@@ -24,13 +24,15 @@ type FormData = z.infer < typeof schema > ;
 // ─────────────────────────────────────────────────────────────────────────────
 // FIX: useSearchParams() ko Suspense boundary ke andar wale component mein
 // rakhna MANDATORY hai Next.js 15 mein — warna static prerendering ke time
-// build crash hota hai. Isliye form alag component mein nikaala.
+// build crash hota hai aur ye error aata hai:
+// "useSearchParams() should be wrapped in a suspense boundary"
 // ─────────────────────────────────────────────────────────────────────────────
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
   const { setUser } = useAuthStore();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   
@@ -150,7 +152,7 @@ function LoginForm() {
   );
 }
 
-// ── Page export ───────────────────────────────────────────────────────────────
+// ── Page export — Suspense wrap mandatory ─────────────────────────────────────
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-muted/30">
@@ -163,11 +165,11 @@ export default function LoginPage() {
         <Suspense
           fallback={
             <div className="bg-card border rounded-2xl p-8 shadow-sm space-y-4">
-              <div className="h-7 w-36 skeleton rounded" />
-              <div className="h-4 w-52 skeleton rounded" />
-              <div className="h-9 skeleton rounded-md" />
-              <div className="h-9 skeleton rounded-md" />
-              <div className="h-9 skeleton rounded-md" />
+              <div className="h-7 w-36 rounded bg-muted animate-pulse" />
+              <div className="h-4 w-52 rounded bg-muted animate-pulse" />
+              <div className="h-9 rounded-md bg-muted animate-pulse" />
+              <div className="h-9 rounded-md bg-muted animate-pulse" />
+              <div className="h-9 rounded-md bg-muted animate-pulse" />
             </div>
           }
         >

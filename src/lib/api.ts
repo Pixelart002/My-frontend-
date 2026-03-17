@@ -2,10 +2,17 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import type { AuthTokens } from "@/types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: NEXT_PUBLIC_API_URL Vercel mein set nahi tha → BASE_URL = "" ban raha
+// tha → API calls /api/v1/... (relative URL) pe jaati thi → 404.
+// Ab backend URL hardcoded fallback hai — env var set karo toh woh use hoga,
+// nahi toh direct backend URL use hoga.
+// ─────────────────────────────────────────────────────────────────────────────
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app";
 
 // ── Axios instance ────────────────────────────────────────────────────────────
-
 export const api = axios.create({
   baseURL: `${BASE_URL}/api/v1`,
   timeout: 15000,
@@ -13,19 +20,21 @@ export const api = axios.create({
 });
 
 // ── Cookie keys ───────────────────────────────────────────────────────────────
-
 export const COOKIE_ACCESS  = "ms_access";
 export const COOKIE_REFRESH = "ms_refresh";
 
 const COOKIE_OPTS = {
-  maxAge: 60 * 60 * 24 * 7,  // 7 days
-  path: "/",
+  maxAge:   60 * 60 * 24 * 7, // 7 days
+  path:     "/",
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  secure:   process.env.NODE_ENV === "production",
 };
 
 export function setAuthCookies(tokens: AuthTokens) {
-  setCookie(COOKIE_ACCESS,  tokens.access_token,  { ...COOKIE_OPTS, maxAge: tokens.expires_in ?? 900 });
+  setCookie(COOKIE_ACCESS,  tokens.access_token,  {
+    ...COOKIE_OPTS,
+    maxAge: tokens.expires_in ?? 900,
+  });
   setCookie(COOKIE_REFRESH, tokens.refresh_token, COOKIE_OPTS);
 }
 
@@ -43,7 +52,6 @@ export function getRefreshToken(): string | undefined {
 }
 
 // ── Request interceptor — attach token ───────────────────────────────────────
-
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token) {
@@ -53,11 +61,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 // ── Response interceptor — auto refresh on 401 ───────────────────────────────
-
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value: string) => void;
-  reject: (reason: unknown) => void;
+  reject:  (reason: unknown) => void;
 }> = [];
 
 function processQueue(error: unknown, token: string | null = null) {
@@ -71,7 +78,9 @@ function processQueue(error: unknown, token: string | null = null) {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -89,7 +98,9 @@ api.interceptors.response.use(
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
         clearAuthCookies();
-        window.location.href = "/auth/login";
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/login";
+        }
         return Promise.reject(error);
       }
 
@@ -105,7 +116,9 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearAuthCookies();
-        window.location.href = "/auth/login";
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/login";
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -117,10 +130,13 @@ api.interceptors.response.use(
 );
 
 // ── API helpers ───────────────────────────────────────────────────────────────
-
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.detail ?? error.message ?? "Something went wrong";
+    return (
+      error.response?.data?.detail ??
+      error.message ??
+      "Something went wrong"
+    );
   }
   if (error instanceof Error) return error.message;
   return "Something went wrong";
