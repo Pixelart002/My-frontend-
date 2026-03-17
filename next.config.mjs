@@ -13,6 +13,11 @@ const nextConfig = {
       },
     ],
   },
+
+  // Axios Node.js APIs (setImmediate, process.nextTick) Edge Runtime warnings fix
+  // Ye packages server-side bundle mein rahenge, Edge Runtime mein nahi jayenge
+  serverExternalPackages: ["axios"],
+
   async headers() {
     return [
       {

@@ -15,7 +15,7 @@ import { Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart";
 import { userService, orderService, paymentService } from "@/lib/api-services";
-import { formatPrice } from "@/lib/utils"
+import { formatPrice } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/api";
 import type { Address, Order } from "@/types";
 
@@ -24,7 +24,13 @@ const stripePromise = loadStripe(
 );
 
 // ── Payment form ──────────────────────────────────────────────────────────────
-function PaymentForm({ order, onSuccess }: { order: Order;onSuccess: () => void }) {
+function PaymentForm({
+  order,
+  onSuccess,
+}: {
+  order: Order;
+  onSuccess: () => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState("");
@@ -36,10 +42,17 @@ function PaymentForm({ order, onSuccess }: { order: Order;onSuccess: () => void 
     setProcessing(true);
     setError("");
     
+    // ✅ FIX: window.location.origin SSR ke time exist nahi karta
+    // typeof check se server-side crash band
+    const origin =
+      typeof window !== "undefined" ?
+      window.location.origin :
+      process.env.NEXT_PUBLIC_APP_URL ?? "";
+    
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/checkout/success?order=${order.id}`,
+        return_url: `${origin}/checkout/success?order=${order.id}`,
       },
     });
     
@@ -91,12 +104,18 @@ export default function CheckoutPage() {
   }
   
   const handlePlaceOrder = async () => {
-    if (!selectedAddress) { setError("Please select a shipping address"); return; }
+    if (!selectedAddress) {
+      setError("Please select a shipping address");
+      return;
+    }
     setCreatingOrder(true);
     setError("");
     try {
       const newOrder = await orderService.create({
-        items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+        items: items.map((i) => ({
+          product_id: i.product.id,
+          quantity: i.quantity,
+        })),
         shipping_address_id: selectedAddress,
       });
       const { client_secret } = await paymentService.createIntent(newOrder.id);
@@ -125,12 +144,16 @@ export default function CheckoutPage() {
                 </h2>
                 {loadingAddr ? (
                   <div className="space-y-2">
-                    {[1, 2].map((i) => <div key={i} className="h-20 skeleton rounded-xl" />)}
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-20 skeleton rounded-xl" />
+                    ))}
                   </div>
                 ) : addresses?.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     No addresses saved.{" "}
-                    <a href="/account/addresses" className="underline">Add one</a>
+                    <a href="/account/addresses" className="underline">
+                      Add one
+                    </a>
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -153,12 +176,17 @@ export default function CheckoutPage() {
                         />
                         <div className="text-sm">
                           <p className="font-medium">{addr.line1}</p>
-                          {addr.line2 && <p className="text-muted-foreground">{addr.line2}</p>}
+                          {addr.line2 && (
+                            <p className="text-muted-foreground">{addr.line2}</p>
+                          )}
                           <p className="text-muted-foreground">
-                            {addr.city}, {addr.state} {addr.postal_code}, {addr.country}
+                            {addr.city}, {addr.state} {addr.postal_code},{" "}
+                            {addr.country}
                           </p>
                           {addr.is_default && (
-                            <span className="text-xs text-blue-600 font-medium">Default</span>
+                            <span className="text-xs text-blue-600 font-medium">
+                              Default
+                            </span>
                           )}
                         </div>
                       </label>
@@ -193,7 +221,10 @@ export default function CheckoutPage() {
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                   <PaymentForm
                     order={order}
-                    onSuccess={() => { clearCart(); router.push(`/checkout/success?order=${order.id}`); }}
+                    onSuccess={() => {
+                      clearCart();
+                      router.push(`/checkout/success?order=${order.id}`);
+                    }}
                   />
                 </Elements>
               )}
@@ -231,7 +262,9 @@ export default function CheckoutPage() {
               <div className="flex justify-between font-semibold pt-2 border-t">
                 <span>Total</span>
                 <span>
-                  {formatPrice(subtotal() * 1.08 + (subtotal() >= 75 ? 0 : 9.99))}
+                  {formatPrice(
+                    subtotal() * 1.08 + (subtotal() >= 75 ? 0 : 9.99)
+                  )}
                 </span>
               </div>
             </div>
