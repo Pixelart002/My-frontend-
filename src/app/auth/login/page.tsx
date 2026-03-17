@@ -11,10 +11,9 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authService } from "@/lib/api-services";
+import { authService, userService } from "@/lib/api-services";
 import { setAuthCookies, getErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
-import { userService } from "@/lib/api-services";
 
 const schema = z.object({
   email: z.string().email("Valid email required"),
@@ -22,7 +21,11 @@ const schema = z.object({
 });
 type FormData = z.infer < typeof schema > ;
 
-// ── useSearchParams ko alag component mein nikala — Suspense ke liye ─────────
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: useSearchParams() ko Suspense boundary ke andar wale component mein
+// rakhna MANDATORY hai Next.js 15 mein — warna static prerendering ke time
+// build crash hota hai. Isliye form alag component mein nikaala.
+// ─────────────────────────────────────────────────────────────────────────────
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,10 +58,13 @@ function LoginForm() {
     <div className="bg-card border rounded-2xl p-8 shadow-sm">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Welcome back</h1>
-        <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Sign in to your account
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email */}
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -73,6 +79,7 @@ function LoginForm() {
           )}
         </div>
 
+        {/* Password */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
@@ -104,10 +111,13 @@ function LoginForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
+        {/* Server error */}
         {error && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -140,7 +150,7 @@ function LoginForm() {
   );
 }
 
-// ── Page export — Suspense wrap mandatory for useSearchParams ─────────────────
+// ── Page export ───────────────────────────────────────────────────────────────
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-muted/30">
@@ -150,15 +160,11 @@ export default function LoginPage() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-sm"
       >
-        {/*
-          Suspense fallback — jab tak searchParams load ho,
-          ek skeleton card dikhao taaki layout shift na ho
-        */}
         <Suspense
           fallback={
             <div className="bg-card border rounded-2xl p-8 shadow-sm space-y-4">
-              <div className="h-7 w-40 skeleton rounded" />
-              <div className="h-4 w-56 skeleton rounded" />
+              <div className="h-7 w-36 skeleton rounded" />
+              <div className="h-4 w-52 skeleton rounded" />
               <div className="h-9 skeleton rounded-md" />
               <div className="h-9 skeleton rounded-md" />
               <div className="h-9 skeleton rounded-md" />

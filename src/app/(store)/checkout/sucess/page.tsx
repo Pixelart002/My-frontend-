@@ -7,7 +7,10 @@ import { motion } from "framer-motion";
 import { CheckCircle, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// ── useSearchParams ko alag component mein — Suspense ke liye ────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: useSearchParams() Suspense boundary ke andar hona MANDATORY hai.
+// Same issue jo login page mein tha — Next.js 15 build crash karta tha.
+// ─────────────────────────────────────────────────────────────────────────────
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order");
@@ -30,7 +33,8 @@ function SuccessContent() {
 
       <h1 className="text-3xl font-bold mb-2">Order confirmed!</h1>
       <p className="text-muted-foreground mb-2">
-        Thank you for your purchase. We&apos;ll send you a confirmation email shortly.
+        Thank you for your purchase. We&apos;ll send you a confirmation email
+        shortly.
       </p>
       {orderId && (
         <p className="text-sm text-muted-foreground mb-8">
@@ -55,7 +59,7 @@ function SuccessContent() {
   );
 }
 
-// ── Page export — Suspense wrap mandatory ─────────────────────────────────────
+// ── Page export ───────────────────────────────────────────────────────────────
 export default function CheckoutSuccessPage() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">

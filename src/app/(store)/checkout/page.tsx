@@ -19,9 +19,16 @@ import { formatPrice } from "@/lib/utils";
 import { getErrorMessage } from "@/lib/api";
 import type { Address, Order } from "@/types";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
-);
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: loadStripe() module level pe call hone se SSR crash hota tha.
+// @stripe/stripe-js internally `location` (browser-only API) access karta hai
+// jab module load hota hai — server pe `location` nahi hota.
+// typeof window guard lagane se server pe ye null rahega aur crash nahi hoga.
+// ─────────────────────────────────────────────────────────────────────────────
+const stripePromise =
+  typeof window !== "undefined" ?
+  loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "") :
+  null;
 
 // ── Payment form ──────────────────────────────────────────────────────────────
 function PaymentForm({
@@ -42,8 +49,7 @@ function PaymentForm({
     setProcessing(true);
     setError("");
     
-    // ✅ FIX: window.location.origin SSR ke time exist nahi karta
-    // typeof check se server-side crash band
+    // return_url ke liye bhi safe guard
     const origin =
       typeof window !== "undefined" ?
       window.location.origin :
@@ -133,7 +139,8 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Left — Address + Payment */}
+
+        {/* ── Left — Address + Payment ─────────────────────────────────────── */}
         <div className="space-y-6">
           {!order ? (
             <>
@@ -142,6 +149,7 @@ export default function CheckoutPage() {
                 <h2 className="font-semibold mb-3 flex items-center gap-2">
                   <MapPin className="h-4 w-4" /> Shipping address
                 </h2>
+
                 {loadingAddr ? (
                   <div className="space-y-2">
                     {[1, 2].map((i) => (
@@ -217,7 +225,7 @@ export default function CheckoutPage() {
             /* Stripe Payment */
             <div>
               <h2 className="font-semibold mb-4">Payment</h2>
-              {clientSecret && (
+              {clientSecret && stripePromise && (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                   <PaymentForm
                     order={order}
@@ -232,7 +240,7 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* Right — Order summary */}
+        {/* ── Right — Order summary ─────────────────────────────────────────── */}
         <div>
           <div className="border rounded-2xl p-6 bg-card sticky top-24">
             <h2 className="font-semibold mb-4">Order summary</h2>
@@ -270,6 +278,7 @@ export default function CheckoutPage() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
