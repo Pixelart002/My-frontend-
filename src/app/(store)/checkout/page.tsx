@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import {
- Elements,
- PaymentElement,
- useStripe,
- useElements,
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
 } from "@stripe/react-stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -15,43 +15,44 @@ import { Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart";
 import { userService, orderService, paymentService } from "@/lib/api-services";
-import { formatPrice, getErrorMessage } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils"
+import { getErrorMessage } from "@/lib/api";
 import type { Address, Order } from "@/types";
 
 const stripePromise = loadStripe(
- process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? ""
 );
 
 // ── Payment form ──────────────────────────────────────────────────────────────
 function PaymentForm({ order, onSuccess }: { order: Order;onSuccess: () => void }) {
- const stripe = useStripe();
- const elements = useElements();
- const [error, setError] = useState("");
- const [processing, setProcessing] = useState(false);
- 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!stripe || !elements) return;
-  setProcessing(true);
-  setError("");
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState("");
+  const [processing, setProcessing] = useState(false);
   
-  const { error: stripeError } = await stripe.confirmPayment({
-   elements,
-   confirmParams: {
-    return_url: `${window.location.origin}/checkout/success?order=${order.id}`,
-   },
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setProcessing(true);
+    setError("");
+    
+    const { error: stripeError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/checkout/success?order=${order.id}`,
+      },
+    });
+    
+    if (stripeError) {
+      setError(stripeError.message ?? "Payment failed");
+      setProcessing(false);
+    } else {
+      onSuccess();
+    }
+  };
   
-  if (stripeError) {
-   setError(stripeError.message ?? "Payment failed");
-   setProcessing(false);
-  } else {
-   onSuccess();
-  }
- };
- 
- return (
-  <form onSubmit={handleSubmit} className="space-y-4">
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
       {error && (
         <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
@@ -66,50 +67,50 @@ function PaymentForm({ order, onSuccess }: { order: Order;onSuccess: () => void 
         )}
       </Button>
     </form>
- );
+  );
 }
 
 // ── Main checkout ─────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
- const router = useRouter();
- const { items, subtotal, clearCart } = useCartStore();
- const [selectedAddress, setSelectedAddress] = useState < string > ("");
- const [order, setOrder] = useState < Order | null > (null);
- const [clientSecret, setClientSecret] = useState < string > ("");
- const [creatingOrder, setCreatingOrder] = useState(false);
- const [error, setError] = useState("");
- 
- const { data: addresses, isLoading: loadingAddr } = useQuery({
-  queryKey: ["addresses"],
-  queryFn: userService.getAddresses,
- });
- 
- if (items.length === 0) {
-  router.replace("/cart");
-  return null;
- }
- 
- const handlePlaceOrder = async () => {
-  if (!selectedAddress) { setError("Please select a shipping address"); return; }
-  setCreatingOrder(true);
-  setError("");
-  try {
-   const newOrder = await orderService.create({
-    items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
-    shipping_address_id: selectedAddress,
-   });
-   const { client_secret } = await paymentService.createIntent(newOrder.id);
-   setOrder(newOrder);
-   setClientSecret(client_secret);
-  } catch (e) {
-   setError(getErrorMessage(e));
-  } finally {
-   setCreatingOrder(false);
+  const router = useRouter();
+  const { items, subtotal, clearCart } = useCartStore();
+  const [selectedAddress, setSelectedAddress] = useState < string > ("");
+  const [order, setOrder] = useState < Order | null > (null);
+  const [clientSecret, setClientSecret] = useState < string > ("");
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [error, setError] = useState("");
+  
+  const { data: addresses, isLoading: loadingAddr } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: userService.getAddresses,
+  });
+  
+  if (items.length === 0) {
+    router.replace("/cart");
+    return null;
   }
- };
- 
- return (
-  <div className="container mx-auto px-4 py-10 max-w-4xl">
+  
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) { setError("Please select a shipping address"); return; }
+    setCreatingOrder(true);
+    setError("");
+    try {
+      const newOrder = await orderService.create({
+        items: items.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+        shipping_address_id: selectedAddress,
+      });
+      const { client_secret } = await paymentService.createIntent(newOrder.id);
+      setOrder(newOrder);
+      setClientSecret(client_secret);
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setCreatingOrder(false);
+    }
+  };
+  
+  return (
+    <div className="container mx-auto px-4 py-10 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -238,5 +239,5 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
- );
+  );
 }
