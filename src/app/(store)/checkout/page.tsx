@@ -20,15 +20,17 @@ import { getErrorMessage } from "@/lib/api";
 import type { Address, Order } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FIX: loadStripe() module level pe call hone se SSR crash hota tha.
-// @stripe/stripe-js internally `location` (browser-only API) access karta hai
-// jab module load hota hai — server pe `location` nahi hota.
-// typeof window guard lagane se server pe ye null rahega aur crash nahi hoga.
+// ROOT CAUSE: loadStripe() module-level pe call karne se @stripe/stripe-js
+// package apne andar `location` (browser-only global) access karta hai jab
+// module SSR ke time evaluate hota hai — server pe `location` nahi hota.
+//
+// typeof window check se module-level initialization band nahi hoti —
+// Next.js module ko import karte waqt hi evaluate karta hai.
+//
+// REAL FIX: loadStripe ko useState lazy initializer mein move karo.
+// useState initializer sirf client-side hydration pe run hota hai,
+// server pe kabhi nahi — isliye `location` crash band ho jaata hai.
 // ─────────────────────────────────────────────────────────────────────────────
-const stripePromise =
-  typeof window !== "undefined" ?
-  loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "") :
-  null;
 
 // ── Payment form ──────────────────────────────────────────────────────────────
 function PaymentForm({
@@ -49,11 +51,7 @@ function PaymentForm({
     setProcessing(true);
     setError("");
     
-    // return_url ke liye bhi safe guard
-    const origin =
-      typeof window !== "undefined" ?
-      window.location.origin :
-      process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const origin = window.location.origin;
     
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
@@ -93,11 +91,18 @@ function PaymentForm({
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCartStore();
+  
   const [selectedAddress, setSelectedAddress] = useState < string > ("");
   const [order, setOrder] = useState < Order | null > (null);
   const [clientSecret, setClientSecret] = useState < string > ("");
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [error, setError] = useState("");
+  
+  // ✅ KEY FIX: useState lazy initializer — sirf browser pe chalega
+  // loadStripe yahan call hoga, module import pe nahi
+  const [stripePromise] = useState(() =>
+    loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
+  );
   
   const { data: addresses, isLoading: loadingAddr } = useQuery({
     queryKey: ["addresses"],
@@ -140,11 +145,11 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-        {/* ── Left — Address + Payment ─────────────────────────────────────── */}
+        {/* ── Left: Address + Payment ──────────────────────────────────────── */}
         <div className="space-y-6">
           {!order ? (
             <>
-              {/* Address selection */}
+              {/* Address */}
               <div>
                 <h2 className="font-semibold mb-3 flex items-center gap-2">
                   <MapPin className="h-4 w-4" /> Shipping address
@@ -225,7 +230,7 @@ export default function CheckoutPage() {
             /* Stripe Payment */
             <div>
               <h2 className="font-semibold mb-4">Payment</h2>
-              {clientSecret && stripePromise && (
+              {clientSecret && (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                   <PaymentForm
                     order={order}
@@ -240,7 +245,7 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* ── Right — Order summary ─────────────────────────────────────────── */}
+        {/* ── Right: Order summary ─────────────────────────────────────────── */}
         <div>
           <div className="border rounded-2xl p-6 bg-card sticky top-24">
             <h2 className="font-semibold mb-4">Order summary</h2>
