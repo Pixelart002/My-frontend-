@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
  darkMode: ["class"],
@@ -84,7 +85,9 @@ const config: Config = {
    },
   },
  },
- plugins: [require("tailwindcss-animate")],
+ // ✅ FIX: require() CommonJS tha — ESM project mein silently fail ho sakta hai
+ // import syntax use kiya — guaranteed kaam karega Next.js 15 + ESM mein
+ plugins: [tailwindcssAnimate],
 };
 
 export default config;
