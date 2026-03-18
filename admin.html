@@ -10,20 +10,121 @@
   
   
   
+  <link rel="preload" href="/css/luviio.css" as="style">
+  <link rel="preload" href="/css/admin.css" as="style">
   
-  <!-- 1. Sabse pehle - Critical resources -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="/css/luviio.css" as="style">
+  <!-- 2. Font Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- 3. Font Preload -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" as="style">
+  
+  <!-- 4. JS Files Prefetch -->
+  <link rel="prefetch" href="/js/config.js">
+  <link rel="prefetch" href="/js/utils.js">
+  <link rel="prefetch" href="/js/auth.js">
+  <link rel="prefetch" href="/js/api.js">
+  <link rel="prefetch" href="/js/cart.js">
+  <link rel="prefetch" href="/js/nav.js">
+  <link rel="prefetch" href="/js/admin.js">
+  <link rel="prefetch" href="/js/validation.js">
+  <link rel="prefetch" href="/js/formatting.js">
+  
+  <!-- 5. Images Prefetch -->
+  <link rel="prefetch" href="/images/logo.png">
+  <link rel="prefetch" href="/images/logo-dark.png">
+  <link rel="prefetch" href="/images/default-product.jpg">
+  <link rel="prefetch" href="/images/avatar-placeholder.jpg">
+  <link rel="prefetch" href="/images/no-image.jpg">
+  <link rel="prefetch" href="/favicon.ico">
+  <link rel="prefetch" href="/apple-touch-icon.png">
+  
+  <!-- 6. CRITICAL APIS - Dashboard ke liye -->
+  <link rel="prefetch" href="/api/dashboard/stats">
+  <link rel="prefetch" href="/api/products?page=1&page_size=20">
+  <link rel="prefetch" href="/api/categories">
+  <link rel="prefetch" href="/api/orders?page=1&page_size=20">
+  <link rel="prefetch" href="/api/users?page=1&page_size=20">
+  <link rel="prefetch" href="/api/dashboard/recent-orders?limit=5">
+  <link rel="prefetch" href="/api/dashboard/low-stock">
+  
+  <!-- 7. PRODUCTS RELATED APIS -->
+  <link rel="prefetch" href="/api/products?page=2&page_size=20">
+  <link rel="prefetch" href="/api/products?page=3&page_size=20">
+  <link rel="prefetch" href="/api/products/count">
+  <link rel="prefetch" href="/api/products/featured">
+  <link rel="prefetch" href="/api/products/recent">
+  <link rel="prefetch" href="/api/products/top-selling">
+  
+  <!-- 8. CATEGORIES RELATED APIS -->
+  <link rel="prefetch" href="/api/categories/tree">
+  <link rel="prefetch" href="/api/categories/stats">
+  <link rel="prefetch" href="/api/categories/featured">
+  <link rel="prefetch" href="/api/categories/parents">
+  
+  <!-- 9. INVENTORY RELATED APIS -->
+  <link rel="prefetch" href="/api/inventory/low-stock">
+  <link rel="prefetch" href="/api/inventory/out-of-stock">
+  <link rel="prefetch" href="/api/inventory/restock-needed">
+  <link rel="prefetch" href="/api/inventory/audit-log?limit=10">
+  <link rel="prefetch" href="/api/inventory/stock-value">
+  
+  <!-- 10. ORDERS RELATED APIS -->
+  <link rel="prefetch" href="/api/orders/pending">
+  <link rel="prefetch" href="/api/orders/processing">
+  <link rel="prefetch" href="/api/orders/shipped">
+  <link rel="prefetch" href="/api/orders/delivered">
+  <link rel="prefetch" href="/api/orders/cancelled">
+  <link rel="prefetch" href="/api/orders/today">
+  <link rel="prefetch" href="/api/orders/this-week">
+  <link rel="prefetch" href="/api/orders/status-counts">
+  <link rel="prefetch" href="/api/orders/recent?limit=10">
+  <link rel="prefetch" href="/api/orders?page=2&page_size=20">
+  
+  <!-- 11. USERS RELATED APIS -->
+  <link rel="prefetch" href="/api/users/new-this-week">
+  <link rel="prefetch" href="/api/users/active">
+  <link rel="prefetch" href="/api/users/inactive">
+  <link rel="prefetch" href="/api/users/admins">
+  <link rel="prefetch" href="/api/users/customers">
+  <link rel="prefetch" href="/api/users/stats">
+  <link rel="prefetch" href="/api/users/activity">
+  <link rel="prefetch" href="/api/users?page=2&page_size=20">
+  
+  <!-- 12. REPORTS RELATED APIS -->
+  <link rel="prefetch" href="/api/reports/sales-today">
+  <link rel="prefetch" href="/api/reports/sales-week">
+  <link rel="prefetch" href="/api/reports/sales-month">
+  <link rel="prefetch" href="/api/reports/sales-year">
+  <link rel="prefetch" href="/api/reports/top-products">
+  <link rel="prefetch" href="/api/reports/top-categories">
+  <link rel="prefetch" href="/api/reports/conversion-rate">
+  <link rel="prefetch" href="/api/reports/revenue">
+  
+  <!-- 13. SETTINGS RELATED APIS -->
+  <link rel="prefetch" href="/api/settings/store">
+  <link rel="prefetch" href="/api/settings/shipping">
+  <link rel="prefetch" href="/api/settings/payment">
+  <link rel="prefetch" href="/api/settings/tax">
+  <link rel="prefetch" href="/api/settings/email-templates">
+  
+  <!-- 14. NOTIFICATIONS -->
+  <link rel="prefetch" href="/api/notifications/unread">
+  <link rel="prefetch" href="/api/notifications/alerts">
+  <link rel="prefetch" href="/api/admin/messages">
+  
+  <!-- 15. META & SEO -->
+  <link rel="prefetch" href="/sitemap.xml">
+  <link rel="prefetch" href="/robots.txt">
+  
+  <!-- Existing CSS (yeh baad mein load hoga) -->
+  <link rel="stylesheet" href="/css/luviio.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  
+  <!-- Font Style (after preload) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
 
-<!-- 2. APIs prefetch -->
-<link rel="prefetch" href="/api/products?page=1&page_size=20">
-<link rel="prefetch" href="/api/categories">
-<link rel="prefetch" href="/api/orders/?page=1&page_size=20">
-
-<!-- 3. JS files (defer ke saath) -->
-<link rel="prefetch" href="/js/auth.js">
-<link rel="prefetch" href="/js/api.js">
   
   
   
