@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders — Luviio</title>
+  <link rel="stylesheet" href="/css/luviio.css">
+  <style>
+    .orders-layout { padding: 40px 0 80px; }
+    .order-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .order-card:hover { border-color: var(--border-light); }
+
+    .order-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; cursor: pointer; gap: 16px; flex-wrap: wrap;
+    }
+    .order-id { font-size:13px;color:var(--text-muted); }
+    .order-id strong { color:var(--text);font-family:'Playfair Display',serif;font-size:16px; }
+    .order-header-right { display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
+    .order-total { font-size:15px;font-weight:700;color:var(--gold); }
+    .order-date { font-size:12px;color:var(--text-dim); }
+    .chevron { transition: transform 0.3s; font-size:18px;color:var(--text-dim); }
+    .chevron.open { transform: rotate(180deg); }
+
+    .order-body { display: none; padding: 0 24px 24px; border-top: 1px solid var(--border); }
+    .order-body.open { display: block; }
+
+    .order-items-list { display: flex; flex-direction: column; gap: 0; margin-top: 16px; }
+    .oi-row {
+      display: flex; gap: 14px; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .oi-row:last-child { border-bottom: none; }
+    .oi-img { width:52px;height:64px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--border-light); }
+    .oi-img img { width:100%;height:100%;object-fit:cover; }
+    .oi-name { font-size:14px;font-weight:500;flex:1; }
+    .oi-meta { font-size:12px;color:var(--text-muted); }
+    .oi-price { font-size:14px;font-weight:700;color:var(--gold); }
+
+    .order-footer { display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px; }
+    .order-tracking { font-size:13px;color:var(--text-muted); }
+    .order-tracking strong { color:var(--text); }
+
+    .orders-header { display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px; }
+
+    @media(max-width:600px){.order-header{flex-direction:column;align-items:flex-start;} .chevron{align-self:flex-end;}}
+  </style>
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper">
+    <div class="container orders-layout">
+      <div class="orders-header">
+        <div>
+          <h1 class="section-title">My Orders</h1>
+          <p style="color:var(--text-muted);font-size:14px;margin-top:4px;">Track and manage your purchases</p>
+        </div>
+        <a href="/shop.html" class="btn btn-outline" style="padding:10px 20px;">Continue Shopping</a>
+      </div>
+
+      <div id="orders-container">
+        <div style="height:120px;" class="skeleton" style="margin-bottom:12px;"></div>
+        <div style="height:120px;" class="skeleton"></div>
+      </div>
+
+      <div id="orders-pagination" class="pagination"></div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+          <span>© 2026 Luviio</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    let currentPage = 1;
+    let totalPages  = 1;
+
+    async function init() {
+      const ok = await pageInit({ requireAuth: true });
+      if (!ok) return;
+      loadOrders(1);
+    }
+
+    init();
+
+    async function loadOrders(page) {
+      currentPage = page;
+      const container = document.getElementById('orders-container');
+      container.innerHTML = `
+        <div style="height:100px;margin-bottom:12px;" class="skeleton"></div>
+        <div style="height:100px;margin-bottom:12px;" class="skeleton"></div>
+        <div style="height:100px;" class="skeleton"></div>
+      `;
+
+      try {
+        const data = await API.getMyOrders(page);
+        totalPages = data.pages || 1;
+
+        container.innerHTML = '';
+
+        if (!data.items?.length) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <h3>No orders yet</h3>
+              <p>When you place an order, it will show up here.</p>
+              <a href="/shop.html" class="btn btn-primary">Shop Now</a>
+            </div>
+          `;
+          document.getElementById('orders-pagination').innerHTML = '';
+          return;
+        }
+
+        data.items.forEach(order => container.appendChild(makeOrderCard(order)));
+        renderPagination();
+      } catch (err) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠</div>
+            <h3>Could not load orders</h3>
+            <p>${escapeHTML(err.message)}</p>
+            <button class="btn btn-outline" onclick="loadOrders(1)">Retry</button>
+          </div>
+        `;
+      }
+    }
+
+    function makeOrderCard(order) {
+      const card = document.createElement('div');
+      card.className = 'order-card';
+
+      // Header
+      const header = document.createElement('div');
+      header.className = 'order-header';
+
+      const idWrap = document.createElement('div');
+      idWrap.className = 'order-id';
+
+      const strong = document.createElement('strong');
+      strong.textContent = '#' + order.id.substring(0, 8).toUpperCase();
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'order-date';
+      dateEl.textContent = formatDate(order.created_at);
+
+      idWrap.appendChild(strong);
+      idWrap.appendChild(dateEl);
+
+      const rightWrap = document.createElement('div');
+      rightWrap.className = 'order-header-right';
+
+      const badge = statusBadge(order.status);
+
+      const totalEl = document.createElement('div');
+      totalEl.className = 'order-total';
+      totalEl.textContent = formatPrice(order.total_amount);
+
+      const chevron = document.createElement('div');
+      chevron.className = 'chevron';
+      chevron.textContent = '⌄';
+
+      rightWrap.appendChild(badge);
+      rightWrap.appendChild(totalEl);
+      rightWrap.appendChild(chevron);
+
+      header.appendChild(idWrap);
+      header.appendChild(rightWrap);
+
+      // Body (expandable)
+      const body = document.createElement('div');
+      body.className = 'order-body';
+
+      // Toggle
+      header.addEventListener('click', async () => {
+        const isOpen = body.classList.contains('open');
+        body.classList.toggle('open');
+        chevron.classList.toggle('open');
+
+        if (!isOpen && !body.dataset.loaded) {
+          body.dataset.loaded = 'true';
+          body.innerHTML = '<div style="height:60px;" class="skeleton"></div>';
+          try {
+            const detail = await API.getMyOrder(order.id);
+            renderOrderBody(body, detail);
+          } catch (err) {
+            body.innerHTML = `<p class="form-error" style="margin-top:16px;">${escapeHTML(err.message)}</p>`;
+          }
+        }
+      });
+
+      card.appendChild(header);
+      card.appendChild(body);
+
+      return card;
+    }
+
+    function renderOrderBody(body, order) {
+      body.innerHTML = '';
+
+      // Shipping address
+      if (order.shipping_line1) {
+        const addrWrap = document.createElement('div');
+        addrWrap.style.cssText = 'margin-top:16px;padding:12px 16px;background:var(--surface-2);border-radius:var(--radius);';
+
+        const addrTitle = document.createElement('div');
+        addrTitle.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;';
+        addrTitle.textContent = 'Shipping To';
+
+        const addrText = document.createElement('div');
+        addrText.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.7;';
+        const parts = [order.shipping_line1, order.shipping_line2, order.shipping_city, order.shipping_state, order.shipping_postal_code, order.shipping_country].filter(Boolean);
+        addrText.textContent = parts.join(', ');
+
+        addrWrap.appendChild(addrTitle);
+        addrWrap.appendChild(addrText);
+        body.appendChild(addrWrap);
+      }
+
+      // Items
+      const items = order.order_items || [];
+      if (items.length) {
+        const itemsTitle = document.createElement('div');
+        itemsTitle.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:20px;margin-bottom:4px;';
+        itemsTitle.textContent = 'Items';
+        body.appendChild(itemsTitle);
+
+        const list = document.createElement('div');
+        list.className = 'order-items-list';
+
+        items.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'oi-row';
+
+          const imgDiv = document.createElement('div');
+          imgDiv.className = 'oi-img';
+          imgDiv.textContent = '◈';
+
+          const infoDiv = document.createElement('div');
+          infoDiv.style.flex = '1';
+
+          const name = document.createElement('div');
+          name.className = 'oi-name';
+          name.textContent = item.product_name;
+
+          const meta = document.createElement('div');
+          meta.className = 'oi-meta';
+          meta.textContent = `Qty: ${item.quantity} × ${formatPrice(item.unit_price)}`;
+
+          infoDiv.appendChild(name);
+          infoDiv.appendChild(meta);
+
+          const price = document.createElement('div');
+          price.className = 'oi-price';
+          price.textContent = formatPrice(item.subtotal);
+
+          row.appendChild(imgDiv);
+          row.appendChild(infoDiv);
+          row.appendChild(price);
+          list.appendChild(row);
+        });
+
+        body.appendChild(list);
+      }
+
+      // Footer with totals + actions
+      const footer = document.createElement('div');
+      footer.className = 'order-footer';
+
+      const totals = document.createElement('div');
+      totals.style.cssText = 'font-size:13px;color:var(--text-muted);display:flex;flex-direction:column;gap:4px;';
+
+      [
+        ['Subtotal',  formatPrice(order.subtotal)],
+        ['Shipping',  formatPrice(order.shipping_cost)],
+        ['Tax',       formatPrice(order.tax_amount)],
+        ['Total',     formatPrice(order.total_amount)],
+      ].forEach(([l, v], idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = `display:flex;gap:20px;justify-content:space-between;${idx === 3 ? 'font-weight:700;color:var(--gold);' : ''}`;
+        const ll = document.createElement('span'); ll.textContent = l;
+        const vv = document.createElement('span'); vv.textContent = v;
+        row.appendChild(ll); row.appendChild(vv);
+        totals.appendChild(row);
+      });
+
+      if (order.tracking_number) {
+        const track = document.createElement('div');
+        track.className = 'order-tracking';
+        track.innerHTML = ''; // Clear before using textContent
+        const label = document.createElement('span');
+        label.textContent = 'Tracking: ';
+        const val = document.createElement('strong');
+        val.textContent = order.tracking_number;
+        track.appendChild(label);
+        track.appendChild(val);
+        totals.appendChild(track);
+      }
+
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+
+      if (order.status === 'pending') {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-danger';
+        cancelBtn.style.cssText = 'padding:8px 16px;font-size:12px;';
+        cancelBtn.textContent = 'Cancel Order';
+        cancelBtn.addEventListener('click', async () => {
+          if (!confirm('Are you sure you want to cancel this order?')) return;
+          try {
+            await API.cancelOrder(order.id);
+            showToast('Order cancelled', 'info');
+            loadOrders(currentPage);
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
+        actions.appendChild(cancelBtn);
+      }
+
+      footer.appendChild(totals);
+      footer.appendChild(actions);
+      body.appendChild(footer);
+    }
+
+    /* ── Pagination ─────────────────────────────────────── */
+    function renderPagination() {
+      const wrap = document.getElementById('orders-pagination');
+      wrap.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      const makeBtn = (label, page, active) => {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.addEventListener('click', () => loadOrders(page));
+        return btn;
+      };
+
+      if (currentPage > 1) wrap.appendChild(makeBtn('‹', currentPage - 1));
+      for (let i = 1; i <= totalPages; i++) {
+        wrap.appendChild(makeBtn(i, i, i === currentPage));
+      }
+      if (currentPage < totalPages) wrap.appendChild(makeBtn('›', currentPage + 1));
+    }
+  </script>
+</body>
+</html>

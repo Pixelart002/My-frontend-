@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Luviio</title>
+  <link rel="stylesheet" href="/css/luviio.css">
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--nav-h) - 120px);
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .error-code {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(80px, 15vw, 180px);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold-dim) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards 0.1s;
+    }
+    .error-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 4vw, 32px);
+      color: var(--text);
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards 0.25s;
+    }
+    .error-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 420px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards 0.4s;
+    }
+    .error-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards 0.55s;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .divider-line {
+      width: 60px;
+      height: 1px;
+      background: var(--gold-dim);
+      margin: 0 auto 32px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.35s;
+    }
+  </style>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <main>
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Page Not Found</h1>
+      <div class="divider-line"></div>
+      <p class="error-sub">The page you're looking for seems to have wandered off. Perhaps it was too exclusive even for us.</p>
+      <div class="error-actions">
+        <a href="/index.html" class="btn btn-primary">Back to Home</a>
+        <a href="/shop.html" class="btn btn-outline">Browse Shop</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="padding:32px 24px;text-align:center;border-top:1px solid var(--border);margin-top:auto;">
+    <p style="font-size:13px;color:var(--text-dim);">© 2025 Luviio. All rights reserved.</p>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    pageInit();
+  </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — Luviio</title>
+  <link rel="stylesheet" href="/css/luviio.css">
+  <style>
+    .profile-layout { display: grid; grid-template-columns: 220px 1fr; gap: 40px; padding: 40px 0 80px; }
+    .profile-nav { display: flex; flex-direction: column; gap: 4px; }
+    .profile-nav-link {
+      padding: 12px 16px; border-radius: var(--radius); font-size: 14px;
+      color: var(--text-muted); transition: all 0.2s; cursor: pointer;
+      border: none; background: none; text-align: left; width: 100%;
+    }
+    .profile-nav-link:hover { background: var(--surface-2); color: var(--text); }
+    .profile-nav-link.active { background: var(--gold-dim); color: var(--gold); font-weight: 600; }
+
+    .profile-section { display: none; }
+    .profile-section.active { display: block; }
+    .section-head { margin-bottom: 28px; }
+    .section-head h2 { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:4px; }
+    .section-head p { font-size:14px;color:var(--text-muted); }
+
+    .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+
+    .address-list { display: flex; flex-direction: column; gap: 12px; }
+    .address-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; padding: 18px; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .address-item-text { font-size:13px;color:var(--text-muted);line-height:1.8; }
+    .address-item-actions { display:flex;gap:8px;flex-shrink:0; }
+
+    @media(max-width:768px){.profile-layout{grid-template-columns:1fr;} .form-2col{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="profile-layout">
+        <!-- Sidebar nav -->
+        <div>
+          <div style="margin-bottom:24px;">
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;" id="profile-greeting">My Account</div>
+            <div style="font-size:13px;color:var(--text-muted);" id="profile-email-display"></div>
+          </div>
+          <nav class="profile-nav">
+            <button class="profile-nav-link active" data-section="personal">Personal Info</button>
+            <button class="profile-nav-link" data-section="addresses">Addresses</button>
+            <hr class="divider" style="margin:8px 0;">
+            <a href="/orders.html" class="profile-nav-link" style="display:block;">My Orders</a>
+          </nav>
+        </div>
+
+        <!-- Content -->
+        <div>
+          <!-- Personal Info -->
+          <div class="profile-section active" id="sec-personal">
+            <div class="section-head">
+              <h2>Personal Info</h2>
+              <p>Update your name and phone number.</p>
+            </div>
+            <div class="form-2col">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="p-name" class="form-input" maxlength="255" placeholder="Your Name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="p-phone" class="form-input" maxlength="20" placeholder="+91 98765 43210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="p-email" class="form-input" disabled style="opacity:0.5;cursor:not-allowed;">
+                <p class="form-hint">Email cannot be changed.</p>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button id="save-profile-btn" class="btn btn-primary">Save Changes</button>
+            </div>
+          </div>
+
+          <!-- Addresses -->
+          <div class="profile-section" id="sec-addresses">
+            <div class="section-head">
+              <h2>Saved Addresses</h2>
+              <p>Manage your shipping addresses.</p>
+            </div>
+
+            <div id="address-list" class="address-list"></div>
+
+            <!-- Add address toggle -->
+            <button id="toggle-addr-form" class="btn btn-outline" style="margin-top:20px;">+ Add New Address</button>
+
+            <div id="addr-form-wrap" style="display:none;margin-top:20px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+              <div style="font-size:14px;font-weight:600;margin-bottom:16px;">New Address</div>
+              <div class="form-2col" style="margin-bottom:16px;">
+                <div class="form-group">
+                  <label class="form-label">Line 1 *</label>
+                  <input type="text" id="na-line1" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Line 2</label>
+                  <input type="text" id="na-line2" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">City *</label>
+                  <input type="text" id="na-city" class="form-input" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">State</label>
+                  <input type="text" id="na-state" class="form-input" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Postal Code *</label>
+                  <input type="text" id="na-postal" class="form-input" maxlength="20">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Country * (ISO 2)</label>
+                  <input type="text" id="na-country" class="form-input" maxlength="2" value="IN">
+                </div>
+              </div>
+              <label class="filter-option" style="margin-bottom:16px;">
+                <input type="checkbox" id="na-default"> Set as default
+              </label>
+              <div style="display:flex;gap:10px;">
+                <button id="save-addr-btn" class="btn btn-primary">Save</button>
+                <button id="cancel-addr-btn" class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+          <span>© 2026 Luviio</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    let profile = null;
+    let addresses = [];
+
+    async function init() {
+      const ok = await pageInit({ requireAuth: true });
+      if (!ok) return;
+
+      await loadProfile();
+      await loadAddresses();
+    }
+
+    init();
+
+    /* ── Section nav ─────────────────────────────────────── */
+    document.querySelectorAll('.profile-nav-link[data-section]').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelectorAll('.profile-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+        link.classList.add('active');
+        document.getElementById('sec-' + link.dataset.section)?.classList.add('active');
+      });
+    });
+
+    /* ── Load profile ────────────────────────────────────── */
+    async function loadProfile() {
+      try {
+        profile = await API.getMe();
+        AUTH.setProfile(profile);
+        document.getElementById('p-name').value  = profile.full_name || '';
+        document.getElementById('p-phone').value = profile.phone || '';
+        document.getElementById('p-email').value = profile.email || '';
+
+        const greet = document.getElementById('profile-greeting');
+        greet.textContent = 'Hi, ' + (profile.full_name?.split(' ')[0] || 'there') + '!';
+
+        const emailDisp = document.getElementById('profile-email-display');
+        emailDisp.textContent = profile.email || '';
+      } catch (err) {
+        showToast('Failed to load profile: ' + err.message, 'error');
+      }
+    }
+
+    /* ── Save profile ────────────────────────────────────── */
+    document.getElementById('save-profile-btn').addEventListener('click', async () => {
+      const btn   = document.getElementById('save-profile-btn');
+      const name  = document.getElementById('p-name').value.trim().substring(0, 255);
+      const phone = document.getElementById('p-phone').value.trim().substring(0, 20);
+
+      showLoader(btn, 'Saving…');
+      try {
+        profile = await API.updateMe({ full_name: name || null, phone: phone || null });
+        AUTH.setProfile(profile);
+        AUTH.updateNavUI();
+        showToast('Profile updated!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
+    });
+
+    /* ── Load addresses ──────────────────────────────────── */
+    async function loadAddresses() {
+      try {
+        addresses = await API.getAddresses();
+        renderAddresses();
+      } catch (err) {
+        document.getElementById('address-list').innerHTML =
+          `<p class="form-error">${escapeHTML(err.message)}</p>`;
+      }
+    }
+
+    function renderAddresses() {
+      const list = document.getElementById('address-list');
+      list.innerHTML = '';
+
+      if (!addresses.length) {
+        const p = document.createElement('p');
+        p.style.cssText = 'font-size:14px;color:var(--text-muted);';
+        p.textContent = 'No saved addresses yet.';
+        list.appendChild(p);
+        return;
+      }
+
+      addresses.forEach(addr => {
+        const item = document.createElement('div');
+        item.className = 'address-item';
+
+        const textWrap = document.createElement('div');
+        textWrap.style.flex = '1';
+
+        if (addr.is_default) {
+          const badge = document.createElement('span');
+          badge.style.cssText = 'font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:inline-block;';
+          badge.textContent = 'Default';
+          textWrap.appendChild(badge);
+        }
+
+        const text = document.createElement('div');
+        text.className = 'address-item-text';
+        const parts = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
+        text.textContent = parts.join(', ');
+        textWrap.appendChild(text);
+
+        const actions = document.createElement('div');
+        actions.className = 'address-item-actions';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger';
+        delBtn.style.cssText = 'padding:8px 14px;font-size:12px;';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', async () => {
+          if (!confirm('Delete this address?')) return;
+          try {
+            await API.deleteAddress(addr.id);
+            addresses = addresses.filter(a => a.id !== addr.id);
+            renderAddresses();
+            showToast('Address deleted', 'info');
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
+
+        actions.appendChild(delBtn);
+        item.appendChild(textWrap);
+        item.appendChild(actions);
+        list.appendChild(item);
+      });
+    }
+
+    /* ── Add address form ────────────────────────────────── */
+    document.getElementById('toggle-addr-form').addEventListener('click', () => {
+      const form = document.getElementById('addr-form-wrap');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('cancel-addr-btn').addEventListener('click', () => {
+      document.getElementById('addr-form-wrap').style.display = 'none';
+    });
+
+    document.getElementById('save-addr-btn').addEventListener('click', async () => {
+      const line1    = document.getElementById('na-line1').value.trim().substring(0, 255);
+      const line2    = document.getElementById('na-line2').value.trim().substring(0, 255);
+      const city     = document.getElementById('na-city').value.trim().substring(0, 100);
+      const state    = document.getElementById('na-state').value.trim().substring(0, 100);
+      const postal   = document.getElementById('na-postal').value.trim().substring(0, 20);
+      const country  = document.getElementById('na-country').value.trim().substring(0, 2).toUpperCase();
+      const isDefault = document.getElementById('na-default').checked;
+      const btn      = document.getElementById('save-addr-btn');
+
+      if (!line1 || !city || !postal || country.length !== 2) {
+        showToast('Fill all required fields (Line 1, City, Postal, 2-letter Country)', 'error');
+        return;
+      }
+
+      showLoader(btn, 'Saving…');
+      try {
+        const addr = await API.addAddress({
+          line1, line2: line2 || null, city,
+          state: state || null, postal_code: postal, country, is_default: isDefault
+        });
+        addresses.push(addr);
+        renderAddresses();
+        document.getElementById('addr-form-wrap').style.display = 'none';
+        // Clear form
+        ['na-line1','na-line2','na-city','na-state','na-postal'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('na-country').value = 'IN';
+        document.getElementById('na-default').checked = false;
+        showToast('Address saved!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
+    });
+  </script>
+</body>
+</html>

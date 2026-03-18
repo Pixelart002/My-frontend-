@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Luviio — Curated luxury goods delivered with care.">
+  <title>Luviio — Luxury Redefined</title>
+  <link rel="stylesheet" href="/css/luviio.css">
+  <style>
+    .hero { min-height: calc(100vh - var(--nav-h)); padding: 0; }
+    .hero-content { position: relative; z-index: 1; max-width: 680px; }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 24px; opacity: 0;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(48px, 7vw, 88px); line-height: 1.05; font-weight: 700;
+      color: var(--text); margin-bottom: 28px; opacity: 0;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      font-size: 16px; color: var(--text-muted); max-width: 460px;
+      line-height: 1.8; margin-bottom: 40px; opacity: 0;
+    }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; opacity: 0; }
+    .hero-scroll {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim);
+      z-index: 1;
+    }
+    .hero-scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    @keyframes scrollLine { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* Category strip */
+    .cat-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    .cat-strip::-webkit-scrollbar { display: none; }
+    .cat-pill {
+      flex-shrink: 0; padding: 10px 20px;
+      border: 1px solid var(--border); border-radius: 30px;
+      font-size: 13px; color: var(--text-muted); transition: all 0.2s;
+    }
+    .cat-pill:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Feature cards */
+    .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); }
+    .feature-card {
+      background: var(--surface); padding: 40px 32px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .feature-icon { font-size: 28px; }
+    .feature-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .feature-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+
+    #featured-grid { min-height: 320px; }
+
+    @media (max-width: 768px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .hero-actions .btn { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Nav -->
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper">
+
+    <!-- Hero -->
+    <section class="hero section container">
+      <div class="hero-bg"></div>
+      <div class="hero-gold-line"></div>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow">New Collection 2026</p>
+        <h1 class="hero-title">
+          Wear the<br><em>Extraordinary.</em>
+        </h1>
+        <p class="hero-sub">
+          Curated luxury pieces selected for those who refuse to compromise.
+          Craftsmanship that speaks before you do.
+        </p>
+        <div class="hero-actions">
+          <a href="/shop.html" class="btn btn-primary">Shop Now</a>
+          <a href="/shop.html?category=new" class="btn btn-outline">New Arrivals</a>
+        </div>
+      </div>
+
+      <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="hero-scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="section-sm" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+      <div class="container">
+        <div id="cat-strip-wrap" class="cat-strip">
+          <a href="/shop.html" class="cat-pill">All</a>
+          <!-- Loaded from API -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="section">
+      <div class="container">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;">
+          <div>
+            <p class="section-subtitle">Handpicked for you</p>
+            <h2 class="section-title">Featured Pieces</h2>
+          </div>
+          <a href="/shop.html" class="btn btn-outline" style="padding:10px 20px;">View All →</a>
+        </div>
+        <div id="featured-grid" class="products-grid">
+          <!-- Skeleton -->
+          <div style="height:360px;" class="skeleton"></div>
+          <div style="height:360px;" class="skeleton"></div>
+          <div style="height:360px;" class="skeleton"></div>
+          <div style="height:360px;" class="skeleton"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features strip -->
+    <div class="container">
+      <div class="feature-grid" style="border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border); background:var(--border);">
+        <div class="feature-card">
+          <div class="feature-icon">🚚</div>
+          <div class="feature-title">Free Shipping</div>
+          <p class="feature-text">On orders above ₹75. Fast, tracked delivery to your door.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-title">Secure Payments</div>
+          <p class="feature-text">SSL encrypted checkout. We never store your card details.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✦</div>
+          <div class="feature-title">Handpicked Quality</div>
+          <p class="feature-text">Every item curated and quality-checked before it reaches you.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">LUVIIO</div>
+            <p>Curated luxury goods for the discerning individual. Quality above all else.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Shop</h4>
+            <a href="/shop.html">All Products</a>
+            <a href="/shop.html?category=new">New Arrivals</a>
+          </div>
+          <div class="footer-col">
+            <h4>Account</h4>
+            <a href="/profile.html">Profile</a>
+            <a href="/orders.html">My Orders</a>
+            <a href="/login.html">Sign In</a>
+          </div>
+          <div class="footer-col">
+            <h4>Help</h4>
+            <a href="mailto:support@luviio.in">Contact Us</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2026 Luviio. All rights reserved.</span>
+          <span>luviio.in</span>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /page-wrapper -->
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"></script>
+  <script>
+    /* ── Page init ───────────────────────────────────────── */
+    pageInit();
+
+    /* ── GSAP Hero animations ────────────────────────────── */
+    gsap.from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.7, delay: 0.3 });
+    gsap.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.7, delay: 0.3 });
+    gsap.to('.hero-title', { opacity: 1, y: 0, duration: 0.9, delay: 0.5 });
+    gsap.from('.hero-title', { y: 30, duration: 0.9, delay: 0.5 });
+    gsap.to('.hero-sub', { opacity: 1, duration: 0.7, delay: 0.8 });
+    gsap.to('.hero-actions', { opacity: 1, y: 0, duration: 0.7, delay: 1.0 });
+    gsap.from('.hero-actions', { y: 16, duration: 0.7, delay: 1.0 });
+
+    /* ── Load categories ─────────────────────────────────── */
+    async function loadCategories() {
+      try {
+        const cats = await API.getCategories();
+        const strip = document.getElementById('cat-strip-wrap');
+        cats.forEach(cat => {
+          const a = document.createElement('a');
+          a.className = 'cat-pill';
+          a.href = `/shop.html?category=${encodeURIComponent(cat.slug)}`;
+          a.textContent = cat.name; // textContent = XSS safe
+          strip.appendChild(a);
+        });
+      } catch {}
+    }
+
+    /* ── Load featured products ──────────────────────────── */
+    async function loadFeatured() {
+      const grid = document.getElementById('featured-grid');
+      try {
+        const data = await API.getProducts({ page_size: 8, in_stock: true });
+        grid.innerHTML = '';
+        if (!data.items?.length) {
+          grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No products yet — check back soon.</p>';
+          return;
+        }
+        data.items.slice(0, 8).forEach(p => {
+          grid.appendChild(makeProductCard(p));
+        });
+
+        // Animate in
+        if (window.gsap) {
+          gsap.from('#featured-grid .product-card', {
+            opacity: 0, y: 30, duration: 0.5,
+            stagger: 0.08, delay: 0.2
+          });
+        }
+      } catch {
+        grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
+      }
+    }
+
+    /* ── Product card builder ─────────────────────────────── */
+    function makeProductCard(p) {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'product-card-img';
+
+      if (p.image_url) {
+        const img = document.createElement('img');
+        img.src = escapeHTML(p.image_url);
+        img.alt = escapeHTML(p.name);
+        img.loading = 'lazy';
+        imgWrap.appendChild(img);
+      } else {
+        const ph = document.createElement('div');
+        ph.className = 'img-placeholder';
+        ph.textContent = '◈';
+        imgWrap.appendChild(ph);
+      }
+
+      const body = document.createElement('div');
+      body.className = 'product-card-body';
+
+      const name = document.createElement('div');
+      name.className = 'product-card-name';
+      name.textContent = p.name;
+
+      const priceRow = document.createElement('div');
+      priceRow.style.display = 'flex';
+      priceRow.style.alignItems = 'center';
+      priceRow.style.gap = '8px';
+
+      const price = document.createElement('div');
+      price.className = 'product-card-price';
+      price.textContent = formatPrice(p.price);
+      priceRow.appendChild(price);
+
+      if (p.compare_price) {
+        const compare = document.createElement('div');
+        compare.className = 'product-card-compare';
+        compare.textContent = formatPrice(p.compare_price);
+        priceRow.appendChild(compare);
+      }
+
+      body.appendChild(name);
+      body.appendChild(priceRow);
+
+      if (p.stock === 0) {
+        const oos = document.createElement('span');
+        oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
+        oos.textContent = 'Out of stock';
+        body.appendChild(oos);
+      }
+
+      const action = document.createElement('div');
+      action.className = 'product-card-action';
+
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.style.width = '100%';
+      btn.style.padding = '10px';
+      btn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
+      btn.disabled = p.stock === 0;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        CART.add(p, 1);
+        showToast(`${p.name} added to cart`, 'success');
+      });
+
+      action.appendChild(btn);
+
+      card.appendChild(imgWrap);
+      card.appendChild(body);
+      card.appendChild(action);
+
+      // Clicking card body goes to product page
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
+      });
+
+      return card;
+    }
+
+    loadCategories();
+    loadFeatured();
+  </script>
+</body>
+</html>

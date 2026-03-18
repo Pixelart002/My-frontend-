@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart — Luviio</title>
+  <link rel="stylesheet" href="/css/luviio.css">
+  <style>
+    .cart-layout { display: grid; grid-template-columns: 1fr 360px; gap: 40px; padding: 40px 0 80px; }
+    .cart-item {
+      display: flex; gap: 20px; padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .cart-item-img {
+      width: 90px; height: 110px; flex-shrink: 0;
+      background: var(--surface-2); border-radius: var(--radius);
+      overflow: hidden; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--border-light);
+    }
+    .cart-item-img img { width:100%;height:100%;object-fit:cover; }
+    .cart-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .cart-item-name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .cart-item-price { font-size: 14px; color: var(--text-muted); }
+    .cart-item-controls { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+    .cart-item-subtotal { font-size: 16px; font-weight: 700; color: var(--gold); }
+    .remove-btn {
+      background: none; border: none; color: var(--text-dim); font-size: 12px;
+      cursor: pointer; padding: 4px; transition: color 0.2s;
+    }
+    .remove-btn:hover { color: var(--error); }
+
+    .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; position: sticky; top: calc(var(--nav-h) + 20px); }
+    .summary-title { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:24px; }
+
+    @media(max-width:900px){.cart-layout{grid-template-columns:1fr;} .summary-card{position:static;}}
+    @media(max-width:600px){.cart-item-img{width:72px;height:88px;}}
+  </style>
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/index.html">Home</a><span>›</span><span>Cart</span>
+      </nav>
+
+      <h1 class="section-title" style="margin-bottom:8px;">Your Cart</h1>
+      <p id="cart-subtitle" style="color:var(--text-muted);font-size:14px;margin-bottom:32px;"></p>
+
+      <div class="cart-layout">
+        <div>
+          <div id="cart-items"></div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="summary-card">
+          <div class="summary-title">Order Summary</div>
+
+          <div id="summary-rows"></div>
+
+          <hr class="divider">
+
+          <a id="checkout-btn" href="/checkout.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">
+            Proceed to Checkout
+          </a>
+          <a href="/shop.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">
+            Continue Shopping
+          </a>
+
+          <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px;line-height:1.6;">
+            🔒 Secure checkout via Stripe.<br>Taxes & shipping calculated at checkout.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+          <span>© 2026 Luviio</span>
+          <a href="/shop.html">← Continue Shopping</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script>
+    pageInit();
+    renderCart();
+
+    window.addEventListener('cart:updated', renderCart);
+
+    function renderCart() {
+      const items = CART.get();
+      const wrap  = document.getElementById('cart-items');
+      const sub   = document.getElementById('cart-subtitle');
+      const sum   = document.getElementById('summary-rows');
+      const btn   = document.getElementById('checkout-btn');
+
+      sub.textContent = `${items.length} item${items.length !== 1 ? 's' : ''}`;
+
+      if (!items.length) {
+        wrap.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🛍</div>
+            <h3>Your cart is empty</h3>
+            <p>Add some beautiful items to get started.</p>
+            <a href="/shop.html" class="btn btn-primary">Shop Now</a>
+          </div>
+        `;
+        sum.innerHTML = '<p style="color:var(--text-dim);font-size:13px;text-align:center;">No items yet</p>';
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+        return;
+      }
+
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+
+      // Render items
+      wrap.innerHTML = '';
+      items.forEach(item => wrap.appendChild(makeItemRow(item)));
+
+      // Summary
+      const subtotal = CART.total();
+      const shipping = subtotal >= 75 ? 0 : 9.99;
+      const tax      = (subtotal + shipping) * 0.08;
+      const total    = subtotal + shipping + tax;
+
+      sum.innerHTML = '';
+      const rows = [
+        ['Subtotal',  formatPrice(subtotal)],
+        ['Shipping',  shipping === 0 ? 'Free' : formatPrice(shipping)],
+        ['Tax (8%)',  formatPrice(tax)],
+      ];
+      rows.forEach(([label, val]) => {
+        const row = document.createElement('div');
+        row.className = 'order-row';
+        const l = document.createElement('span'); l.textContent = label;
+        const v = document.createElement('span'); v.textContent = val;
+        row.appendChild(l); row.appendChild(v);
+        sum.appendChild(row);
+      });
+
+      const totalRow = document.createElement('div');
+      totalRow.className = 'order-row total';
+      totalRow.style.borderTop = '2px solid var(--border)';
+      totalRow.style.marginTop = '8px';
+      totalRow.style.paddingTop = '16px';
+      const tl = document.createElement('span'); tl.textContent = 'Total';
+      const tv = document.createElement('span'); tv.textContent = formatPrice(total);
+      totalRow.appendChild(tl); totalRow.appendChild(tv);
+      sum.appendChild(totalRow);
+
+      if (shipping === 0) {
+        const freeNote = document.createElement('p');
+        freeNote.style.cssText = 'font-size:12px;color:var(--success);text-align:center;margin-top:12px;';
+        freeNote.textContent = '🎉 You qualify for free shipping!';
+        sum.appendChild(freeNote);
+      } else {
+        const needMore = 75 - subtotal;
+        const note = document.createElement('p');
+        note.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;';
+        note.textContent = `Add ${formatPrice(needMore)} more for free shipping`;
+        sum.appendChild(note);
+      }
+    }
+
+    function makeItemRow(item) {
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+
+      // Image
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'cart-item-img';
+      if (item.image) {
+        const img = document.createElement('img');
+        img.src = escapeHTML(item.image);
+        img.alt = escapeHTML(item.name);
+        imgWrap.appendChild(img);
+      } else {
+        imgWrap.textContent = '◈';
+      }
+
+      // Info
+      const info = document.createElement('div');
+      info.className = 'cart-item-info';
+
+      const name = document.createElement('a');
+      name.className = 'cart-item-name';
+      name.href = `/product.html?slug=${encodeURIComponent(item.slug)}`;
+      name.textContent = item.name;
+
+      const unitP = document.createElement('div');
+      unitP.className = 'cart-item-price';
+      unitP.textContent = formatPrice(item.price) + ' each';
+
+      // Controls row
+      const controls = document.createElement('div');
+      controls.className = 'cart-item-controls';
+
+      const qtyCtrl = document.createElement('div');
+      qtyCtrl.className = 'qty-control';
+
+      const minus = document.createElement('button');
+      minus.className = 'qty-btn';
+      minus.textContent = '−';
+      minus.addEventListener('click', () => CART.update(item.id, item.qty - 1));
+
+      const disp = document.createElement('div');
+      disp.className = 'qty-display';
+      disp.textContent = item.qty;
+
+      const plus = document.createElement('button');
+      plus.className = 'qty-btn';
+      plus.textContent = '+';
+      plus.addEventListener('click', () => CART.update(item.id, item.qty + 1));
+
+      qtyCtrl.appendChild(minus);
+      qtyCtrl.appendChild(disp);
+      qtyCtrl.appendChild(plus);
+
+      const right = document.createElement('div');
+      right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:6px;';
+
+      const subtotal = document.createElement('div');
+      subtotal.className = 'cart-item-subtotal';
+      subtotal.textContent = formatPrice(item.price * item.qty);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '✕ Remove';
+      removeBtn.addEventListener('click', () => {
+        CART.remove(item.id);
+        showToast('Item removed', 'info');
+      });
+
+      right.appendChild(subtotal);
+      right.appendChild(removeBtn);
+
+      controls.appendChild(qtyCtrl);
+      controls.appendChild(right);
+
+      info.appendChild(name);
+      info.appendChild(unitP);
+      info.appendChild(controls);
+
+      row.appendChild(imgWrap);
+      row.appendChild(info);
+
+      return row;
+    }
+  </script>
+</body>
+</html>
