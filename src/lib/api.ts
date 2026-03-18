@@ -3,35 +3,38 @@ import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import type { AuthTokens } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FIX: NEXT_PUBLIC_API_URL Vercel mein set nahi tha → BASE_URL = "" ban raha
-// tha → API calls /api/v1/... (relative URL) pe jaati thi → 404.
-// Ab backend URL hardcoded fallback hai — env var set karo toh woh use hoga,
-// nahi toh direct backend URL use hoga.
+// Backend URL — env var missing ho toh bhi kaam kare
+// Vercel mein NEXT_PUBLIC_API_URL set karo → Settings → Environment Variables
+// Value: https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app
 // ─────────────────────────────────────────────────────────────────────────────
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
   "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app";
 
 // ── Axios instance ────────────────────────────────────────────────────────────
 export const api = axios.create({
-  baseURL: `${BASE_URL}/api/v1`,
-  timeout: 15000,
-  headers: { "Content-Type": "application/json" },
+  baseURL:         `${BASE_URL}/api/v1`,
+  timeout:         15000,
+  withCredentials: false,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // ── Cookie keys ───────────────────────────────────────────────────────────────
+// NOTE: ye value middleware.ts mein bhi same rakho — import mat karo wahan se
 export const COOKIE_ACCESS  = "ms_access";
 export const COOKIE_REFRESH = "ms_refresh";
 
 const COOKIE_OPTS = {
-  maxAge:   60 * 60 * 24 * 7, // 7 days
+  maxAge:   60 * 60 * 24 * 7,
   path:     "/",
   sameSite: "lax" as const,
   secure:   process.env.NODE_ENV === "production",
 };
 
 export function setAuthCookies(tokens: AuthTokens) {
-  setCookie(COOKIE_ACCESS,  tokens.access_token,  {
+  setCookie(COOKIE_ACCESS, tokens.access_token, {
     ...COOKIE_OPTS,
     maxAge: tokens.expires_in ?? 900,
   });
@@ -93,7 +96,7 @@ api.interceptors.response.use(
       }
 
       originalRequest._retry = true;
-      isRefreshing = true;
+      isRefreshing           = true;
 
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
@@ -129,7 +132,7 @@ api.interceptors.response.use(
   }
 );
 
-// ── API helpers ───────────────────────────────────────────────────────────────
+// ── Error helper ──────────────────────────────────────────────────────────────
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     return (
