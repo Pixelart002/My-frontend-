@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +8,24 @@
   <link rel="stylesheet" href="/css/luviio.css">
   <style>
     /* ── SVG Icon helper ─────────────────────────────── */
-    .ico { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .ico svg { display:block; }
-
+    .ico {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .ico svg {
+      display: block;
+    }
+    
     /* ── Admin shell ─────────────────────────────────── */
     .admin-wrap {
       display: grid;
       grid-template-columns: 230px 1fr;
       min-height: calc(100vh - var(--nav-h));
     }
-
+    
     /* ── Sidebar ─────────────────────────────────────── */
     .admin-sidebar {
       background: var(--surface);
@@ -29,9 +38,12 @@
       display: flex;
       flex-direction: column;
     }
-
-    .sidebar-section { padding: 0 12px; margin-bottom: 20px; }
-
+    
+    .sidebar-section {
+      padding: 0 12px;
+      margin-bottom: 20px;
+    }
+    
     .sidebar-label {
       font-size: 10px;
       font-weight: 700;
@@ -41,7 +53,7 @@
       padding: 0 10px;
       margin-bottom: 6px;
     }
-
+    
     .sidebar-btn {
       display: flex;
       align-items: center;
@@ -57,19 +69,34 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-
-    .sidebar-btn:hover { background: var(--surface-2); color: var(--text); }
-    .sidebar-btn.active { background: var(--gold-dim); color: var(--gold); font-weight: 600; }
-    .sidebar-btn.active svg { stroke: var(--gold); }
-
-    .sidebar-divider { border:none; border-top:1px solid var(--border); margin:8px 12px; }
-
+    
+    .sidebar-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    
+    .sidebar-btn.active {
+      background: var(--gold-dim);
+      color: var(--gold);
+      font-weight: 600;
+    }
+    
+    .sidebar-btn.active svg {
+      stroke: var(--gold);
+    }
+    
+    .sidebar-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 8px 12px;
+    }
+    
     .sidebar-live {
       margin-top: auto;
       padding: 16px 22px;
       border-top: 1px solid var(--border);
     }
-
+    
     .live-label {
       font-size: 10px;
       font-weight: 700;
@@ -78,7 +105,7 @@
       color: var(--text-dim);
       margin-bottom: 10px;
     }
-
+    
     .live-row {
       display: flex;
       justify-content: space-between;
@@ -86,13 +113,23 @@
       padding: 5px 0;
       font-size: 12px;
     }
-
-    .live-row-label { color: var(--text-dim); }
-    .live-row-val { color: var(--gold); font-weight: 700; font-family: 'Playfair Display', serif; }
-
+    
+    .live-row-label {
+      color: var(--text-dim);
+    }
+    
+    .live-row-val {
+      color: var(--gold);
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+    }
+    
     /* ── Main ────────────────────────────────────────── */
-    .admin-main { padding: 32px 40px; background: var(--bg); }
-
+    .admin-main {
+      padding: 32px 40px;
+      background: var(--bg);
+    }
+    
     .admin-header {
       display: flex;
       align-items: center;
@@ -101,28 +138,37 @@
       flex-wrap: wrap;
       gap: 12px;
     }
-
+    
     .admin-title {
       font-family: 'Playfair Display', serif;
       font-size: 26px;
       font-weight: 700;
       color: var(--text);
     }
-
-    .admin-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-
+    
+    .admin-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
     /* ── Panels ──────────────────────────────────────── */
-    .admin-panel { display: none; }
-    .admin-panel.active { display: block; }
-
+    .admin-panel {
+      display: none;
+    }
+    
+    .admin-panel.active {
+      display: block;
+    }
+    
     /* ── Stats row ───────────────────────────────────── */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 32px;
     }
-
+    
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -132,13 +178,13 @@
       flex-direction: column;
       gap: 8px;
     }
-
+    
     .stat-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-
+    
     .stat-card-label {
       font-size: 11px;
       font-weight: 700;
@@ -146,28 +192,42 @@
       text-transform: uppercase;
       color: var(--text-dim);
     }
-
+    
     .stat-card-icon {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       border-radius: var(--radius);
       background: var(--gold-dim);
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
-    .stat-card-icon svg { stroke: var(--gold); }
-    .stat-card-val { font-size: 30px; font-weight: 700; color: var(--gold); font-family:'Playfair Display',serif; line-height:1; }
-    .stat-card-sub { font-size: 12px; color: var(--text-dim); }
-
+    
+    .stat-card-icon svg {
+      stroke: var(--gold);
+    }
+    
+    .stat-card-val {
+      font-size: 30px;
+      font-weight: 700;
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+    }
+    
+    .stat-card-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    
     /* ── Quick Actions ───────────────────────────────── */
     .quick-grid {
       display: grid;
-      grid-template-columns: repeat(3,1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin-bottom: 32px;
     }
-
+    
     .quick-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -179,11 +239,16 @@
       align-items: center;
       gap: 14px;
     }
-
-    .quick-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-
+    
+    .quick-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    
     .quick-card-icon {
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       border-radius: var(--radius);
       background: var(--surface-2);
       display: flex;
@@ -192,14 +257,31 @@
       flex-shrink: 0;
       transition: background 0.2s;
     }
-
-    .quick-card:hover .quick-card-icon { background: var(--gold-dim); }
-    .quick-card:hover .quick-card-icon svg { stroke: var(--gold); }
-    .quick-card-icon svg { stroke: var(--text-dim); transition: stroke 0.2s; }
-
-    .quick-card-label { font-size: 13px; font-weight: 600; color: var(--text-muted); transition: color 0.2s; }
-    .quick-card:hover .quick-card-label { color: var(--text); }
-
+    
+    .quick-card:hover .quick-card-icon {
+      background: var(--gold-dim);
+    }
+    
+    .quick-card:hover .quick-card-icon svg {
+      stroke: var(--gold);
+    }
+    
+    .quick-card-icon svg {
+      stroke: var(--text-dim);
+      transition: stroke 0.2s;
+    }
+    
+    .quick-card-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    
+    .quick-card:hover .quick-card-label {
+      color: var(--text);
+    }
+    
     /* ── Table ───────────────────────────────────────── */
     .admin-table-wrap {
       background: var(--surface);
@@ -207,7 +289,7 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
     }
-
+    
     .table-toolbar {
       display: flex;
       align-items: center;
@@ -216,7 +298,7 @@
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
-
+    
     .t-search {
       display: flex;
       align-items: center;
@@ -229,10 +311,16 @@
       max-width: 280px;
       transition: border-color 0.2s;
     }
-
-    .t-search:focus-within { border-color: var(--gold); }
-    .t-search svg { stroke: var(--text-dim); flex-shrink:0; }
-
+    
+    .t-search:focus-within {
+      border-color: var(--gold);
+    }
+    
+    .t-search svg {
+      stroke: var(--text-dim);
+      flex-shrink: 0;
+    }
+    
     .t-search input {
       background: none;
       border: none;
@@ -241,7 +329,7 @@
       font-size: 13px;
       width: 100%;
     }
-
+    
     .t-select {
       padding: 7px 12px;
       background: var(--surface-2);
@@ -252,11 +340,17 @@
       outline: none;
       cursor: pointer;
     }
-
-    .t-select:focus { border-color: var(--gold); }
-
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-
+    
+    .t-select:focus {
+      border-color: var(--gold);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    
     th {
       text-align: left;
       padding: 11px 16px;
@@ -269,24 +363,43 @@
       background: var(--surface-2);
       white-space: nowrap;
     }
-
+    
     td {
       padding: 13px 16px;
       border-bottom: 1px solid var(--border);
       color: var(--text-muted);
       vertical-align: middle;
     }
-
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,0.015); }
-
-    .td-primary { color: var(--text); font-weight: 500; }
-    .td-gold { color: var(--gold); font-weight: 700; }
-    .td-dim { color: var(--text-dim); font-size: 12px; }
-
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+    
+    .td-primary {
+      color: var(--text);
+      font-weight: 500;
+    }
+    
+    .td-gold {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    
+    .td-dim {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+    
     /* ── Action buttons ──────────────────────────────── */
-    .action-btns { display:flex; gap:5px; }
-
+    .action-btns {
+      display: flex;
+      gap: 5px;
+    }
+    
     .btn-xs {
       display: inline-flex;
       align-items: center;
@@ -301,37 +414,117 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-
-    .btn-xs svg { flex-shrink:0; }
-
-    .bxp { background: var(--gold-dim); color: var(--gold); }
-    .bxp:hover { background: var(--gold); color: #000; }
-    .bxp:hover svg { stroke: #000; }
-
-    .bxd { background: var(--error-dim); color: var(--error); }
-    .bxd:hover { background: var(--error); color: #fff; }
-    .bxd:hover svg { stroke: #fff; }
-
-    .bxo { background: none; color: var(--text-muted); border: 1px solid var(--border); }
-    .bxo:hover { border-color: var(--gold); color: var(--gold); }
-
-    .bxs { background: var(--success-dim); color: var(--success); }
-    .bxs:hover { background: var(--success); color: #000; }
-
+    
+    .btn-xs svg {
+      flex-shrink: 0;
+    }
+    
+    .bxp {
+      background: var(--gold-dim);
+      color: var(--gold);
+    }
+    
+    .bxp:hover {
+      background: var(--gold);
+      color: #000;
+    }
+    
+    .bxp:hover svg {
+      stroke: #000;
+    }
+    
+    .bxd {
+      background: var(--error-dim);
+      color: var(--error);
+    }
+    
+    .bxd:hover {
+      background: var(--error);
+      color: #fff;
+    }
+    
+    .bxd:hover svg {
+      stroke: #fff;
+    }
+    
+    .bxo {
+      background: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    
+    .bxo:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    
+    .bxs {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+    
+    .bxs:hover {
+      background: var(--success);
+      color: #000;
+    }
+    
     /* ── Stock badges ────────────────────────────────── */
-    .sbadge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
-    .sb-ok  { background:var(--success-dim); color:var(--success); }
-    .sb-low { background:#e0a95222; color:var(--warn); }
-    .sb-out { background:var(--error-dim); color:var(--error); }
-
+    .sbadge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .sb-ok {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+    
+    .sb-low {
+      background: #e0a95222;
+      color: var(--warn);
+    }
+    
+    .sb-out {
+      background: var(--error-dim);
+      color: var(--error);
+    }
+    
     /* ── Status dot ──────────────────────────────────── */
-    .status-dot { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; }
-    .status-dot::before { content:''; width:6px; height:6px; border-radius:50%; display:inline-block; }
-    .status-dot.active::before { background:var(--success); }
-    .status-dot.inactive::before { background:var(--error); }
-    .status-dot.active { color:var(--success); }
-    .status-dot.inactive { color:var(--error); }
-
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .status-dot::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .status-dot.active::before {
+      background: var(--success);
+    }
+    
+    .status-dot.inactive::before {
+      background: var(--error);
+    }
+    
+    .status-dot.active {
+      color: var(--success);
+    }
+    
+    .status-dot.inactive {
+      color: var(--error);
+    }
+    
     /* ── Bulk bar ────────────────────────────────────── */
     .bulk-bar {
       display: none;
@@ -344,10 +537,17 @@
       margin-bottom: 10px;
       font-size: 13px;
     }
-
-    .bulk-bar.visible { display: flex; }
-    .bulk-bar-label { color: var(--gold); font-weight: 600; flex:1; }
-
+    
+    .bulk-bar.visible {
+      display: flex;
+    }
+    
+    .bulk-bar-label {
+      color: var(--gold);
+      font-weight: 600;
+      flex: 1;
+    }
+    
     /* ── Table footer ────────────────────────────────── */
     .table-footer {
       display: flex;
@@ -358,11 +558,12 @@
       font-size: 12px;
       color: var(--text-dim);
     }
-
+    
     /* ── Modal ───────────────────────────────────────── */
     .modal-bd {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.72);
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
       z-index: 2000;
       display: flex;
       align-items: center;
@@ -370,7 +571,7 @@
       padding: 24px;
       backdrop-filter: blur(4px);
     }
-
+    
     .modal {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -380,7 +581,7 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-
+    
     .modal-hd {
       display: flex;
       align-items: center;
@@ -392,25 +593,51 @@
       background: var(--surface);
       z-index: 1;
     }
-
-    .modal-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; }
-
+    
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
     .modal-close {
-      background: none; border: none;
-      color: var(--text-dim); cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
       padding: 4px;
-      display: flex; align-items: center;
+      display: flex;
+      align-items: center;
       border-radius: 6px;
       transition: all 0.15s;
     }
-
-    .modal-close:hover { color: var(--text); background: var(--surface-2); }
-
-    .modal-bd-inner { padding: 22px 24px; display:flex; flex-direction:column; gap:16px; }
-    .modal-ft { display:flex; gap:10px; justify-content:flex-end; padding:16px 24px; border-top:1px solid var(--border); }
-
-    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-
+    
+    .modal-close:hover {
+      color: var(--text);
+      background: var(--surface-2);
+    }
+    
+    .modal-bd-inner {
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .modal-ft {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    
     /* ── Image drop zone ─────────────────────────────── */
     .drop-zone {
       border: 2px dashed var(--border);
@@ -420,87 +647,169 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .drop-zone:hover { border-color: var(--gold); }
-    .drop-zone.over { border-color: var(--gold); background: var(--gold-dim); }
-    .drop-zone-img { width:72px;height:88px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);margin:0 auto 10px;display:none; }
-    .drop-zone-txt { font-size:12px; color:var(--text-dim); }
-
+    
+    .drop-zone:hover {
+      border-color: var(--gold);
+    }
+    
+    .drop-zone.over {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+    
+    .drop-zone-img {
+      width: 72px;
+      height: 88px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 0 auto 10px;
+      display: none;
+    }
+    
+    .drop-zone-txt {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    
     /* ── Inventory inline ────────────────────────────── */
     .stk-input {
-      width: 72px; padding: 5px 8px;
+      width: 72px;
+      padding: 5px 8px;
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text);
-      font-size: 12px; text-align: center; outline: none;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      text-align: center;
+      outline: none;
     }
-
-    .stk-input:focus { border-color: var(--gold); }
-    .stk-edit { display:flex; align-items:center; gap:5px; }
-
+    
+    .stk-input:focus {
+      border-color: var(--gold);
+    }
+    
+    .stk-edit {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
     /* ── Hint bar ────────────────────────────────────── */
     .hint-bar {
-      display:flex; align-items:center; gap:8px;
-      padding:10px 14px;
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      margin-bottom:16px;
-      font-size:12px;
-      color:var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
     }
-
-    @media(max-width:1100px){ .stats-grid{grid-template-columns:repeat(2,1fr);} .quick-grid{grid-template-columns:repeat(2,1fr);} }
-    @media(max-width:900px){ .admin-wrap{grid-template-columns:180px 1fr;} .admin-main{padding:20px 24px;} }
-    @media(max-width:768px){ .admin-sidebar{display:none;} .admin-wrap{grid-template-columns:1fr;} }
+    
+    @media(max-width:1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media(max-width:900px) {
+      .admin-wrap {
+        grid-template-columns: 180px 1fr;
+      }
+      
+      .admin-main {
+        padding: 20px 24px;
+      }
+    }
+    
+    @media(max-width:768px) {
+      .admin-sidebar {
+        display: none;
+      }
+      
+      .admin-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
+
 <body>
   <nav id="main-nav"></nav>
-
+  
   <div class="page-wrapper">
     <div class="admin-wrap">
-
+      
       <!-- ════════════════════ SIDEBAR ════════════════════ -->
       <aside class="admin-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-label">Overview</div>
           <button class="sidebar-btn active" onclick="showPanel('dashboard')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
             Dashboard
           </button>
         </div>
-
+        
         <div class="sidebar-section">
           <div class="sidebar-label">Catalogue</div>
           <button class="sidebar-btn" onclick="showPanel('products')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+              <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+            </svg>
             Products
           </button>
           <button class="sidebar-btn" onclick="showPanel('categories')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+            </svg>
             Categories
           </button>
           <button class="sidebar-btn" onclick="showPanel('inventory')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
             Inventory
           </button>
         </div>
-
+        
         <hr class="sidebar-divider">
-
+        
         <div class="sidebar-section">
           <div class="sidebar-label">Commerce</div>
           <button class="sidebar-btn" onclick="showPanel('orders')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 01-8 0" />
+            </svg>
             Orders
           </button>
           <button class="sidebar-btn" onclick="showPanel('users')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87" />
+              <path d="M16 3.13a4 4 0 010 7.75" />
+            </svg>
             Users
           </button>
         </div>
-
+        
         <div class="sidebar-live">
           <div class="live-label">Live Stats</div>
           <div class="live-row"><span class="live-row-label">Products</span><span class="live-row-val" id="sb-products">—</span></div>
@@ -509,10 +818,10 @@
           <div class="live-row"><span class="live-row-label">Users</span><span class="live-row-val" id="sb-users">—</span></div>
         </div>
       </aside>
-
+      
       <!-- ════════════════════ MAIN ════════════════════ -->
       <main class="admin-main">
-
+        
         <!-- ─── DASHBOARD ─── -->
         <div id="panel-dashboard" class="admin-panel active">
           <div class="admin-header">
@@ -522,12 +831,15 @@
             </div>
             <div style="font-size:12px;color:var(--text-dim);" id="dash-time"></div>
           </div>
-
+          
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-card-top">
                 <div class="stat-card-label">Products</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div>
+                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+                    <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+                  </svg></div>
               </div>
               <div class="stat-card-val" id="stat-products">—</div>
               <div class="stat-card-sub">Active listings</div>
@@ -535,7 +847,11 @@
             <div class="stat-card">
               <div class="stat-card-top">
                 <div class="stat-card-label">Total Orders</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 01-8 0" />
+                  </svg></div>
               </div>
               <div class="stat-card-val" id="stat-orders">—</div>
               <div class="stat-card-sub">All time</div>
@@ -543,7 +859,10 @@
             <div class="stat-card">
               <div class="stat-card-top">
                 <div class="stat-card-label">Pending</div>
-                <div class="stat-card-icon" style="background:var(--warn)22;"><svg width="16" height="16" fill="none" stroke="var(--warn)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="stat-card-icon" style="background:var(--warn)22;"><svg width="16" height="16" fill="none" stroke="var(--warn)" stroke-width="1.8" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg></div>
               </div>
               <div class="stat-card-val" id="stat-pending" style="color:var(--warn)">—</div>
               <div class="stat-card-sub">Needs action</div>
@@ -551,52 +870,90 @@
             <div class="stat-card">
               <div class="stat-card-top">
                 <div class="stat-card-label">Users</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                    <path d="M16 3.13a4 4 0 010 7.75" />
+                  </svg></div>
               </div>
               <div class="stat-card-val" id="stat-users">—</div>
               <div class="stat-card-sub">Registered</div>
             </div>
           </div>
-
+          
           <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">Quick Actions</div>
           <div class="quick-grid" style="margin-bottom:32px;">
             <div class="quick-card" onclick="showPanel('products');openProductModal()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg></div>
               <span class="quick-card-label">Add Product</span>
             </div>
             <div class="quick-card" onclick="showPanel('categories');openCatModal()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                  <line x1="12" y1="11" x2="12" y2="17" />
+                  <line x1="9" y1="14" x2="15" y2="14" />
+                </svg></div>
               <span class="quick-card-label">Add Category</span>
             </div>
             <div class="quick-card" onclick="showPanel('orders')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 01-8 0" />
+                </svg></div>
               <span class="quick-card-label">View Orders</span>
             </div>
             <div class="quick-card" onclick="showPanel('inventory')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg></div>
               <span class="quick-card-label">Update Stock</span>
             </div>
             <div class="quick-card" onclick="showPanel('users')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                  <path d="M16 3.13a4 4 0 010 7.75" />
+                </svg></div>
               <span class="quick-card-label">Manage Users</span>
             </div>
             <div class="quick-card" onclick="loadDashboard()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div>
+              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                </svg></div>
               <span class="quick-card-label">Refresh Stats</span>
             </div>
           </div>
-
+          
           <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">Recent Orders</div>
           <div class="admin-table-wrap">
             <table>
-              <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
               <tbody id="dash-orders-body">
-                <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:32px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
-
+        
         <!-- ─── PRODUCTS ─── -->
         <div id="panel-products" class="admin-panel">
           <div class="admin-header">
@@ -605,25 +962,37 @@
               <div class="admin-subtitle" id="prod-subtitle"></div>
             </div>
             <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openProductModal()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               Add Product
             </button>
           </div>
-
+          
           <div id="prod-bulk-bar" class="bulk-bar">
-            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="9 11 12 14 22 4" />
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
             <span class="bulk-bar-label" id="prod-bulk-label">0 selected</span>
             <button class="btn-xs bxd" onclick="bulkDeleteProducts()">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
               Delete Selected
             </button>
             <button class="btn-xs bxo" onclick="clearProdSel()">Clear</button>
           </div>
-
+          
           <div class="admin-table-wrap">
             <div class="table-toolbar">
               <div class="t-search">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
                 <input type="text" placeholder="Search products…" id="prod-search" oninput="filterProducts(this.value)">
               </div>
               <select class="t-select" id="prod-cat-f" onchange="filterProducts(document.getElementById('prod-search').value)">
@@ -631,14 +1000,24 @@
               </select>
               <div style="margin-left:auto;" id="prod-count"></div>
             </div>
-
+            
             <table>
-              <thead><tr>
-                <th style="width:36px;"><input type="checkbox" id="prod-chk-all" style="accent-color:var(--gold)" onchange="toggleAllProds(this.checked)"></th>
-                <th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Category</th><th>Status</th><th>Actions</th>
-              </tr></thead>
+              <thead>
+                <tr>
+                  <th style="width:36px;"><input type="checkbox" id="prod-chk-all" style="accent-color:var(--gold)" onchange="toggleAllProds(this.checked)"></th>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody id="products-body">
-                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
             <div class="table-footer">
@@ -647,45 +1026,67 @@
             </div>
           </div>
         </div>
-
+        
         <!-- ─── CATEGORIES ─── -->
         <div id="panel-categories" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Categories</div>
             <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openCatModal()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
               Add Category
             </button>
           </div>
           <div class="admin-table-wrap">
             <table>
-              <thead><tr><th>Name</th><th>Slug</th><th>Description</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody id="categories-body">
-                <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
-
+        
         <!-- ─── INVENTORY ─── -->
         <div id="panel-inventory" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Inventory</div>
             <button class="btn btn-outline" style="padding:10px 18px;gap:8px;" onclick="loadInventory()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+              </svg>
               Refresh
             </button>
           </div>
-
+          
           <div class="hint-bar">
-            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             Click any stock number to edit inline. Press <strong style="color:var(--text);">Enter</strong> or click the check button to save.
           </div>
-
+          
           <div class="admin-table-wrap">
             <div class="table-toolbar">
               <div class="t-search" style="max-width:240px;">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
                 <input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)">
               </div>
               <select class="t-select" id="inv-sf" onchange="filterInv(document.getElementById('inv-search').value)">
@@ -696,14 +1097,25 @@
               </select>
             </div>
             <table>
-              <thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Threshold</th><th>Status</th><th>Edit</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Stock</th>
+                  <th>Threshold</th>
+                  <th>Status</th>
+                  <th>Edit</th>
+                </tr>
+              </thead>
               <tbody id="inventory-body">
-                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
-
+        
         <!-- ─── ORDERS ─── -->
         <div id="panel-orders" class="admin-panel">
           <div class="admin-header">
@@ -720,9 +1132,22 @@
           </div>
           <div class="admin-table-wrap">
             <table>
-              <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Tracking</th><th>Date</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Tracking</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody id="orders-body">
-                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
             <div class="table-footer">
@@ -731,21 +1156,35 @@
             </div>
           </div>
         </div>
-
+        
         <!-- ─── USERS ─── -->
         <div id="panel-users" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Users</div>
             <div class="t-search" style="max-width:260px;">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
               <input type="text" placeholder="Search by email or name…" id="user-search" oninput="filterUsers(this.value)">
             </div>
           </div>
           <div class="admin-table-wrap">
             <table>
-              <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
               <tbody id="users-body">
-                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td></tr>
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
+                </tr>
               </tbody>
             </table>
             <div class="table-footer">
@@ -754,18 +1193,21 @@
             </div>
           </div>
         </div>
-
+        
       </main>
     </div>
   </div>
-
+  
   <!-- ════ PRODUCT MODAL ════ -->
   <div id="modal-product" class="modal-bd" style="display:none;" onclick="closeModal('modal-product',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
         <div class="modal-title" id="pm-title">Add Product</div>
         <button class="modal-close" onclick="closeModal('modal-product')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
       <div class="modal-bd-inner">
@@ -811,7 +1253,9 @@
         <div class="g2">
           <div class="form-group">
             <label class="form-label">Category</label>
-            <select id="pm-cat" class="form-input form-select"><option value="">— None —</option></select>
+            <select id="pm-cat" class="form-input form-select">
+              <option value="">— None —</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Weight (grams)</label>
@@ -823,7 +1267,11 @@
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pm-img-file').click()">
             <img id="pm-img-preview" class="drop-zone-img">
             <div id="drop-zone-txt">
-              <svg width="28" height="28" fill="none" stroke="var(--text-dim)" stroke-width="1.4" viewBox="0 0 24 24" style="margin:0 auto 8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <svg width="28" height="28" fill="none" stroke="var(--text-dim)" stroke-width="1.4" viewBox="0 0 24 24" style="margin:0 auto 8px;">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
               <div class="drop-zone-txt">Click or drag image here</div>
               <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">JPEG · PNG · WebP — max 5MB</div>
             </div>
@@ -841,14 +1289,17 @@
       </div>
     </div>
   </div>
-
+  
   <!-- ════ CATEGORY MODAL ════ -->
   <div id="modal-cat" class="modal-bd" style="display:none;" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
         <div class="modal-title">Add Category</div>
         <button class="modal-close" onclick="closeModal('modal-cat')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
       <div class="modal-bd-inner">
@@ -871,14 +1322,17 @@
       </div>
     </div>
   </div>
-
+  
   <!-- ════ ORDER MODAL ════ -->
   <div id="modal-order" class="modal-bd" style="display:none;" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
         <div class="modal-title" id="om-title">Update Order</div>
         <button class="modal-close" onclick="closeModal('modal-order')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
       <div class="modal-bd-inner">
@@ -906,7 +1360,7 @@
       </div>
     </div>
   </div>
-
+  
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -917,15 +1371,17 @@
     /* ══════════════════════════════════════
        STATE
     ══════════════════════════════════════ */
-    let allProducts   = [];
+    let allProducts = [];
     let allCategories = [];
-    let allUsers      = [];
-    let allInventory  = [];
+    let allUsers = [];
+    let allInventory = [];
     let selectedProds = new Set();
-    let pendingImg    = null;
-    let pProdPage  = 1, pOrderPage = 1, pUserPage = 1;
+    let pendingImg = null;
+    let pProdPage = 1,
+      pOrderPage = 1,
+      pUserPage = 1;
     const PS = 20;
-
+    
     /* ══════════════════════════════════════
        ADMIN API
     ══════════════════════════════════════ */
@@ -943,27 +1399,30 @@
         return d;
       },
       async uploadImage(id, file) {
-        const fd = new FormData(); fd.append('file', file);
+        const fd = new FormData();
+        fd.append('file', file);
         const res = await fetch(`${CONFIG.API_BASE}/products/${id}/image`, {
-          method: 'POST', headers: { 'Authorization': `Bearer ${AUTH.getToken()}` }, body: fd,
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
+          body: fd,
         });
         const d = await res.json();
         if (!res.ok) throw new Error(d?.detail || 'Upload failed');
         return d;
       },
-      getProducts : (p=1) => ADMIN.req('GET', `/products?page=${p}&page_size=${PS}`),
-      createProduct: d    => ADMIN.req('POST', '/products', d),
-      updateProduct: (id,d) => ADMIN.req('PATCH', `/products/${id}`, d),
-      deleteProduct: id   => ADMIN.req('DELETE', `/products/${id}`),
-      getCategories: ()   => ADMIN.req('GET', '/categories'),
-      createCategory: d   => ADMIN.req('POST', '/categories', d),
-      deleteCategory: id  => ADMIN.req('DELETE', `/categories/${id}`),
-      getOrders : (p=1,s='') => ADMIN.req('GET', `/orders/?page=${p}&page_size=${PS}${s?'&status_filter='+s:''}`),
-      updateOrder : (id,d)   => ADMIN.req('PATCH', `/orders/${id}`, d),
-      getUsers : (p=1) => ADMIN.req('GET', `/users/?page=${p}&page_size=${PS}`),
-      updateUser: (id,d) => ADMIN.req('PATCH', `/users/${id}`, d),
+      getProducts: (p = 1) => ADMIN.req('GET', `/products?page=${p}&page_size=${PS}`),
+      createProduct: d => ADMIN.req('POST', '/products', d),
+      updateProduct: (id, d) => ADMIN.req('PATCH', `/products/${id}`, d),
+      deleteProduct: id => ADMIN.req('DELETE', `/products/${id}`),
+      getCategories: () => ADMIN.req('GET', '/categories'),
+      createCategory: d => ADMIN.req('POST', '/categories', d),
+      deleteCategory: id => ADMIN.req('DELETE', `/categories/${id}`),
+      getOrders: (p = 1, s = '') => ADMIN.req('GET', `/orders/?page=${p}&page_size=${PS}${s?'&status_filter='+s:''}`),
+      updateOrder: (id, d) => ADMIN.req('PATCH', `/orders/${id}`, d),
+      getUsers: (p = 1) => ADMIN.req('GET', `/users/?page=${p}&page_size=${PS}`),
+      updateUser: (id, d) => ADMIN.req('PATCH', `/users/${id}`, d),
     };
-
+    
     /* ══════════════════════════════════════
        INIT
     ══════════════════════════════════════ */
@@ -980,13 +1439,13 @@
         `Welcome back, ${escapeHTML(profile.full_name?.split(' ')[0] || 'Admin')}`;
       setInterval(() => {
         const el = document.getElementById('dash-time');
-        if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true });
+        if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
       }, 1000);
       loadDashboard();
     }
-
+    
     init();
-
+    
     /* ══════════════════════════════════════
        PANEL SWITCH
     ══════════════════════════════════════ */
@@ -997,13 +1456,13 @@
       document.querySelectorAll('.sidebar-btn').forEach(b => {
         if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active');
       });
-      if (name === 'products')   loadProducts();
+      if (name === 'products') loadProducts();
       if (name === 'categories') loadCategories();
-      if (name === 'inventory')  loadInventory();
-      if (name === 'orders')     loadOrders(1);
-      if (name === 'users')      loadUsers(1);
+      if (name === 'inventory') loadInventory();
+      if (name === 'orders') loadOrders(1);
+      if (name === 'users') loadUsers(1);
     }
-
+    
     /* ══════════════════════════════════════
        DASHBOARD
     ══════════════════════════════════════ */
@@ -1015,18 +1474,18 @@
         const pending = orders?.items?.filter(o => o.status === 'pending').length ?? 0;
         [
           ['stat-products', prods?.total],
-          ['stat-orders',   orders?.total],
-          ['stat-pending',  pending],
-          ['stat-users',    users?.total],
-          ['sb-products',   prods?.total],
-          ['sb-orders',     orders?.total],
-          ['sb-pending',    pending],
-          ['sb-users',      users?.total],
+          ['stat-orders', orders?.total],
+          ['stat-pending', pending],
+          ['stat-users', users?.total],
+          ['sb-products', prods?.total],
+          ['sb-orders', orders?.total],
+          ['sb-pending', pending],
+          ['sb-users', users?.total],
         ].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; });
-
+        
         const tbody = document.getElementById('dash-orders-body');
         tbody.innerHTML = '';
-        (orders?.items?.slice(0,8) || []).forEach(o => {
+        (orders?.items?.slice(0, 8) || []).forEach(o => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td>
@@ -1044,7 +1503,7 @@
         showToast('Dashboard error: ' + err.message, 'error');
       }
     }
-
+    
     /* ══════════════════════════════════════
        PRODUCTS
     ══════════════════════════════════════ */
@@ -1063,18 +1522,18 @@
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
       }
     }
-
+    
     function renderProducts(items, total, pages) {
       const tbody = document.getElementById('products-body');
       tbody.innerHTML = '';
       document.getElementById('prod-count').textContent = `${total} items`;
       document.getElementById('prod-info').textContent = `Showing ${items.length} of ${total}`;
-
+      
       if (!items.length) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No products found</td></tr>';
         return;
       }
-
+      
       items.forEach(p => {
         const sc = p.stock === 0 ? 'sb-out' : p.stock <= 10 ? 'sb-low' : 'sb-ok';
         const sl = p.stock === 0 ? 'Out' : p.stock <= 10 ? `Low (${p.stock})` : p.stock;
@@ -1114,17 +1573,17 @@
       });
       renderPaging('prod-pages', pProdPage, pages, loadProducts);
     }
-
+    
     function filterProducts(q) {
       const cf = document.getElementById('prod-cat-f').value;
       const lower = q.toLowerCase();
       const filtered = allProducts.filter(p =>
-        (!lower || p.name.toLowerCase().includes(lower) || (p.sku||'').toLowerCase().includes(lower)) &&
+        (!lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower)) &&
         (!cf || p.category_id === cf)
       );
       renderProducts(filtered, filtered.length, 1);
     }
-
+    
     /* Bulk select */
     function toggleProdSel(id, checked) {
       checked ? selectedProds.add(id) : selectedProds.delete(id);
@@ -1132,31 +1591,36 @@
       bar.classList.toggle('visible', selectedProds.size > 0);
       document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
     }
-
+    
     function toggleAllProds(checked) {
       allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = checked);
       document.getElementById('prod-bulk-bar').classList.toggle('visible', selectedProds.size > 0);
       document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
     }
-
+    
     function clearProdSel() {
       selectedProds.clear();
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = false);
       document.getElementById('prod-chk-all').checked = false;
       document.getElementById('prod-bulk-bar').classList.remove('visible');
     }
-
+    
     async function bulkDeleteProducts() {
       if (!selectedProds.size || !confirm(`Delete ${selectedProds.size} products?`)) return;
-      let ok = 0, fail = 0;
+      let ok = 0,
+        fail = 0;
       for (const id of selectedProds) {
-        try { await ADMIN.deleteProduct(id); ok++; } catch { fail++; }
+        try {
+          await ADMIN.deleteProduct(id);
+          ok++;
+        } catch { fail++; }
       }
       showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
-      clearProdSel(); loadProducts(pProdPage);
+      clearProdSel();
+      loadProducts(pProdPage);
     }
-
+    
     /* Product modal */
     function openProductModal(p = null) {
       const fields = [
@@ -1174,48 +1638,56 @@
       fields.forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
       document.getElementById('pm-active').checked = p ? p.is_active : true;
       document.getElementById('pm-title').textContent = p ? `Edit — ${p.name}` : 'Add Product';
-
+      
       const preview = document.getElementById('pm-img-preview');
       const txt = document.getElementById('drop-zone-txt');
-      if (p?.image_url) { preview.src = p.image_url; preview.style.display = 'block'; txt.style.display = 'none'; }
-      else { preview.style.display = 'none'; txt.style.display = 'block'; }
-
+      if (p?.image_url) {
+        preview.src = p.image_url;
+        preview.style.display = 'block';
+        txt.style.display = 'none';
+      }
+      else {
+        preview.style.display = 'none';
+        txt.style.display = 'block';
+      }
+      
       pendingImg = null;
       document.getElementById('pm-img-file').value = '';
       populateCatSelects();
       if (p?.category_id) document.getElementById('pm-cat').value = p.category_id;
       document.getElementById('modal-product').style.display = 'flex';
     }
-
+    
     function editProduct(p) { openProductModal(p); }
-
+    
     function autoSlug(val) {
       if (!document.getElementById('pm-id').value) {
-        document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       }
     }
-
+    
     async function saveProduct() {
-      const id  = document.getElementById('pm-id').value;
+      const id = document.getElementById('pm-id').value;
       const btn = document.getElementById('pm-save');
       const payload = {
-        name:              document.getElementById('pm-name').value.trim(),
-        slug:              document.getElementById('pm-slug').value.trim(),
+        name: document.getElementById('pm-name').value.trim(),
+        slug: document.getElementById('pm-slug').value.trim(),
         short_description: document.getElementById('pm-sdesc').value.trim() || null,
-        description:       document.getElementById('pm-desc').value.trim() || null,
-        price:             parseFloat(document.getElementById('pm-price').value),
-        compare_price:     parseFloat(document.getElementById('pm-compare').value) || null,
-        stock:             parseInt(document.getElementById('pm-stock').value) || 0,
-        sku:               document.getElementById('pm-sku').value.trim() || null,
-        weight_grams:      parseInt(document.getElementById('pm-weight').value) || null,
-        is_active:         document.getElementById('pm-active').checked,
-        category_id:       document.getElementById('pm-cat').value || null,
+        description: document.getElementById('pm-desc').value.trim() || null,
+        price: parseFloat(document.getElementById('pm-price').value),
+        compare_price: parseFloat(document.getElementById('pm-compare').value) || null,
+        stock: parseInt(document.getElementById('pm-stock').value) || 0,
+        sku: document.getElementById('pm-sku').value.trim() || null,
+        weight_grams: parseInt(document.getElementById('pm-weight').value) || null,
+        is_active: document.getElementById('pm-active').checked,
+        category_id: document.getElementById('pm-cat').value || null,
       };
-
+      
       if (!payload.name || !payload.slug || isNaN(payload.price)) {
-        showToast('Name, Slug and Price are required', 'error'); return;
+        showToast('Name, Slug and Price are required', 'error');
+        return;
       }
-
+      
       showLoader(btn, 'Saving…');
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
@@ -1230,41 +1702,51 @@
         showToast(err.message, 'error');
       } finally { hideLoader(btn); }
     }
-
+    
     async function deleteProduct(id, name) {
       if (!confirm(`Delete "${name}"?`)) return;
-      try { await ADMIN.deleteProduct(id); showToast('Deleted', 'info'); loadProducts(pProdPage); }
+      try {
+        await ADMIN.deleteProduct(id);
+        showToast('Deleted', 'info');
+        loadProducts(pProdPage);
+      }
       catch (err) { showToast(err.message, 'error'); }
     }
-
+    
     function handleImg(input) {
-      const file = input.files[0]; if (!file) return;
+      const file = input.files[0];
+      if (!file) return;
       pendingImg = file;
       const r = new FileReader();
       r.onload = e => {
         const preview = document.getElementById('pm-img-preview');
-        preview.src = e.target.result; preview.style.display = 'block';
+        preview.src = e.target.result;
+        preview.style.display = 'block';
         document.getElementById('drop-zone-txt').style.display = 'none';
       };
       r.readAsDataURL(file);
     }
-
+    
     const dz = document.getElementById('drop-zone');
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragover', e => {
+      e.preventDefault();
+      dz.classList.add('over');
+    });
     dz.addEventListener('dragleave', () => dz.classList.remove('over'));
     dz.addEventListener('drop', e => {
-      e.preventDefault(); dz.classList.remove('over');
+      e.preventDefault();
+      dz.classList.remove('over');
       const file = e.dataTransfer.files[0];
       if (file) handleImg({ files: [file] });
     });
-
+    
     /* ══════════════════════════════════════
        CATEGORIES
     ══════════════════════════════════════ */
     async function ensureCategories() {
       if (!allCategories.length) allCategories = await ADMIN.getCategories() || [];
     }
-
+    
     async function loadCategories() {
       allCategories = [];
       await ensureCategories();
@@ -1288,28 +1770,28 @@
         tbody.appendChild(tr);
       });
     }
-
+    
     function populateCatSelects() {
       const sf = document.getElementById('prod-cat-f');
       const pm = document.getElementById('pm-cat');
       const cur = sf.value;
-      sf.innerHTML  = '<option value="">All Categories</option>';
-      pm.innerHTML  = '<option value="">— None —</option>';
+      sf.innerHTML = '<option value="">All Categories</option>';
+      pm.innerHTML = '<option value="">— None —</option>';
       allCategories.forEach(c => {
         sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`;
         pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`;
       });
     }
-
+    
     function openCatModal() {
-      ['cm-name','cm-slug','cm-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('modal-cat').style.display = 'flex';
     }
-
+    
     function autoCatSlug(val) {
-      document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     }
-
+    
     async function saveCategory() {
       const btn = document.getElementById('cm-save');
       const name = document.getElementById('cm-name').value.trim();
@@ -1326,13 +1808,18 @@
       } catch (err) { showToast(err.message, 'error'); }
       finally { hideLoader(btn); }
     }
-
+    
     async function deleteCategory(id, name) {
       if (!confirm(`Delete category "${name}"?`)) return;
-      try { await ADMIN.deleteCategory(id); showToast('Deleted', 'info'); allCategories=[]; loadCategories(); }
+      try {
+        await ADMIN.deleteCategory(id);
+        showToast('Deleted', 'info');
+        allCategories = [];
+        loadCategories();
+      }
       catch (err) { showToast(err.message, 'error'); }
     }
-
+    
     /* ══════════════════════════════════════
        INVENTORY
     ══════════════════════════════════════ */
@@ -1352,7 +1839,7 @@
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
       }
     }
-
+    
     function renderInv(items) {
       const tbody = document.getElementById('inventory-body');
       tbody.innerHTML = '';
@@ -1389,19 +1876,19 @@
         tbody.appendChild(tr);
       });
     }
-
+    
     function startStockEdit(id, stock, el) {
       document.getElementById(`se-${id}`).style.display = 'flex';
       el.style.display = 'none';
       document.getElementById(`si-${id}`).focus();
     }
-
+    
     function cancelStockEdit(id, stock) {
       document.getElementById(`se-${id}`).style.display = 'none';
       const v = document.querySelector(`.inv-val[data-id="${id}"]`);
       if (v) v.style.display = '';
     }
-
+    
     async function saveStock(id) {
       const inp = document.getElementById(`si-${id}`);
       const newStock = parseInt(inp.value);
@@ -1411,26 +1898,29 @@
         const p = allInventory.find(p => p.id === id);
         if (p) p.stock = newStock;
         const v = document.querySelector(`.inv-val[data-id="${id}"]`);
-        if (v) { v.textContent = newStock; v.style.display = ''; }
+        if (v) {
+          v.textContent = newStock;
+          v.style.display = '';
+        }
         document.getElementById(`se-${id}`).style.display = 'none';
-        const thr = allInventory.find(p=>p.id===id)?.low_stock_threshold || 10;
+        const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10;
         const tr = document.querySelector(`tr[data-id="${id}"]`);
         if (tr) {
           const badge = tr.querySelector('.sbadge');
           if (badge) {
-            badge.className = 'sbadge ' + (newStock===0?'sb-out':newStock<=thr?'sb-low':'sb-ok');
-            badge.textContent = newStock===0?'Out of Stock':newStock<=thr?'Low Stock':'In Stock';
+            badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok');
+            badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock';
           }
         }
         showToast('Stock updated', 'success');
       } catch (err) { showToast(err.message, 'error'); }
     }
-
+    
     function filterInv(q) {
       const sf = document.getElementById('inv-sf').value;
       const lower = q.toLowerCase();
       const f = allInventory.filter(p => {
-        const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku||'').toLowerCase().includes(lower);
+        const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower);
         const thr = p.low_stock_threshold || 10;
         let mk = true;
         if (sf === 'out') mk = p.stock === 0;
@@ -1440,7 +1930,7 @@
       });
       renderInv(f);
     }
-
+    
     /* ══════════════════════════════════════
        ORDERS
     ══════════════════════════════════════ */
@@ -1477,27 +1967,27 @@
           `;
           tbody.appendChild(tr);
         });
-        renderPaging('orders-pages', pOrderPage, data?.pages||1, loadOrders);
+        renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders);
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
       }
     }
-
+    
     function openOrderModal(o) {
-      document.getElementById('om-id').value      = o.id;
-      document.getElementById('om-status').value  = o.status;
+      document.getElementById('om-id').value = o.id;
+      document.getElementById('om-status').value = o.status;
       document.getElementById('om-tracking').value = o.tracking_number || '';
       document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`;
       const el = document.getElementById('om-items');
       const items = o.order_items || [];
-      el.innerHTML = items.length
-        ? '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>' +
-          items.map(i=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${formatPrice(i.subtotal)}</span></div>`).join('') +
-          `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--gold);"><span>Total</span><span>${formatPrice(o.total_amount)}</span></div>`
-        : '';
+      el.innerHTML = items.length ?
+        '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>' +
+        items.map(i => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${formatPrice(i.subtotal)}</span></div>`).join('') +
+        `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--gold);"><span>Total</span><span>${formatPrice(o.total_amount)}</span></div>` :
+        '';
       document.getElementById('modal-order').style.display = 'flex';
     }
-
+    
     async function saveOrder() {
       const id = document.getElementById('om-id').value;
       const btn = document.getElementById('om-save');
@@ -1513,7 +2003,7 @@
       } catch (err) { showToast(err.message, 'error'); }
       finally { hideLoader(btn); }
     }
-
+    
     /* ══════════════════════════════════════
        USERS
     ══════════════════════════════════════ */
@@ -1525,12 +2015,12 @@
         const data = await ADMIN.getUsers(page);
         allUsers = data?.items || [];
         document.getElementById('users-info').textContent = `${data?.total||0} users`;
-        renderUsers(allUsers, data?.total||0, data?.pages||1);
+        renderUsers(allUsers, data?.total || 0, data?.pages || 1);
       } catch (err) {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
       }
     }
-
+    
     function renderUsers(items, total, pages) {
       const tbody = document.getElementById('users-body');
       tbody.innerHTML = '';
@@ -1565,19 +2055,25 @@
       });
       renderPaging('users-pages', pUserPage, pages, loadUsers);
     }
-
+    
     function filterUsers(q) {
       const lower = q.toLowerCase();
       renderUsers(allUsers.filter(u =>
-        u.email.toLowerCase().includes(lower) || (u.full_name||'').toLowerCase().includes(lower)
+        u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)
       ), 0, 1);
     }
-
+    
     async function updateRole(id, role) {
-      try { await ADMIN.updateUser(id, { role }); showToast('Role updated', 'success'); }
-      catch (err) { showToast(err.message, 'error'); loadUsers(pUserPage); }
+      try {
+        await ADMIN.updateUser(id, { role });
+        showToast('Role updated', 'success');
+      }
+      catch (err) {
+        showToast(err.message, 'error');
+        loadUsers(pUserPage);
+      }
     }
-
+    
     async function toggleUser(id, activate) {
       if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return;
       try {
@@ -1586,7 +2082,7 @@
         loadUsers(pUserPage);
       } catch (err) { showToast(err.message, 'error'); }
     }
-
+    
     /* ══════════════════════════════════════
        UTILS
     ══════════════════════════════════════ */
@@ -1594,27 +2090,28 @@
       if (e && e.target !== document.getElementById(id)) return;
       document.getElementById(id).style.display = 'none';
     }
-
+    
     function renderPaging(cid, cur, pages, fn) {
       const wrap = document.getElementById(cid);
       if (!wrap) return;
       wrap.innerHTML = '';
       if (pages <= 1) return;
-      const mk = (label, pg, active=false) => {
+      const mk = (label, pg, active = false) => {
         const btn = document.createElement('button');
-        btn.className = 'page-btn' + (active?' active':'');
+        btn.className = 'page-btn' + (active ? ' active' : '');
         btn.style.cssText = 'width:30px;height:30px;font-size:12px;';
         btn.textContent = label;
         btn.addEventListener('click', () => fn(pg));
         return btn;
       };
-      if (cur > 1) wrap.appendChild(mk('‹', cur-1));
-      for (let i=1; i<=pages; i++) {
-        if (pages > 7 && Math.abs(i-cur) > 2 && i !== 1 && i !== pages) continue;
-        wrap.appendChild(mk(i, i, i===cur));
+      if (cur > 1) wrap.appendChild(mk('‹', cur - 1));
+      for (let i = 1; i <= pages; i++) {
+        if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue;
+        wrap.appendChild(mk(i, i, i === cur));
       }
-      if (cur < pages) wrap.appendChild(mk('›', cur+1));
+      if (cur < pages) wrap.appendChild(mk('›', cur + 1));
     }
   </script>
 </body>
+
 </html>
