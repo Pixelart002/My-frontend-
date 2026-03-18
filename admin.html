@@ -6,6 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Luviio</title>
   <link rel="stylesheet" href="/css/luviio.css">
+  
+  
+  
+  
+  
+  <!-- 1. Sabse pehle - Critical resources -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="/css/luviio.css" as="style">
+
+<!-- 2. APIs prefetch -->
+<link rel="prefetch" href="/api/products?page=1&page_size=20">
+<link rel="prefetch" href="/api/categories">
+<link rel="prefetch" href="/api/orders/?page=1&page_size=20">
+
+<!-- 3. JS files (defer ke saath) -->
+<link rel="prefetch" href="/js/auth.js">
+<link rel="prefetch" href="/js/api.js">
+  
+  
+  
   <style>
     /* ── SVG Icon helper ─────────────────────────────── */
     .ico {
