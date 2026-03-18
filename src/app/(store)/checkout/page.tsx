@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import {
   Elements,
   PaymentElement,
@@ -20,16 +20,25 @@ import { getErrorMessage } from "@/lib/api";
 import type { Address, Order } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROOT CAUSE: loadStripe() module-level pe call karne se @stripe/stripe-js
-// package apne andar `location` (browser-only global) access karta hai jab
-// module SSR ke time evaluate hota hai — server pe `location` nahi hota.
+// EVALUATION:
 //
-// typeof window check se module-level initialization band nahi hoti —
-// Next.js module ko import karte waqt hi evaluate karta hai.
+// Attempt 1 — module level `const stripePromise = loadStripe(...)`:
+//   FAIL: Next.js SSR ke time poora module evaluate hota hai.
+//   @stripe/stripe-js andar `location` global access karta hai → crash.
 //
-// REAL FIX: loadStripe ko useState lazy initializer mein move karo.
-// useState initializer sirf client-side hydration pe run hota hai,
-// server pe kabhi nahi — isliye `location` crash band ho jaata hai.
+// Attempt 2 — `typeof window !== "undefined" ? loadStripe(...) : null`:
+//   FAIL: Module-level evaluation Next.js rok nahi sakta sirf typeof se.
+//   Import chain ke time hi crash hota hai.
+//
+// Attempt 3 — `useState(() => loadStripe(...))` lazy initializer:
+//   FAIL: useState initializer BHI server pe chalta hai during
+//   static prerendering. Next.js "use client" components ko bhi
+//   build time pe server-side render karta hai HTML generate karne ke liye.
+//
+// ✅ CORRECT FIX — `useEffect`:
+//   useEffect GUARANTEED hai ki kabhi server pe nahi chalta.
+//   React ki specification: effects only run in browser after mount.
+//   Isliye loadStripe sirf browser pe call hoga → `location` available → no crash.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Payment form ──────────────────────────────────────────────────────────────
@@ -40,26 +49,26 @@ function PaymentForm({
   order: Order;
   onSuccess: () => void;
 }) {
-  const stripe = useStripe();
+  const stripe   = useStripe();
   const elements = useElements();
-  const [error, setError] = useState("");
+  const [error, setError]           = useState("");
   const [processing, setProcessing] = useState(false);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) return;
     setProcessing(true);
     setError("");
-    
-    const origin = window.location.origin;
-    
+
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${origin}/checkout/success?order=${order.id}`,
+        // window.location sirf browser pe call hota hai — yahan safe hai
+        // kyunki PaymentForm sirf client pe render hota hai (Elements ke andar)
+        return_url: `${window.location.origin}/checkout/success?order=${order.id}`,
       },
     });
-    
+
     if (stripeError) {
       setError(stripeError.message ?? "Payment failed");
       setProcessing(false);
@@ -67,7 +76,7 @@ function PaymentForm({
       onSuccess();
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
@@ -91,29 +100,35 @@ function PaymentForm({
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, clearCart } = useCartStore();
-  
-  const [selectedAddress, setSelectedAddress] = useState < string > ("");
-  const [order, setOrder] = useState < Order | null > (null);
-  const [clientSecret, setClientSecret] = useState < string > ("");
-  const [creatingOrder, setCreatingOrder] = useState(false);
-  const [error, setError] = useState("");
-  
-  // ✅ KEY FIX: useState lazy initializer — sirf browser pe chalega
-  // loadStripe yahan call hoga, module import pe nahi
-  const [stripePromise] = useState(() =>
-    loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
-  );
-  
+
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
+  const [order, setOrder]                     = useState<Order | null>(null);
+  const [clientSecret, setClientSecret]       = useState<string>("");
+  const [creatingOrder, setCreatingOrder]     = useState(false);
+  const [error, setError]                     = useState("");
+
+  // ✅ THE FIX: useEffect = browser-only, guaranteed never runs on server.
+  // null → server render (safe, no crash)
+  // Stripe instance → browser mount ke baad set hota hai
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+
+  useEffect(() => {
+    // Ye sirf browser pe chalega — location crash impossible
+    setStripePromise(
+      loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "")
+    );
+  }, []);
+
   const { data: addresses, isLoading: loadingAddr } = useQuery({
     queryKey: ["addresses"],
-    queryFn: userService.getAddresses,
+    queryFn:  userService.getAddresses,
   });
-  
+
   if (items.length === 0) {
     router.replace("/cart");
     return null;
   }
-  
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       setError("Please select a shipping address");
@@ -125,7 +140,7 @@ export default function CheckoutPage() {
       const newOrder = await orderService.create({
         items: items.map((i) => ({
           product_id: i.product.id,
-          quantity: i.quantity,
+          quantity:   i.quantity,
         })),
         shipping_address_id: selectedAddress,
       });
@@ -138,7 +153,7 @@ export default function CheckoutPage() {
       setCreatingOrder(false);
     }
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
@@ -149,7 +164,7 @@ export default function CheckoutPage() {
         <div className="space-y-6">
           {!order ? (
             <>
-              {/* Address */}
+              {/* Address selection */}
               <div>
                 <h2 className="font-semibold mb-3 flex items-center gap-2">
                   <MapPin className="h-4 w-4" /> Shipping address
@@ -227,10 +242,10 @@ export default function CheckoutPage() {
               </Button>
             </>
           ) : (
-            /* Stripe Payment */
+            /* Stripe Payment — stripePromise null hoga toh Elements render nahi hoga */
             <div>
               <h2 className="font-semibold mb-4">Payment</h2>
-              {clientSecret && (
+              {clientSecret && stripePromise ? (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                   <PaymentForm
                     order={order}
@@ -240,6 +255,10 @@ export default function CheckoutPage() {
                     }}
                   />
                 </Elements>
+              ) : (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
               )}
             </div>
           )}
