@@ -11,7 +11,7 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
-    .replace(/\//g, '&#x2F;');
+    .replace(/`/g, '&#96;');
 }
 
 // Safe text setter — never use innerHTML with user content

@@ -253,7 +253,7 @@
 
       if (p.image_url) {
         const img = document.createElement('img');
-        img.src = escapeHTML(p.image_url);
+        img.src = p.image_url;
         img.alt = escapeHTML(p.name);
         img.loading = 'lazy';
         imgWrap.appendChild(img);
@@ -294,7 +294,7 @@
       if (p.stock === 0) {
         const oos = document.createElement('span');
         oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
-        oos.textContent = 'Out of stock';
+        oos.textContent = 'Out of   stock';
         body.appendChild(oos);
       }
 

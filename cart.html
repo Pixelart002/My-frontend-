@@ -10,7 +10,9 @@
     .cart-item {
       display: flex; gap: 20px; padding: 24px 0;
       border-bottom: 1px solid var(--border);
+      position: relative;
     }
+    .cart-item.stock-warn { background: rgba(224,169,82,.04); border-radius: var(--radius); padding: 16px; }
     .cart-item-img {
       width: 90px; height: 110px; flex-shrink: 0;
       background: var(--surface-2); border-radius: var(--radius);
@@ -20,7 +22,8 @@
     }
     .cart-item-img img { width:100%;height:100%;object-fit:cover; }
     .cart-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-    .cart-item-name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .cart-item-name { font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; }
+    .cart-item-name:hover { color: var(--gold); }
     .cart-item-price { font-size: 14px; color: var(--text-muted); }
     .cart-item-controls { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
     .cart-item-subtotal { font-size: 16px; font-weight: 700; color: var(--gold); }
@@ -30,8 +33,30 @@
     }
     .remove-btn:hover { color: var(--error); }
 
-    .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; position: sticky; top: calc(var(--nav-h) + 20px); }
-    .summary-title { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:24px; }
+    /* Stock warning pill */
+    .stock-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; padding: 3px 9px;
+      border-radius: 20px; margin-top: 4px;
+    }
+    .stock-pill.low   { background: rgba(224,169,82,.15); color: var(--warn); }
+    .stock-pill.out   { background: rgba(224,82,82,.15);  color: var(--error); }
+
+    /* Stock warning banner */
+    .stock-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius);
+      background: rgba(224,169,82,.08); border: 1px solid rgba(224,169,82,.25);
+      font-size: 13px; color: var(--warn); margin-bottom: 20px;
+    }
+    .stock-banner.error { background: rgba(224,82,82,.08); border-color: rgba(224,82,82,.25); color: var(--error); }
+
+    .summary-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px;
+      position: sticky; top: calc(var(--nav-h) + 20px);
+    }
+    .summary-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin-bottom:24px; }
 
     @media(max-width:900px){.cart-layout{grid-template-columns:1fr;} .summary-card{position:static;}}
     @media(max-width:600px){.cart-item-img{width:72px;height:88px;}}
@@ -47,28 +72,25 @@
       </nav>
 
       <h1 class="section-title" style="margin-bottom:8px;">Your Cart</h1>
-      <p id="cart-subtitle" style="color:var(--text-muted);font-size:14px;margin-bottom:32px;"></p>
+      <p id="cart-subtitle" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;"></p>
+
+      <!-- Stock warnings banner -->
+      <div id="stock-warnings"></div>
 
       <div class="cart-layout">
-        <div>
-          <div id="cart-items"></div>
-        </div>
+        <div id="cart-items"></div>
 
         <!-- Order Summary -->
         <div class="summary-card">
           <div class="summary-title">Order Summary</div>
-
           <div id="summary-rows"></div>
-
           <hr class="divider">
-
           <a id="checkout-btn" href="/checkout.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">
             Proceed to Checkout
           </a>
           <a href="/shop.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">
             Continue Shopping
           </a>
-
           <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px;line-height:1.6;">
             🔒 Secure checkout via Stripe.<br>Taxes & shipping calculated at checkout.
           </p>
@@ -95,17 +117,46 @@
   <script>
     pageInit();
     renderCart();
+    // Check live stock on page load
+    checkLiveStock();
 
     window.addEventListener('cart:updated', renderCart);
 
+    // ── Live stock check ─────────────────────────────────────────────────────
+    async function checkLiveStock() {
+      const warnings = await CART.checkStock();
+      const bannerEl = document.getElementById('stock-warnings');
+      bannerEl.innerHTML = '';
+
+      if (!warnings.length) return;
+
+      warnings.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'stock-banner' + (w.reason === 'out_of_stock' ? ' error' : '');
+        if (w.reason === 'out_of_stock') {
+          div.innerHTML = `<span>⚠</span><span><strong>${escapeHTML(w.name)}</strong> is now out of stock and has been removed from your cart.</span>`;
+          CART.remove(w.id);
+        } else {
+          div.innerHTML = `<span>⚠</span><span>Only <strong>${w.liveStock}</strong> units of <strong>${escapeHTML(w.name)}</strong> available. Your quantity has been adjusted.</span>`;
+          CART.update(w.id, w.liveStock);
+        }
+        bannerEl.appendChild(div);
+      });
+
+      // Re-render after adjustments
+      if (warnings.length) renderCart();
+    }
+
+    // ── Render cart ──────────────────────────────────────────────────────────
     function renderCart() {
       const items = CART.get();
       const wrap  = document.getElementById('cart-items');
       const sub   = document.getElementById('cart-subtitle');
       const sum   = document.getElementById('summary-rows');
       const btn   = document.getElementById('checkout-btn');
+      const total = CART.count();
 
-      sub.textContent = `${items.length} item${items.length !== 1 ? 's' : ''}`;
+      sub.textContent = `${total} item${total !== 1 ? 's' : ''}`;
 
       if (!items.length) {
         wrap.innerHTML = `
@@ -125,58 +176,54 @@
       btn.style.opacity = '';
       btn.style.pointerEvents = '';
 
-      // Render items
       wrap.innerHTML = '';
       items.forEach(item => wrap.appendChild(makeItemRow(item)));
 
-      // Summary
+      // Summary totals
       const subtotal = CART.total();
       const shipping = subtotal >= 75 ? 0 : 9.99;
       const tax      = (subtotal + shipping) * 0.08;
-      const total    = subtotal + shipping + tax;
+      const grandTotal = subtotal + shipping + tax;
 
       sum.innerHTML = '';
-      const rows = [
-        ['Subtotal',  formatPrice(subtotal)],
-        ['Shipping',  shipping === 0 ? 'Free' : formatPrice(shipping)],
-        ['Tax (8%)',  formatPrice(tax)],
-      ];
-      rows.forEach(([label, val]) => {
+      [
+        ['Subtotal', formatPrice(subtotal)],
+        ['Shipping', shipping === 0 ? 'Free 🎉' : formatPrice(shipping)],
+        ['Tax (8%)', formatPrice(tax)],
+      ].forEach(([label, val]) => {
         const row = document.createElement('div');
         row.className = 'order-row';
         const l = document.createElement('span'); l.textContent = label;
         const v = document.createElement('span'); v.textContent = val;
+        if (val === 'Free 🎉') v.style.color = 'var(--success)';
         row.appendChild(l); row.appendChild(v);
         sum.appendChild(row);
       });
 
       const totalRow = document.createElement('div');
       totalRow.className = 'order-row total';
-      totalRow.style.borderTop = '2px solid var(--border)';
-      totalRow.style.marginTop = '8px';
-      totalRow.style.paddingTop = '16px';
+      totalRow.style.cssText = 'border-top:2px solid var(--border);margin-top:8px;padding-top:16px;';
       const tl = document.createElement('span'); tl.textContent = 'Total';
-      const tv = document.createElement('span'); tv.textContent = formatPrice(total);
+      const tv = document.createElement('span'); tv.textContent = formatPrice(grandTotal);
       totalRow.appendChild(tl); totalRow.appendChild(tv);
       sum.appendChild(totalRow);
 
-      if (shipping === 0) {
-        const freeNote = document.createElement('p');
-        freeNote.style.cssText = 'font-size:12px;color:var(--success);text-align:center;margin-top:12px;';
-        freeNote.textContent = '🎉 You qualify for free shipping!';
-        sum.appendChild(freeNote);
-      } else {
-        const needMore = 75 - subtotal;
+      if (shipping > 0) {
         const note = document.createElement('p');
         note.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;';
-        note.textContent = `Add ${formatPrice(needMore)} more for free shipping`;
+        note.textContent = `Add ${formatPrice(75 - subtotal)} more for free shipping`;
         sum.appendChild(note);
       }
     }
 
+    // ── Build item row ───────────────────────────────────────────────────────
     function makeItemRow(item) {
+      const maxStock   = item.maxStock ?? 99;
+      const isLow      = maxStock > 0 && maxStock <= 5;
+      const isOut      = maxStock === 0;
+
       const row = document.createElement('div');
-      row.className = 'cart-item';
+      row.className = 'cart-item' + (isLow || isOut ? ' stock-warn' : '');
 
       // Image
       const imgWrap = document.createElement('div');
@@ -194,19 +241,40 @@
       const info = document.createElement('div');
       info.className = 'cart-item-info';
 
-      const name = document.createElement('a');
-      name.className = 'cart-item-name';
-      name.href = `/product.html?slug=${encodeURIComponent(item.slug)}`;
-      name.textContent = item.name;
+      const nameEl = document.createElement('a');
+      nameEl.className = 'cart-item-name';
+      nameEl.href = `/product.html?slug=${encodeURIComponent(item.slug || '')}`;
+      nameEl.textContent = item.name;
 
       const unitP = document.createElement('div');
       unitP.className = 'cart-item-price';
       unitP.textContent = formatPrice(item.price) + ' each';
 
-      // Controls row
+      // Stock pill
+      if (isOut) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill out';
+        pill.textContent = '✕ Out of stock';
+        info.appendChild(nameEl);
+        info.appendChild(unitP);
+        info.appendChild(pill);
+      } else if (isLow) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill low';
+        pill.textContent = `⚠ Only ${maxStock} left`;
+        info.appendChild(nameEl);
+        info.appendChild(unitP);
+        info.appendChild(pill);
+      } else {
+        info.appendChild(nameEl);
+        info.appendChild(unitP);
+      }
+
+      // Controls
       const controls = document.createElement('div');
       controls.className = 'cart-item-controls';
 
+      // Qty
       const qtyCtrl = document.createElement('div');
       qtyCtrl.className = 'qty-control';
 
@@ -222,18 +290,28 @@
       const plus = document.createElement('button');
       plus.className = 'qty-btn';
       plus.textContent = '+';
-      plus.addEventListener('click', () => CART.update(item.id, item.qty + 1));
+      plus.disabled = item.qty >= maxStock;
+      plus.style.opacity = item.qty >= maxStock ? '0.4' : '1';
+      plus.title = item.qty >= maxStock ? `Max ${maxStock} available` : '';
+      plus.addEventListener('click', () => {
+        if (item.qty >= maxStock) {
+          showToast(`Only ${maxStock} in stock`, 'warn');
+          return;
+        }
+        CART.update(item.id, item.qty + 1);
+      });
 
       qtyCtrl.appendChild(minus);
       qtyCtrl.appendChild(disp);
       qtyCtrl.appendChild(plus);
 
+      // Right side
       const right = document.createElement('div');
       right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:6px;';
 
-      const subtotal = document.createElement('div');
-      subtotal.className = 'cart-item-subtotal';
-      subtotal.textContent = formatPrice(item.price * item.qty);
+      const subtotalEl = document.createElement('div');
+      subtotalEl.className = 'cart-item-subtotal';
+      subtotalEl.textContent = formatPrice(item.price * item.qty);
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-btn';
@@ -243,19 +321,15 @@
         showToast('Item removed', 'info');
       });
 
-      right.appendChild(subtotal);
+      right.appendChild(subtotalEl);
       right.appendChild(removeBtn);
 
       controls.appendChild(qtyCtrl);
       controls.appendChild(right);
 
-      info.appendChild(name);
-      info.appendChild(unitP);
       info.appendChild(controls);
-
       row.appendChild(imgWrap);
       row.appendChild(info);
-
       return row;
     }
   </script>

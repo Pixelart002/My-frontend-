@@ -13,11 +13,7 @@
     }
     .product-img-main img { width:100%;height:100%;object-fit:cover; }
     .product-img-placeholder { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--border-light); }
-    .product-badge-oos {
-      position:absolute;top:16px;left:16px;
-      background:var(--error);color:#fff;font-size:11px;font-weight:700;
-      letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px;
-    }
+    .product-badge-oos { position:absolute;top:16px;left:16px;background:var(--error);color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px; }
 
     .product-info { display: flex; flex-direction: column; gap: 24px; }
     .product-category { font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold); }
@@ -25,27 +21,24 @@
     .product-price-row { display:flex;align-items:baseline;gap:16px; }
     .product-price { font-size:28px;font-weight:700;color:var(--gold); }
     .product-compare { font-size:18px;color:var(--text-dim);text-decoration:line-through; }
-
-    .product-stock { font-size:12px;font-weight:600; }
-    .product-stock.low { color:var(--warn); }
-    .product-stock.ok { color:var(--success); }
-    .product-stock.oos { color:var(--error); }
-
     .product-desc { font-size:14px;color:var(--text-muted);line-height:1.8; }
-
     .add-to-cart-section { display:flex;gap:16px;align-items:center; }
-
     .product-meta { display:flex;flex-direction:column;gap:10px; }
     .product-meta-row { display:flex;gap:12px;font-size:13px; }
     .product-meta-label { color:var(--text-dim);min-width:80px; }
     .product-meta-value { color:var(--text-muted); }
-
     .divider { border-top:1px solid var(--border);margin:0; }
 
-    @media (max-width:900px) {
-      .product-layout { grid-template-columns:1fr;gap:32px; }
-      .product-img-main { max-height:420px;aspect-ratio:auto; }
-    }
+    /* Stock indicator bar */
+    .stock-bar-wrap { display:flex;flex-direction:column;gap:6px; }
+    .stock-bar-track { height:4px;background:var(--border);border-radius:2px;overflow:hidden; }
+    .stock-bar-fill  { height:100%;border-radius:2px;transition:width .4s ease; }
+    .stock-label { font-size:12px;font-weight:600; }
+    .stock-label.ok  { color:var(--success); }
+    .stock-label.low { color:var(--warn); }
+    .stock-label.oos { color:var(--error); }
+
+    @media (max-width:900px) { .product-layout { grid-template-columns:1fr;gap:32px; } .product-img-main { max-height:420px;aspect-ratio:auto; } }
   </style>
 </head>
 <body>
@@ -54,15 +47,12 @@
   <div class="page-wrapper">
     <div class="container">
       <nav class="breadcrumb">
-        <a href="/index.html">Home</a>
-        <span>›</span>
-        <a href="/shop.html">Shop</a>
-        <span>›</span>
+        <a href="/index.html">Home</a><span>›</span>
+        <a href="/shop.html">Shop</a><span>›</span>
         <span id="bc-name">…</span>
       </nav>
 
       <div id="product-layout" class="product-layout">
-        <!-- Loading skeleton -->
         <div style="aspect-ratio:4/5;" class="skeleton"></div>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div style="height:20px;width:120px;" class="skeleton"></div>
@@ -111,212 +101,215 @@
             <h3>Product not found</h3>
             <p>${escapeHTML(err.message)}</p>
             <a href="/shop.html" class="btn btn-outline">Back to Shop</a>
-          </div>
-        `;
+          </div>`;
       }
     }
 
     function renderProduct(p) {
-      // Update page title safely
       document.title = `${p.name} — Luviio`;
-
-      // Update breadcrumb
       document.getElementById('bc-name').textContent = p.name;
 
-      const layout = document.getElementById('product-layout');
+      const layout   = document.getElementById('product-layout');
+      const maxStock = p.stock ?? 0;
+      const isOOS    = maxStock === 0;
+      const isLow    = !isOOS && maxStock <= (p.low_stock_threshold || 10);
+      qty = 1;
+
       layout.innerHTML = '';
 
-      // ── Image section ──
-      const imgSec = document.createElement('div');
-
+      // ── Image ──────────────────────────────────────────────────────────────
+      const imgSec  = document.createElement('div');
       const imgMain = document.createElement('div');
       imgMain.className = 'product-img-main';
 
       if (p.image_url) {
         const img = document.createElement('img');
-        img.src = escapeHTML(p.image_url);
-        img.alt = escapeHTML(p.name);
+        img.src = escapeHTML(p.image_url); img.alt = escapeHTML(p.name);
         imgMain.appendChild(img);
       } else {
         const ph = document.createElement('div');
-        ph.className = 'product-img-placeholder';
-        ph.textContent = '◈';
+        ph.className = 'product-img-placeholder'; ph.textContent = '◈';
         imgMain.appendChild(ph);
       }
 
-      if (p.stock === 0) {
+      if (isOOS) {
         const badge = document.createElement('div');
-        badge.className = 'product-badge-oos';
-        badge.textContent = 'Sold Out';
+        badge.className = 'product-badge-oos'; badge.textContent = 'Sold Out';
         imgMain.appendChild(badge);
       }
 
       imgSec.appendChild(imgMain);
 
-      // ── Info section ──
+      // ── Info ───────────────────────────────────────────────────────────────
       const info = document.createElement('div');
       info.className = 'product-info';
 
-      // Category
       if (p.categories?.name) {
         const cat = document.createElement('div');
-        cat.className = 'product-category';
-        cat.textContent = p.categories.name;
+        cat.className = 'product-category'; cat.textContent = p.categories.name;
         info.appendChild(cat);
       }
 
-      // Title
       const title = document.createElement('h1');
-      title.className = 'product-title';
-      title.textContent = p.name;
+      title.className = 'product-title'; title.textContent = p.name;
       info.appendChild(title);
 
       // Price
       const priceRow = document.createElement('div');
       priceRow.className = 'product-price-row';
-      const price = document.createElement('div');
-      price.className = 'product-price';
-      price.textContent = formatPrice(p.price);
-      priceRow.appendChild(price);
+      const priceEl = document.createElement('div');
+      priceEl.className = 'product-price'; priceEl.textContent = formatPrice(p.price);
+      priceRow.appendChild(priceEl);
+
       if (p.compare_price) {
         const cmp = document.createElement('div');
-        cmp.className = 'product-compare';
-        cmp.textContent = formatPrice(p.compare_price);
+        cmp.className = 'product-compare'; cmp.textContent = formatPrice(p.compare_price);
         priceRow.appendChild(cmp);
-        // Discount badge
+
         const disc = document.createElement('span');
         disc.style.cssText = 'font-size:12px;font-weight:700;background:var(--error-dim);color:var(--error);padding:2px 8px;border-radius:20px;';
-        const pct = Math.round((1 - p.price / p.compare_price) * 100);
-        disc.textContent = `-${pct}%`;
+        disc.textContent = `-${Math.round((1 - p.price / p.compare_price) * 100)}%`;
         priceRow.appendChild(disc);
       }
       info.appendChild(priceRow);
 
-      // Stock
-      const stockEl = document.createElement('div');
-      stockEl.className = 'product-stock';
-      if (p.stock === 0) {
-        stockEl.className += ' oos';
-        stockEl.textContent = '✕ Out of stock';
-      } else if (p.stock <= (p.low_stock_threshold || 10)) {
-        stockEl.className += ' low';
-        stockEl.textContent = `⚠ Only ${p.stock} left`;
-      } else {
-        stockEl.className += ' ok';
-        stockEl.textContent = '✓ In stock';
-      }
-      info.appendChild(stockEl);
+      // ── Stock indicator ────────────────────────────────────────────────────
+      info.appendChild(buildStockIndicator(maxStock, p.low_stock_threshold || 10));
 
       // Description
       if (p.short_description || p.description) {
-        const hr1 = document.createElement('hr');
-        hr1.className = 'divider';
+        const hr1 = document.createElement('hr'); hr1.className = 'divider';
         info.appendChild(hr1);
-
         const desc = document.createElement('p');
         desc.className = 'product-desc';
         desc.textContent = p.short_description || p.description;
         info.appendChild(desc);
       }
 
-      // Qty + Add to cart
-      const hr2 = document.createElement('hr');
-      hr2.className = 'divider';
+      // ── Add to cart ────────────────────────────────────────────────────────
+      const hr2 = document.createElement('hr'); hr2.className = 'divider';
       info.appendChild(hr2);
 
       const addSec = document.createElement('div');
       addSec.className = 'add-to-cart-section';
 
-      // Qty control
-      const qtyCtrl = document.createElement('div');
-      qtyCtrl.className = 'qty-control';
+      if (!isOOS) {
+        const qtyCtrl   = document.createElement('div');
+        qtyCtrl.className = 'qty-control';
 
-      const qtyMinus = document.createElement('button');
-      qtyMinus.className = 'qty-btn';
-      qtyMinus.textContent = '−';
-      qtyMinus.setAttribute('aria-label', 'Decrease quantity');
+        const qtyMinus = document.createElement('button');
+        qtyMinus.className = 'qty-btn'; qtyMinus.textContent = '−';
 
-      const qtyDisp = document.createElement('div');
-      qtyDisp.className = 'qty-display';
-      qtyDisp.id = 'qty-display';
-      qtyDisp.textContent = qty;
+        const qtyDisp = document.createElement('div');
+        qtyDisp.className = 'qty-display'; qtyDisp.id = 'qty-display'; qtyDisp.textContent = qty;
 
-      const qtyPlus = document.createElement('button');
-      qtyPlus.className = 'qty-btn';
-      qtyPlus.textContent = '+';
-      qtyPlus.setAttribute('aria-label', 'Increase quantity');
+        const qtyPlus = document.createElement('button');
+        qtyPlus.className = 'qty-btn'; qtyPlus.textContent = '+';
 
-      qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyDisp.textContent = qty; } });
-      qtyPlus.addEventListener('click', () => { if (qty < p.stock) { qty++; qtyDisp.textContent = qty; } });
+        const updateQtyUI = () => {
+          qtyDisp.textContent = qty;
+          qtyMinus.style.opacity = qty <= 1        ? '0.4' : '1';
+          qtyPlus.style.opacity  = qty >= maxStock ? '0.4' : '1';
+        };
 
-      qtyCtrl.appendChild(qtyMinus);
-      qtyCtrl.appendChild(qtyDisp);
-      qtyCtrl.appendChild(qtyPlus);
+        qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; updateQtyUI(); } });
+        qtyPlus.addEventListener('click', () => {
+          if (qty >= maxStock) { showToast(`Only ${maxStock} in stock`, 'warn'); return; }
+          qty++; updateQtyUI();
+        });
+
+        qtyCtrl.appendChild(qtyMinus); qtyCtrl.appendChild(qtyDisp); qtyCtrl.appendChild(qtyPlus);
+        addSec.appendChild(qtyCtrl);
+        updateQtyUI();
+      }
 
       const addBtn = document.createElement('button');
-      addBtn.className = 'btn btn-primary';
-      addBtn.style.flex = '1';
-      addBtn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
-      addBtn.disabled = p.stock === 0;
+      addBtn.className = 'btn btn-primary'; addBtn.style.flex = '1';
+      addBtn.textContent = isOOS ? 'Sold Out' : 'Add to Cart';
+      addBtn.disabled = isOOS;
 
       addBtn.addEventListener('click', () => {
-        CART.add(p, qty);
-        showToast(`${p.name} × ${qty} added to cart`, 'success');
-        // Animate button
-        addBtn.textContent = '✓ Added!';
-        setTimeout(() => { addBtn.textContent = 'Add to Cart'; }, 1500);
+        const added = CART.add(p, qty);
+        if (added !== false) {
+          showToast(`${p.name} × ${qty} added to cart`, 'success');
+          addBtn.textContent = '✓ Added!';
+          setTimeout(() => { addBtn.textContent = 'Add to Cart'; }, 1500);
+        }
       });
 
-      if (p.stock > 0) addSec.appendChild(qtyCtrl);
       addSec.appendChild(addBtn);
       info.appendChild(addSec);
 
-      // Secondary actions
-      const actRow = document.createElement('div');
-      actRow.style.cssText = 'display:flex;gap:12px;';
-
-      const cartBtn = document.createElement('a');
-      cartBtn.href = '/cart.html';
-      cartBtn.className = 'btn btn-outline';
-      cartBtn.style.flex = '1';
-      cartBtn.style.justifyContent = 'center';
-      cartBtn.textContent = 'View Cart';
-      actRow.appendChild(cartBtn);
-
-      info.appendChild(actRow);
+      // Cart link
+      const cartRow = document.createElement('div');
+      cartRow.style.cssText = 'display:flex;gap:12px;';
+      const cartLink = document.createElement('a');
+      cartLink.href = '/cart.html'; cartLink.className = 'btn btn-outline';
+      cartLink.style.cssText = 'flex:1;justify-content:center;';
+      cartLink.textContent = 'View Cart';
+      cartRow.appendChild(cartLink);
+      info.appendChild(cartRow);
 
       // Meta
       if (p.sku || p.weight_grams || p.categories?.name) {
-        const hr3 = document.createElement('hr');
-        hr3.className = 'divider';
+        const hr3 = document.createElement('hr'); hr3.className = 'divider';
         info.appendChild(hr3);
-
-        const meta = document.createElement('div');
-        meta.className = 'product-meta';
-
-        const addMeta = (label, value) => {
-          const row = document.createElement('div');
-          row.className = 'product-meta-row';
-          const l = document.createElement('span');
-          l.className = 'product-meta-label';
-          l.textContent = label;
-          const v = document.createElement('span');
-          v.className = 'product-meta-value';
-          v.textContent = value;
-          row.appendChild(l);
-          row.appendChild(v);
-          meta.appendChild(row);
+        const meta = document.createElement('div'); meta.className = 'product-meta';
+        const addMeta = (label, val) => {
+          const row = document.createElement('div'); row.className = 'product-meta-row';
+          const l = document.createElement('span'); l.className = 'product-meta-label'; l.textContent = label;
+          const v = document.createElement('span'); v.className = 'product-meta-value'; v.textContent = val;
+          row.appendChild(l); row.appendChild(v); meta.appendChild(row);
         };
-
-        if (p.sku) addMeta('SKU', p.sku);
-        if (p.weight_grams) addMeta('Weight', `${p.weight_grams}g`);
+        if (p.sku)            addMeta('SKU', p.sku);
+        if (p.weight_grams)   addMeta('Weight', `${p.weight_grams}g`);
         if (p.categories?.name) addMeta('Category', p.categories.name);
-
         info.appendChild(meta);
       }
 
       layout.appendChild(imgSec);
       layout.appendChild(info);
+    }
+
+    // ── Stock indicator with bar ──────────────────────────────────────────────
+    function buildStockIndicator(stock, threshold) {
+      const wrap = document.createElement('div');
+      wrap.className = 'stock-bar-wrap';
+
+      const label = document.createElement('div');
+      label.className = 'stock-label';
+
+      const track = document.createElement('div');
+      track.className = 'stock-bar-track';
+      const fill = document.createElement('div');
+      fill.className = 'stock-bar-fill';
+
+      if (stock === 0) {
+        label.className += ' oos';
+        label.textContent = '✕ Out of stock';
+        fill.style.width = '0%';
+        fill.style.background = 'var(--error)';
+      } else if (stock <= 3) {
+        label.className += ' low';
+        label.textContent = `⚠ Only ${stock} left — order soon!`;
+        fill.style.width = `${Math.min(stock / threshold * 100, 100)}%`;
+        fill.style.background = 'var(--error)';
+      } else if (stock <= threshold) {
+        label.className += ' low';
+        label.textContent = `⚠ Low stock — ${stock} remaining`;
+        fill.style.width = `${Math.min(stock / threshold * 100, 100)}%`;
+        fill.style.background = 'var(--warn)';
+      } else {
+        label.className += ' ok';
+        label.textContent = '✓ In stock';
+        fill.style.width = '100%';
+        fill.style.background = 'var(--success)';
+      }
+
+      track.appendChild(fill);
+      wrap.appendChild(label);
+      if (stock > 0) wrap.appendChild(track);   // hide bar if OOS
+      return wrap;
     }
   </script>
 </body>
