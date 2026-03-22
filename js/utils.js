@@ -14,12 +14,10 @@ function escapeHTML(str) {
     .replace(/`/g, '&#96;');
 }
 
-// Safe text setter — never use innerHTML with user content
 function setText(el, text) {
   if (el) el.textContent = text ?? '';
 }
 
-// Build a safe attribute string
 function safeAttr(val) {
   return escapeHTML(String(val ?? ''));
 }
@@ -50,11 +48,29 @@ function getParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-// Prevent open redirect: only allow same-origin paths (must start with / but NOT //)
+/**
+ * safeRedirect — prevents open redirect AND login-loop
+ *
+ * Rules:
+ *   1. Must start with / (same-origin only)
+ *   2. Must NOT start with // (protocol-relative = open redirect)
+ *   3. Must NOT point back to login page (breaks infinite redirect loop)
+ *
+ * Before this fix:
+ *   /login.html?redirect=%2Flogin.html → safeRedirect returned /login.html
+ *   → login.html loaded → already logged in → redirect to /login.html → ♾️ loop
+ */
 function safeRedirect(url, fallback = '/index.html') {
   if (!url) return fallback;
-  if (/^\/[^/]/.test(url) || url === '/') return url;
-  return fallback;
+
+  // Must be a relative path starting with single /
+  if (!/^\/[^/]/.test(url) && url !== '/') return fallback;
+
+  // Block redirect back to login page (the loop culprit)
+  const path = url.split('?')[0].toLowerCase();
+  if (path === '/login.html' || path === '/login') return fallback;
+
+  return url;
 }
 
 /* ── Input validation ────────────────────────────────────── */
@@ -109,13 +125,12 @@ function showToast(message, type = 'info', duration = 4000) {
   icon.textContent = c.icon;
 
   const msg = document.createElement('span');
-  msg.textContent = message; // textContent — XSS safe
+  msg.textContent = message;
 
   toast.appendChild(icon);
   toast.appendChild(msg);
   container.appendChild(toast);
 
-  // Animate in
   requestAnimationFrame(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(0)';

@@ -7,16 +7,14 @@
    ============================================================ */
 
 const AUTH = (() => {
-  // NEVER write this to localStorage / sessionStorage
   let _accessToken = null;
-  let _userProfile  = null;
-
-  const RT_KEY = '__lv_rt'; // sessionStorage key for refresh token
-
+  let _userProfile = null;
+  
+  const RT_KEY = '__lv_rt';
+  
   return {
-    /* ── Token getters/setters ─────────────────────────── */
     getToken() { return _accessToken; },
-
+    
     setTokens(access, refresh) {
       _accessToken = access;
       if (refresh) {
@@ -24,38 +22,36 @@ const AUTH = (() => {
         catch (e) { console.warn('sessionStorage unavailable', e); }
       }
     },
-
+    
     clearTokens() {
-      _accessToken  = null;
-      _userProfile  = null;
+      _accessToken = null;
+      _userProfile = null;
       try { sessionStorage.removeItem(RT_KEY); } catch (e) {}
       window.dispatchEvent(new CustomEvent('auth:logout'));
     },
-
+    
     getRefreshToken() {
       try { return sessionStorage.getItem(RT_KEY); }
       catch (e) { return null; }
     },
-
+    
     isLoggedIn() { return !!_accessToken; },
-
-    /* ── Profile cache ─────────────────────────────────── */
+    
     setProfile(p) { _userProfile = p; },
-    getProfile()  { return _userProfile; },
-
-    /* ── Silent refresh on page load ───────────────────── */
+    getProfile() { return _userProfile; },
+    
     async init() {
       const rt = this.getRefreshToken();
       if (!rt) return false;
-
+      
       try {
         const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ refresh_token: rt }),
+          body: JSON.stringify({ refresh_token: rt }),
         });
         if (!res.ok) { this.clearTokens(); return false; }
-
+        
         const data = await res.json();
         this.setTokens(data.access_token, data.refresh_token);
         window.dispatchEvent(new CustomEvent('auth:login'));
@@ -65,33 +61,48 @@ const AUTH = (() => {
         return false;
       }
     },
-
-    /* ── Redirect if not authed ────────────────────────── */
+    
+    /**
+     * requireAuth — redirect to login if not authenticated
+     *
+     * FIX: Never add current page to redirect param if it IS login.html
+     * That was the root cause of the infinite redirect loop:
+     *   /login.html?redirect=/login.html?redirect=/login.html?...
+     *
+     * Before: always set redirect = window.location.pathname (even on login page)
+     * After:  if already on login page, just return false silently
+     */
     requireAuth() {
       if (!this.isLoggedIn()) {
+        const current = window.location.pathname;
+        
+        // If already on login page, don't redirect (would create loop)
+        if (current === '/login.html' || current === '/login' || current.endsWith('/login.html')) {
+          return false;
+        }
+        
         window.location.href =
-          '/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+          '/login.html?redirect=' + encodeURIComponent(current + window.location.search);
         return false;
       }
       return true;
     },
-
-    /* ── Update nav UI based on auth state ─────────────── */
+    
     updateNavUI() {
       const guestEls = document.querySelectorAll('[data-guest]');
-      const authEls  = document.querySelectorAll('[data-authed]');
-      const nameEls  = document.querySelectorAll('[data-user-name]');
-
+      const authEls = document.querySelectorAll('[data-authed]');
+      const nameEls = document.querySelectorAll('[data-user-name]');
+      
       if (this.isLoggedIn()) {
         guestEls.forEach(el => el.style.display = 'none');
-        authEls.forEach(el  => el.style.display = '');
+        authEls.forEach(el => el.style.display = '');
         if (_userProfile) {
           nameEls.forEach(el => el.textContent =
             escapeHTML(_userProfile.full_name || _userProfile.email?.split('@')[0] || 'Account'));
         }
       } else {
         guestEls.forEach(el => el.style.display = '');
-        authEls.forEach(el  => el.style.display = 'none');
+        authEls.forEach(el => el.style.display = 'none');
       }
     },
   };
