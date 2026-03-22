@@ -14,9 +14,7 @@
       display: flex; align-items: center; gap: 12px;
     }
     .checkout-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
-
     .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
     .order-item { display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border); }
     .order-item-img { width:52px;height:64px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--border-light); }
     .order-item-img img { width:100%;height:100%;object-fit:cover; }
@@ -24,19 +22,36 @@
     .order-item-name { font-size:14px;font-weight:500; }
     .order-item-meta { font-size:12px;color:var(--text-muted); }
     .order-item-price { font-size:14px;font-weight:700;color:var(--gold); }
-
     .summary-sticky { position:sticky;top:calc(var(--nav-h)+20px); }
+    .stripe-card-wrap { padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius); }
 
-    .stripe-card-wrap { padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); }
+    /* Success screen */
+    .success-screen { text-align:center; padding:60px 24px; }
+    .success-icon { font-size:72px; margin-bottom:24px; animation: popIn .5s cubic-bezier(.175,.885,.32,1.275); }
+    @keyframes popIn { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
 
-    .success-screen { text-align:center;padding:60px 24px; }
-    .success-icon { font-size:64px;margin-bottom:24px; }
+    /* Push prompt card inside success */
+    .push-card {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--surface); border: 1px solid rgba(0,197,212,.25);
+      border-radius: var(--radius-lg); padding: 20px 24px;
+      margin: 28px auto 0; max-width: 440px;
+      animation: fadeUp .4s ease .6s both;
+    }
+    .push-card-icon { font-size: 32px; flex-shrink: 0; }
+    .push-card-text { flex: 1; text-align: left; }
+    .push-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .push-card-sub   { font-size: 12px; color: var(--text-muted); }
+    .push-card-btns  { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
     @media(max-width:900px){.checkout-layout{grid-template-columns:1fr;} .summary-sticky{position:static;} .address-grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
   <nav id="main-nav"></nav>
+
   <div class="page-wrapper">
     <div class="container">
       <nav class="breadcrumb">
@@ -45,16 +60,16 @@
         <span>Checkout</span>
       </nav>
 
+      <!-- ── Main checkout ── -->
       <div id="main-content">
         <div class="checkout-layout">
+
           <!-- Left: address + payment -->
           <div>
-            <!-- Step: Shipping -->
+            <!-- Shipping -->
             <div class="checkout-section">
               <div class="checkout-section-title">Shipping Address</div>
-              <div id="address-section">
-                <div style="height:120px;" class="skeleton"></div>
-              </div>
+              <div id="address-section"><div style="height:120px;" class="skeleton"></div></div>
               <button id="add-address-toggle" class="btn btn-outline" style="margin-top:12px;padding:10px 16px;font-size:12px;">+ Add New Address</button>
               <div id="new-address-form" style="display:none;margin-top:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
                 <div class="address-grid" style="margin-bottom:12px;">
@@ -90,13 +105,11 @@
               </div>
             </div>
 
-            <!-- Step: Payment -->
+            <!-- Payment -->
             <div class="checkout-section">
               <div class="checkout-section-title">Payment</div>
               <div id="stripe-elements-wrap" style="display:none;">
-                <div class="stripe-card-wrap" id="stripe-card-element">
-                  <!-- Stripe Element injected here -->
-                </div>
+                <div class="stripe-card-wrap" id="stripe-card-element"></div>
                 <div id="stripe-errors" class="form-error" style="margin-top:8px;display:none;"></div>
               </div>
               <div id="stripe-placeholder" style="height:52px;" class="skeleton"></div>
@@ -124,15 +137,34 @@
         </div>
       </div>
 
-      <!-- Success screen (hidden) -->
+      <!-- ── Success screen ── -->
       <div id="success-screen" style="display:none;">
         <div class="success-screen">
           <div class="success-icon">✅</div>
           <h2 class="section-title" style="margin-bottom:12px;">Order Placed!</h2>
-          <p style="color:var(--text-muted);margin-bottom:32px;">
-            Thank you! Your order is confirmed. You'll receive an email confirmation shortly.
+          <p style="color:var(--text-muted);margin-bottom:8px;">
+            Thank you! Your order is confirmed.<br>
+            You'll receive a confirmation email shortly.
           </p>
-          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+
+          <!-- Push notification prompt — shown only if not subscribed -->
+          <div id="push-prompt-card" class="push-card" style="display:none;">
+            <div class="push-card-icon">🔔</div>
+            <div class="push-card-text">
+              <div class="push-card-title">Get instant order updates</div>
+              <div class="push-card-sub">Know when your order ships — no app needed</div>
+            </div>
+            <div class="push-card-btns">
+              <button id="push-allow-btn" class="btn btn-primary" style="padding:9px 18px;font-size:12px;">
+                Allow
+              </button>
+              <button id="push-skip-btn" style="background:none;border:none;font-size:12px;color:var(--text-dim);cursor:pointer;">
+                Skip
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px;">
             <a href="/orders.html" class="btn btn-primary">View My Orders</a>
             <a href="/shop.html" class="btn btn-outline">Continue Shopping</a>
           </div>
@@ -151,16 +183,14 @@
   <script src="/js/push.js"></script>
   <script>
     let selectedAddressId = null;
-    let addresses = [];
-    let stripe = null;
-    let cardElement = null;
-    let createdOrderId = null;
+    let addresses         = [];
+    let stripe            = null;
+    let cardElement       = null;
 
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
 
-      // Redirect if cart empty
       if (!CART.count()) {
         showToast('Your cart is empty', 'warn');
         setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
@@ -174,7 +204,7 @@
 
     init();
 
-    /* ── Order summary ──────────────────────────────────── */
+    /* ── Order summary ─────────────────────────────────────── */
     function renderOrderSummary() {
       const items    = CART.get();
       const subtotal = CART.total();
@@ -182,9 +212,8 @@
       const tax      = (subtotal + shipping) * 0.08;
       const total    = subtotal + shipping + tax;
 
-      const itemsWrap = document.getElementById('order-items-preview');
-      itemsWrap.innerHTML = '';
-
+      const wrap = document.getElementById('order-items-preview');
+      wrap.innerHTML = '';
       items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'order-item';
@@ -193,45 +222,40 @@
         img.className = 'order-item-img';
         if (item.image) {
           const i = document.createElement('img');
-          i.src = escapeHTML(item.image);
-          i.alt = escapeHTML(item.name);
+          i.src = item.image; i.alt = item.name;
           img.appendChild(i);
         } else { img.textContent = '◈'; }
 
         const info = document.createElement('div');
         info.className = 'order-item-info';
         const name = document.createElement('div');
-        name.className = 'order-item-name';
-        name.textContent = item.name;
+        name.className = 'order-item-name'; name.textContent = item.name;
         const meta = document.createElement('div');
-        meta.className = 'order-item-meta';
-        meta.textContent = `Qty: ${item.qty}`;
-        info.appendChild(name);
-        info.appendChild(meta);
+        meta.className = 'order-item-meta'; meta.textContent = `Qty: ${item.qty}`;
+        info.appendChild(name); info.appendChild(meta);
 
         const price = document.createElement('div');
         price.className = 'order-item-price';
         price.textContent = formatPrice(item.price * item.qty);
 
-        row.appendChild(img);
-        row.appendChild(info);
-        row.appendChild(price);
-        itemsWrap.appendChild(row);
+        row.appendChild(img); row.appendChild(info); row.appendChild(price);
+        wrap.appendChild(row);
       });
 
-      const totals = document.getElementById('order-totals');
-      totals.innerHTML = '';
+      const totalsEl = document.getElementById('order-totals');
+      totalsEl.innerHTML = '';
       [
-        ['Subtotal',  formatPrice(subtotal)],
-        ['Shipping',  shipping === 0 ? 'Free' : formatPrice(shipping)],
-        ['Tax (8%)',  formatPrice(tax)],
+        ['Subtotal', formatPrice(subtotal)],
+        ['Shipping', shipping === 0 ? 'Free 🎉' : formatPrice(shipping)],
+        ['Tax (8%)', formatPrice(tax)],
       ].forEach(([l, v]) => {
         const row = document.createElement('div');
         row.className = 'order-row';
         const ll = document.createElement('span'); ll.textContent = l;
         const vv = document.createElement('span'); vv.textContent = v;
+        if (v === 'Free 🎉') vv.style.color = 'var(--success)';
         row.appendChild(ll); row.appendChild(vv);
-        totals.appendChild(row);
+        totalsEl.appendChild(row);
       });
 
       const totalRow = document.createElement('div');
@@ -240,24 +264,23 @@
       const tl = document.createElement('span'); tl.textContent = 'Total';
       const tv = document.createElement('span'); tv.textContent = formatPrice(total);
       totalRow.appendChild(tl); totalRow.appendChild(tv);
-      totals.appendChild(totalRow);
+      totalsEl.appendChild(totalRow);
     }
 
-    /* ── Addresses ──────────────────────────────────────── */
+    /* ── Addresses ─────────────────────────────────────────── */
     async function loadAddresses() {
-      const wrap = document.getElementById('address-section');
       try {
         addresses = await API.getAddresses();
         renderAddresses();
       } catch (err) {
-        wrap.innerHTML = `<p class="form-error">${escapeHTML(err.message)}</p>`;
+        document.getElementById('address-section').innerHTML =
+          `<p class="form-error">${escapeHTML(err.message)}</p>`;
       }
     }
 
     function renderAddresses() {
       const wrap = document.getElementById('address-section');
       wrap.innerHTML = '';
-
       if (!addresses.length) {
         const p = document.createElement('p');
         p.style.cssText = 'font-size:14px;color:var(--text-muted);';
@@ -265,49 +288,36 @@
         wrap.appendChild(p);
         return;
       }
-
       const grid = document.createElement('div');
       grid.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
-
       addresses.forEach(addr => {
         const card = document.createElement('div');
         card.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
-        card.dataset.id = addr.id;
-
-        // If default and none selected yet, auto-select
         if (addr.is_default && !selectedAddressId) {
           selectedAddressId = addr.id;
           card.classList.add('selected');
         }
-
         if (addr.is_default) {
           const badge = document.createElement('span');
-          badge.className = 'badge-default';
-          badge.textContent = 'Default';
+          badge.className = 'badge-default'; badge.textContent = 'Default';
           card.appendChild(badge);
         }
-
         const p = document.createElement('p');
         p.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.8;';
-        const parts = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
-        p.textContent = parts.join(', ');
+        p.textContent = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ');
         card.appendChild(p);
-
         card.addEventListener('click', () => {
           selectedAddressId = addr.id;
           document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
           card.classList.add('selected');
           checkPayBtnState();
         });
-
         grid.appendChild(card);
       });
-
       wrap.appendChild(grid);
       checkPayBtnState();
     }
 
-    /* ── Add address ─────────────────────────────────────── */
     document.getElementById('add-address-toggle').addEventListener('click', () => {
       const form = document.getElementById('new-address-form');
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -322,60 +332,48 @@
       const country  = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
       const isDefault = document.getElementById('a-default').checked;
       const btn      = document.getElementById('save-address-btn');
-
       if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Please fill all required address fields', 'error');
-        return;
+        showToast('Please fill all required address fields', 'error'); return;
       }
-
       showLoader(btn, 'Saving…');
       try {
-        const addr = await API.addAddress({ line1, line2: line2 || null, city, state: state || null, postal_code: postal, country, is_default: isDefault });
+        const addr = await API.addAddress({ line1, line2: line2||null, city, state: state||null, postal_code: postal, country, is_default: isDefault });
         addresses.push(addr);
         selectedAddressId = addr.id;
         renderAddresses();
         document.getElementById('new-address-form').style.display = 'none';
         showToast('Address saved!', 'success');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        hideLoader(btn);
-      }
+      } catch (err) { showToast(err.message, 'error'); }
+      finally { hideLoader(btn); }
     });
 
-    /* ── Stripe ──────────────────────────────────────────── */
+    /* ── Stripe ────────────────────────────────────────────── */
     function initStripe() {
-      const placeholder = document.getElementById('stripe-placeholder');
+      const placeholder  = document.getElementById('stripe-placeholder');
       const elementsWrap = document.getElementById('stripe-elements-wrap');
-
       if (!CONFIG.STRIPE_PK || CONFIG.STRIPE_PK.includes('REPLACE')) {
-        placeholder.style.height = 'auto';
+        placeholder.style.cssText = 'height:auto;';
         placeholder.classList.remove('skeleton');
-        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">⚠ Stripe is not configured. Add your publishable key to js/config.js.</p>';
+        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">⚠ Stripe not configured. Add your publishable key to js/config.js.</p>';
+        document.getElementById('pay-btn').disabled = false;
         return;
       }
-
       try {
         stripe = Stripe(CONFIG.STRIPE_PK);
         const elements = stripe.elements({
           appearance: {
             theme: 'night',
-            variables: { colorPrimary: '#c9a96e', colorBackground: '#1a1a1a', colorText: '#f0ece4', colorDanger: '#e05252', fontFamily: 'DM Sans, sans-serif', borderRadius: '8px' }
+            variables: { colorPrimary:'#c9a96e', colorBackground:'#1a1a1a', colorText:'#f0ece4', colorDanger:'#e05252', fontFamily:'DM Sans, sans-serif', borderRadius:'8px' }
           }
         });
         cardElement = elements.create('card', { hidePostalCode: true });
         placeholder.style.display = 'none';
         elementsWrap.style.display = 'block';
         cardElement.mount('#stripe-card-element');
-
         cardElement.on('change', e => {
           const errDiv = document.getElementById('stripe-errors');
-          if (e.error) {
-            errDiv.textContent = e.error.message;
-            errDiv.style.display = 'block';
-          } else {
-            errDiv.style.display = 'none';
-          }
+          if (e.error) { errDiv.textContent = e.error.message; errDiv.style.display = 'block'; }
+          else { errDiv.style.display = 'none'; }
           checkPayBtnState();
         });
       } catch (err) {
@@ -386,76 +384,96 @@
     }
 
     function checkPayBtnState() {
-      const btn = document.getElementById('pay-btn');
-      btn.disabled = !selectedAddressId;
+      document.getElementById('pay-btn').disabled = !selectedAddressId;
     }
 
-    /* ── Place order ─────────────────────────────────────── */
+    /* ── Place order ───────────────────────────────────────── */
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn    = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
       errDiv.style.display = 'none';
 
-      if (!selectedAddressId) {
-        showToast('Please select a shipping address', 'error');
-        return;
-      }
-
+      if (!selectedAddressId) { showToast('Please select a shipping address', 'error'); return; }
       if (!AUTH.isLoggedIn()) { AUTH.requireAuth(); return; }
-
-      const cartItems = CART.get();
-      if (!cartItems.length) { showToast('Your cart is empty', 'warn'); return; }
+      if (!CART.count()) { showToast('Your cart is empty', 'warn'); return; }
 
       showLoader(btn, '🔒 Processing…');
-
       try {
-        // 1. Create order
-        const orderPayload = {
-          items: cartItems.map(i => ({ product_id: i.id, quantity: i.qty })),
+        const order = await API.createOrder({
+          items: CART.get().map(i => ({ product_id: i.id, quantity: i.qty })),
           shipping_address_id: selectedAddressId,
-        };
-        const order = await API.createOrder(orderPayload);
-        createdOrderId = order.id;
+        });
 
-        // 2. If Stripe configured, create payment intent & confirm
         if (stripe && cardElement) {
           const intentData = await API.createPaymentIntent(order.id);
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
             intentData.client_secret,
             { payment_method: { card: cardElement } }
           );
-
           if (stripeErr) {
-            // Show stripe error — order is created, user can retry payment
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
-            showLoader(btn, '🔒 Retry Payment');
-            btn.disabled = false;
+            hideLoader(btn); btn.disabled = false;
             return;
           }
-
           if (paymentIntent.status === 'succeeded') {
             CART.clear();
             showSuccess();
           }
         } else {
-          // No Stripe configured - order created, show success
           CART.clear();
           showSuccess();
         }
       } catch (err) {
         errDiv.textContent = err.message || 'Order failed. Please try again.';
         errDiv.style.display = 'block';
-        hideLoader(btn);
-        btn.disabled = false;
+        hideLoader(btn); btn.disabled = false;
       }
     });
 
+    /* ── Show success + push prompt ────────────────────────── */
     function showSuccess() {
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Show push prompt only if:
+      // 1. Browser supports it
+      // 2. Permission not yet granted/denied
+      // 3. User hasn't skipped before
+      setTimeout(() => {
+        if (
+          PUSH.isSupported() &&
+          Notification.permission === 'default' &&
+          !sessionStorage.getItem('push_dismissed')
+        ) {
+          document.getElementById('push-prompt-card').style.display = 'flex';
+        }
+      }, 800);
     }
+
+    /* ── Push prompt buttons ───────────────────────────────── */
+    document.getElementById('push-allow-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('push-allow-btn');
+      btn.textContent = '…';
+      btn.disabled = true;
+      const ok = await PUSH.subscribe();
+      if (ok) {
+        document.getElementById('push-prompt-card').innerHTML = `
+          <div class="push-card-icon">✅</div>
+          <div class="push-card-text">
+            <div class="push-card-title">Notifications enabled!</div>
+            <div class="push-card-sub">You'll get instant updates on your orders.</div>
+          </div>`;
+      } else {
+        document.getElementById('push-prompt-card').style.display = 'none';
+      }
+    });
+
+    document.getElementById('push-skip-btn').addEventListener('click', () => {
+      sessionStorage.setItem('push_dismissed', '1');
+      document.getElementById('push-prompt-card').style.display = 'none';
+    });
   </script>
 </body>
 </html>
