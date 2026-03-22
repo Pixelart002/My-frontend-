@@ -19,6 +19,10 @@ const PUSH = (() => {
  const isSupported = () =>
   'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
  
+ // ── Safe Notification.permission — never throws ReferenceError ────────────
+ const notifPermission = () =>
+  typeof Notification !== 'undefined' ? Notification.permission : 'denied';
+ 
  // ── Register service worker ────────────────────────────────────────────────
  const registerSW = async () => {
   if (!isSupported()) return null;
@@ -87,7 +91,9 @@ const PUSH = (() => {
    }
    if (!AUTH.isLoggedIn()) return false;
    
-   const permission = await Notification.requestPermission();
+   const permission = typeof Notification !== 'undefined' ?
+    await Notification.requestPermission() :
+    'denied';
    if (permission !== 'granted') {
     console.info('[PUSH] Permission denied by user');
     return false;
@@ -128,7 +134,7 @@ const PUSH = (() => {
   // ── Auto-subscribe when user logs in ──────────────────────────────────────
   async autoSubscribe() {
    if (!isSupported() || !AUTH.isLoggedIn()) return;
-   const permission = Notification.permission;
+   const permission = notifPermission();
    if (permission === 'granted') {
     // Already granted — silently subscribe in background
     const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
@@ -155,7 +161,7 @@ const PUSH = (() => {
   // ── Show prompt UI (call from profile page or after first order) ──────────
   showPrompt() {
    if (!isSupported()) return;
-   if (Notification.permission !== 'default') return;
+   if (notifPermission() !== 'default') return;
    // Show a friendly in-app prompt before the browser one
    const banner = document.createElement('div');
    banner.style.cssText = `
@@ -199,7 +205,7 @@ const PUSH = (() => {
    
    // Show prompt once per session if not dismissed
    if (AUTH.isLoggedIn() &&
-    Notification.permission === 'default' &&
+    notifPermission() === 'default' &&
     !sessionStorage.getItem('push_dismissed')) {
     // Small delay so page loads first
     setTimeout(() => this.showPrompt(), 3000);

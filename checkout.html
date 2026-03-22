@@ -442,9 +442,12 @@
       // 2. Permission not yet granted/denied
       // 3. User hasn't skipped before
       setTimeout(() => {
+        const notifPermission = typeof Notification !== 'undefined'
+          ? Notification.permission
+          : 'denied';
         if (
           PUSH.isSupported() &&
-          Notification.permission === 'default' &&
+          notifPermission === 'default' &&
           !sessionStorage.getItem('push_dismissed')
         ) {
           document.getElementById('push-prompt-card').style.display = 'flex';
