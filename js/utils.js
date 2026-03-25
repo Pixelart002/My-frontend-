@@ -23,7 +23,7 @@ function safeAttr(val) {
 }
 
 /* ── Currency / Date formatters ──────────────────────────── */
-function formatPrice(amount, currency = 'USD') {
+function formatPrice(amount, currency = 'INR') {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency,
@@ -48,28 +48,11 @@ function getParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-/**
- * safeRedirect — prevents open redirect AND login-loop
- *
- * Rules:
- *   1. Must start with / (same-origin only)
- *   2. Must NOT start with // (protocol-relative = open redirect)
- *   3. Must NOT point back to login page (breaks infinite redirect loop)
- *
- * Before this fix:
- *   /login.html?redirect=%2Flogin.html → safeRedirect returned /login.html
- *   → login.html loaded → already logged in → redirect to /login.html → ♾️ loop
- */
 function safeRedirect(url, fallback = '/index.html') {
   if (!url) return fallback;
-
-  // Must be a relative path starting with single /
   if (!/^\/[^/]/.test(url) && url !== '/') return fallback;
-
-  // Block redirect back to login page (the loop culprit)
   const path = url.split('?')[0].toLowerCase();
   if (path === '/login.html' || path === '/login') return fallback;
-
   return url;
 }
 
