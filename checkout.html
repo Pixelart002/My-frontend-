@@ -417,10 +417,29 @@
             return;
           }
           if (paymentIntent.status === 'succeeded') {
+            // ── FIX: Webhook pe rely mat karo — directly backend ko bolo ──
+            // Webhook sirf tab kaam karta hai jab Stripe Dashboard mein configure ho.
+            // /confirm endpoint Stripe se verify karke order paid mark karta hai.
+            try {
+              await API.post('/payments/confirm', {
+                order_id: order.id,
+                payment_intent_id: paymentIntent.id,
+              });
+            } catch (confirmErr) {
+              console.warn('Confirm endpoint error (non-fatal):', confirmErr.message);
+              // Non-fatal — webhook backup karega
+            }
             CART.clear();
             showSuccess();
           }
         } else {
+          // Stripe nahi hai (demo mode) — order create ho gaya, confirm karo
+          try {
+            await API.post('/payments/confirm', {
+              order_id: order.id,
+              payment_intent_id: 'demo_' + order.id,
+            });
+          } catch (e) { /* demo mode mein ignore */ }
           CART.clear();
           showSuccess();
         }
