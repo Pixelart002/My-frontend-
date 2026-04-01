@@ -7,56 +7,72 @@
   <link rel="stylesheet" href="/css/luviio.css">
   <style>
     .orders-layout { padding: 40px 0 80px; }
-    .order-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .order-card:hover { border-color: var(--border-light); }
-
-    .order-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; cursor: pointer; gap: 16px; flex-wrap: wrap;
-    }
-    .order-id { font-size:13px;color:var(--text-muted); }
-    .order-id strong { color:var(--text);font-family:'Playfair Display',serif;font-size:16px; }
-    .order-header-right { display:flex;align-items:center;gap:16px;flex-wrap:wrap; }
-    .order-total { font-size:15px;font-weight:700;color:var(--gold); }
-    .order-date { font-size:12px;color:var(--text-dim); }
-    .chevron { transition: transform 0.3s; font-size:18px;color:var(--text-dim); }
-    .chevron.open { transform: rotate(180deg); }
-
-    .order-body { display: none; padding: 0 24px 24px; border-top: 1px solid var(--border); }
-    .order-body.open { display: block; }
-
-    .order-items-list { display: flex; flex-direction: column; gap: 0; margin-top: 16px; }
-    .oi-row {
-      display: flex; gap: 14px; align-items: center;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
-    }
-    .oi-row:last-child { border-bottom: none; }
-    .oi-img {
-      width:52px; height:64px; border-radius:6px;
-      background:var(--surface-2); overflow:hidden;
-      border:1px solid var(--border); flex-shrink:0;
-    }
-    .oi-img img { width:100%; height:100%; object-fit:cover; display:block; }
-    .oi-name { font-size:14px;font-weight:500;flex:1; }
-    .oi-meta { font-size:12px;color:var(--text-muted); }
-    .oi-price { font-size:14px;font-weight:700;color:var(--gold); }
-
-    .order-footer { display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:10px; }
-    .order-tracking { font-size:13px;color:var(--text-muted); }
-    .order-tracking strong { color:var(--text); }
-
     .orders-header { display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px; }
-
-    @media(max-width:600px){.order-header{flex-direction:column;align-items:flex-start;} .chevron{align-self:flex-end;}}
+    .order-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;transition:border-color 0.2s; }
+    .order-card:hover { border-color:var(--border-light); }
+    .order-header { display:flex;align-items:center;justify-content:space-between;padding:18px 24px;cursor:pointer;gap:14px;flex-wrap:wrap;user-select:none; }
+    .order-meta { display:flex;flex-direction:column;gap:3px; }
+    .order-num { font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text); }
+    .order-date { font-size:11px;color:var(--text-dim); }
+    .order-header-right { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+    .order-total { font-size:15px;font-weight:700;color:var(--gold); }
+    .chevron { transition:transform 0.3s;color:var(--text-dim);display:flex;align-items:center; }
+    .chevron.open { transform:rotate(180deg); }
+    .order-body { display:none;border-top:1px solid var(--border); }
+    .order-body.open { display:block; }
+    .order-body-inner { padding:20px 24px 24px; }
+    /* Timeline */
+    .status-timeline { display:flex;align-items:flex-start;margin-bottom:24px;overflow-x:auto;padding-bottom:4px; }
+    .tl-step { display:flex;flex-direction:column;align-items:center;flex:1;min-width:64px;position:relative; }
+    .tl-step:not(:last-child)::after { content:'';position:absolute;top:13px;left:calc(50% + 13px);width:calc(100% - 26px);height:2px;background:var(--border); }
+    .tl-step.done:not(:last-child)::after { background:var(--gold); }
+    .tl-dot { width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;position:relative;z-index:1; }
+    .tl-step.done .tl-dot { border-color:var(--gold);background:var(--gold-dim);color:var(--gold); }
+    .tl-step.current .tl-dot { border-color:var(--gold);background:var(--gold);color:#000;box-shadow:0 0 0 4px var(--gold-dim); }
+    .tl-step.cancelled .tl-dot { border-color:var(--error);background:var(--error-dim);color:var(--error); }
+    .tl-label { font-size:10px;font-weight:600;margin-top:6px;color:var(--text-dim);text-align:center;white-space:nowrap; }
+    .tl-step.done .tl-label,.tl-step.current .tl-label { color:var(--text-muted); }
+    .tl-step.cancelled .tl-label { color:var(--error); }
+    /* Tracking */
+    .tracking-bar { display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gold-dim);border:1px solid var(--gold);border-radius:var(--radius);margin-bottom:16px;font-size:13px; }
+    .tracking-bar svg { stroke:var(--gold);flex-shrink:0; }
+    .tracking-bar strong { color:var(--gold); }
+    /* Address */
+    .addr-box { padding:12px 16px;background:var(--surface-2);border-radius:var(--radius);margin-bottom:20px; }
+    .addr-box-label { font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px; }
+    .addr-box-text { font-size:13px;color:var(--text-muted);line-height:1.7; }
+    /* Items */
+    .items-label { font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px; }
+    .order-items-list { display:flex;flex-direction:column; }
+    .oi-row { display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border); }
+    .oi-row:last-child { border-bottom:none; }
+    .oi-img { width:48px;height:60px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border);flex-shrink:0; }
+    .oi-img img { width:100%;height:100%;object-fit:cover;display:block; }
+    .oi-info { flex:1;min-width:0; }
+    .oi-name { font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .oi-meta { font-size:12px;color:var(--text-muted);margin-top:2px; }
+    .oi-price { font-size:14px;font-weight:700;color:var(--gold);flex-shrink:0; }
+    /* Summary */
+    .order-summary { background:var(--surface-2);border-radius:var(--radius);padding:14px 16px;margin-top:16px; }
+    .summary-row { display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);padding:4px 0; }
+    .summary-row.total { font-weight:700;color:var(--gold);font-size:14px;border-top:1px solid var(--border);margin-top:6px;padding-top:10px; }
+    /* Actions */
+    .order-actions { display:flex;gap:10px;margin-top:16px;flex-wrap:wrap; }
+    #orders-pagination { margin-top:24px; }
+    @media(max-width:600px){
+      .orders-layout{padding:20px 0 60px;}
+      .order-header{padding:14px 16px;flex-direction:column;align-items:flex-start;}
+      .order-header-right{width:100%;justify-content:space-between;}
+      .chevron{position:absolute;right:16px;top:18px;}
+      .order-header{position:relative;}
+      .order-body-inner{padding:14px 16px 18px;}
+      .orders-header{flex-direction:column;align-items:flex-start;}
+      .tl-label{font-size:9px;}
+    }
   </style>
 </head>
 <body>
   <nav id="main-nav"></nav>
-
   <div class="page-wrapper">
     <div class="container orders-layout">
       <div class="orders-header">
@@ -66,24 +82,22 @@
         </div>
         <a href="/shop.html" class="btn btn-outline" style="padding:10px 20px;">Continue Shopping</a>
       </div>
-
       <div id="orders-container">
-        <div style="height:120px;" class="skeleton" style="margin-bottom:12px;"></div>
-        <div style="height:120px;" class="skeleton"></div>
+        <div style="height:100px;margin-bottom:12px;border-radius:12px;" class="skeleton"></div>
+        <div style="height:100px;margin-bottom:12px;border-radius:12px;" class="skeleton"></div>
+        <div style="height:100px;border-radius:12px;" class="skeleton"></div>
       </div>
-
       <div id="orders-pagination" class="pagination"></div>
     </div>
-
     <footer class="site-footer">
       <div class="container">
-        <div class="footer-bottom" style="border-top:none;margin-top:0;">
-          <span>© 2026 Luviio</span>
-        </div>
+        <div class="footer-bottom" style="border-top:none;margin-top:0;"><span>© 2026 Luviio</span></div>
       </div>
     </footer>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -92,285 +106,302 @@
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
   <script>
-    let currentPage = 1;
-    let totalPages  = 1;
+    let currentPage = 1, totalPages = 1;
+    const STATUS_FLOW   = ['pending','paid','shipped','delivered'];
+    const STATUS_LABELS = {pending:'Pending',paid:'Paid',shipped:'Shipped',delivered:'Delivered',cancelled:'Cancelled',refunded:'Refunded'};
 
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
       loadOrders(1);
     }
-
     init();
 
     async function loadOrders(page) {
       currentPage = page;
-      const container = document.getElementById('orders-container');
-      container.innerHTML = `
-        <div style="height:100px;margin-bottom:12px;" class="skeleton"></div>
-        <div style="height:100px;margin-bottom:12px;" class="skeleton"></div>
-        <div style="height:100px;" class="skeleton"></div>
-      `;
-
+      const c = document.getElementById('orders-container');
+      c.innerHTML = `<div style="height:100px;margin-bottom:12px;border-radius:12px;" class="skeleton"></div><div style="height:100px;margin-bottom:12px;border-radius:12px;" class="skeleton"></div><div style="height:100px;border-radius:12px;" class="skeleton"></div>`;
       try {
         const data = await API.getMyOrders(page);
         totalPages = data.pages || 1;
-
-        container.innerHTML = '';
-
+        c.innerHTML = '';
         if (!data.items?.length) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">📦</div>
-              <h3>No orders yet</h3>
-              <p>When you place an order, it will show up here.</p>
-              <a href="/shop.html" class="btn btn-primary">Shop Now</a>
-            </div>
-          `;
+          c.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><h3>No orders yet</h3><p>When you place an order, it will appear here.</p><a href="/shop.html" class="btn btn-primary">Shop Now</a></div>`;
           document.getElementById('orders-pagination').innerHTML = '';
           return;
         }
-
-        data.items.forEach(order => container.appendChild(makeOrderCard(order)));
+        data.items.forEach(o => c.appendChild(makeOrderCard(o)));
         renderPagination();
       } catch (err) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">⚠</div>
-            <h3>Could not load orders</h3>
-            <p>${escapeHTML(err.message)}</p>
-            <button class="btn btn-outline" onclick="loadOrders(1)">Retry</button>
-          </div>
-        `;
+        c.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠</div><h3>Could not load orders</h3><p>${escapeHTML(err.message)}</p><button class="btn btn-outline" onclick="loadOrders(${currentPage})">Retry</button></div>`;
       }
     }
 
     function makeOrderCard(order) {
-      const card = document.createElement('div');
+      const card   = document.createElement('div');
       card.className = 'order-card';
-
       const header = document.createElement('div');
       header.className = 'order-header';
-
-      const idWrap = document.createElement('div');
-      idWrap.className = 'order-id';
-
-      const strong = document.createElement('strong');
-      strong.textContent = '#' + order.id.substring(0, 8).toUpperCase();
-
-      const dateEl = document.createElement('div');
-      dateEl.className = 'order-date';
-      dateEl.textContent = formatDate(order.created_at);
-
-      idWrap.appendChild(strong);
-      idWrap.appendChild(dateEl);
-
-      const rightWrap = document.createElement('div');
-      rightWrap.className = 'order-header-right';
-
-      const badge = statusBadge(order.status);
-
-      const totalEl = document.createElement('div');
-      totalEl.className = 'order-total';
-      totalEl.textContent = formatPrice(order.total_amount);
-
-      const chevron = document.createElement('div');
-      chevron.className = 'chevron';
-      chevron.textContent = '⌄';
-
-      rightWrap.appendChild(badge);
-      rightWrap.appendChild(totalEl);
-      rightWrap.appendChild(chevron);
-
-      header.appendChild(idWrap);
-      header.appendChild(rightWrap);
-
-      const body = document.createElement('div');
+      header.innerHTML = `
+        <div class="order-meta">
+          <div class="order-num">#${order.id.substring(0,8).toUpperCase()}</div>
+          <div class="order-date">${formatDate(order.created_at)} &middot; ${(order.order_items||[]).length} item${(order.order_items||[]).length!==1?'s':''}</div>
+        </div>
+        <div class="order-header-right">
+          ${statusBadge(order.status).outerHTML}
+          <div class="order-total">${formatPrice(order.total_amount)}</div>
+          <div class="chevron"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+        </div>`;
+      const body   = document.createElement('div');
       body.className = 'order-body';
-
+      const chevron = header.querySelector('.chevron');
       header.addEventListener('click', async () => {
         const isOpen = body.classList.contains('open');
         body.classList.toggle('open');
         chevron.classList.toggle('open');
-
         if (!isOpen && !body.dataset.loaded) {
           body.dataset.loaded = 'true';
-          body.innerHTML = '<div style="height:60px;" class="skeleton"></div>';
-          try {
-            const detail = await API.getMyOrder(order.id);
-            renderOrderBody(body, detail);
-          } catch (err) {
-            body.innerHTML = `<p class="form-error" style="margin-top:16px;">${escapeHTML(err.message)}</p>`;
-          }
+          body.innerHTML = '<div class="order-body-inner"><div style="height:60px;border-radius:8px;" class="skeleton"></div></div>';
+          try { renderOrderBody(body, await API.getMyOrder(order.id)); }
+          catch (err) { body.innerHTML = `<div class="order-body-inner"><p class="form-error">${escapeHTML(err.message)}</p></div>`; }
         }
       });
-
       card.appendChild(header);
       card.appendChild(body);
-
       return card;
     }
 
     function renderOrderBody(body, order) {
-      body.innerHTML = '';
+      const isCancelled = ['cancelled','refunded'].includes(order.status);
+      const currentIdx  = STATUS_FLOW.indexOf(order.status);
+      body.innerHTML    = '';
+      const inner       = document.createElement('div');
+      inner.className   = 'order-body-inner';
 
-      // Shipping address
-      if (order.shipping_line1) {
-        const addrWrap = document.createElement('div');
-        addrWrap.style.cssText = 'margin-top:16px;padding:12px 16px;background:var(--surface-2);border-radius:var(--radius);';
+      /* Timeline */
+      const tl = document.createElement('div');
+      tl.className = 'status-timeline';
+      if (isCancelled) {
+        const s = document.createElement('div');
+        s.className = 'tl-step cancelled';
+        s.innerHTML = `<div class="tl-dot">✕</div><div class="tl-label">${STATUS_LABELS[order.status]}</div>`;
+        tl.appendChild(s);
+      } else {
+        STATUS_FLOW.forEach((key, i) => {
+          const state = i < currentIdx ? 'done' : i === currentIdx ? 'current' : '';
+          const s = document.createElement('div');
+          s.className = `tl-step ${state}`;
+          s.innerHTML = `<div class="tl-dot">${(state==='done'||state==='current')?'✓':''}</div><div class="tl-label">${STATUS_LABELS[key]}</div>`;
+          tl.appendChild(s);
+        });
+      }
+      inner.appendChild(tl);
 
-        const addrTitle = document.createElement('div');
-        addrTitle.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;';
-        addrTitle.textContent = 'Shipping To';
-
-        const addrText = document.createElement('div');
-        addrText.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.7;';
-        const parts = [order.shipping_line1, order.shipping_line2, order.shipping_city, order.shipping_state, order.shipping_postal_code, order.shipping_country].filter(Boolean);
-        addrText.textContent = parts.join(', ');
-
-        addrWrap.appendChild(addrTitle);
-        addrWrap.appendChild(addrText);
-        body.appendChild(addrWrap);
+      /* Tracking */
+      if (order.tracking_number) {
+        const tb = document.createElement('div');
+        tb.className = 'tracking-bar';
+        tb.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><line x1="13" y1="16" x2="17" y2="16"/></svg> Tracking: <strong>${escapeHTML(order.tracking_number)}</strong>`;
+        inner.appendChild(tb);
       }
 
-      // Items
+      /* Address */
+      if (order.shipping_line1) {
+        const parts = [order.shipping_line1,order.shipping_line2,order.shipping_city,order.shipping_state,order.shipping_postal_code,order.shipping_country].filter(Boolean);
+        const a = document.createElement('div');
+        a.className = 'addr-box';
+        a.innerHTML = `<div class="addr-box-label">Shipping To</div><div class="addr-box-text">${escapeHTML(parts.join(', '))}</div>`;
+        inner.appendChild(a);
+      }
+
+      /* Items */
       const items = order.order_items || [];
       if (items.length) {
-        const itemsTitle = document.createElement('div');
-        itemsTitle.style.cssText = 'font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:20px;margin-bottom:4px;';
-        itemsTitle.textContent = 'Items';
-        body.appendChild(itemsTitle);
-
+        const lbl = document.createElement('div');
+        lbl.className = 'items-label';
+        lbl.textContent = 'Items';
+        inner.appendChild(lbl);
         const list = document.createElement('div');
         list.className = 'order-items-list';
-
         items.forEach(item => {
           const row = document.createElement('div');
           row.className = 'oi-row';
-
-          // ── Product image ──────────────────────────────────────────────────
-          // item.products comes from the join: order_items(*, products(image_url, slug))
           const imgDiv = document.createElement('div');
           imgDiv.className = 'oi-img';
-
           const imageUrl = item.products?.image_url || null;
           if (imageUrl) {
             const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = item.product_name;
-            img.loading = 'lazy';
-            // If image fails to load, remove it so background shows
+            img.src = imageUrl; img.alt = item.product_name; img.loading = 'lazy';
             img.onerror = () => img.remove();
             imgDiv.appendChild(img);
           }
-          // No fallback icon — just the styled empty box if no image
-          // ──────────────────────────────────────────────────────────────────
-
-          const infoDiv = document.createElement('div');
-          infoDiv.style.flex = '1';
-
-          const name = document.createElement('div');
-          name.className = 'oi-name';
-          name.textContent = item.product_name;
-
-          const meta = document.createElement('div');
-          meta.className = 'oi-meta';
-          meta.textContent = `Qty: ${item.quantity} × ${formatPrice(item.unit_price)}`;
-
-          infoDiv.appendChild(name);
-          infoDiv.appendChild(meta);
-
+          const info = document.createElement('div');
+          info.className = 'oi-info';
+          info.innerHTML = `<div class="oi-name">${escapeHTML(item.product_name)}</div><div class="oi-meta">Qty: ${item.quantity} &times; ${formatPrice(item.unit_price)}</div>`;
           const price = document.createElement('div');
           price.className = 'oi-price';
           price.textContent = formatPrice(item.subtotal);
-
-          row.appendChild(imgDiv);
-          row.appendChild(infoDiv);
-          row.appendChild(price);
+          row.appendChild(imgDiv); row.appendChild(info); row.appendChild(price);
           list.appendChild(row);
         });
-
-        body.appendChild(list);
+        inner.appendChild(list);
       }
 
-      // Footer with totals + actions
-      const footer = document.createElement('div');
-      footer.className = 'order-footer';
+      /* Summary */
+      const summary = document.createElement('div');
+      summary.className = 'order-summary';
+      summary.innerHTML = `
+        <div class="summary-row"><span>Subtotal</span><span>${formatPrice(order.subtotal)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${formatPrice(order.shipping_cost)}</span></div>
+        <div class="summary-row"><span>Tax</span><span>${formatPrice(order.tax_amount)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${formatPrice(order.total_amount)}</span></div>`;
+      inner.appendChild(summary);
 
-      const totals = document.createElement('div');
-      totals.style.cssText = 'font-size:13px;color:var(--text-muted);display:flex;flex-direction:column;gap:4px;';
-
-      [
-        ['Subtotal',  formatPrice(order.subtotal)],
-        ['Shipping',  formatPrice(order.shipping_cost)],
-        ['Tax',       formatPrice(order.tax_amount)],
-        ['Total',     formatPrice(order.total_amount)],
-      ].forEach(([l, v], idx) => {
-        const row = document.createElement('div');
-        row.style.cssText = `display:flex;gap:20px;justify-content:space-between;${idx === 3 ? 'font-weight:700;color:var(--gold);' : ''}`;
-        const ll = document.createElement('span'); ll.textContent = l;
-        const vv = document.createElement('span'); vv.textContent = v;
-        row.appendChild(ll); row.appendChild(vv);
-        totals.appendChild(row);
-      });
-
-      if (order.tracking_number) {
-        const track = document.createElement('div');
-        track.className = 'order-tracking';
-        const label = document.createElement('span');
-        label.textContent = 'Tracking: ';
-        const val = document.createElement('strong');
-        val.textContent = order.tracking_number;
-        track.appendChild(label);
-        track.appendChild(val);
-        totals.appendChild(track);
-      }
-
+      /* Actions */
       const actions = document.createElement('div');
-      actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
+      actions.className = 'order-actions';
+
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'btn btn-outline';
+      dlBtn.style.cssText = 'padding:9px 16px;font-size:13px;gap:7px;display:inline-flex;align-items:center;';
+      dlBtn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Invoice`;
+      dlBtn.addEventListener('click', () => downloadInvoice(order));
+      actions.appendChild(dlBtn);
 
       if (order.status === 'pending') {
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn btn-danger';
-        cancelBtn.style.cssText = 'padding:8px 16px;font-size:12px;';
+        cancelBtn.style.cssText = 'padding:9px 16px;font-size:13px;';
         cancelBtn.textContent = 'Cancel Order';
         cancelBtn.addEventListener('click', async () => {
-          if (!confirm('Are you sure you want to cancel this order?')) return;
-          try {
-            await API.cancelOrder(order.id);
-            showToast('Order cancelled', 'info');
-            loadOrders(currentPage);
-          } catch (err) {
-            showToast(err.message, 'error');
-          }
+          if (!confirm('Cancel this order? This cannot be undone.')) return;
+          cancelBtn.disabled = true; cancelBtn.textContent = 'Cancelling…';
+          try { await API.cancelOrder(order.id); showToast('Order cancelled','info'); loadOrders(currentPage); }
+          catch (err) { showToast(err.message,'error'); cancelBtn.disabled=false; cancelBtn.textContent='Cancel Order'; }
         });
         actions.appendChild(cancelBtn);
       }
 
-      footer.appendChild(totals);
-      footer.appendChild(actions);
-      body.appendChild(footer);
+      inner.appendChild(actions);
+      body.appendChild(inner);
     }
 
-    /* ── Pagination ─────────────────────────────────────── */
+    /* ── PDF Invoice ── */
+    function downloadInvoice(order) {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+        const W = 210, margin = 20;
+        let y = margin;
+        const gold=[180,140,60], dark=[15,22,40], muted=[100,110,130], light=[230,232,238];
+
+        /* Header band */
+        doc.setFillColor(...dark); doc.rect(0,0,W,36,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(...gold);
+        doc.text('LUVIIO', margin, 22);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,205,215);
+        doc.text('Tax Invoice', margin, 30);
+        doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...gold);
+        doc.text('#'+order.id.substring(0,8).toUpperCase(), W-margin, 18, {align:'right'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,205,215);
+        doc.text(new Date(order.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}), W-margin, 26, {align:'right'});
+
+        y = 48;
+
+        /* Ship to */
+        if (order.shipping_line1) {
+          const parts = [order.shipping_line1,order.shipping_line2,order.shipping_city,order.shipping_state,order.shipping_postal_code,order.shipping_country].filter(Boolean);
+          doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...muted);
+          doc.text('SHIP TO', margin, y);
+          doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...dark);
+          const addrLines = doc.splitTextToSize(parts.join(', '), 90);
+          doc.text(addrLines, margin, y+6);
+        }
+
+        /* Status badge */
+        const statusLabel = (order.status||'pending').charAt(0).toUpperCase()+order.status.slice(1);
+        doc.setFillColor(...gold); doc.setDrawColor(...gold);
+        doc.roundedRect(W-margin-32, y, 32, 8, 2, 2, 'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,0,0);
+        doc.text(statusLabel, W-margin-16, y+5.5, {align:'center'});
+
+        y += 26;
+        doc.setDrawColor(...light); doc.setLineWidth(0.4);
+        doc.line(margin, y, W-margin, y);
+        y += 8;
+
+        /* Items table */
+        const items = order.order_items || [];
+        doc.autoTable({
+          startY: y,
+          head: [['#','Product','Qty','Unit Price','Subtotal']],
+          body: items.map((item,i) => [i+1, item.product_name, item.quantity, formatPrice(item.unit_price), formatPrice(item.subtotal)]),
+          margin: {left:margin, right:margin},
+          headStyles: {fillColor:dark, textColor:gold, fontSize:8, fontStyle:'bold', cellPadding:{top:5,bottom:5,left:4,right:4}},
+          bodyStyles: {textColor:dark, fontSize:8, cellPadding:{top:5,bottom:5,left:4,right:4}},
+          alternateRowStyles: {fillColor:[248,249,252]},
+          columnStyles: {0:{cellWidth:8,halign:'center'},2:{cellWidth:12,halign:'center'},3:{cellWidth:28,halign:'right'},4:{cellWidth:28,halign:'right'}},
+          tableLineColor:light, tableLineWidth:0.3,
+        });
+
+        y = doc.lastAutoTable.finalY + 8;
+
+        /* Summary box */
+        const boxW=70, boxX=W-margin-boxW;
+        doc.setFillColor(248,249,252); doc.setDrawColor(...light); doc.setLineWidth(0.3);
+        doc.roundedRect(boxX, y, boxW, 44, 3, 3, 'FD');
+        let sy = y+8;
+        [['Subtotal',formatPrice(order.subtotal)],['Shipping',formatPrice(order.shipping_cost)],['Tax',formatPrice(order.tax_amount)]].forEach(([label,val]) => {
+          doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...muted);
+          doc.text(label, boxX+6, sy);
+          doc.setTextColor(...dark); doc.text(val, boxX+boxW-6, sy, {align:'right'});
+          sy += 7;
+        });
+        sy += 2;
+        doc.setDrawColor(...light); doc.line(boxX+4, sy-3, boxX+boxW-4, sy-3);
+        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...gold);
+        doc.text('Total', boxX+6, sy+5);
+        doc.text(formatPrice(order.total_amount), boxX+boxW-6, sy+5, {align:'right'});
+
+        /* Tracking */
+        if (order.tracking_number) {
+          const ty = doc.lastAutoTable.finalY + 60;
+          doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...muted);
+          doc.text('Tracking Number:', margin, ty);
+          doc.setFont('helvetica','bold'); doc.setTextColor(...dark);
+          doc.text(order.tracking_number, margin+34, ty);
+        }
+
+        /* Footer */
+        const pH = doc.internal.pageSize.getHeight();
+        doc.setFillColor(...dark); doc.rect(0, pH-18, W, 18, 'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(120,130,150);
+        doc.text('Thank you for shopping with Luviio.', margin, pH-8);
+        doc.text('Generated '+new Date().toLocaleDateString('en-IN'), W-margin, pH-8, {align:'right'});
+
+        doc.save('Luviio-Invoice-'+order.id.substring(0,8).toUpperCase()+'.pdf');
+        showToast('Invoice downloaded!', 'success');
+      } catch(err) {
+        console.error('Invoice error:',err);
+        showToast('Could not generate invoice','error');
+      }
+    }
+
+    /* ── Pagination ── */
     function renderPagination() {
       const wrap = document.getElementById('orders-pagination');
       wrap.innerHTML = '';
       if (totalPages <= 1) return;
-
-      const makeBtn = (label, page, active) => {
+      const mk = (label, page, active) => {
         const btn = document.createElement('button');
-        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.className = 'page-btn'+(active?' active':'');
         btn.textContent = label;
         btn.addEventListener('click', () => loadOrders(page));
         return btn;
       };
-
-      if (currentPage > 1) wrap.appendChild(makeBtn('‹', currentPage - 1));
-      for (let i = 1; i <= totalPages; i++) {
-        wrap.appendChild(makeBtn(i, i, i === currentPage));
-      }
-      if (currentPage < totalPages) wrap.appendChild(makeBtn('›', currentPage + 1));
+      if (currentPage > 1) wrap.appendChild(mk('‹', currentPage-1));
+      for (let i=1;i<=totalPages;i++) wrap.appendChild(mk(i,i,i===currentPage));
+      if (currentPage < totalPages) wrap.appendChild(mk('›', currentPage+1));
     }
   </script>
 </body>
