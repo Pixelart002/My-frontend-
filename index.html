@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   
-  <!-- ── Primary SEO ───────────────────────────────────── -->
   <title>Luviio — Luxury Bath & Sanitation Products India</title>
   <meta name="description" content="Shop Luviio's curated collection of premium bath & sanitation products. Free shipping on orders above ₹75. Secure checkout via Stripe. Delivered across India.">
   <meta name="keywords" content="luxury bath products, premium sanitation, bath accessories India, Luviio, luxury bathroom, bath essentials">
@@ -14,10 +13,8 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="https://luviio.in/">
   
-  <!-- ── Google Site Verification ─────────────────────── -->
   <meta name="google-site-verification" content="vv6TFfQ4d01M7QjYQ2qDQfpCevqwhMmoOc_XIuzgeoE">
   
-  <!-- ── Open Graph (Facebook, WhatsApp, LinkedIn) ─────── -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Luviio">
   <meta property="og:title" content="Luviio — Luxury Bath & Sanitation Products India">
@@ -29,14 +26,12 @@
   <meta property="og:image:alt" content="Luviio — Premium Bath Products">
   <meta property="og:locale" content="en_IN">
   
-  <!-- ── Twitter Card ──────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Luviio — Luxury Bath & Sanitation Products India">
   <meta name="twitter:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹75.">
   <meta name="twitter:image" content="https://luviio.in/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="Luviio — Premium Bath Products">
   
-  <!-- ── Favicon ───────────────────────────────────────── -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -44,7 +39,6 @@
   <meta name="theme-color" content="#080808">
   <meta name="msapplication-TileColor" content="#080808">
   
-  <!-- ── Structured Data (JSON-LD) ─────────────────────── -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -123,7 +117,6 @@
     }
   </script>
   
-  <!-- ── Performance: Preconnect ───────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app">
@@ -298,7 +291,6 @@
   
   <div class="page-wrapper">
     
-    <!-- Hero -->
     <section class="hero section container" aria-label="Hero">
       <div class="hero-bg"></div>
       <div class="hero-gold-line"></div>
@@ -320,7 +312,6 @@
       </div>
     </section>
     
-    <!-- Categories -->
     <section class="section-sm" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);" aria-label="Categories">
       <div class="container">
         <nav id="cat-strip-wrap" class="cat-strip" aria-label="Product categories">
@@ -329,7 +320,6 @@
       </div>
     </section>
     
-    <!-- Featured Products -->
     <section class="section" aria-label="Featured products">
       <div class="container">
         <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;">
@@ -348,7 +338,6 @@
       </div>
     </section>
     
-    <!-- Features strip -->
     <div class="container">
       <div class="feature-grid" style="border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border); background:var(--border);">
         <div class="feature-card">
@@ -369,7 +358,6 @@
       </div>
     </div>
     
-    <!-- Footer -->
     <footer class="site-footer" role="contentinfo">
       <div class="container">
         <div class="footer-grid">
@@ -409,18 +397,28 @@
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous"></script>
+  
   <script>
     pageInit();
     
-    gsap.from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.7, delay: 0.3 });
-    gsap.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.7, delay: 0.3 });
-    gsap.to('.hero-title', { opacity: 1, y: 0, duration: 0.9, delay: 0.5 });
-    gsap.from('.hero-title', { y: 30, duration: 0.9, delay: 0.5 });
-    gsap.to('.hero-sub', { opacity: 1, duration: 0.7, delay: 0.8 });
-    gsap.to('.hero-actions', { opacity: 1, y: 0, duration: 0.7, delay: 1.0 });
-    gsap.from('.hero-actions', { y: 16, duration: 0.7, delay: 1.0 });
+    // Register ScrollTrigger
+    if (window.gsap && window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+    }
     
+    // 1. Sequenced Hero Animations
+    if (window.gsap) {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.fromTo('.hero-eyebrow', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.2 })
+        .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.4")
+        .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
+        .fromTo('.hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
+    }
+    
+    // 2. Load Categories
     async function loadCategories() {
       try {
         const cats = await API.getCategories();
@@ -435,6 +433,7 @@
       } catch {}
     }
     
+    // 3. Load Featured Products with ScrollTrigger
     async function loadFeatured() {
       const grid = document.getElementById('featured-grid');
       try {
@@ -444,15 +443,32 @@
           grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No products yet — check back soon.</p>';
           return;
         }
+        
         data.items.slice(0, 8).forEach(p => grid.appendChild(makeProductCard(p)));
-        if (window.gsap) {
-          gsap.from('#featured-grid .product-card', { opacity: 0, y: 30, duration: 0.5, stagger: 0.08, delay: 0.2 });
+        
+        if (window.gsap && window.ScrollTrigger) {
+          gsap.fromTo('#featured-grid .product-card', 
+            { opacity: 0, y: 40 },
+            { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.6, 
+              stagger: 0.1, 
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: "#featured-grid",
+                start: "top 85%", // Triggers when the grid is 85% into the viewport
+                toggleActions: "play none none none"
+              }
+            }
+          );
         }
       } catch {
         grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
       }
     }
     
+    // 4. Card Maker Function
     function makeProductCard(p) {
       const card = document.createElement('div');
       card.className = 'product-card';
