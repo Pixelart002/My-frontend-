@@ -12,6 +12,8 @@ const API = (() => {
     const token = AUTH.getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const opts = { method, headers };
+    
+    // FormData check already perfectly handled here
     if (body !== null && !(body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(body);
@@ -76,6 +78,15 @@ const API = (() => {
     },
     getProduct: (slug) => API.get(`/products/${encodeURIComponent(slug)}`),
     getCategories: () => API.get('/categories'),
+    
+    // ✅ NEW: Added support for Max 10 multiple images upload
+    uploadImages: (id, files) => {
+      const fd = new FormData();
+      for (let i = 0; i < Math.min(files.length, 10); i++) {
+        fd.append('files', files[i]);
+      }
+      return API.post(`/products/${id}/images`, fd);
+    },
     
     createOrder: (data) => API.post('/orders/', data),
     getMyOrders: (page) => API.get(`/orders/my?page=${page}&page_size=10`),

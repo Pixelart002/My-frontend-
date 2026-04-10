@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
+  
   <!-- ── Primary SEO ───────────────────────────────────── -->
   <title>Luviio — Luxury Bath & Sanitation Products India</title>
   <meta name="description" content="Shop Luviio's curated collection of premium bath & sanitation products. Free shipping on orders above ₹75. Secure checkout via Stripe. Delivered across India.">
@@ -12,10 +13,10 @@
   <meta name="author" content="Luviio">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="https://luviio.in/">
-
+  
   <!-- ── Google Site Verification ─────────────────────── -->
   <meta name="google-site-verification" content="vv6TFfQ4d01M7QjYQ2qDQfpCevqwhMmoOc_XIuzgeoE">
-
+  
   <!-- ── Open Graph (Facebook, WhatsApp, LinkedIn) ─────── -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Luviio">
@@ -27,14 +28,14 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Luviio — Premium Bath Products">
   <meta property="og:locale" content="en_IN">
-
+  
   <!-- ── Twitter Card ──────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Luviio — Luxury Bath & Sanitation Products India">
   <meta name="twitter:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹75.">
   <meta name="twitter:image" content="https://luviio.in/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="Luviio — Premium Bath Products">
-
+  
   <!-- ── Favicon ───────────────────────────────────────── -->
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -42,12 +43,12 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#080808">
   <meta name="msapplication-TileColor" content="#080808">
-
+  
   <!-- ── Structured Data (JSON-LD) ─────────────────────── -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
+    {
+      "@context": "https://schema.org",
+      "@graph": [
       {
         "@type": "WebSite",
         "@id": "https://luviio.in/#website",
@@ -118,76 +119,185 @@
           "@type": "OfferCatalog",
           "name": "Bath & Sanitation Products"
         }
-      }
-    ]
-  }
+      }]
+    }
   </script>
-
+  
   <!-- ── Performance: Preconnect ───────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app">
   <link rel="dns-prefetch" href="https://js.stripe.com">
-
+  
   <link rel="stylesheet" href="/css/luviio.css">
   <style>
-    .hero { min-height: calc(100vh - var(--nav-h)); padding: 0; }
-    .hero-content { position: relative; z-index: 1; max-width: 680px; }
-    .hero-eyebrow {
-      font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 24px; opacity: 0;
+    .hero {
+      min-height: calc(100vh - var(--nav-h));
+      padding: 0;
     }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+    }
+    
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+      opacity: 0;
+    }
+    
     .hero-title {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(48px, 7vw, 88px); line-height: 1.05; font-weight: 700;
-      color: var(--text); margin-bottom: 28px; opacity: 0;
+      font-size: clamp(48px, 7vw, 88px);
+      line-height: 1.05;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 28px;
+      opacity: 0;
     }
-    .hero-title em { font-style: italic; color: var(--gold); }
+    
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    
     .hero-sub {
-      font-size: 16px; color: var(--text-muted); max-width: 460px;
-      line-height: 1.8; margin-bottom: 40px; opacity: 0;
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 460px;
+      line-height: 1.8;
+      margin-bottom: 40px;
+      opacity: 0;
     }
-    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; opacity: 0; }
+    
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      opacity: 0;
+    }
+    
     .hero-scroll {
-      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim);
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
       z-index: 1;
     }
+    
     .hero-scroll-line {
-      width: 1px; height: 48px;
+      width: 1px;
+      height: 48px;
       background: linear-gradient(to bottom, var(--gold), transparent);
       animation: scrollLine 2s ease-in-out infinite;
     }
-    @keyframes scrollLine { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
-    .cat-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-    .cat-strip::-webkit-scrollbar { display: none; }
+    
+    @keyframes scrollLine {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+      
+      50% {
+        opacity: 1;
+      }
+    }
+    
+    .cat-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    
+    .cat-strip::-webkit-scrollbar {
+      display: none;
+    }
+    
     .cat-pill {
-      flex-shrink: 0; padding: 10px 20px;
-      border: 1px solid var(--border); border-radius: 30px;
-      font-size: 13px; color: var(--text-muted); transition: all 0.2s;
+      flex-shrink: 0;
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: all 0.2s;
     }
-    .cat-pill:hover { border-color: var(--gold); color: var(--gold); }
-    .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); }
+    
+    .cat-pill:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    
     .feature-card {
-      background: var(--surface); padding: 40px 32px;
-      display: flex; flex-direction: column; gap: 12px;
+      background: var(--surface);
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .feature-icon { font-size: 28px; }
-    .feature-title { font-size: 16px; font-weight: 600; color: var(--text); }
-    .feature-text { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-    #featured-grid { min-height: 320px; }
+    
+    .feature-icon {
+      font-size: 28px;
+    }
+    
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .feature-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    
+    #featured-grid {
+      min-height: 320px;
+    }
+    
     @media (max-width: 768px) {
-      .feature-grid { grid-template-columns: 1fr; }
-      .hero-actions .btn { flex: 1; justify-content: center; }
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
     }
   </style>
 </head>
+
 <body>
   <nav id="main-nav"></nav>
-
+  
   <div class="page-wrapper">
-
+    
     <!-- Hero -->
     <section class="hero section container" aria-label="Hero">
       <div class="hero-bg"></div>
@@ -209,7 +319,7 @@
         <div class="hero-scroll-line"></div>
       </div>
     </section>
-
+    
     <!-- Categories -->
     <section class="section-sm" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);" aria-label="Categories">
       <div class="container">
@@ -218,7 +328,7 @@
         </nav>
       </div>
     </section>
-
+    
     <!-- Featured Products -->
     <section class="section" aria-label="Featured products">
       <div class="container">
@@ -237,7 +347,7 @@
         </div>
       </div>
     </section>
-
+    
     <!-- Features strip -->
     <div class="container">
       <div class="feature-grid" style="border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border); background:var(--border);">
@@ -258,7 +368,7 @@
         </div>
       </div>
     </div>
-
+    
     <!-- Footer -->
     <footer class="site-footer" role="contentinfo">
       <div class="container">
@@ -289,9 +399,9 @@
         </div>
       </div>
     </footer>
-
+    
   </div>
-
+  
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -302,15 +412,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"></script>
   <script>
     pageInit();
-
+    
     gsap.from('.hero-eyebrow', { opacity: 0, y: 20, duration: 0.7, delay: 0.3 });
-    gsap.to('.hero-eyebrow',   { opacity: 1, y: 0, duration: 0.7, delay: 0.3 });
-    gsap.to('.hero-title',     { opacity: 1, y: 0, duration: 0.9, delay: 0.5 });
-    gsap.from('.hero-title',   { y: 30,          duration: 0.9, delay: 0.5 });
-    gsap.to('.hero-sub',       { opacity: 1,      duration: 0.7, delay: 0.8 });
-    gsap.to('.hero-actions',   { opacity: 1, y: 0, duration: 0.7, delay: 1.0 });
-    gsap.from('.hero-actions', { y: 16,           duration: 0.7, delay: 1.0 });
-
+    gsap.to('.hero-eyebrow', { opacity: 1, y: 0, duration: 0.7, delay: 0.3 });
+    gsap.to('.hero-title', { opacity: 1, y: 0, duration: 0.9, delay: 0.5 });
+    gsap.from('.hero-title', { y: 30, duration: 0.9, delay: 0.5 });
+    gsap.to('.hero-sub', { opacity: 1, duration: 0.7, delay: 0.8 });
+    gsap.to('.hero-actions', { opacity: 1, y: 0, duration: 0.7, delay: 1.0 });
+    gsap.from('.hero-actions', { y: 16, duration: 0.7, delay: 1.0 });
+    
     async function loadCategories() {
       try {
         const cats = await API.getCategories();
@@ -324,7 +434,7 @@
         });
       } catch {}
     }
-
+    
     async function loadFeatured() {
       const grid = document.getElementById('featured-grid');
       try {
@@ -342,81 +452,95 @@
         grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
       }
     }
-
+    
     function makeProductCard(p) {
       const card = document.createElement('div');
       card.className = 'product-card';
       card.setAttribute('role', 'listitem');
-
+      
       const imgWrap = document.createElement('div');
       imgWrap.className = 'product-card-img';
       if (p.image_url) {
         const img = document.createElement('img');
-        img.src = p.image_url; img.alt = escapeHTML(p.name); img.loading = 'lazy';
-        img.width = 400; img.height = 500;
+        img.src = p.image_url;
+        img.alt = escapeHTML(p.name);
+        img.loading = 'lazy';
+        img.width = 400;
+        img.height = 500;
         imgWrap.appendChild(img);
       } else {
         const ph = document.createElement('div');
-        ph.className = 'img-placeholder'; ph.textContent = '◈';
+        ph.className = 'img-placeholder';
+        ph.textContent = '◈';
         imgWrap.appendChild(ph);
       }
-
+      
       const body = document.createElement('div');
       body.className = 'product-card-body';
-
+      
       const name = document.createElement('div');
-      name.className = 'product-card-name'; name.textContent = p.name;
-
+      name.className = 'product-card-name';
+      name.textContent = p.name;
+      
       const priceRow = document.createElement('div');
       priceRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
-
+      
       const price = document.createElement('div');
-      price.className = 'product-card-price'; price.textContent = formatPrice(p.price);
+      price.className = 'product-card-price';
+      price.textContent = formatPrice(p.price);
       priceRow.appendChild(price);
-
+      
       if (p.compare_price) {
         const compare = document.createElement('div');
-        compare.className = 'product-card-compare'; compare.textContent = formatPrice(p.compare_price);
+        compare.className = 'product-card-compare';
+        compare.textContent = formatPrice(p.compare_price);
         priceRow.appendChild(compare);
       }
-
-      body.appendChild(name); body.appendChild(priceRow);
-
+      
+      body.appendChild(name);
+      body.appendChild(priceRow);
+      
       if (p.stock === 0) {
         const oos = document.createElement('span');
         oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
         oos.textContent = 'Out of stock';
         body.appendChild(oos);
       }
-
+      
       const action = document.createElement('div');
       action.className = 'product-card-action';
-
+      
       const btn = document.createElement('button');
-      btn.className = 'btn btn-primary'; btn.style.width = '100%'; btn.style.padding = '10px';
+      btn.className = 'btn btn-primary';
+      btn.style.width = '100%';
+      btn.style.padding = '10px';
       btn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
       btn.disabled = p.stock === 0;
       btn.setAttribute('aria-label', `Add ${p.name} to cart`);
-
+      
       btn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
         CART.add(p, 1);
         showToast(`${p.name} added to cart`, 'success');
       });
-
+      
       action.appendChild(btn);
-      card.appendChild(imgWrap); card.appendChild(body); card.appendChild(action);
-
+      card.appendChild(imgWrap);
+      card.appendChild(body);
+      card.appendChild(action);
+      
       card.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') return;
         window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
       });
-
+      
       return card;
     }
-
+    
     loadCategories();
     loadFeatured();
   </script>
 </body>
+
 </html>

@@ -325,76 +325,48 @@
        RESPONSIVE
     ══════════════════════════════════════════════════ */
 
-    /* Tablet landscape */
     @media (max-width: 1100px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .quick-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* Tablet portrait */
     @media (max-width: 900px) {
       .admin-wrap { grid-template-columns: 180px 1fr; }
       .admin-main { padding: 20px 24px; }
       .admin-title { font-size: 22px; }
     }
 
-    /* Mobile — hide sidebar, show bottom nav */
     @media (max-width: 768px) {
       .admin-sidebar { display: none; }
       .admin-wrap { grid-template-columns: 1fr; }
       .mobile-nav { display: block; }
-
-      /* Push content above bottom nav */
       .admin-main {
         padding: 16px;
         padding-bottom: calc(70px + env(safe-area-inset-bottom) + 16px);
       }
-
       .admin-title { font-size: 20px; }
       .admin-header { margin-bottom: 16px; gap: 8px; }
-
-      /* Stats — 2 col on mobile */
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
       .stat-card { padding: 14px 16px; }
       .stat-card-val { font-size: 24px; }
-
-      /* Quick actions — 2 col */
       .quick-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
       .quick-card { padding: 14px; gap: 10px; }
       .quick-card-icon { width: 32px; height: 32px; }
-
-      /* Table toolbar wraps */
       .table-toolbar { gap: 8px; padding: 10px 12px; }
       .t-search { max-width: 100%; }
-
-      /* Table cells smaller */
       th { padding: 9px 12px; font-size: 9px; }
       td { padding: 10px 12px; }
-
-      /* Modal full-screen on mobile */
       .modal-bd { padding: 0; align-items: flex-end; }
-      .modal {
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        max-height: 88vh;
-      }
+      .modal { border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 88vh; }
       .modal-bd-inner { padding: 16px; gap: 12px; }
       .modal-ft { padding: 12px 16px; }
       .modal-hd { padding: 14px 16px; }
-
-      /* Grid inside modal goes 1 col */
       .g2 { grid-template-columns: 1fr; gap: 10px; }
-
-      /* Bulk bar wraps */
       .bulk-bar { flex-wrap: wrap; }
-
-      /* Table footer stacks */
       .table-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
-
-      /* Action buttons icon-only on very small */
       .btn-xs span { display: none; }
     }
 
-    /* Very small phones */
     @media (max-width: 380px) {
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
       .quick-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -409,7 +381,6 @@
   <div class="page-wrapper">
     <div class="admin-wrap">
 
-      <!-- ════════ SIDEBAR (desktop) ════════ -->
       <aside class="admin-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-label">Overview</div>
@@ -454,10 +425,8 @@
         </div>
       </aside>
 
-      <!-- ════════ MAIN ════════ -->
       <main class="admin-main">
 
-        <!-- ─── DASHBOARD ─── -->
         <div id="panel-dashboard" class="admin-panel active">
           <div class="admin-header">
             <div>
@@ -542,7 +511,6 @@
           </div>
         </div>
 
-        <!-- ─── PRODUCTS ─── -->
         <div id="panel-products" class="admin-panel">
           <div class="admin-header">
             <div>
@@ -594,7 +562,6 @@
           </div>
         </div>
 
-        <!-- ─── CATEGORIES ─── -->
         <div id="panel-categories" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Categories</div>
@@ -615,7 +582,6 @@
           </div>
         </div>
 
-        <!-- ─── INVENTORY ─── -->
         <div id="panel-inventory" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Inventory</div>
@@ -652,7 +618,6 @@
           </div>
         </div>
 
-        <!-- ─── ORDERS ─── -->
         <div id="panel-orders" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Orders</div>
@@ -682,7 +647,6 @@
           </div>
         </div>
 
-        <!-- ─── USERS ─── -->
         <div id="panel-users" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Users</div>
@@ -711,33 +675,9 @@
     </div>
   </div>
 
-  <!-- ════ MOBILE BOTTOM NAV ════ -->
   <nav class="mobile-nav">
-    <div class="mobile-nav-inner">
-      <button class="mnav-btn active" id="mnav-dashboard" onclick="showPanel('dashboard')">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Home
-      </button>
-      <button class="mnav-btn" id="mnav-products" onclick="showPanel('products')">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
-        Products
-      </button>
-      <button class="mnav-btn" id="mnav-orders" onclick="showPanel('orders')">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        Orders
-      </button>
-      <button class="mnav-btn" id="mnav-inventory" onclick="showPanel('inventory')">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        Stock
-      </button>
-      <button class="mnav-btn" id="mnav-users" onclick="showPanel('users')">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        Users
-      </button>
-    </div>
-  </nav>
+    </nav>
 
-  <!-- ════ PRODUCT MODAL ════ -->
   <div id="modal-product" class="modal-bd" style="display:none;" onclick="closeModal('modal-product',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -764,18 +704,20 @@
           <div class="form-group"><label class="form-label">Category</label><select id="pm-cat" class="form-input form-select"><option value="">— None —</option></select></div>
           <div class="form-group"><label class="form-label">Weight (grams)</label><input type="number" id="pm-weight" class="form-input" min="0"></div>
         </div>
+        
         <div class="form-group">
-          <label class="form-label">Product Image</label>
+          <label class="form-label">Product Images (Max 10)</label>
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pm-img-file').click()">
-            <img id="pm-img-preview" class="drop-zone-img">
             <div id="drop-zone-txt">
               <svg width="28" height="28" fill="none" stroke="var(--text-dim)" stroke-width="1.4" viewBox="0 0 24 24" style="margin:0 auto 8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <div class="drop-zone-txt">Click or drag image here</div>
+              <div class="drop-zone-txt">Click or drag up to 10 images here</div>
               <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">JPEG · PNG · WebP — max 5MB</div>
             </div>
-            <input type="file" id="pm-img-file" accept="image/*" style="display:none;" onchange="handleImg(this)">
+            <input type="file" id="pm-img-file" accept="image/*" multiple style="display:none;" onchange="handleImgs(this)">
           </div>
+          <div id="pm-img-previews" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;"></div>
         </div>
+
         <label class="filter-option" style="gap:10px;">
           <input type="checkbox" id="pm-active" checked style="accent-color:var(--gold)">
           Active — visible in shop
@@ -788,7 +730,6 @@
     </div>
   </div>
 
-  <!-- ════ CATEGORY MODAL ════ -->
   <div id="modal-cat" class="modal-bd" style="display:none;" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -807,7 +748,6 @@
     </div>
   </div>
 
-  <!-- ════ ORDER MODAL ════ -->
   <div id="modal-order" class="modal-bd" style="display:none;" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -844,7 +784,9 @@
   <script>
     let allProducts = [], allCategories = [], allUsers = [], allInventory = [];
     let selectedProds = new Set();
-    let pendingImg = null;
+    
+    // Naya Variable: pendingImages
+    let pendingImages = [];
     let pProdPage = 1, pOrderPage = 1, pUserPage = 1;
     const PS = 20;
 
@@ -861,10 +803,14 @@
         if (!res.ok) throw new Error(d?.detail || `Error ${res.status}`);
         return d;
       },
-      async uploadImage(id, file) {
+      
+      // Updated function to handle Multiple Images Upload
+      async uploadImages(id, files) {
         const fd = new FormData();
-        fd.append('file', file);
-        const res = await fetch(`${CONFIG.API_BASE}/products/${id}/image`, {
+        for (let i = 0; i < Math.min(files.length, 10); i++) {
+          fd.append('files', files[i]);
+        }
+        const res = await fetch(`${CONFIG.API_BASE}/products/${id}/images`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
           body: fd,
@@ -873,6 +819,7 @@
         if (!res.ok) throw new Error(d?.detail || 'Upload failed');
         return d;
       },
+      
       getProducts: (p = 1) => ADMIN.req('GET', `/products?page=${p}&page_size=${PS}`),
       createProduct: d => ADMIN.req('POST', '/products', d),
       updateProduct: (id, d) => ADMIN.req('PATCH', `/products/${id}`, d),
@@ -906,17 +853,14 @@
 
     init();
 
-    /* ── Panel switch ─────────────────────────────── */
     function showPanel(name) {
       document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.mnav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`panel-${name}`).classList.add('active');
-      // Sidebar highlight
       document.querySelectorAll('.sidebar-btn').forEach(b => {
         if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active');
       });
-      // Mobile nav highlight
       const mb = document.getElementById(`mnav-${name}`);
       if (mb) mb.classList.add('active');
       if (name === 'products')   loadProducts();
@@ -926,8 +870,8 @@
       if (name === 'users')      loadUsers(1);
     }
 
-    /* ── Dashboard ────────────────────────────────── */
     async function loadDashboard() {
+      // (Unchanged code logic...)
       try {
         const [prods, orders, users] = await Promise.all([
           ADMIN.getProducts(), ADMIN.getOrders(), ADMIN.getUsers(),
@@ -957,7 +901,6 @@
       } catch (err) { showToast('Dashboard error: ' + err.message, 'error'); }
     }
 
-    /* ── Products ─────────────────────────────────── */
     async function loadProducts(page = 1) {
       pProdPage = page;
       const tbody = document.getElementById('products-body');
@@ -1064,20 +1007,33 @@
       loadProducts(pProdPage);
     }
 
+    // Modal Image Initialization 
     function openProductModal(p = null) {
       [['pm-id', p?.id || ''], ['pm-name', p?.name || ''], ['pm-slug', p?.slug || ''],
        ['pm-sdesc', p?.short_description || ''], ['pm-desc', p?.description || ''],
        ['pm-price', p?.price || ''], ['pm-compare', p?.compare_price || ''],
        ['pm-stock', p?.stock ?? 0], ['pm-sku', p?.sku || ''], ['pm-weight', p?.weight_grams || '']
       ].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+      
       document.getElementById('pm-active').checked = p ? p.is_active : true;
       document.getElementById('pm-title').textContent = p ? `Edit — ${p.name}` : 'Add Product';
-      const preview = document.getElementById('pm-img-preview');
-      const txt = document.getElementById('drop-zone-txt');
-      if (p?.image_url) { preview.src = p.image_url; preview.style.display = 'block'; txt.style.display = 'none'; }
-      else { preview.style.display = 'none'; txt.style.display = 'block'; }
-      pendingImg = null;
+      
+      pendingImages = [];
       document.getElementById('pm-img-file').value = '';
+      const previews = document.getElementById('pm-img-previews');
+      previews.innerHTML = '';
+      const txt = document.getElementById('drop-zone-txt');
+      
+      if (p?.images && p.images.length > 0) {
+        p.images.forEach(imgUrl => addPreviewThumbnail(imgUrl));
+        txt.style.display = 'none';
+      } else if (p?.image_url) {
+        addPreviewThumbnail(p.image_url);
+        txt.style.display = 'none';
+      } else {
+        txt.style.display = 'block';
+      }
+      
       populateCatSelects();
       if (p?.category_id) document.getElementById('pm-cat').value = p.category_id;
       document.getElementById('modal-product').style.display = 'flex';
@@ -1091,6 +1047,7 @@
       }
     }
 
+    // Save Logic (Calls Multiple Images Endpoint)
     async function saveProduct() {
       const id = document.getElementById('pm-id').value;
       const btn = document.getElementById('pm-save');
@@ -1107,14 +1064,20 @@
         is_active: document.getElementById('pm-active').checked,
         category_id: document.getElementById('pm-cat').value || null,
       };
+      
       if (!payload.name || !payload.slug || isNaN(payload.price)) { showToast('Name, Slug and Price are required', 'error'); return; }
       showLoader(btn, 'Saving…');
+      
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
-        if (pendingImg && saved?.id) {
-          try { await ADMIN.uploadImage(saved.id, pendingImg); }
-          catch (e) { showToast('Product saved, image failed: ' + e.message, 'warn'); }
+        
+        if (pendingImages.length > 0 && saved?.id) {
+          try { 
+            await ADMIN.uploadImages(saved.id, pendingImages); 
+          }
+          catch (e) { showToast('Product saved, some images failed: ' + e.message, 'warn'); }
         }
+        
         showToast(id ? 'Product updated!' : 'Product created!', 'success');
         closeModal('modal-product');
         loadProducts(pProdPage);
@@ -1128,23 +1091,49 @@
       catch (err) { showToast(err.message, 'error'); }
     }
 
-    function handleImg(input) {
-      const file = input.files[0];
-      if (!file) return;
-      pendingImg = file;
-      const r = new FileReader();
-      r.onload = e => {
-        const preview = document.getElementById('pm-img-preview');
-        preview.src = e.target.result; preview.style.display = 'block';
+    // Multi-Image Handle Support
+    function handleImgs(input) {
+      const newFiles = Array.from(input.files);
+      const currentCount = document.getElementById('pm-img-previews').children.length;
+      
+      if (currentCount + newFiles.length > 10) {
+        showToast('Maximum 10 images are allowed.', 'error');
+        return;
+      }
+      
+      if (currentCount + newFiles.length > 0) {
         document.getElementById('drop-zone-txt').style.display = 'none';
-      };
-      r.readAsDataURL(file);
+      }
+      
+      newFiles.forEach(file => {
+        pendingImages.push(file);
+        const r = new FileReader();
+        r.onload = e => addPreviewThumbnail(e.target.result);
+        r.readAsDataURL(file);
+      });
+    }
+
+    function addPreviewThumbnail(src) {
+      const container = document.getElementById('pm-img-previews');
+      const imgWrap = document.createElement('div');
+      imgWrap.style.cssText = 'width:64px; height:64px; border-radius:6px; overflow:hidden; border:1px solid var(--border); flex-shrink:0;';
+      
+      const img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+      
+      imgWrap.appendChild(img);
+      container.appendChild(imgWrap);
     }
 
     const dz = document.getElementById('drop-zone');
     dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); const file = e.dataTransfer.files[0]; if (file) handleImg({ files: [file] }); });
+    dz.addEventListener('drop', e => { 
+      e.preventDefault(); 
+      dz.classList.remove('over'); 
+      if (e.dataTransfer.files.length) handleImgs({ files: e.dataTransfer.files }); 
+    });
 
     /* ── Categories ───────────────────────────────── */
     async function ensureCategories() {

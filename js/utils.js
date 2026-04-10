@@ -34,7 +34,9 @@ function formatPrice(amount, currency = 'INR') {
 function formatDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   });
 }
 
@@ -63,9 +65,9 @@ function validateEmail(email) {
 
 function validatePassword(pass) {
   const errors = [];
-  if (pass.length < 8)            errors.push('Minimum 8 characters');
-  if (!/[A-Z]/.test(pass))        errors.push('At least one uppercase letter');
-  if (!/[0-9]/.test(pass))        errors.push('At least one number');
+  if (pass.length < 8) errors.push('Minimum 8 characters');
+  if (!/[A-Z]/.test(pass)) errors.push('At least one uppercase letter');
+  if (!/[0-9]/.test(pass)) errors.push('At least one number');
   return errors;
 }
 
@@ -81,18 +83,18 @@ function validatePassword(pass) {
 function showToast(message, type = 'info', duration = 4000) {
   const container = document.getElementById('toast-container');
   if (!container) return;
-
+  
   const colors = {
-    info:    { bg: '#1c1c1c', border: '#c9a96e', icon: 'ℹ' },
+    info: { bg: '#1c1c1c', border: '#c9a96e', icon: 'ℹ' },
     success: { bg: '#1c1c1c', border: '#5ec789', icon: '✓' },
-    error:   { bg: '#1c1c1c', border: '#e05252', icon: '✕' },
-    warn:    { bg: '#1c1c1c', border: '#e0a952', icon: '⚠' },
+    error: { bg: '#1c1c1c', border: '#e05252', icon: '✕' },
+    warn: { bg: '#1c1c1c', border: '#e0a952', icon: '⚠' },
   };
   const c = colors[type] || colors.info;
-
+  
   const toast = document.createElement('div');
   toast.style.cssText = `
-    background:${c.bg};border-left:3px solid ${c.border};
+  background:${c.bg};border-left:3px solid ${c.border};
     color:#f0ece4;padding:14px 18px;border-radius:6px;
     font-family:'DM Sans',sans-serif;font-size:14px;
     box-shadow:0 4px 20px rgba(0,0,0,0.5);
@@ -102,29 +104,29 @@ function showToast(message, type = 'info', duration = 4000) {
     opacity:0;transform:translateX(20px);
     transition:opacity 0.3s,transform 0.3s;
   `;
-
+  
   const icon = document.createElement('span');
   icon.style.cssText = `color:${c.border};font-weight:700;font-size:16px;flex-shrink:0;`;
   icon.textContent = c.icon;
-
+  
   const msg = document.createElement('span');
   msg.textContent = message;
-
+  
   toast.appendChild(icon);
   toast.appendChild(msg);
   container.appendChild(toast);
-
+  
   requestAnimationFrame(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(0)';
   });
-
+  
   const remove = () => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateX(20px)';
     setTimeout(() => toast.remove(), 300);
   };
-
+  
   toast.addEventListener('click', remove);
   setTimeout(remove, duration);
 }
@@ -146,12 +148,12 @@ function hideLoader(el) {
 /* ── Order status badge ──────────────────────────────────── */
 function statusBadge(status) {
   const map = {
-    pending:   ['#e0a952', 'Pending'],
-    paid:      ['#5ec789', 'Paid'],
-    shipped:   ['#4ea8e0', 'Shipped'],
+    pending: ['#e0a952', 'Pending'],
+    paid: ['#5ec789', 'Paid'],
+    shipped: ['#4ea8e0', 'Shipped'],
     delivered: ['#5ec789', 'Delivered'],
     cancelled: ['#e05252', 'Cancelled'],
-    refunded:  ['#888', 'Refunded'],
+    refunded: ['#888', 'Refunded'],
   };
   const [color, label] = map[status] || ['#888', capitalize(status)];
   const el = document.createElement('span');
