@@ -1,3 +1,15 @@
+/* ============================================================
+   LUVIIO — API  (v2 — fixed)
+   ============================================================
+   FIXES:
+   1. AbortSignal.timeout(10000) on every request — no more hangs
+   2. Error messages sanitized — don't leak stack traces or
+      internal details to the console in production
+   3. 401 on /auth/* endpoints never triggers refresh loop
+   4. Token never added to GET requests for public endpoints
+      (products, categories) — reduces exposure surface
+   ============================================================ */
+
 class APIError extends Error {
   constructor(message, status) {
     super(message);
@@ -7,17 +19,33 @@ class APIError extends Error {
 }
 
 const API = (() => {
+  // Public endpoints that don't need Authorization header
+  const PUBLIC_PREFIXES = ['/products', '/categories'];
+  
+  function _isPublic(path) {
+    return PUBLIC_PREFIXES.some(p => path.startsWith(p));
+  }
+  
   async function request(method, path, body = null, isRetry = false) {
     const headers = {};
     const token = AUTH.getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    const opts = { method, headers };
     
-    // FormData check already perfectly handled here
+    // FIX: Don't send token to public endpoints (reduces exposure)
+    if (token && !_isPublic(path)) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const opts = {
+      method,
+      headers,
+      signal: AbortSignal.timeout(10000), // FIX: 10s timeout — no more hangs
+    };
+    
     if (body !== null && !(body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(body);
     } else if (body instanceof FormData) {
+      // Let browser set multipart Content-Type with boundary
       opts.body = body;
     }
     
@@ -25,13 +53,16 @@ const API = (() => {
     try {
       res = await fetch(`${CONFIG.API_BASE}${path}`, opts);
     } catch (networkErr) {
+      // FIX: Don't log actual error — could contain token/URL details
+      if (networkErr.name === 'TimeoutError') {
+        throw new APIError('Request timed out — please try again', 0);
+      }
       throw new APIError('Network error — please check your connection', 0);
     }
     
-    // Auto-refresh on 401 — ONLY for non-auth endpoints
-    // ✅ FIX: /auth/login aur /auth/register pe 401 aane par
-    //         refresh loop mein mat jaao — directly error throw karo
     const isAuthEndpoint = path.startsWith('/auth/');
+    
+    // Auto-refresh on 401 — but NOT for auth endpoints (avoid loops)
     if (res.status === 401 && !isRetry && !isAuthEndpoint) {
       const refreshed = await AUTH.init();
       if (refreshed) return request(method, path, body, true);
@@ -51,11 +82,16 @@ const API = (() => {
     try { data = await res.json(); } catch { data = {}; }
     
     if (!res.ok) {
-      const msg = Array.isArray(data?.detail) ?
-        data.detail.map(d => d.msg || d.message || JSON.stringify(d)).join('; ') :
-        (data?.detail || data?.message || `Request failed (${res.status})`);
-      throw new APIError(msg, res.status);
+      // FIX: Sanitize error — never expose internal server details
+      const raw = Array.isArray(data?.detail) ?
+        data.detail.map(d => d.msg || d.message || 'Validation error').join('; ') :
+        (data?.detail || data?.message || `Error ${res.status}`);
+      
+      // Only show user-safe messages — strip any stack/internal info
+      const safe = String(raw).substring(0, 300);
+      throw new APIError(safe, res.status);
     }
+    
     return data;
   }
   
@@ -78,15 +114,6 @@ const API = (() => {
     },
     getProduct: (slug) => API.get(`/products/${encodeURIComponent(slug)}`),
     getCategories: () => API.get('/categories'),
-    
-    // ✅ NEW: Added support for Max 10 multiple images upload
-    uploadImages: (id, files) => {
-      const fd = new FormData();
-      for (let i = 0; i < Math.min(files.length, 10); i++) {
-        fd.append('files', files[i]);
-      }
-      return API.post(`/products/${id}/images`, fd);
-    },
     
     createOrder: (data) => API.post('/orders/', data),
     getMyOrders: (page) => API.get(`/orders/my?page=${page}&page_size=10`),

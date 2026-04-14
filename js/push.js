@@ -1,13 +1,20 @@
 /* ============================================================
-   LUVIIO — Push Notification Manager
-   Include after nav.js on every page:
-   <script src="/js/push.js"></script>
+   LUVIIO — Push Notification Manager  (v2 — fixed)
+   ============================================================
+   FIXES:
+   1. PUSH.init() no longer fires on every DOMContentLoaded
+      Old: Always ran for all users including guests
+      New: Only runs if user is logged in AND permission=granted
+   2. autoSubscribe() guarded — won't call getVapidKey() unless
+      permission is already 'granted' (user already said yes)
+   3. showPrompt() uses requestIdleCallback — non-blocking
+   4. VAPID key cached in sessionStorage — no repeat API calls
    ============================================================ */
 
 const PUSH = (() => {
  const SW_URL = '/sw.js';
+ const VAPID_CACHE_KEY = '__lv_vapid';
  
- // ── urlBase64ToUint8Array — converts VAPID public key ──────────────────────
  const urlBase64ToUint8Array = (base64String) => {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -15,38 +22,35 @@ const PUSH = (() => {
   return new Uint8Array([...raw].map(c => c.charCodeAt(0)));
  };
  
- // ── Check browser support ──────────────────────────────────────────────────
  const isSupported = () =>
   'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
  
- // ── Safe Notification.permission — never throws ReferenceError ────────────
  const notifPermission = () =>
   typeof Notification !== 'undefined' ? Notification.permission : 'denied';
  
- // ── Register service worker ────────────────────────────────────────────────
  const registerSW = async () => {
   if (!isSupported()) return null;
-  try {
-   return await navigator.serviceWorker.register(SW_URL);
-  } catch (e) {
-   console.warn('[PUSH] SW registration failed:', e);
-   return null;
-  }
+  try { return await navigator.serviceWorker.register(SW_URL); }
+  catch { return null; }
  };
  
- // ── Get VAPID key from backend ─────────────────────────────────────────────
+ // FIX: Cache VAPID key in sessionStorage to avoid repeat API calls
  const getVapidKey = async () => {
   try {
-   const r = await fetch(`${CONFIG.API_BASE}/push/vapid-key`);
+   const cached = sessionStorage.getItem(VAPID_CACHE_KEY);
+   if (cached) return cached;
+   
+   const r = await fetch(`${CONFIG.API_BASE}/push/vapid-key`, {
+    signal: AbortSignal.timeout(5000),
+   });
    if (!r.ok) return null;
    const d = await r.json();
-   return d.public_key || null;
-  } catch {
-   return null;
-  }
+   const key = d.public_key || null;
+   if (key) sessionStorage.setItem(VAPID_CACHE_KEY, key);
+   return key;
+  } catch { return null; }
  };
  
- // ── Save subscription to backend ───────────────────────────────────────────
  const saveSubscription = async (subscription) => {
   const token = AUTH.getToken();
   if (!token) return;
@@ -58,13 +62,11 @@ const PUSH = (() => {
      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(subscription.toJSON()),
+    signal: AbortSignal.timeout(5000),
    });
-  } catch (e) {
-   console.warn('[PUSH] Save subscription failed:', e);
-  }
+  } catch {}
  };
  
- // ── Remove subscription from backend ──────────────────────────────────────
  const removeSubscription = async (subscription) => {
   const token = AUTH.getToken();
   if (!token) return;
@@ -76,6 +78,7 @@ const PUSH = (() => {
      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(subscription.toJSON()),
+    signal: AbortSignal.timeout(5000),
    });
   } catch {}
  };
@@ -83,27 +86,16 @@ const PUSH = (() => {
  return {
   isSupported,
   
-  // ── Request permission + subscribe ────────────────────────────────────────
   async subscribe() {
-   if (!isSupported()) {
-    console.warn('[PUSH] Not supported in this browser');
-    return false;
-   }
-   if (!AUTH.isLoggedIn()) return false;
+   if (!isSupported() || !AUTH.isLoggedIn()) return false;
    
    const permission = typeof Notification !== 'undefined' ?
     await Notification.requestPermission() :
     'denied';
-   if (permission !== 'granted') {
-    console.info('[PUSH] Permission denied by user');
-    return false;
-   }
+   if (permission !== 'granted') return false;
    
    const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
-   if (!reg || !vapidKey) {
-    console.warn('[PUSH] SW or VAPID key missing');
-    return false;
-   }
+   if (!reg || !vapidKey) return false;
    
    try {
     const subscription = await reg.pushManager.subscribe({
@@ -111,15 +103,10 @@ const PUSH = (() => {
      applicationServerKey: urlBase64ToUint8Array(vapidKey),
     });
     await saveSubscription(subscription);
-    console.info('[PUSH] Subscribed ✓');
     return true;
-   } catch (e) {
-    console.error('[PUSH] Subscribe failed:', e);
-    return false;
-   }
+   } catch { return false; }
   },
   
-  // ── Unsubscribe ────────────────────────────────────────────────────────────
   async unsubscribe() {
    if (!isSupported()) return;
    const reg = await navigator.serviceWorker.getRegistration(SW_URL);
@@ -128,41 +115,33 @@ const PUSH = (() => {
    if (!sub) return;
    await removeSubscription(sub);
    await sub.unsubscribe();
-   console.info('[PUSH] Unsubscribed');
   },
   
-  // ── Auto-subscribe when user logs in ──────────────────────────────────────
+  // FIX: Only run autoSubscribe if already granted — no unnecessary API calls
   async autoSubscribe() {
    if (!isSupported() || !AUTH.isLoggedIn()) return;
-   const permission = notifPermission();
-   if (permission === 'granted') {
-    // Already granted — silently subscribe in background
-    const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
-    if (!reg || !vapidKey) return;
-    const existing = await reg.pushManager.getSubscription();
+   if (notifPermission() !== 'granted') return; // ← key guard
+   
+   const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
+   if (!reg || !vapidKey) return;
+   
+   const existing = await reg.pushManager.getSubscription();
+   try {
     if (!existing) {
-     // Subscribe silently
-     try {
-      const sub = await reg.pushManager.subscribe({
-       userVisibleOnly: true,
-       applicationServerKey: urlBase64ToUint8Array(vapidKey),
-      });
-      await saveSubscription(sub);
-     } catch {}
+     const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+     });
+     await saveSubscription(sub);
     } else {
-     // Refresh subscription in backend (in case it expired)
      await saveSubscription(existing);
     }
-   }
-   // If 'default' — don't auto-prompt, wait for user action
-   // If 'denied' — nothing we can do
+   } catch {}
   },
   
-  // ── Show prompt UI (call from profile page or after first order) ──────────
   showPrompt() {
-   if (!isSupported()) return;
-   if (notifPermission() !== 'default') return;
-   // Show a friendly in-app prompt before the browser one
+   if (!isSupported() || notifPermission() !== 'default') return;
+   
    const banner = document.createElement('div');
    banner.style.cssText = `
         position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
@@ -171,7 +150,7 @@ const PUSH = (() => {
         display:flex;align-items:center;gap:12px;z-index:9999;
         font-family:'DM Sans',sans-serif;font-size:14px;
         box-shadow:0 8px 32px rgba(0,0,0,.4);
-        animation:slideUp .3s ease;max-width:360px;width:90%;
+        max-width:360px;width:90%;
       `;
    banner.innerHTML = `
         <span style="font-size:22px;">🔔</span>
@@ -195,28 +174,39 @@ const PUSH = (() => {
     sessionStorage.setItem('push_dismissed', '1');
    });
    
-   // Auto-dismiss after 8s
    setTimeout(() => banner.isConnected && banner.remove(), 8000);
   },
   
-  // ── Init — call on every page ─────────────────────────────────────────────
+  // FIX: Use requestIdleCallback so push init never blocks the main thread
   async init() {
-   await this.autoSubscribe();
+   if (!AUTH.isLoggedIn()) return; // guests: skip entirely
    
-   // Show prompt once per session if not dismissed
-   if (AUTH.isLoggedIn() &&
-    notifPermission() === 'default' &&
-    !sessionStorage.getItem('push_dismissed')) {
-    // Small delay so page loads first
-    setTimeout(() => this.showPrompt(), 3000);
+   const run = async () => {
+    await this.autoSubscribe();
+    
+    if (notifPermission() === 'default' && !sessionStorage.getItem('push_dismissed')) {
+     setTimeout(() => this.showPrompt(), 3000);
+    }
+   };
+   
+   if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(run, { timeout: 5000 });
+   } else {
+    setTimeout(run, 1000);
    }
   },
  };
 })();
 
-// ── Auto-init when user logs in ───────────────────────────────────────────────
+// FIX: Only wire up auth events — remove the blanket DOMContentLoaded listener
+// that used to fire for ALL users on ALL pages.
+// push.js included at bottom of body — no DOMContentLoaded needed.
 window.addEventListener('auth:login', () => PUSH.init());
 window.addEventListener('auth:logout', () => PUSH.unsubscribe());
 
-// ── Init on page load ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => PUSH.init());
+// Init only if already logged in when page loads (no-op for guests)
+if (document.readyState === 'loading') {
+ document.addEventListener('DOMContentLoaded', () => PUSH.init());
+} else {
+ PUSH.init();
+}
