@@ -124,6 +124,11 @@
   
   <link rel="stylesheet" href="/css/luviio.css">
   <style>
+    /* CSS Performance optimizations added here */
+    .section, .section-sm {
+      contain: content; /* Isolates layout repaints for blazing fast rendering */
+    }
+
     .hero {
       min-height: calc(100vh - var(--nav-h));
       padding: 0;
@@ -143,6 +148,7 @@
       color: var(--gold);
       margin-bottom: 24px;
       opacity: 0;
+      will-change: transform, opacity; /* GPU Hint */
     }
     
     .hero-title {
@@ -153,6 +159,7 @@
       color: var(--text);
       margin-bottom: 28px;
       opacity: 0;
+      will-change: transform, opacity; /* GPU Hint */
     }
     
     .hero-title em {
@@ -167,6 +174,7 @@
       line-height: 1.8;
       margin-bottom: 40px;
       opacity: 0;
+      will-change: transform, opacity; /* GPU Hint */
     }
     
     .hero-actions {
@@ -174,6 +182,7 @@
       gap: 16px;
       flex-wrap: wrap;
       opacity: 0;
+      will-change: transform, opacity; /* GPU Hint */
     }
     
     .hero-scroll {
@@ -197,10 +206,10 @@
       height: 48px;
       background: linear-gradient(to bottom, var(--gold), transparent);
       animation: scrollLine 2s ease-in-out infinite;
+      will-change: opacity; /* GPU Hint */
     }
     
     @keyframes scrollLine {
-
       0%,
       100% {
         opacity: 0.3;
@@ -217,6 +226,7 @@
       overflow-x: auto;
       padding-bottom: 8px;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch; /* Smooth buttery scroll for iOS */
     }
     
     .cat-strip::-webkit-scrollbar {
@@ -402,160 +412,173 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous"></script>
   
   <script>
-    pageInit();
-    
-    // Register ScrollTrigger
-    if (window.gsap && window.ScrollTrigger) {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-    
-    // 1. Sequenced Hero Animations
-    if (window.gsap) {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.fromTo('.hero-eyebrow', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.2 })
-        .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.4")
-        .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
-        .fromTo('.hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
-    }
-    
-    // 2. Load Categories
-    async function loadCategories() {
-      try {
-        const cats = await API.getCategories();
-        const strip = document.getElementById('cat-strip-wrap');
-        cats.forEach(cat => {
-          const a = document.createElement('a');
-          a.className = 'cat-pill';
-          a.href = `/shop.html?category=${encodeURIComponent(cat.slug)}`;
-          a.textContent = cat.name;
-          strip.appendChild(a);
-        });
-      } catch {}
-    }
-    
-    // 3. Load Featured Products with ScrollTrigger
-    async function loadFeatured() {
-      const grid = document.getElementById('featured-grid');
-      try {
-        const data = await API.getProducts({ page_size: 8, in_stock: true });
-        grid.innerHTML = '';
-        if (!data.items?.length) {
-          grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No products yet — check back soon.</p>';
-          return;
-        }
-        
-        data.items.slice(0, 8).forEach(p => grid.appendChild(makeProductCard(p)));
-        
-        if (window.gsap && window.ScrollTrigger) {
-          gsap.fromTo('#featured-grid .product-card', 
-            { opacity: 0, y: 40 },
-            { 
-              opacity: 1, 
-              y: 0, 
-              duration: 0.6, 
-              stagger: 0.1, 
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: "#featured-grid",
-                start: "top 85%", // Triggers when the grid is 85% into the viewport
-                toggleActions: "play none none none"
+    // Yielding to browser to render skeletons perfectly before running heavy tasks
+    requestAnimationFrame(() => {
+      pageInit();
+      
+      // Register ScrollTrigger
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+      }
+      
+      // 1. Sequenced Hero Animations
+      if (window.gsap) {
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        tl.fromTo('.hero-eyebrow', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.2 })
+          .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.4")
+          .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
+          .fromTo('.hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
+      }
+      
+      // 2. Load Categories (Optimized with DocumentFragment)
+      async function loadCategories() {
+        try {
+          const cats = await API.getCategories();
+          const strip = document.getElementById('cat-strip-wrap');
+          const fragment = document.createDocumentFragment();
+          
+          cats.forEach(cat => {
+            const a = document.createElement('a');
+            a.className = 'cat-pill';
+            a.href = `/shop.html?category=${encodeURIComponent(cat.slug)}`;
+            a.textContent = cat.name;
+            fragment.appendChild(a);
+          });
+          
+          strip.appendChild(fragment); // Single DOM insertion
+        } catch {}
+      }
+      
+      // 3. Load Featured Products (Optimized with DocumentFragment)
+      async function loadFeatured() {
+        const grid = document.getElementById('featured-grid');
+        try {
+          const data = await API.getProducts({ page_size: 8, in_stock: true });
+          grid.innerHTML = '';
+          
+          if (!data.items?.length) {
+            grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No products yet — check back soon.</p>';
+            return;
+          }
+          
+          const fragment = document.createDocumentFragment();
+          data.items.slice(0, 8).forEach(p => fragment.appendChild(makeProductCard(p)));
+          
+          grid.appendChild(fragment); // Single DOM insertion
+          
+          if (window.gsap && window.ScrollTrigger) {
+            gsap.fromTo('#featured-grid .product-card', 
+              { opacity: 0, y: 40 },
+              { 
+                opacity: 1, 
+                y: 0, 
+                duration: 0.6, 
+                stagger: 0.1, 
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: "#featured-grid",
+                  start: "top 85%", // Triggers when the grid is 85% into the viewport
+                  toggleActions: "play none none none"
+                }
               }
-            }
-          );
+            );
+          }
+        } catch {
+          grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
         }
-      } catch {
-        grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
-      }
-    }
-    
-    // 4. Card Maker Function
-    function makeProductCard(p) {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.setAttribute('role', 'listitem');
-      
-      const imgWrap = document.createElement('div');
-      imgWrap.className = 'product-card-img';
-      if (p.image_url) {
-        const img = document.createElement('img');
-        img.src = p.image_url;
-        img.alt = escapeHTML(p.name);
-        img.loading = 'lazy';
-        img.width = 400;
-        img.height = 500;
-        imgWrap.appendChild(img);
-      } else {
-        const ph = document.createElement('div');
-        ph.className = 'img-placeholder';
-        ph.textContent = '◈';
-        imgWrap.appendChild(ph);
       }
       
-      const body = document.createElement('div');
-      body.className = 'product-card-body';
-      
-      const name = document.createElement('div');
-      name.className = 'product-card-name';
-      name.textContent = p.name;
-      
-      const priceRow = document.createElement('div');
-      priceRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
-      
-      const price = document.createElement('div');
-      price.className = 'product-card-price';
-      price.textContent = formatPrice(p.price);
-      priceRow.appendChild(price);
-      
-      if (p.compare_price) {
-        const compare = document.createElement('div');
-        compare.className = 'product-card-compare';
-        compare.textContent = formatPrice(p.compare_price);
-        priceRow.appendChild(compare);
+      // 4. Card Maker Function (Optimized Image Rendering)
+      function makeProductCard(p) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.setAttribute('role', 'listitem');
+        
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'product-card-img';
+        
+        if (p.image_url) {
+          const img = document.createElement('img');
+          img.src = p.image_url;
+          img.alt = escapeHTML(p.name);
+          img.loading = 'lazy';
+          img.decoding = 'async'; // Prevents UI lag while decoding large images
+          img.width = 400;
+          img.height = 500;
+          imgWrap.appendChild(img);
+        } else {
+          const ph = document.createElement('div');
+          ph.className = 'img-placeholder';
+          ph.textContent = '◈';
+          imgWrap.appendChild(ph);
+        }
+        
+        const body = document.createElement('div');
+        body.className = 'product-card-body';
+        
+        const name = document.createElement('div');
+        name.className = 'product-card-name';
+        name.textContent = p.name;
+        
+        const priceRow = document.createElement('div');
+        priceRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        
+        const price = document.createElement('div');
+        price.className = 'product-card-price';
+        price.textContent = formatPrice(p.price);
+        priceRow.appendChild(price);
+        
+        if (p.compare_price) {
+          const compare = document.createElement('div');
+          compare.className = 'product-card-compare';
+          compare.textContent = formatPrice(p.compare_price);
+          priceRow.appendChild(compare);
+        }
+        
+        body.appendChild(name);
+        body.appendChild(priceRow);
+        
+        if (p.stock === 0) {
+          const oos = document.createElement('span');
+          oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
+          oos.textContent = 'Out of stock';
+          body.appendChild(oos);
+        }
+        
+        const action = document.createElement('div');
+        action.className = 'product-card-action';
+        
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary';
+        btn.style.width = '100%';
+        btn.style.padding = '10px';
+        btn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
+        btn.disabled = p.stock === 0;
+        btn.setAttribute('aria-label', `Add ${p.name} to cart`);
+        
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          CART.add(p, 1);
+          showToast(`${p.name} added to cart`, 'success');
+        });
+        
+        action.appendChild(btn);
+        card.appendChild(imgWrap);
+        card.appendChild(body);
+        card.appendChild(action);
+        
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'BUTTON') return;
+          window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
+        });
+        
+        return card;
       }
       
-      body.appendChild(name);
-      body.appendChild(priceRow);
-      
-      if (p.stock === 0) {
-        const oos = document.createElement('span');
-        oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
-        oos.textContent = 'Out of stock';
-        body.appendChild(oos);
-      }
-      
-      const action = document.createElement('div');
-      action.className = 'product-card-action';
-      
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-primary';
-      btn.style.width = '100%';
-      btn.style.padding = '10px';
-      btn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
-      btn.disabled = p.stock === 0;
-      btn.setAttribute('aria-label', `Add ${p.name} to cart`);
-      
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        CART.add(p, 1);
-        showToast(`${p.name} added to cart`, 'success');
-      });
-      
-      action.appendChild(btn);
-      card.appendChild(imgWrap);
-      card.appendChild(body);
-      card.appendChild(action);
-      
-      card.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
-      });
-      
-      return card;
-    }
-    
-    loadCategories();
-    loadFeatured();
+      loadCategories();
+      loadFeatured();
+    });
   </script>
 </body>
 
