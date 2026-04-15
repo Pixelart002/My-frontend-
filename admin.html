@@ -13,11 +13,14 @@
   <link rel="preload" href="/css/luviio.css" as="style">
   <link rel="preload" href="/css/admin.css" as="style">
   
+  <!-- 2. Font Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
+  <!-- 3. Font Preload -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" as="style">
   
+  <!-- 4. JS Files Prefetch -->
   <link rel="prefetch" href="/js/config.js">
   <link rel="prefetch" href="/js/utils.js">
   <link rel="prefetch" href="/js/auth.js">
@@ -28,6 +31,7 @@
   <link rel="prefetch" href="/js/validation.js">
   <link rel="prefetch" href="/js/formatting.js">
   
+  <!-- 5. Images Prefetch -->
   <link rel="prefetch" href="/images/logo.png">
   <link rel="prefetch" href="/images/logo-dark.png">
   <link rel="prefetch" href="/images/default-product.jpg">
@@ -36,6 +40,7 @@
   <link rel="prefetch" href="/favicon.ico">
   <link rel="prefetch" href="/apple-touch-icon.png">
   
+  <!-- 6. CRITICAL APIS - Dashboard ke liye -->
   <link rel="prefetch" href="/api/dashboard/stats">
   <link rel="prefetch" href="/api/products?page=1&page_size=20">
   <link rel="prefetch" href="/api/categories">
@@ -44,6 +49,7 @@
   <link rel="prefetch" href="/api/dashboard/recent-orders?limit=5">
   <link rel="prefetch" href="/api/dashboard/low-stock">
   
+  <!-- 7. PRODUCTS RELATED APIS -->
   <link rel="prefetch" href="/api/products?page=2&page_size=20">
   <link rel="prefetch" href="/api/products?page=3&page_size=20">
   <link rel="prefetch" href="/api/products/count">
@@ -51,17 +57,20 @@
   <link rel="prefetch" href="/api/products/recent">
   <link rel="prefetch" href="/api/products/top-selling">
   
+  <!-- 8. CATEGORIES RELATED APIS -->
   <link rel="prefetch" href="/api/categories/tree">
   <link rel="prefetch" href="/api/categories/stats">
   <link rel="prefetch" href="/api/categories/featured">
   <link rel="prefetch" href="/api/categories/parents">
   
+  <!-- 9. INVENTORY RELATED APIS -->
   <link rel="prefetch" href="/api/inventory/low-stock">
   <link rel="prefetch" href="/api/inventory/out-of-stock">
   <link rel="prefetch" href="/api/inventory/restock-needed">
   <link rel="prefetch" href="/api/inventory/audit-log?limit=10">
   <link rel="prefetch" href="/api/inventory/stock-value">
   
+  <!-- 10. ORDERS RELATED APIS -->
   <link rel="prefetch" href="/api/orders/pending">
   <link rel="prefetch" href="/api/orders/processing">
   <link rel="prefetch" href="/api/orders/shipped">
@@ -73,6 +82,7 @@
   <link rel="prefetch" href="/api/orders/recent?limit=10">
   <link rel="prefetch" href="/api/orders?page=2&page_size=20">
   
+  <!-- 11. USERS RELATED APIS -->
   <link rel="prefetch" href="/api/users/new-this-week">
   <link rel="prefetch" href="/api/users/active">
   <link rel="prefetch" href="/api/users/inactive">
@@ -82,6 +92,7 @@
   <link rel="prefetch" href="/api/users/activity">
   <link rel="prefetch" href="/api/users?page=2&page_size=20">
   
+  <!-- 12. REPORTS RELATED APIS -->
   <link rel="prefetch" href="/api/reports/sales-today">
   <link rel="prefetch" href="/api/reports/sales-week">
   <link rel="prefetch" href="/api/reports/sales-month">
@@ -91,24 +102,32 @@
   <link rel="prefetch" href="/api/reports/conversion-rate">
   <link rel="prefetch" href="/api/reports/revenue">
   
+  <!-- 13. SETTINGS RELATED APIS -->
   <link rel="prefetch" href="/api/settings/store">
   <link rel="prefetch" href="/api/settings/shipping">
   <link rel="prefetch" href="/api/settings/payment">
   <link rel="prefetch" href="/api/settings/tax">
   <link rel="prefetch" href="/api/settings/email-templates">
   
+  <!-- 14. NOTIFICATIONS -->
   <link rel="prefetch" href="/api/notifications/unread">
   <link rel="prefetch" href="/api/notifications/alerts">
   <link rel="prefetch" href="/api/admin/messages">
   
+  <!-- 15. META & SEO -->
   <link rel="prefetch" href="/sitemap.xml">
   <link rel="prefetch" href="/robots.txt">
   
+  <!-- Existing CSS (yeh baad mein load hoga) -->
   <link rel="stylesheet" href="/css/luviio.css">
   <link rel="stylesheet" href="/css/admin.css">
   
+  <!-- Font Style (after preload) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
 
+  
+  
+  
   <style>
     /* ── SVG Icon helper ─────────────────────────────── */
     .ico {
@@ -811,26 +830,6 @@
       font-size: 12px;
       color: var(--text-muted);
     }
-
-    /* ── SECURITY: Auth Gate Overlay ─────────────────── */
-    #auth-gate {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-    }
-    #auth-gate.hidden {
-      display: none;
-    }
-    #auth-gate-msg {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
     
     @media(max-width:1100px) {
       .stats-grid {
@@ -865,16 +864,12 @@
 </head>
 
 <body>
-  <div id="auth-gate">
-    <svg width="32" height="32" fill="none" stroke="var(--gold)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-    <div id="auth-gate-msg">Verifying access…</div>
-  </div>
-
   <nav id="main-nav"></nav>
   
   <div class="page-wrapper">
     <div class="admin-wrap">
       
+      <!-- ════════════════════ SIDEBAR ════════════════════ -->
       <aside class="admin-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-label">Overview</div>
@@ -946,8 +941,10 @@
         </div>
       </aside>
       
+      <!-- ════════════════════ MAIN ════════════════════ -->
       <main class="admin-main">
         
+        <!-- ─── DASHBOARD ─── -->
         <div id="panel-dashboard" class="admin-panel active">
           <div class="admin-header">
             <div>
@@ -1079,6 +1076,7 @@
           </div>
         </div>
         
+        <!-- ─── PRODUCTS ─── -->
         <div id="panel-products" class="admin-panel">
           <div class="admin-header">
             <div>
@@ -1151,6 +1149,7 @@
           </div>
         </div>
         
+        <!-- ─── CATEGORIES ─── -->
         <div id="panel-categories" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Categories</div>
@@ -1181,6 +1180,7 @@
           </div>
         </div>
         
+        <!-- ─── INVENTORY ─── -->
         <div id="panel-inventory" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Inventory</div>
@@ -1238,6 +1238,7 @@
           </div>
         </div>
         
+        <!-- ─── ORDERS ─── -->
         <div id="panel-orders" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Orders</div>
@@ -1278,6 +1279,7 @@
           </div>
         </div>
         
+        <!-- ─── USERS ─── -->
         <div id="panel-users" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Users</div>
@@ -1318,6 +1320,7 @@
     </div>
   </div>
   
+  <!-- ════ PRODUCT MODAL ════ -->
   <div id="modal-product" class="modal-bd" style="display:none;" onclick="closeModal('modal-product',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -1409,6 +1412,7 @@
     </div>
   </div>
   
+  <!-- ════ CATEGORY MODAL ════ -->
   <div id="modal-cat" class="modal-bd" style="display:none;" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -1441,6 +1445,7 @@
     </div>
   </div>
   
+  <!-- ════ ORDER MODAL ════ -->
   <div id="modal-order" class="modal-bd" style="display:none;" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -1484,6 +1489,7 @@
   <script src="/js/api.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
+  <script src="/js/push.js"></script>
   <script>
     /* ══════════════════════════════════════
        STATE
@@ -1541,53 +1547,23 @@
     };
     
     /* ══════════════════════════════════════
-       INIT (SECURE ROLE CHECK ADDED)
+       INIT
     ══════════════════════════════════════ */
     async function init() {
-      await pageInit(); // sets up nav, refreshes token
-
-      if (!AUTH.isLoggedIn()) {
-        window.location.href = '/login.html?redirect=/admin.html';
-        return;
-      }
-
-      const gate    = document.getElementById('auth-gate');
-      const gateMsg = document.getElementById('auth-gate-msg');
-
-      try {
-        // Live DB check — cannot be spoofed by XSS or stale cache
-        const verifyRes = await fetch(`${CONFIG.API_BASE}/admin/verify`, {
-          headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
-          signal:  AbortSignal.timeout(8000),
-        });
-
-        if (!verifyRes.ok) {
-          gateMsg.textContent = 'Access denied. Redirecting…';
-          setTimeout(() => { window.location.href = '/index.html'; }, 1000);
-          return;
-        }
-
-        const { profile } = await verifyRes.json();
-        AUTH.setProfile(profile);   // update with fresh server data
-
-      } catch {
-        gateMsg.textContent = 'Could not verify access. Redirecting…';
-        setTimeout(() => { window.location.href = '/index.html'; }, 1200);
-        return;
-      }
-
-      // Verified — reveal page
-      gate.classList.add('hidden');
-
+      const ok = await pageInit({ requireAuth: true });
+      if (!ok) return;
       const profile = AUTH.getProfile();
+      if (!profile || profile.role !== 'admin') {
+        showToast('Admin access required', 'error');
+        setTimeout(() => location.href = '/index.html', 1400);
+        return;
+      }
       document.getElementById('dash-greeting').textContent =
-        `Welcome back, ${escapeHTML(profile?.full_name?.split(' ')[0] || 'Admin')}`;
-
+        `Welcome back, ${escapeHTML(profile.full_name?.split(' ')[0] || 'Admin')}`;
       setInterval(() => {
         const el = document.getElementById('dash-time');
         if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
       }, 1000);
-      
       loadDashboard();
     }
     
@@ -2262,3 +2238,4 @@
 </body>
 
 </html>
+
