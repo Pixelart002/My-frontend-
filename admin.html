@@ -13,14 +13,11 @@
   <link rel="preload" href="/css/luviio.css" as="style">
   <link rel="preload" href="/css/admin.css" as="style">
   
-  <!-- 2. Font Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
-  <!-- 3. Font Preload -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" as="style">
   
-  <!-- 4. JS Files Prefetch -->
   <link rel="prefetch" href="/js/config.js">
   <link rel="prefetch" href="/js/utils.js">
   <link rel="prefetch" href="/js/auth.js">
@@ -31,7 +28,6 @@
   <link rel="prefetch" href="/js/validation.js">
   <link rel="prefetch" href="/js/formatting.js">
   
-  <!-- 5. Images Prefetch -->
   <link rel="prefetch" href="/images/logo.png">
   <link rel="prefetch" href="/images/logo-dark.png">
   <link rel="prefetch" href="/images/default-product.jpg">
@@ -40,7 +36,6 @@
   <link rel="prefetch" href="/favicon.ico">
   <link rel="prefetch" href="/apple-touch-icon.png">
   
-  <!-- 6. CRITICAL APIS - Dashboard ke liye -->
   <link rel="prefetch" href="/api/dashboard/stats">
   <link rel="prefetch" href="/api/products?page=1&page_size=20">
   <link rel="prefetch" href="/api/categories">
@@ -49,7 +44,6 @@
   <link rel="prefetch" href="/api/dashboard/recent-orders?limit=5">
   <link rel="prefetch" href="/api/dashboard/low-stock">
   
-  <!-- 7. PRODUCTS RELATED APIS -->
   <link rel="prefetch" href="/api/products?page=2&page_size=20">
   <link rel="prefetch" href="/api/products?page=3&page_size=20">
   <link rel="prefetch" href="/api/products/count">
@@ -57,20 +51,17 @@
   <link rel="prefetch" href="/api/products/recent">
   <link rel="prefetch" href="/api/products/top-selling">
   
-  <!-- 8. CATEGORIES RELATED APIS -->
   <link rel="prefetch" href="/api/categories/tree">
   <link rel="prefetch" href="/api/categories/stats">
   <link rel="prefetch" href="/api/categories/featured">
   <link rel="prefetch" href="/api/categories/parents">
   
-  <!-- 9. INVENTORY RELATED APIS -->
   <link rel="prefetch" href="/api/inventory/low-stock">
   <link rel="prefetch" href="/api/inventory/out-of-stock">
   <link rel="prefetch" href="/api/inventory/restock-needed">
   <link rel="prefetch" href="/api/inventory/audit-log?limit=10">
   <link rel="prefetch" href="/api/inventory/stock-value">
   
-  <!-- 10. ORDERS RELATED APIS -->
   <link rel="prefetch" href="/api/orders/pending">
   <link rel="prefetch" href="/api/orders/processing">
   <link rel="prefetch" href="/api/orders/shipped">
@@ -82,7 +73,6 @@
   <link rel="prefetch" href="/api/orders/recent?limit=10">
   <link rel="prefetch" href="/api/orders?page=2&page_size=20">
   
-  <!-- 11. USERS RELATED APIS -->
   <link rel="prefetch" href="/api/users/new-this-week">
   <link rel="prefetch" href="/api/users/active">
   <link rel="prefetch" href="/api/users/inactive">
@@ -92,7 +82,6 @@
   <link rel="prefetch" href="/api/users/activity">
   <link rel="prefetch" href="/api/users?page=2&page_size=20">
   
-  <!-- 12. REPORTS RELATED APIS -->
   <link rel="prefetch" href="/api/reports/sales-today">
   <link rel="prefetch" href="/api/reports/sales-week">
   <link rel="prefetch" href="/api/reports/sales-month">
@@ -102,31 +91,23 @@
   <link rel="prefetch" href="/api/reports/conversion-rate">
   <link rel="prefetch" href="/api/reports/revenue">
   
-  <!-- 13. SETTINGS RELATED APIS -->
   <link rel="prefetch" href="/api/settings/store">
   <link rel="prefetch" href="/api/settings/shipping">
   <link rel="prefetch" href="/api/settings/payment">
   <link rel="prefetch" href="/api/settings/tax">
   <link rel="prefetch" href="/api/settings/email-templates">
   
-  <!-- 14. NOTIFICATIONS -->
   <link rel="prefetch" href="/api/notifications/unread">
   <link rel="prefetch" href="/api/notifications/alerts">
   <link rel="prefetch" href="/api/admin/messages">
   
-  <!-- 15. META & SEO -->
   <link rel="prefetch" href="/sitemap.xml">
   <link rel="prefetch" href="/robots.txt">
   
-  <!-- Existing CSS (yeh baad mein load hoga) -->
   <link rel="stylesheet" href="/css/luviio.css">
   <link rel="stylesheet" href="/css/admin.css">
   
-  <!-- Font Style (after preload) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
-
-  
-  
   
   <style>
     /* ── SVG Icon helper ─────────────────────────────── */
@@ -274,7 +255,6 @@
       margin-top: 2px;
     }
     
-    /* ── Panels ──────────────────────────────────────── */
     .admin-panel {
       display: none;
     }
@@ -590,7 +570,7 @@
       color: #000;
     }
     
-    /* ── Stock badges ────────────────────────────────── */
+    /* ── Stock badges & Status dots ──────────────────── */
     .sbadge {
       display: inline-block;
       padding: 2px 8px;
@@ -614,7 +594,6 @@
       color: var(--error);
     }
     
-    /* ── Status dot ──────────────────────────────────── */
     .status-dot {
       display: inline-flex;
       align-items: center;
@@ -647,7 +626,7 @@
       color: var(--error);
     }
     
-    /* ── Bulk bar ────────────────────────────────────── */
+    /* ── Bulk bar & Footer ───────────────────────────── */
     .bulk-bar {
       display: none;
       align-items: center;
@@ -670,7 +649,6 @@
       flex: 1;
     }
     
-    /* ── Table footer ────────────────────────────────── */
     .table-footer {
       display: flex;
       align-items: center;
@@ -760,7 +738,7 @@
       gap: 14px;
     }
     
-    /* ── Image drop zone ─────────────────────────────── */
+    /* ── Image drop zone & Multiple Previews ─────────── */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
@@ -779,19 +757,49 @@
       background: var(--gold-dim);
     }
     
-    .drop-zone-img {
-      width: 72px;
-      height: 88px;
-      object-fit: cover;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin: 0 auto 10px;
-      display: none;
-    }
-    
     .drop-zone-txt {
       font-size: 12px;
       color: var(--text-dim);
+    }
+    
+    /* New styles for multiple images */
+    .img-preview-wrap {
+      position: relative;
+      width: 68px;
+      height: 84px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+    
+    .img-preview-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .img-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      backdrop-filter: blur(2px);
+    }
+    
+    .img-remove-btn:hover {
+      background: var(--error);
     }
     
     /* ── Inventory inline ────────────────────────────── */
@@ -817,7 +825,6 @@
       gap: 5px;
     }
     
-    /* ── Hint bar ────────────────────────────────────── */
     .hint-bar {
       display: flex;
       align-items: center;
@@ -869,7 +876,6 @@
   <div class="page-wrapper">
     <div class="admin-wrap">
       
-      <!-- ════════════════════ SIDEBAR ════════════════════ -->
       <aside class="admin-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-label">Overview</div>
@@ -941,10 +947,7 @@
         </div>
       </aside>
       
-      <!-- ════════════════════ MAIN ════════════════════ -->
       <main class="admin-main">
-        
-        <!-- ─── DASHBOARD ─── -->
         <div id="panel-dashboard" class="admin-panel active">
           <div class="admin-header">
             <div>
@@ -1010,32 +1013,28 @@
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
-                </svg></div>
-              <span class="quick-card-label">Add Product</span>
+                </svg></div><span class="quick-card-label">Add Product</span>
             </div>
             <div class="quick-card" onclick="showPanel('categories');openCatModal()">
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
                   <line x1="12" y1="11" x2="12" y2="17" />
                   <line x1="9" y1="14" x2="15" y2="14" />
-                </svg></div>
-              <span class="quick-card-label">Add Category</span>
+                </svg></div><span class="quick-card-label">Add Category</span>
             </div>
             <div class="quick-card" onclick="showPanel('orders')">
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                   <line x1="3" y1="6" x2="21" y2="6" />
                   <path d="M16 10a4 4 0 01-8 0" />
-                </svg></div>
-              <span class="quick-card-label">View Orders</span>
+                </svg></div><span class="quick-card-label">View Orders</span>
             </div>
             <div class="quick-card" onclick="showPanel('inventory')">
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
                   <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                   <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg></div>
-              <span class="quick-card-label">Update Stock</span>
+                </svg></div><span class="quick-card-label">Update Stock</span>
             </div>
             <div class="quick-card" onclick="showPanel('users')">
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -1043,15 +1042,13 @@
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 00-3-3.87" />
                   <path d="M16 3.13a4 4 0 010 7.75" />
-                </svg></div>
-              <span class="quick-card-label">Manage Users</span>
+                </svg></div><span class="quick-card-label">Manage Users</span>
             </div>
             <div class="quick-card" onclick="loadDashboard()">
               <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <polyline points="23 4 23 10 17 10" />
                   <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-                </svg></div>
-              <span class="quick-card-label">Refresh Stats</span>
+                </svg></div><span class="quick-card-label">Refresh Stats</span>
             </div>
           </div>
           
@@ -1076,7 +1073,6 @@
           </div>
         </div>
         
-        <!-- ─── PRODUCTS ─── -->
         <div id="panel-products" class="admin-panel">
           <div class="admin-header">
             <div>
@@ -1087,8 +1083,7 @@
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add Product
+              </svg> Add Product
             </button>
           </div>
           
@@ -1098,13 +1093,10 @@
               <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
             </svg>
             <span class="bulk-bar-label" id="prod-bulk-label">0 selected</span>
-            <button class="btn-xs bxd" onclick="bulkDeleteProducts()">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <button class="btn-xs bxd" onclick="bulkDeleteProducts()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-              </svg>
-              Delete Selected
-            </button>
+              </svg> Delete Selected</button>
             <button class="btn-xs bxo" onclick="clearProdSel()">Clear</button>
           </div>
           
@@ -1122,7 +1114,6 @@
               </select>
               <div style="margin-left:auto;" id="prod-count"></div>
             </div>
-            
             <table>
               <thead>
                 <tr>
@@ -1142,24 +1133,16 @@
                 </tr>
               </tbody>
             </table>
-            <div class="table-footer">
-              <span id="prod-info"></span>
+            <div class="table-footer"><span id="prod-info"></span>
               <div class="pagination" id="prod-pages" style="margin:0;gap:4px;"></div>
             </div>
           </div>
         </div>
         
-        <!-- ─── CATEGORIES ─── -->
         <div id="panel-categories" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Categories</div>
-            <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openCatModal()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              Add Category
-            </button>
+            <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openCatModal()">Add Category</button>
           </div>
           <div class="admin-table-wrap">
             <table>
@@ -1171,50 +1154,23 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="categories-body">
-                <tr>
-                  <td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
+              <tbody id="categories-body"></tbody>
             </table>
           </div>
         </div>
         
-        <!-- ─── INVENTORY ─── -->
         <div id="panel-inventory" class="admin-panel">
           <div class="admin-header">
-            <div class="admin-title">Inventory</div>
-            <button class="btn btn-outline" style="padding:10px 18px;gap:8px;" onclick="loadInventory()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-              </svg>
-              Refresh
-            </button>
+            <div class="admin-title">Inventory</div><button class="btn btn-outline" style="padding:10px 18px;gap:8px;" onclick="loadInventory()">Refresh</button>
           </div>
-          
-          <div class="hint-bar">
-            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            Click any stock number to edit inline. Press <strong style="color:var(--text);">Enter</strong> or click the check button to save.
-          </div>
-          
+          <div class="hint-bar">Click any stock number to edit inline. Press Enter or click the check button to save.</div>
           <div class="admin-table-wrap">
             <div class="table-toolbar">
-              <div class="t-search" style="max-width:240px;">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-                <input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)">
-              </div>
+              <div class="t-search" style="max-width:240px;"><input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)"></div>
               <select class="t-select" id="inv-sf" onchange="filterInv(document.getElementById('inv-search').value)">
                 <option value="">All Stock</option>
                 <option value="out">Out of Stock</option>
-                <option value="low">Low Stock (≤10)</option>
+                <option value="low">Low Stock</option>
                 <option value="ok">In Stock</option>
               </select>
             </div>
@@ -1229,27 +1185,21 @@
                   <th>Edit</th>
                 </tr>
               </thead>
-              <tbody id="inventory-body">
-                <tr>
-                  <td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
+              <tbody id="inventory-body"></tbody>
             </table>
           </div>
         </div>
         
-        <!-- ─── ORDERS ─── -->
         <div id="panel-orders" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Orders</div>
-            <select class="t-select" id="order-sf" onchange="loadOrders(1)" style="padding:9px 14px;font-size:13px;">
+            <select class="t-select" id="order-sf" onchange="loadOrders(1)">
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
-              <option value="refunded">Refunded</option>
             </select>
           </div>
           <div class="admin-table-wrap">
@@ -1266,30 +1216,18 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="orders-body">
-                <tr>
-                  <td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
+              <tbody id="orders-body"></tbody>
             </table>
-            <div class="table-footer">
-              <span id="orders-info"></span>
-              <div class="pagination" id="orders-pages" style="margin:0;gap:4px;"></div>
+            <div class="table-footer"><span id="orders-info"></span>
+              <div class="pagination" id="orders-pages"></div>
             </div>
           </div>
         </div>
         
-        <!-- ─── USERS ─── -->
         <div id="panel-users" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Users</div>
-            <div class="t-search" style="max-width:260px;">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <input type="text" placeholder="Search by email or name…" id="user-search" oninput="filterUsers(this.value)">
-            </div>
+            <div class="t-search"><input type="text" placeholder="Search by email…" id="user-search" oninput="filterUsers(this.value)"></div>
           </div>
           <div class="admin-table-wrap">
             <table>
@@ -1303,74 +1241,41 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="users-body">
-                <tr>
-                  <td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
+              <tbody id="users-body"></tbody>
             </table>
-            <div class="table-footer">
-              <span id="users-info"></span>
-              <div class="pagination" id="users-pages" style="margin:0;gap:4px;"></div>
+            <div class="table-footer"><span id="users-info"></span>
+              <div class="pagination" id="users-pages"></div>
             </div>
           </div>
         </div>
-        
       </main>
     </div>
   </div>
   
-  <!-- ════ PRODUCT MODAL ════ -->
   <div id="modal-product" class="modal-bd" style="display:none;" onclick="closeModal('modal-product',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
         <div class="modal-title" id="pm-title">Add Product</div>
-        <button class="modal-close" onclick="closeModal('modal-product')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button class="modal-close" onclick="closeModal('modal-product')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          </svg></button>
       </div>
       <div class="modal-bd-inner">
         <input type="hidden" id="pm-id">
         <div class="g2">
-          <div class="form-group">
-            <label class="form-label">Name *</label>
-            <input type="text" id="pm-name" class="form-input" maxlength="255" oninput="autoSlug(this.value)">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Slug *</label>
-            <input type="text" id="pm-slug" class="form-input" maxlength="280">
-          </div>
+          <div class="form-group"><label class="form-label">Name *</label><input type="text" id="pm-name" class="form-input" maxlength="255" oninput="autoSlug(this.value)"></div>
+          <div class="form-group"><label class="form-label">Slug *</label><input type="text" id="pm-slug" class="form-input" maxlength="280"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Short Description</label>
-          <input type="text" id="pm-sdesc" class="form-input" maxlength="255">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Full Description</label>
-          <textarea id="pm-desc" class="form-input" rows="3" style="resize:vertical;"></textarea>
+        <div class="form-group"><label class="form-label">Short Description</label><input type="text" id="pm-sdesc" class="form-input" maxlength="255"></div>
+        <div class="form-group"><label class="form-label">Full Description</label><textarea id="pm-desc" class="form-input" rows="3" style="resize:vertical;"></textarea></div>
+        <div class="g2">
+          <div class="form-group"><label class="form-label">Price *</label><input type="number" id="pm-price" class="form-input" min="0" step="0.01"></div>
+          <div class="form-group"><label class="form-label">Compare Price</label><input type="number" id="pm-compare" class="form-input" min="0" step="0.01"></div>
         </div>
         <div class="g2">
-          <div class="form-group">
-            <label class="form-label">Price *</label>
-            <input type="number" id="pm-price" class="form-input" min="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Compare Price</label>
-            <input type="number" id="pm-compare" class="form-input" min="0" step="0.01">
-          </div>
-        </div>
-        <div class="g2">
-          <div class="form-group">
-            <label class="form-label">Stock</label>
-            <input type="number" id="pm-stock" class="form-input" min="0" value="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">SKU</label>
-            <input type="text" id="pm-sku" class="form-input" maxlength="100">
-          </div>
+          <div class="form-group"><label class="form-label">Stock</label><input type="number" id="pm-stock" class="form-input" min="0" value="0"></div>
+          <div class="form-group"><label class="form-label">SKU</label><input type="text" id="pm-sku" class="form-input" maxlength="100"></div>
         </div>
         <div class="g2">
           <div class="form-group">
@@ -1379,31 +1284,27 @@
               <option value="">— None —</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Weight (grams)</label>
-            <input type="number" id="pm-weight" class="form-input" min="0">
-          </div>
+          <div class="form-group"><label class="form-label">Weight (grams)</label><input type="number" id="pm-weight" class="form-input" min="0"></div>
         </div>
+        
         <div class="form-group">
-          <label class="form-label">Product Image</label>
+          <label class="form-label">Product Images (Max 10)</label>
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pm-img-file').click()">
-            <img id="pm-img-preview" class="drop-zone-img">
             <div id="drop-zone-txt">
               <svg width="28" height="28" fill="none" stroke="var(--text-dim)" stroke-width="1.4" viewBox="0 0 24 24" style="margin:0 auto 8px;">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />
               </svg>
-              <div class="drop-zone-txt">Click or drag image here</div>
-              <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">JPEG · PNG · WebP — max 5MB</div>
+              <div class="drop-zone-txt">Click or drag images here</div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">JPEG · PNG · WebP — max 5MB per image</div>
             </div>
-            <input type="file" id="pm-img-file" accept="image/*" style="display:none;" onchange="handleImg(this)">
+            <input type="file" id="pm-img-file" accept="image/*" multiple style="display:none;" onchange="handleImgs(this)">
           </div>
+          <div id="pm-img-previews" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
         </div>
-        <label class="filter-option" style="gap:10px;">
-          <input type="checkbox" id="pm-active" checked style="accent-color:var(--gold)">
-          Active — visible in shop
-        </label>
+        
+        <label class="filter-option" style="gap:10px;"><input type="checkbox" id="pm-active" checked style="accent-color:var(--gold)">Active — visible in shop</label>
       </div>
       <div class="modal-ft">
         <button class="btn btn-outline" style="padding:10px 18px;" onclick="closeModal('modal-product')">Cancel</button>
@@ -1412,74 +1313,44 @@
     </div>
   </div>
   
-  <!-- ════ CATEGORY MODAL ════ -->
   <div id="modal-cat" class="modal-bd" style="display:none;" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
-        <div class="modal-title">Add Category</div>
-        <button class="modal-close" onclick="closeModal('modal-cat')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="modal-title">Add Category</div><button class="modal-close" onclick="closeModal('modal-cat')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          </svg></button>
       </div>
       <div class="modal-bd-inner">
-        <div class="form-group">
-          <label class="form-label">Name *</label>
-          <input type="text" id="cm-name" class="form-input" maxlength="100" oninput="autoCatSlug(this.value)">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Slug * (lowercase, hyphens only)</label>
-          <input type="text" id="cm-slug" class="form-input" maxlength="120" pattern="[a-z0-9-]+">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea id="cm-desc" class="form-input" rows="2" style="resize:vertical;"></textarea>
-        </div>
+        <div class="form-group"><label class="form-label">Name *</label><input type="text" id="cm-name" class="form-input" maxlength="100" oninput="autoCatSlug(this.value)"></div>
+        <div class="form-group"><label class="form-label">Slug * (lowercase, hyphens only)</label><input type="text" id="cm-slug" class="form-input" maxlength="120" pattern="[a-z0-9-]+"></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="cm-desc" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
       </div>
-      <div class="modal-ft">
-        <button class="btn btn-outline" style="padding:10px 18px;" onclick="closeModal('modal-cat')">Cancel</button>
-        <button class="btn btn-primary" style="padding:10px 24px;" id="cm-save" onclick="saveCategory()">Save</button>
-      </div>
+      <div class="modal-ft"><button class="btn btn-outline" onclick="closeModal('modal-cat')">Cancel</button><button class="btn btn-primary" id="cm-save" onclick="saveCategory()">Save</button></div>
     </div>
   </div>
   
-  <!-- ════ ORDER MODAL ════ -->
   <div id="modal-order" class="modal-bd" style="display:none;" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
-        <div class="modal-title" id="om-title">Update Order</div>
-        <button class="modal-close" onclick="closeModal('modal-order')">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="modal-title" id="om-title">Update Order</div><button class="modal-close" onclick="closeModal('modal-order')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          </svg></button>
       </div>
       <div class="modal-bd-inner">
         <input type="hidden" id="om-id">
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select id="om-status" class="form-input form-select">
+        <div class="form-group"><label class="form-label">Status</label><select id="om-status" class="form-input form-select">
             <option value="pending">Pending</option>
             <option value="paid">Paid</option>
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tracking Number</label>
-          <input type="text" id="om-tracking" class="form-input" maxlength="100">
-        </div>
+          </select></div>
+        <div class="form-group"><label class="form-label">Tracking Number</label><input type="text" id="om-tracking" class="form-input" maxlength="100"></div>
         <div id="om-items" style="background:var(--surface-2);border-radius:var(--radius);padding:14px;font-size:13px;color:var(--text-muted);"></div>
       </div>
-      <div class="modal-ft">
-        <button class="btn btn-outline" style="padding:10px 18px;" onclick="closeModal('modal-order')">Cancel</button>
-        <button class="btn btn-primary" style="padding:10px 24px;" id="om-save" onclick="saveOrder()">Update Order</button>
-      </div>
+      <div class="modal-ft"><button class="btn btn-outline" onclick="closeModal('modal-order')">Cancel</button><button class="btn btn-primary" id="om-save" onclick="saveOrder()">Update Order</button></div>
     </div>
   </div>
   
@@ -1499,7 +1370,11 @@
     let allUsers = [];
     let allInventory = [];
     let selectedProds = new Set();
-    let pendingImg = null;
+    
+    // UPDATED FOR MULTIPLE IMAGES
+    let pendingImages = [];
+    let currentProductData = null; // Track currently editing product
+    
     let pProdPage = 1,
       pOrderPage = 1,
       pUserPage = 1;
@@ -1521,10 +1396,13 @@
         if (!res.ok) throw new Error(d?.detail || `Error ${res.status}`);
         return d;
       },
-      async uploadImage(id, file) {
+      // UPDATED TO SUPPORT LIST OF FILES
+      async uploadImages(id, files) {
         const fd = new FormData();
-        fd.append('file', file);
-        const res = await fetch(`${CONFIG.API_BASE}/products/${id}/image`, {
+        files.forEach(file => {
+          fd.append('files', file); // 'files' matches FastAPI variable name
+        });
+        const res = await fetch(`${CONFIG.API_BASE}/products/${id}/images`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
           body: fd,
@@ -1547,7 +1425,7 @@
     };
     
     /* ══════════════════════════════════════
-       INIT
+       INIT & DASHBOARD (Unchanged)
     ══════════════════════════════════════ */
     async function init() {
       const ok = await pageInit({ requireAuth: true });
@@ -1558,27 +1436,17 @@
         setTimeout(() => location.href = '/index.html', 1400);
         return;
       }
-      document.getElementById('dash-greeting').textContent =
-        `Welcome back, ${escapeHTML(profile.full_name?.split(' ')[0] || 'Admin')}`;
-      setInterval(() => {
-        const el = document.getElementById('dash-time');
-        if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
-      }, 1000);
+      document.getElementById('dash-greeting').textContent = `Welcome back, ${escapeHTML(profile.full_name?.split(' ')[0] || 'Admin')}`;
+      setInterval(() => { const el = document.getElementById('dash-time'); if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true }); }, 1000);
       loadDashboard();
     }
-    
     init();
     
-    /* ══════════════════════════════════════
-       PANEL SWITCH
-    ══════════════════════════════════════ */
     function showPanel(name) {
       document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`panel-${name}`).classList.add('active');
-      document.querySelectorAll('.sidebar-btn').forEach(b => {
-        if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active');
-      });
+      document.querySelectorAll('.sidebar-btn').forEach(b => { if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active'); });
       if (name === 'products') loadProducts();
       if (name === 'categories') loadCategories();
       if (name === 'inventory') loadInventory();
@@ -1586,14 +1454,10 @@
       if (name === 'users') loadUsers(1);
     }
     
-    /* ══════════════════════════════════════
-       DASHBOARD
-    ══════════════════════════════════════ */
     async function loadDashboard() {
+      // Logic same as original
       try {
-        const [prods, orders, users] = await Promise.all([
-          ADMIN.getProducts(), ADMIN.getOrders(), ADMIN.getUsers(),
-        ]);
+        const [prods, orders, users] = await Promise.all([ADMIN.getProducts(), ADMIN.getOrders(), ADMIN.getUsers()]);
         const pending = orders?.items?.filter(o => o.status === 'pending').length ?? 0;
         [
           ['stat-products', prods?.total],
@@ -1603,32 +1467,21 @@
           ['sb-products', prods?.total],
           ['sb-orders', orders?.total],
           ['sb-pending', pending],
-          ['sb-users', users?.total],
+          ['sb-users', users?.total]
         ].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; });
-        
         const tbody = document.getElementById('dash-orders-body');
         tbody.innerHTML = '';
         (orders?.items?.slice(0, 8) || []).forEach(o => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td>
-            <td class="td-dim">${escapeHTML(o.users?.email || '—')}</td>
-            <td class="td-gold">${formatPrice(o.total_amount)}</td>
-            <td>${statusBadge(o.status).outerHTML}</td>
-            <td class="td-dim">${formatDate(o.created_at)}</td>
-          `;
+          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim">${escapeHTML(o.users?.email || '—')}</td><td class="td-gold">${formatPrice(o.total_amount)}</td><td>${statusBadge(o.status).outerHTML}</td><td class="td-dim">${formatDate(o.created_at)}</td>`;
           tbody.appendChild(tr);
         });
-        if (!orders?.items?.length) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">No orders yet</td></tr>';
-        }
-      } catch (err) {
-        showToast('Dashboard error: ' + err.message, 'error');
-      }
+        if (!orders?.items?.length) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">No orders yet</td></tr>';
+      } catch (err) { showToast('Dashboard error: ' + err.message, 'error'); }
     }
     
     /* ══════════════════════════════════════
-       PRODUCTS
+       PRODUCTS & IMAGES UPLOAD
     ══════════════════════════════════════ */
     async function loadProducts(page = 1) {
       pProdPage = page;
@@ -1641,9 +1494,7 @@
         populateCatSelects();
         renderProducts(allProducts, data?.total || 0, data?.pages || 1);
         document.getElementById('prod-subtitle').textContent = `${data?.total || 0} products total`;
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
-      }
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
     }
     
     function renderProducts(items, total, pages) {
@@ -1651,12 +1502,7 @@
       tbody.innerHTML = '';
       document.getElementById('prod-count').textContent = `${total} items`;
       document.getElementById('prod-info').textContent = `Showing ${items.length} of ${total}`;
-      
-      if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No products found</td></tr>';
-        return;
-      }
-      
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No products found</td></tr>'; return; }
       items.forEach(p => {
         const sc = p.stock === 0 ? 'sb-out' : p.stock <= 10 ? 'sb-low' : 'sb-ok';
         const sl = p.stock === 0 ? 'Out' : p.stock <= 10 ? `Low (${p.stock})` : p.stock;
@@ -1664,33 +1510,12 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><input type="checkbox" style="accent-color:var(--gold)" ${selectedProds.has(p.id)?'checked':''} onchange="toggleProdSel('${p.id}',this.checked)"></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:10px;">
-              ${p.image_url
-                ? `<img src="${escapeHTML(p.image_url)}" style="width:34px;height:42px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0;">`
-                : `<div style="width:34px;height:42px;background:var(--surface-2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" fill="none" stroke="var(--border-light)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
-              <div>
-                <div class="td-primary">${escapeHTML(p.name)}</div>
-                <div class="td-dim">${escapeHTML(p.slug)}</div>
-              </div>
-            </div>
-          </td>
-          <td class="td-dim">${escapeHTML(p.sku||'—')}</td>
-          <td class="td-gold">${formatPrice(p.price)}</td>
-          <td><span class="sbadge ${sc}">${sl}</span></td>
-          <td class="td-dim">${escapeHTML(catName)}</td>
+          <td><div style="display:flex;align-items:center;gap:10px;">
+              ${p.image_url ? `<img src="${escapeHTML(p.image_url)}" style="width:34px;height:42px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0;">` : `<div style="width:34px;height:42px;background:var(--surface-2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" fill="none" stroke="var(--border-light)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+              <div><div class="td-primary">${escapeHTML(p.name)}</div><div class="td-dim">${escapeHTML(p.slug)}</div></div></div></td>
+          <td class="td-dim">${escapeHTML(p.sku||'—')}</td><td class="td-gold">${formatPrice(p.price)}</td><td><span class="sbadge ${sc}">${sl}</span></td><td class="td-dim">${escapeHTML(catName)}</td>
           <td><span class="status-dot ${p.is_active?'active':'inactive'}">${p.is_active?'Active':'Hidden'}</span></td>
-          <td>
-            <div class="action-btns">
-              <button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Edit
-              </button>
-              <button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-              </button>
-            </div>
-          </td>
+          <td><div class="action-btns"><button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button><button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button></div></td>
         `;
         tbody.appendChild(tr);
       });
@@ -1700,52 +1525,40 @@
     function filterProducts(q) {
       const cf = document.getElementById('prod-cat-f').value;
       const lower = q.toLowerCase();
-      const filtered = allProducts.filter(p =>
-        (!lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower)) &&
-        (!cf || p.category_id === cf)
-      );
+      const filtered = allProducts.filter(p => (!lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower)) && (!cf || p.category_id === cf));
       renderProducts(filtered, filtered.length, 1);
     }
     
-    /* Bulk select */
-    function toggleProdSel(id, checked) {
-      checked ? selectedProds.add(id) : selectedProds.delete(id);
-      const bar = document.getElementById('prod-bulk-bar');
+    function toggleProdSel(id, checked) { checked ? selectedProds.add(id) : selectedProds.delete(id); const bar = document.getElementById('prod-bulk-bar');
       bar.classList.toggle('visible', selectedProds.size > 0);
-      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
-    }
+      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
     
-    function toggleAllProds(checked) {
-      allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
+    function toggleAllProds(checked) { allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = checked);
       document.getElementById('prod-bulk-bar').classList.toggle('visible', selectedProds.size > 0);
-      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
-    }
+      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
     
-    function clearProdSel() {
-      selectedProds.clear();
+    function clearProdSel() { selectedProds.clear();
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = false);
       document.getElementById('prod-chk-all').checked = false;
-      document.getElementById('prod-bulk-bar').classList.remove('visible');
-    }
+      document.getElementById('prod-bulk-bar').classList.remove('visible'); }
     
     async function bulkDeleteProducts() {
       if (!selectedProds.size || !confirm(`Delete ${selectedProds.size} products?`)) return;
       let ok = 0,
         fail = 0;
-      for (const id of selectedProds) {
-        try {
-          await ADMIN.deleteProduct(id);
-          ok++;
-        } catch { fail++; }
-      }
+      for (const id of selectedProds) { try { await ADMIN.deleteProduct(id);
+          ok++; } catch { fail++; } }
       showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
       clearProdSel();
       loadProducts(pProdPage);
     }
     
-    /* Product modal */
+    // UPDATED PRODUCT MODAL LOGIC
     function openProductModal(p = null) {
+      currentProductData = p; // Track for images logic
+      pendingImages = []; // Reset newly selected images
+      
       const fields = [
         ['pm-id', p?.id || ''],
         ['pm-name', p?.name || ''],
@@ -1762,33 +1575,98 @@
       document.getElementById('pm-active').checked = p ? p.is_active : true;
       document.getElementById('pm-title').textContent = p ? `Edit — ${p.name}` : 'Add Product';
       
-      const preview = document.getElementById('pm-img-preview');
-      const txt = document.getElementById('drop-zone-txt');
-      if (p?.image_url) {
-        preview.src = p.image_url;
-        preview.style.display = 'block';
-        txt.style.display = 'none';
-      }
-      else {
-        preview.style.display = 'none';
-        txt.style.display = 'block';
-      }
-      
-      pendingImg = null;
       document.getElementById('pm-img-file').value = '';
       populateCatSelects();
       if (p?.category_id) document.getElementById('pm-cat').value = p.category_id;
+      
+      renderImagePreviews(); // Draw existing/empty images
       document.getElementById('modal-product').style.display = 'flex';
     }
     
     function editProduct(p) { openProductModal(p); }
     
-    function autoSlug(val) {
-      if (!document.getElementById('pm-id').value) {
-        document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    function autoSlug(val) { if (!document.getElementById('pm-id').value) document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+    
+    // RENDER IMAGES PREVIEW (EXISTING + PENDING)
+    function renderImagePreviews() {
+      const wrap = document.getElementById('pm-img-previews');
+      wrap.innerHTML = '';
+      
+      // Render existing images from server
+      if (currentProductData && currentProductData.images && currentProductData.images.length > 0) {
+        currentProductData.images.forEach(url => {
+          wrap.innerHTML += `
+            <div class="img-preview-wrap" title="Already uploaded">
+              <img src="${escapeHTML(url)}">
+            </div>
+          `;
+        });
       }
+      
+      // Render new pending images
+      pendingImages.forEach((file, idx) => {
+        const r = new FileReader();
+        r.onload = e => {
+          const div = document.createElement('div');
+          div.className = 'img-preview-wrap';
+          div.innerHTML = `
+            <img src="${e.target.result}">
+            <button class="img-remove-btn" onclick="removePendingImg(${idx}, event)">×</button>
+          `;
+          wrap.appendChild(div);
+        };
+        r.readAsDataURL(file);
+      });
     }
     
+    // MULTIPLE FILES HANDLER
+    function handleImgs(input) {
+      if (input.files.length > 0) addFilesToPending(input.files);
+      input.value = ''; // Reset input to allow selecting same files again
+    }
+    
+    function addFilesToPending(files) {
+      const existingCount = (currentProductData?.images?.length) || 0;
+      const newFiles = Array.from(files);
+      const totalCount = existingCount + pendingImages.length + newFiles.length;
+      
+      if (totalCount > 10) {
+        showToast(`Cannot upload. Max limit is 10 images.`, 'error');
+        // Only accept files up to limit
+        const allowedCount = 10 - (existingCount + pendingImages.length);
+        if (allowedCount > 0) newFiles.splice(allowedCount);
+        else return;
+      }
+      
+      newFiles.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast(`${file.name} is larger than 5MB limit`, 'error');
+          return;
+        }
+        pendingImages.push(file);
+      });
+      
+      renderImagePreviews();
+    }
+    
+    function removePendingImg(index, event) {
+      event.stopPropagation();
+      pendingImages.splice(index, 1);
+      renderImagePreviews();
+    }
+    
+    // DRAG AND DROP
+    const dz = document.getElementById('drop-zone');
+    dz.addEventListener('dragover', e => { e.preventDefault();
+      dz.classList.add('over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('over');
+      if (e.dataTransfer.files.length > 0) addFilesToPending(e.dataTransfer.files);
+    });
+    
+    // UPDATED SAVING LOGIC
     async function saveProduct() {
       const id = document.getElementById('pm-id').value;
       const btn = document.getElementById('pm-save');
@@ -1806,115 +1684,56 @@
         category_id: document.getElementById('pm-cat').value || null,
       };
       
-      if (!payload.name || !payload.slug || isNaN(payload.price)) {
-        showToast('Name, Slug and Price are required', 'error');
-        return;
-      }
+      if (!payload.name || !payload.slug || isNaN(payload.price)) { showToast('Name, Slug and Price are required', 'error'); return; }
       
       showLoader(btn, 'Saving…');
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
-        if (pendingImg && saved?.id) {
-          try { await ADMIN.uploadImage(saved.id, pendingImg); }
-          catch (e) { showToast('Product saved, image failed: ' + e.message, 'warn'); }
+        
+        // Upload any newly selected images
+        if (pendingImages.length > 0 && saved?.id) {
+          try {
+            await ADMIN.uploadImages(saved.id, pendingImages);
+          } catch (e) {
+            showToast('Product saved, but some images failed to upload: ' + e.message, 'warn');
+          }
         }
+        
         showToast(id ? 'Product updated!' : 'Product created!', 'success');
         closeModal('modal-product');
         loadProducts(pProdPage);
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally { hideLoader(btn); }
+      } catch (err) { showToast(err.message, 'error'); }
+      finally { hideLoader(btn); }
     }
-    
-    async function deleteProduct(id, name) {
-      if (!confirm(`Delete "${name}"?`)) return;
-      try {
-        await ADMIN.deleteProduct(id);
-        showToast('Deleted', 'info');
-        loadProducts(pProdPage);
-      }
-      catch (err) { showToast(err.message, 'error'); }
-    }
-    
-    function handleImg(input) {
-      const file = input.files[0];
-      if (!file) return;
-      pendingImg = file;
-      const r = new FileReader();
-      r.onload = e => {
-        const preview = document.getElementById('pm-img-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        document.getElementById('drop-zone-txt').style.display = 'none';
-      };
-      r.readAsDataURL(file);
-    }
-    
-    const dz = document.getElementById('drop-zone');
-    dz.addEventListener('dragover', e => {
-      e.preventDefault();
-      dz.classList.add('over');
-    });
-    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-    dz.addEventListener('drop', e => {
-      e.preventDefault();
-      dz.classList.remove('over');
-      const file = e.dataTransfer.files[0];
-      if (file) handleImg({ files: [file] });
-    });
     
     /* ══════════════════════════════════════
-       CATEGORIES
+       CATEGORIES, INVENTORY, ORDERS, USERS (Unchanged scripts)
     ══════════════════════════════════════ */
-    async function ensureCategories() {
-      if (!allCategories.length) allCategories = await ADMIN.getCategories() || [];
-    }
-    
+    async function ensureCategories() { if (!allCategories.length) allCategories = await ADMIN.getCategories() || []; }
     async function loadCategories() {
       allCategories = [];
       await ensureCategories();
       const tbody = document.getElementById('categories-body');
       tbody.innerHTML = '';
-      if (!allCategories.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">No categories yet</td></tr>';
-        return;
-      }
+      if (!allCategories.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">No categories yet</td></tr>'; return; }
       allCategories.forEach(c => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="td-primary">${escapeHTML(c.name)}</td>
-          <td class="td-dim">${escapeHTML(c.slug)}</td>
-          <td class="td-dim">${escapeHTML(c.description || '—')}</td>
-          <td><button class="btn-xs bxd" onclick="deleteCategory('${c.id}','${escapeHTML(c.name).replace(/'/g,"\\'")}')">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-            Delete
-          </button></td>
-        `;
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(c.name)}</td><td class="td-dim">${escapeHTML(c.slug)}</td><td class="td-dim">${escapeHTML(c.description || '—')}</td><td><button class="btn-xs bxd" onclick="deleteCategory('${c.id}','${escapeHTML(c.name).replace(/'/g,"\\'")}')">Delete</button></td>`;
         tbody.appendChild(tr);
       });
     }
     
-    function populateCatSelects() {
-      const sf = document.getElementById('prod-cat-f');
-      const pm = document.getElementById('pm-cat');
-      const cur = sf.value;
+    function populateCatSelects() { const sf = document.getElementById('prod-cat-f'); const pm = document.getElementById('pm-cat'); const cur = sf.value;
       sf.innerHTML = '<option value="">All Categories</option>';
       pm.innerHTML = '<option value="">— None —</option>';
-      allCategories.forEach(c => {
-        sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`;
-        pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`;
-      });
-    }
+      allCategories.forEach(c => { sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`;
+        pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`; }); }
     
     function openCatModal() {
       ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      document.getElementById('modal-cat').style.display = 'flex';
-    }
+      document.getElementById('modal-cat').style.display = 'flex'; }
     
-    function autoCatSlug(val) {
-      document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    }
-    
+    function autoCatSlug(val) { document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
     async function saveCategory() {
       const btn = document.getElementById('cm-save');
       const name = document.getElementById('cm-name').value.trim();
@@ -1922,96 +1741,51 @@
       const desc = document.getElementById('cm-desc').value.trim();
       if (!name || !slug || !/^[a-z0-9-]+$/.test(slug)) { showToast('Name and valid slug required', 'error'); return; }
       showLoader(btn, 'Saving…');
-      try {
-        await ADMIN.createCategory({ name, slug, description: desc || null });
+      try { await ADMIN.createCategory({ name, slug, description: desc || null });
         showToast('Category created!', 'success');
         allCategories = [];
         closeModal('modal-cat');
-        loadCategories();
-      } catch (err) { showToast(err.message, 'error'); }
-      finally { hideLoader(btn); }
+        loadCategories(); } catch (err) { showToast(err.message, 'error'); } finally { hideLoader(btn); }
     }
-    
-    async function deleteCategory(id, name) {
-      if (!confirm(`Delete category "${name}"?`)) return;
-      try {
-        await ADMIN.deleteCategory(id);
+    async function deleteCategory(id, name) { if (!confirm(`Delete category "${name}"?`)) return; try { await ADMIN.deleteCategory(id);
         showToast('Deleted', 'info');
         allCategories = [];
-        loadCategories();
-      }
-      catch (err) { showToast(err.message, 'error'); }
-    }
+        loadCategories(); } catch (err) { showToast(err.message, 'error'); } }
     
-    /* ══════════════════════════════════════
-       INVENTORY
-    ══════════════════════════════════════ */
+    // Inventory
     async function loadInventory() {
       const tbody = document.getElementById('inventory-body');
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
       try {
         const first = await ADMIN.getProducts(1);
         let items = first?.items || [];
-        for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) {
-          const d = await ADMIN.getProducts(p);
-          items = items.concat(d?.items || []);
-        }
+        for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) { const d = await ADMIN.getProducts(p);
+          items = items.concat(d?.items || []); }
         allInventory = items;
         renderInv(items);
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
-      }
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
     }
     
     function renderInv(items) {
       const tbody = document.getElementById('inventory-body');
       tbody.innerHTML = '';
-      if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No products</td></tr>';
-        return;
-      }
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No products</td></tr>'; return; }
       items.forEach(p => {
         const thr = p.low_stock_threshold || 10;
         const sc = p.stock === 0 ? 'sb-out' : p.stock <= thr ? 'sb-low' : 'sb-ok';
         const sl = p.stock === 0 ? 'Out of Stock' : p.stock <= thr ? 'Low Stock' : 'In Stock';
         const tr = document.createElement('tr');
         tr.dataset.id = p.id;
-        tr.innerHTML = `
-          <td class="td-primary">${escapeHTML(p.name)}</td>
-          <td class="td-dim">${escapeHTML(p.sku||'—')}</td>
-          <td>
-            <span class="inv-val" data-id="${p.id}" style="cursor:pointer;font-weight:600;color:var(--text);text-decoration:underline dotted var(--border-light);" onclick="startStockEdit('${p.id}',${p.stock},this)">${p.stock}</span>
-          </td>
-          <td class="td-dim">${thr}</td>
-          <td><span class="sbadge ${sc}">${sl}</span></td>
-          <td>
-            <div class="stk-edit" id="se-${p.id}" style="display:none;">
-              <input type="number" class="stk-input" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')">
-              <button class="btn-xs bxs" onclick="saveStock('${p.id}')">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-              </button>
-              <button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-          </td>
-        `;
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(p.name)}</td><td class="td-dim">${escapeHTML(p.sku||'—')}</td><td><span class="inv-val" data-id="${p.id}" style="cursor:pointer;font-weight:600;color:var(--text);text-decoration:underline dotted var(--border-light);" onclick="startStockEdit('${p.id}',${p.stock},this)">${p.stock}</span></td><td class="td-dim">${thr}</td><td><span class="sbadge ${sc}">${sl}</span></td><td><div class="stk-edit" id="se-${p.id}" style="display:none;"><input type="number" class="stk-input" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')"><button class="btn-xs bxs" onclick="saveStock('${p.id}')">✓</button><button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})">✕</button></div></td>`;
         tbody.appendChild(tr);
       });
     }
     
-    function startStockEdit(id, stock, el) {
-      document.getElementById(`se-${id}`).style.display = 'flex';
+    function startStockEdit(id, stock, el) { document.getElementById(`se-${id}`).style.display = 'flex';
       el.style.display = 'none';
-      document.getElementById(`si-${id}`).focus();
-    }
+      document.getElementById(`si-${id}`).focus(); }
     
-    function cancelStockEdit(id, stock) {
-      document.getElementById(`se-${id}`).style.display = 'none';
-      const v = document.querySelector(`.inv-val[data-id="${id}"]`);
-      if (v) v.style.display = '';
-    }
-    
+    function cancelStockEdit(id, stock) { document.getElementById(`se-${id}`).style.display = 'none'; const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) v.style.display = ''; }
     async function saveStock(id) {
       const inp = document.getElementById(`si-${id}`);
       const newStock = parseInt(inp.value);
@@ -2021,20 +1795,13 @@
         const p = allInventory.find(p => p.id === id);
         if (p) p.stock = newStock;
         const v = document.querySelector(`.inv-val[data-id="${id}"]`);
-        if (v) {
-          v.textContent = newStock;
-          v.style.display = '';
-        }
+        if (v) { v.textContent = newStock;
+          v.style.display = ''; }
         document.getElementById(`se-${id}`).style.display = 'none';
         const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10;
         const tr = document.querySelector(`tr[data-id="${id}"]`);
-        if (tr) {
-          const badge = tr.querySelector('.sbadge');
-          if (badge) {
-            badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok');
-            badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock';
-          }
-        }
+        if (tr) { const badge = tr.querySelector('.sbadge'); if (badge) { badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok');
+            badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock'; } }
         showToast('Stock updated', 'success');
       } catch (err) { showToast(err.message, 'error'); }
     }
@@ -2042,21 +1809,13 @@
     function filterInv(q) {
       const sf = document.getElementById('inv-sf').value;
       const lower = q.toLowerCase();
-      const f = allInventory.filter(p => {
-        const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower);
-        const thr = p.low_stock_threshold || 10;
-        let mk = true;
-        if (sf === 'out') mk = p.stock === 0;
+      const f = allInventory.filter(p => { const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower); const thr = p.low_stock_threshold || 10; let mk = true; if (sf === 'out') mk = p.stock === 0;
         else if (sf === 'low') mk = p.stock > 0 && p.stock <= thr;
-        else if (sf === 'ok') mk = p.stock > thr;
-        return ms && mk;
-      });
+        else if (sf === 'ok') mk = p.stock > thr; return ms && mk; });
       renderInv(f);
     }
     
-    /* ══════════════════════════════════════
-       ORDERS
-    ══════════════════════════════════════ */
+    // Orders
     async function loadOrders(page = 1) {
       pOrderPage = page;
       const tbody = document.getElementById('orders-body');
@@ -2067,33 +1826,14 @@
         const items = data?.items || [];
         document.getElementById('orders-info').textContent = `${data?.total||0} orders`;
         tbody.innerHTML = '';
-        if (!items.length) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No orders</td></tr>';
-          return;
-        }
+        if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No orders</td></tr>'; return; }
         items.forEach(o => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td>
-            <td class="td-dim" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td>
-            <td class="td-dim">${(o.order_items||[]).length} items</td>
-            <td class="td-gold">${formatPrice(o.total_amount)}</td>
-            <td>${statusBadge(o.status).outerHTML}</td>
-            <td class="td-dim" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.tracking_number||'—')}</td>
-            <td class="td-dim">${formatDate(o.created_at)}</td>
-            <td>
-              <button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'>
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                Edit
-              </button>
-            </td>
-          `;
+          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td><td class="td-dim">${(o.order_items||[]).length} items</td><td class="td-gold">${formatPrice(o.total_amount)}</td><td>${statusBadge(o.status).outerHTML}</td><td class="td-dim" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.tracking_number||'—')}</td><td class="td-dim">${formatDate(o.created_at)}</td><td><button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'>Edit</button></td>`;
           tbody.appendChild(tr);
         });
         renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders);
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
-      }
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
     }
     
     function openOrderModal(o) {
@@ -2103,139 +1843,73 @@
       document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`;
       const el = document.getElementById('om-items');
       const items = o.order_items || [];
-      el.innerHTML = items.length ?
-        '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>' +
-        items.map(i => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${formatPrice(i.subtotal)}</span></div>`).join('') +
-        `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--gold);"><span>Total</span><span>${formatPrice(o.total_amount)}</span></div>` :
-        '';
+      el.innerHTML = items.length ? '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>' + items.map(i => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${formatPrice(i.subtotal)}</span></div>`).join('') + `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--gold);"><span>Total</span><span>${formatPrice(o.total_amount)}</span></div>` : '';
       document.getElementById('modal-order').style.display = 'flex';
     }
-    
     async function saveOrder() {
       const id = document.getElementById('om-id').value;
       const btn = document.getElementById('om-save');
       showLoader(btn, 'Updating…');
-      try {
-        await ADMIN.updateOrder(id, {
-          status: document.getElementById('om-status').value,
-          tracking_number: document.getElementById('om-tracking').value.trim() || null,
-        });
+      try { await ADMIN.updateOrder(id, { status: document.getElementById('om-status').value, tracking_number: document.getElementById('om-tracking').value.trim() || null });
         showToast('Order updated!', 'success');
         closeModal('modal-order');
-        loadOrders(pOrderPage);
-      } catch (err) { showToast(err.message, 'error'); }
-      finally { hideLoader(btn); }
+        loadOrders(pOrderPage); } catch (err) { showToast(err.message, 'error'); } finally { hideLoader(btn); }
     }
     
-    /* ══════════════════════════════════════
-       USERS
-    ══════════════════════════════════════ */
+    // Users
     async function loadUsers(page = 1) {
       pUserPage = page;
       const tbody = document.getElementById('users-body');
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
-      try {
-        const data = await ADMIN.getUsers(page);
+      try { const data = await ADMIN.getUsers(page);
         allUsers = data?.items || [];
         document.getElementById('users-info').textContent = `${data?.total||0} users`;
-        renderUsers(allUsers, data?.total || 0, data?.pages || 1);
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`;
-      }
+        renderUsers(allUsers, data?.total || 0, data?.pages || 1); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
     }
     
     function renderUsers(items, total, pages) {
       const tbody = document.getElementById('users-body');
       tbody.innerHTML = '';
-      if (!items.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No users</td></tr>';
-        return;
-      }
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No users</td></tr>'; return; }
       const myId = AUTH.getProfile()?.id;
       items.forEach(u => {
         const me = u.id === myId;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="td-primary">${escapeHTML(u.email)}</td>
-          <td class="td-dim">${escapeHTML(u.full_name||'—')}</td>
-          <td>
-            <select class="t-select" style="font-size:12px;" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)">
-              <option value="customer" ${u.role==='customer'?'selected':''}>Customer</option>
-              <option value="admin"    ${u.role==='admin'   ?'selected':''}>Admin</option>
-            </select>
-          </td>
-          <td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td>
-          <td class="td-dim">${formatDate(u.created_at)}</td>
-          <td>
-            <button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">
-              ${u.is_active
-                ? `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Deactivate`
-                : `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Activate`}
-            </button>
-          </td>
-        `;
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(u.email)}</td><td class="td-dim">${escapeHTML(u.full_name||'—')}</td><td><select class="t-select" style="font-size:12px;" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)"><option value="customer" ${u.role==='customer'?'selected':''}>Customer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td><td class="td-dim">${formatDate(u.created_at)}</td><td><button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Deactivate':'Activate'}</button></td>`;
         tbody.appendChild(tr);
       });
       renderPaging('users-pages', pUserPage, pages, loadUsers);
     }
     
-    function filterUsers(q) {
-      const lower = q.toLowerCase();
-      renderUsers(allUsers.filter(u =>
-        u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)
-      ), 0, 1);
-    }
-    
-    async function updateRole(id, role) {
-      try {
-        await ADMIN.updateUser(id, { role });
-        showToast('Role updated', 'success');
-      }
-      catch (err) {
-        showToast(err.message, 'error');
-        loadUsers(pUserPage);
-      }
-    }
-    
-    async function toggleUser(id, activate) {
-      if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return;
-      try {
-        await ADMIN.updateUser(id, { is_active: activate });
+    function filterUsers(q) { const lower = q.toLowerCase();
+      renderUsers(allUsers.filter(u => u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)), 0, 1); }
+    async function updateRole(id, role) { try { await ADMIN.updateUser(id, { role });
+        showToast('Role updated', 'success'); } catch (err) { showToast(err.message, 'error');
+        loadUsers(pUserPage); } }
+    async function toggleUser(id, activate) { if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return; try { await ADMIN.updateUser(id, { is_active: activate });
         showToast(`User ${activate?'activated':'deactivated'}`, 'info');
-        loadUsers(pUserPage);
-      } catch (err) { showToast(err.message, 'error'); }
-    }
+        loadUsers(pUserPage); } catch (err) { showToast(err.message, 'error'); } }
     
-    /* ══════════════════════════════════════
-       UTILS
-    ══════════════════════════════════════ */
-    function closeModal(id, e) {
-      if (e && e.target !== document.getElementById(id)) return;
-      document.getElementById(id).style.display = 'none';
-    }
+    // Utilities
+    function closeModal(id, e) { if (e && e.target !== document.getElementById(id)) return;
+      document.getElementById(id).style.display = 'none'; }
     
     function renderPaging(cid, cur, pages, fn) {
       const wrap = document.getElementById(cid);
       if (!wrap) return;
       wrap.innerHTML = '';
       if (pages <= 1) return;
-      const mk = (label, pg, active = false) => {
-        const btn = document.createElement('button');
+      const mk = (label, pg, active = false) => { const btn = document.createElement('button');
         btn.className = 'page-btn' + (active ? ' active' : '');
         btn.style.cssText = 'width:30px;height:30px;font-size:12px;';
         btn.textContent = label;
-        btn.addEventListener('click', () => fn(pg));
-        return btn;
-      };
+        btn.addEventListener('click', () => fn(pg)); return btn; };
       if (cur > 1) wrap.appendChild(mk('‹', cur - 1));
-      for (let i = 1; i <= pages; i++) {
-        if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue;
-        wrap.appendChild(mk(i, i, i === cur));
-      }
+      for (let i = 1; i <= pages; i++) { if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue;
+        wrap.appendChild(mk(i, i, i === cur)); }
       if (cur < pages) wrap.appendChild(mk('›', cur + 1));
     }
   </script>
 </body>
 
 </html>
-
