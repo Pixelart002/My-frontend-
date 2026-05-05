@@ -126,6 +126,27 @@
       document.title = `${p.name} — Luviio`;
       document.getElementById('bc-name').textContent = p.name;
 
+      // --- NEW CANONICAL & META DESCRIPTION CODE STARTS HERE ---
+      let canonicalUrl = window.location.origin + window.location.pathname + "?slug=" + slug;
+      let linkTag = document.querySelector("link[rel='canonical']");
+      
+      if (!linkTag) {
+        linkTag = document.createElement('link');
+        linkTag.setAttribute('rel', 'canonical');
+        document.head.appendChild(linkTag);
+      }
+      linkTag.setAttribute('href', canonicalUrl);
+
+      let metaDesc = document.querySelector("meta[name='description']");
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      // Uses short_description, fallback to description, fallback to default text
+      metaDesc.setAttribute('content', p.short_description || p.description || `Buy ${p.name} at Luviio.`);
+      // --- NEW CANONICAL & META DESCRIPTION CODE ENDS HERE ---
+
       const layout   = document.getElementById('product-layout');
       const maxStock = p.stock ?? 0;
       const isOOS    = maxStock === 0;
