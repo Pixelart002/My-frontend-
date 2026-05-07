@@ -5,19 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973"
      crossorigin="anonymous"></script>
-     
+
   <title>Luviio — Luxury Bath & Sanitation Products India</title>
   <meta name="description" content="Shop Luviio's curated collection of premium bath & sanitation products. Free shipping on orders above ₹75. Secure checkout via Stripe. Delivered across India.">
   <meta name="keywords" content="luxury bath products, premium sanitation, bath accessories India, Luviio, luxury bathroom, bath essentials">
   <meta name="author" content="Luviio">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="https://luviio.in/">
-  
+
   <meta name="google-site-verification" content="vv6TFfQ4d01M7QjYQ2qDQfpCevqwhMmoOc_XIuzgeoE">
-  
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Luviio">
   <meta property="og:title" content="Luviio — Luxury Bath & Sanitation Products India">
@@ -28,28 +28,22 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Luviio — Premium Bath Products">
   <meta property="og:locale" content="en_IN">
-  
+
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Luviio — Luxury Bath & Sanitation Products India">
   <meta name="twitter:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹75.">
   <meta name="twitter:image" content="https://luviio.in/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="Luviio — Premium Bath Products">
-  
+
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#080808">
   <meta name="msapplication-TileColor" content="#080808">
-  
-  
+
   <meta name="google-adsense-account" content="ca-pub-8360942174797973">
-  
-  
-  
-  
-  
-  
+
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -63,10 +57,7 @@
         "inLanguage": "en-IN",
         "potentialAction": {
           "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://luviio.in/shop.html?search={search_term_string}"
-          },
+          "target": { "@type": "EntryPoint", "urlTemplate": "https://luviio.in/shop.html?search={search_term_string}" },
           "query-input": "required name=search_term_string"
         }
       },
@@ -75,19 +66,8 @@
         "@id": "https://luviio.in/#organization",
         "name": "Luviio",
         "url": "https://luviio.in/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://luviio.in/images/logo.png",
-          "width": 400,
-          "height": 100
-        },
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "email": "support@luviio.in",
-          "contactType": "customer service",
-          "availableLanguage": ["English", "Hindi"],
-          "areaServed": "IN"
-        },
+        "logo": { "@type": "ImageObject", "url": "https://luviio.in/images/logo.png", "width": 400, "height": 100 },
+        "contactPoint": { "@type": "ContactPoint", "email": "support@luviio.in", "contactType": "customer service", "availableLanguage": ["English", "Hindi"], "areaServed": "IN" },
         "sameAs": []
       },
       {
@@ -99,12 +79,7 @@
         "about": { "@id": "https://luviio.in/#organization" },
         "description": "Shop Luviio's curated collection of premium bath & sanitation products.",
         "inLanguage": "en-IN",
-        "breadcrumb": {
-          "@type": "BreadcrumbList",
-          "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://luviio.in/" }
-          ]
-        }
+        "breadcrumb": { "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://luviio.in/" }] }
       },
       {
         "@type": "OnlineStore",
@@ -116,86 +91,206 @@
         "priceRange": "₹₹",
         "currenciesAccepted": "INR",
         "paymentAccepted": "Credit Card, Debit Card, UPI",
-        "areaServed": {
-          "@type": "Country",
-          "name": "India"
-        },
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Bath & Sanitation Products"
-        }
+        "areaServed": { "@type": "Country", "name": "India" },
+        "hasOfferCatalog": { "@type": "OfferCatalog", "name": "Bath & Sanitation Products" }
       }]
     }
   </script>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app">
   <link rel="dns-prefetch" href="https://js.stripe.com">
-  
+
   <link rel="stylesheet" href="/css/luviio.css">
+
   <style>
-    /* CSS Performance optimizations added here */
-    .section, .section-sm {
-      contain: content; /* Isolates layout repaints for blazing fast rendering */
+    /* ================================================================
+       LUVIIO ANIMATION SYSTEM v2.0 — CSS Foundation
+    ================================================================ */
+
+    :root {
+      /* Fallback gold RGB for rgba() usage — luviio.css may override --gold */
+      --gold-r: 201; --gold-g: 165; --gold-b: 94;
     }
 
+    /* ── Layout Containment (performance) ── */
+    .section, .section-sm { contain: content; }
+
+    /* ── Page Transition Curtain ── */
+    #lv-transition {
+      position: fixed;
+      inset: 0;
+      background: #080808;
+      z-index: 99999;
+      pointer-events: none;
+      transform-origin: bottom;
+      transform: scaleY(0);
+    }
+
+    /* ── Custom Cursor ── */
+    #lv-cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      width: 44px; height: 44px;
+      border: 1px solid var(--gold, #c9a55e);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      will-change: transform;
+      mix-blend-mode: exclusion;
+      opacity: 0;
+      transition: width 0.35s cubic-bezier(0.16,1,0.3,1),
+                  height 0.35s cubic-bezier(0.16,1,0.3,1),
+                  opacity 0.3s;
+    }
+    #lv-cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 5px; height: 5px;
+      background: var(--gold, #c9a55e);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      will-change: transform;
+      opacity: 0;
+    }
+    body.cursor-active #lv-cursor-ring,
+    body.cursor-active #lv-cursor-dot { opacity: 1; }
+    body.cursor-hover-cta #lv-cursor-ring {
+      width: 72px; height: 72px;
+      background: rgba(201,165,94,0.06);
+      border-color: rgba(201,165,94,0.5);
+    }
+    body.cursor-hover-img #lv-cursor-ring {
+      width: 88px; height: 88px;
+      border-color: rgba(201,165,94,0.25);
+    }
+    /* Hide default on devices with pointer */
+    @media (pointer: fine) {
+      body.cursor-active { cursor: none; }
+      body.cursor-active a, body.cursor-active button { cursor: none; }
+    }
+
+    /* ── Scroll Progress ── */
+    #lv-scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 2px;
+      z-index: 9997;
+      transform-origin: left center;
+      transform: scaleX(0);
+      will-change: transform;
+      background: linear-gradient(90deg,
+        var(--gold, #c9a55e) 0%,
+        rgba(255,255,255,0.4) 60%,
+        var(--gold, #c9a55e) 100%);
+    }
+
+    /* ── Hero ── */
     .hero {
       min-height: calc(100vh - var(--nav-h));
       padding: 0;
+      overflow: hidden;
     }
-    
     .hero-content {
       position: relative;
       z-index: 1;
       max-width: 680px;
     }
-    
+
+    /* Eyebrow */
     .hero-eyebrow {
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 4px;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--gold, #c9a55e);
       margin-bottom: 24px;
       opacity: 0;
-      will-change: transform, opacity; /* GPU Hint */
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      will-change: opacity, transform;
     }
-    
+    .hero-eyebrow-pulse {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--gold, #c9a55e);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Title — each line wrapped for clip reveal */
     .hero-title {
       font-family: 'Playfair Display', serif;
       font-size: clamp(48px, 7vw, 88px);
       line-height: 1.05;
       font-weight: 700;
-      color: var(--text);
+      color: var(--text, #f0ece4);
       margin-bottom: 28px;
-      opacity: 0;
-      will-change: transform, opacity; /* GPU Hint */
+      will-change: transform;
     }
-    
-    .hero-title em {
+    .tl { /* title line wrapper */
+      display: block;
+      overflow: hidden;
+      line-height: 1.12;
+    }
+    .tli { /* title line inner — slides up into view */
+      display: block;
+      transform: translateY(110%);
+      will-change: transform;
+    }
+    .hero-title em .tli {
       font-style: italic;
-      color: var(--gold);
+      color: var(--gold, #c9a55e);
     }
-    
+
+    /* Morph word characters */
+    .mchar {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    /* Subtitle word-split */
     .hero-sub {
       font-size: 16px;
-      color: var(--text-muted);
+      color: var(--text-muted, #7a7368);
       max-width: 460px;
       line-height: 1.8;
       margin-bottom: 40px;
       opacity: 0;
-      will-change: transform, opacity; /* GPU Hint */
+      will-change: opacity, transform;
     }
-    
+    .wrd { /* word wrapper for overflow clip */
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      margin-right: 0.28em;
+    }
+    .wrd-inner {
+      display: inline-block;
+      transform: translateY(100%);
+      will-change: transform;
+    }
+
+    /* Actions */
     .hero-actions {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
       opacity: 0;
-      will-change: transform, opacity; /* GPU Hint */
+      will-change: opacity, transform;
     }
-    
+
+    /* Magnetic button wrapper */
+    .mag-wrap {
+      display: inline-block;
+      will-change: transform;
+    }
+
+    /* Scroll indicator */
     .hero-scroll {
       position: absolute;
       bottom: 40px;
@@ -208,131 +303,320 @@
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--text-dim);
+      color: var(--text-dim, #3a3730);
       z-index: 1;
+      opacity: 0;
     }
-    
     .hero-scroll-line {
-      width: 1px;
-      height: 48px;
-      background: linear-gradient(to bottom, var(--gold), transparent);
-      animation: scrollLine 2s ease-in-out infinite;
-      will-change: opacity; /* GPU Hint */
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--gold, #c9a55e), transparent);
+      will-change: transform;
     }
-    
-    @keyframes scrollLine {
-      0%,
-      100% {
-        opacity: 0.3;
-      }
-      
-      50% {
-        opacity: 1;
-      }
+
+    /* ── Marquee ── */
+    .marquee-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border, #1e1c18);
+      border-bottom: 1px solid var(--border, #1e1c18);
+      padding: 13px 0;
+      position: relative;
+      background: var(--surface, #0d0c0a);
+      cursor: default;
+      user-select: none;
     }
-    
+    .marquee-stage {
+      display: flex;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .marquee-track {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .mq-item {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-dim, #3a3730);
+      padding: 0 32px;
+      transition: color 0.3s;
+    }
+    .mq-item:hover { color: var(--gold, #c9a55e); }
+    .mq-sep {
+      display: inline-block;
+      color: var(--gold, #c9a55e);
+      opacity: 0.45;
+      font-size: 10px;
+      padding: 0 4px;
+    }
+
+    /* ── Category Pills ── */
     .cat-strip {
       display: flex;
       gap: 12px;
       overflow-x: auto;
       padding-bottom: 8px;
       scrollbar-width: none;
-      -webkit-overflow-scrolling: touch; /* Smooth buttery scroll for iOS */
+      -webkit-overflow-scrolling: touch;
     }
-    
-    .cat-strip::-webkit-scrollbar {
-      display: none;
-    }
-    
+    .cat-strip::-webkit-scrollbar { display: none; }
     .cat-pill {
       flex-shrink: 0;
       padding: 10px 20px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border, #1e1c18);
       border-radius: 30px;
       font-size: 13px;
-      color: var(--text-muted);
-      transition: all 0.2s;
+      color: var(--text-muted, #7a7368);
+      position: relative;
+      overflow: hidden;
+      will-change: transform;
     }
-    
+    /* Shimmer sweep on pill hover */
+    .cat-pill::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg,
+        transparent 35%,
+        rgba(201,165,94,0.08) 50%,
+        transparent 65%);
+      transform: translateX(-120%);
+      pointer-events: none;
+    }
+    .cat-pill:hover::before { animation: pillShimmer 0.55s ease forwards; }
+    @keyframes pillShimmer { to { transform: translateX(120%); } }
     .cat-pill:hover {
-      border-color: var(--gold);
-      color: var(--gold);
+      border-color: var(--gold, #c9a55e);
+      color: var(--gold, #c9a55e);
     }
-    
+
+    /* ── Feature Grid ── */
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1px;
-      background: var(--border);
+      background: var(--border, #1e1c18);
     }
-    
     .feature-card {
-      background: var(--surface);
+      background: var(--surface, #0d0c0a);
       padding: 40px 32px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      will-change: opacity, transform;
     }
-    
+    /* Animated border-top reveal on scroll */
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      height: 1px;
+      width: 0;
+      background: var(--gold, #c9a55e);
+      will-change: width;
+    }
+    .feature-card.anim-done::after {
+      transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+      width: 100%;
+    }
+    .feature-card:hover { background: rgba(201,165,94,0.025); }
     .feature-icon {
       font-size: 28px;
+      display: inline-block;
+      will-change: transform;
     }
-    
     .feature-title {
       font-size: 16px;
       font-weight: 600;
-      color: var(--text);
+      color: var(--text, #f0ece4);
     }
-    
     .feature-text {
       font-size: 13px;
-      color: var(--text-muted);
+      color: var(--text-muted, #7a7368);
       line-height: 1.7;
     }
-    
-    #featured-grid {
-      min-height: 320px;
+
+    /* ── Section heading reveal ── */
+    .section-title-wrap { overflow: hidden; }
+    .section-title {
+      transform: translateY(60px);
+      opacity: 0;
+      will-change: transform, opacity;
     }
-    
+    .section-subtitle {
+      opacity: 0;
+      will-change: opacity;
+    }
+
+    /* ── Products grid ── */
+    #featured-grid { min-height: 320px; }
+
+    /* Product card micro animations */
+    .product-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transform: translateY(0);
+      will-change: transform;
+    }
+    .product-card-img {
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card-img img {
+      transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform;
+    }
+    .product-card:hover .product-card-img img {
+      transform: scale(1.06);
+    }
+    /* Shimmer swipe on img hover */
+    .product-card-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg,
+        transparent 25%,
+        rgba(255,255,255,0.065) 50%,
+        transparent 75%);
+      transform: translateX(-130%) skewX(-12deg);
+      pointer-events: none;
+    }
+    .product-card:hover .product-card-img::after {
+      animation: cardShimmer 0.75s 0.1s ease forwards;
+    }
+    @keyframes cardShimmer { to { transform: translateX(130%) skewX(-12deg); } }
+
+    /* Gold overlay on card hover */
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(201,165,94,0.04), transparent 40%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .product-card:hover::before { opacity: 1; }
+
+    /* Card body slides up slightly on hover */
+    .product-card-body {
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform;
+    }
+    .product-card:hover .product-card-body {
+      transform: translateY(-4px);
+    }
+
+    /* Add to Cart — micro-bounce on click via JS class */
+    .btn-pop {
+      animation: btnPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes btnPop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(0.88); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── Footer entrance ── */
+    .site-footer {
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+
+    /* ── Noise grain overlay (atmospheric) ── */
+    #lv-grain {
+      position: fixed;
+      inset: 0;
+      z-index: 9996;
+      pointer-events: none;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-      .feature-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .hero-actions .btn {
-        flex: 1;
-        justify-content: center;
+      .feature-grid { grid-template-columns: 1fr; }
+      .hero-actions .btn { flex: 1; justify-content: center; }
+      #lv-cursor-ring, #lv-cursor-dot { display: none !important; }
+    }
+
+    /* ── Reduced-motion respect ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 
 <body>
+  <div id="lv-grain" aria-hidden="true"></div>
+
+  <div id="lv-transition" aria-hidden="true"></div>
+
+  <div id="lv-scroll-progress" aria-hidden="true"></div>
+
+  <div id="lv-cursor-ring" aria-hidden="true"></div>
+  <div id="lv-cursor-dot" aria-hidden="true"></div>
+
   <nav id="main-nav"></nav>
-  
+
   <div class="page-wrapper">
-    
+
     <section class="hero section container" aria-label="Hero">
       <div class="hero-bg"></div>
       <div class="hero-gold-line"></div>
       <div class="hero-content">
-        <p class="hero-eyebrow">New Collection 2026</p>
-        <h1 class="hero-title">Wear the<br><em>Extraordinary.</em></h1>
-        <p class="hero-sub">
-          Curated luxury bath & sanitation products for those who refuse to compromise.
+
+        <p class="hero-eyebrow" aria-label="New Collection 2026">
+          <span class="hero-eyebrow-pulse" aria-hidden="true"></span>
+          <span id="eyebrow-text">New Collection 2026</span>
+        </p>
+
+        <h1 class="hero-title" aria-label="Wear the Extraordinary.">
+          <span class="tl"><span class="tli">Wear the</span></span>
+          <span class="tl"><em><span class="tli" id="morph-word">Extraordinary.</span></em></span>
+        </h1>
+
+        <p class="hero-sub" id="hero-sub-text">
+          Curated luxury bath &amp; sanitation products for those who refuse to compromise.
           Craftsmanship that speaks before you do.
         </p>
+
         <div class="hero-actions">
-          <a href="/shop.html" class="btn btn-primary">Shop Now</a>
-          <a href="/shop.html?category=new" class="btn btn-outline">New Arrivals</a>
+          <span class="mag-wrap">
+            <a href="/shop.html" class="btn btn-primary" id="hero-cta-primary">Shop Now</a>
+          </span>
+          <span class="mag-wrap">
+            <a href="/shop.html?category=new" class="btn btn-outline" id="hero-cta-outline">New Arrivals</a>
+          </span>
         </div>
       </div>
+
       <div class="hero-scroll" aria-hidden="true">
         <span>Scroll</span>
         <div class="hero-scroll-line"></div>
       </div>
     </section>
-    
+
+    <section class="marquee-wrap" aria-hidden="true" id="lv-marquee">
+      <div class="marquee-stage" id="marquee-stage">
+        <div class="marquee-track" id="marquee-track-a"></div>
+        <div class="marquee-track" id="marquee-track-b"></div>
+      </div>
+    </section>
+
     <section class="section-sm" style="border-top:1px solid var(--border); border-bottom:1px solid var(--border);" aria-label="Categories">
       <div class="container">
         <nav id="cat-strip-wrap" class="cat-strip" aria-label="Product categories">
@@ -340,31 +624,30 @@
         </nav>
       </div>
     </section>
-    
+
     <section class="section" aria-label="Featured products">
       <div class="container">
         <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;">
           <div>
             <p class="section-subtitle">Handpicked for you</p>
-            <h2 class="section-title">Featured Pieces</h2>
+            <div class="section-title-wrap">
+              <h2 class="section-title">Featured Pieces</h2>
+            </div>
           </div>
-          <a href="/shop.html" class="btn btn-outline" style="padding:10px 20px;">View All →</a>
+          <a href="/shop.html" class="btn btn-outline mag-wrap" style="padding:10px 20px;">View All →</a>
         </div>
-       
-<br>
+
+        <br>
         <div id="featured-grid" class="products-grid" role="list" aria-label="Featured products">
           <div style="height:360px;" class="skeleton" aria-hidden="true"></div>
           <div style="height:360px;" class="skeleton" aria-hidden="true"></div>
           <div style="height:360px;" class="skeleton" aria-hidden="true"></div>
           <div style="height:360px;" class="skeleton" aria-hidden="true"></div>
-          
         </div>
       </div>
-    
-      
     </section>
-    
-    <div class="container">
+
+    <div class="container" style="margin-bottom: var(--section-gap, 80px);">
       <div class="feature-grid" style="border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border); background:var(--border);">
         <div class="feature-card">
           <div class="feature-icon" aria-hidden="true">🚚</div>
@@ -383,13 +666,13 @@
         </div>
       </div>
     </div>
-    
+
     <footer class="site-footer" role="contentinfo">
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="logo">LUVIIO</div>
-            <p>Curated luxury bath & sanitation products for the discerning individual. Quality above all else.</p>
+            <p>Curated luxury bath &amp; sanitation products for the discerning individual. Quality above all else.</p>
           </div>
           <div class="footer-col">
             <h4>Shop</h4>
@@ -413,112 +696,747 @@
         </div>
       </div>
     </footer>
-    
-  </div>
-  
-  <script src="/js/config.js"></script>
+
+  </div><script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" crossorigin="anonymous"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Observer.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js" crossorigin="anonymous"></script>
+
   <script>
-    // Yielding to browser to render skeletons perfectly before running heavy tasks
-    requestAnimationFrame(() => {
-      pageInit();
-      
-      // Register ScrollTrigger
-      if (window.gsap && window.ScrollTrigger) {
-        gsap.registerPlugin(ScrollTrigger);
+  /* ================================================================
+     LUVIIO ANIMATION SYSTEM v2.0
+     Strategy: Page-wide orchestration with GSAP context,
+     per-element micro-interactions, scroll-velocity marquee,
+     manual SplitText + ScrambleText + MorphText, magnetic fields,
+     custom cursor, and staged entrance choreography.
+  ================================================================ */
+
+  requestAnimationFrame(() => {
+    // ── App init (unchanged) ──────────────────────────────────────
+    pageInit();
+
+    if (!window.gsap) return; // graceful degradation
+
+    // ── Plugin Registration ───────────────────────────────────────
+    const plugins = [ScrollTrigger];
+    if (window.Observer)   plugins.push(Observer);
+    if (window.CustomEase) plugins.push(CustomEase);
+    gsap.registerPlugin(...plugins);
+
+    // ── Signature Ease Curves ─────────────────────────────────────
+    if (window.CustomEase) {
+      CustomEase.create('luxe',    'M0,0 C0.1,0 0.16,1 1,1');           // buttery deceleration
+      CustomEase.create('luxeOut', 'M0,0 C0.22,0.9 0.36,1 1,1');        // smooth settle
+      CustomEase.create('snap',    'M0,0 C0.14,0 0.24,0.44 0.27,0.56 0.32,0.73 0.36,0.96 0.36,1 0.38,0.98 0.42,0.97 0.45,0.96 0.49,0.95 0.64,1 0.66,1 0.68,0.98 0.78,0.95 0.84,0.96 0.90,0.98 0.95,1 1,1'); // elastic snap
+    }
+    const EASE_LUXE    = window.CustomEase ? 'luxe'    : 'power3.out';
+    const EASE_LUXEOUT = window.CustomEase ? 'luxeOut' : 'power4.out';
+    const EASE_SNAP    = window.CustomEase ? 'snap'    : 'elastic.out(1,0.5)';
+
+    // ── GSAP Context (scoped, cleans up on unload) ────────────────
+    const ctx = gsap.context(() => {
+
+      // ================================================================
+      //  UTIL — SPLIT HELPERS
+      // ================================================================
+
+      /**
+       * splitChars — wraps every character in an element into .mchar <span>s
+       * Preserves spaces as &nbsp; for correct spacing.
+       * Returns array of char span elements.
+       */
+      function splitChars(el) {
+        const text = el.textContent;
+        const frag = document.createDocumentFragment();
+        const spans = [];
+        for (const ch of text) {
+          const s = document.createElement('span');
+          s.className = 'mchar';
+          s.textContent = ch === ' ' ? '\u00A0' : ch;
+          frag.appendChild(s);
+          spans.push(s);
+        }
+        el.innerHTML = '';
+        el.appendChild(frag);
+        return spans;
       }
-      
-      // 1. Sequenced Hero Animations
-      if (window.gsap) {
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        tl.fromTo('.hero-eyebrow', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.2 })
-          .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8 }, "-=0.4")
-          .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5")
-          .fromTo('.hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.5");
+
+      /**
+       * splitWords — wraps each word in a double-span for clip-path reveal.
+       * .wrd (overflow:hidden) > .wrd-inner (slides up into view)
+       */
+      function splitWords(el) {
+        const words = el.textContent.split(/\s+/).filter(Boolean);
+        el.innerHTML = '';
+        return words.map(word => {
+          const outer = document.createElement('span');
+          outer.className = 'wrd';
+          const inner = document.createElement('span');
+          inner.className = 'wrd-inner';
+          inner.textContent = word;
+          outer.appendChild(inner);
+          el.appendChild(outer);
+          el.appendChild(document.createTextNode(' '));
+          return inner;
+        });
       }
-      
-      // 2. Load Categories (Optimized with DocumentFragment)
+
+      // ================================================================
+      //  FEATURE 1 — CUSTOM CURSOR
+      // ================================================================
+
+      (function setupCursor() {
+        const ring = document.getElementById('lv-cursor-ring');
+        const dot  = document.getElementById('lv-cursor-dot');
+        if (!ring || !dot) return;
+
+        let rx = 0, ry = 0; // ring position (lerped)
+        let mx = 0, my = 0; // mouse position
+
+        // Activate only on first real mouse move
+        document.addEventListener('mousemove', (e) => {
+          mx = e.clientX; my = e.clientY;
+          document.body.classList.add('cursor-active');
+
+          // Dot snaps instantly
+          gsap.set(dot, { x: mx - 2.5, y: my - 2.5 });
+        }, { once: false });
+
+        // Ring follows with lerp via ticker (silky lag effect)
+        gsap.ticker.add(() => {
+          rx += (mx - rx) * 0.12;
+          ry += (my - ry) * 0.12;
+          gsap.set(ring, { x: rx - 22, y: ry - 22 });
+        });
+
+        // Cursor state changes — CTAs
+        document.querySelectorAll('.btn, .cat-pill, a[href]').forEach(el => {
+          el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover-cta'));
+          el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover-cta'));
+        });
+
+        // Cursor state changes — images
+        document.addEventListener('mouseenter', (e) => {
+          if (e.target.closest?.('.product-card-img') || e.target.tagName === 'IMG') {
+            document.body.classList.add('cursor-hover-img');
+          }
+        }, true);
+        document.addEventListener('mouseleave', (e) => {
+          if (e.target.closest?.('.product-card-img') || e.target.tagName === 'IMG') {
+            document.body.classList.remove('cursor-hover-img');
+          }
+        }, true);
+
+        // Click ripple: ring shrinks then snaps back
+        document.addEventListener('click', () => {
+          gsap.fromTo(ring,
+            { scale: 0.6 },
+            { scale: 1, duration: 0.4, ease: EASE_SNAP }
+          );
+        });
+      })();
+
+      // ================================================================
+      //  FEATURE 2 — SCROLL PROGRESS BAR
+      // ================================================================
+
+      (function setupScrollProgress() {
+        const bar = document.getElementById('lv-scroll-progress');
+        if (!bar) return;
+        ScrollTrigger.create({
+          trigger: document.documentElement,
+          start: 'top top',
+          end: 'bottom bottom',
+          onUpdate: (self) => {
+            gsap.set(bar, { scaleX: self.progress });
+          }
+        });
+      })();
+
+      // ================================================================
+      //  FEATURE 3 — PAGE TRANSITION
+      //  Curtain wipe on outbound navigation.
+      // ================================================================
+
+      (function setupPageTransition() {
+        const curtain = document.getElementById('lv-transition');
+        if (!curtain) return;
+
+        // Entry: curtain is already scaleY(0) via CSS.
+        // Animate it away on load.
+        gsap.fromTo(curtain,
+          { scaleY: 1, transformOrigin: 'top' },
+          { scaleY: 0, transformOrigin: 'top', duration: 0.9, ease: EASE_LUXE, delay: 0.1 }
+        );
+
+        // Exit: wipe down before navigating
+        document.addEventListener('click', (e) => {
+          const link = e.target.closest?.('a[href]');
+          if (!link) return;
+          const href = link.getAttribute('href');
+          if (!href || href.startsWith('#') || href.startsWith('mailto:') ||
+              href.startsWith('tel:') || link.target === '_blank') return;
+
+          e.preventDefault();
+          gsap.fromTo(curtain,
+            { scaleY: 0, transformOrigin: 'bottom' },
+            {
+              scaleY: 1, transformOrigin: 'bottom',
+              duration: 0.65, ease: 'power3.in',
+              onComplete: () => { window.location.href = href; }
+            }
+          );
+        });
+      })();
+
+      // ================================================================
+      //  FEATURE 4 — MAGNETIC BUTTONS
+      //  Buttons pull toward cursor within their gravity radius.
+      // ================================================================
+
+      function applyMagnetic(el, strength = 0.38, radius = 80) {
+        if (!el) return;
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const cx = rect.left + rect.width  / 2;
+          const cy = rect.top  + rect.height / 2;
+          const dx = (e.clientX - cx) * strength;
+          const dy = (e.clientY - cy) * strength;
+          gsap.to(el, { x: dx, y: dy, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+        });
+        el.addEventListener('mouseleave', () => {
+          gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: EASE_SNAP, overwrite: 'auto' });
+        });
+      }
+
+      document.querySelectorAll('.mag-wrap').forEach(w => applyMagnetic(w));
+
+      // ================================================================
+      //  FEATURE 5 — SCRAMBLE TEXT  (custom, no plugin required)
+      //  Progressive character revelation with random noise chars.
+      // ================================================================
+
+      const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789✦◈·';
+
+      function scrambleIn(el, finalText, durationMs = 1100, delay = 0) {
+        const len = finalText.length;
+        let startTime = null;
+        let rafId;
+        let started = false;
+
+        function tick(ts) {
+          if (!started) { startTime = ts; started = true; }
+          const elapsed = ts - startTime;
+          const progress = Math.min(elapsed / durationMs, 1);
+          // Eased progress for reveal front
+          const easedProgress = progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+          const revealed = Math.floor(easedProgress * len);
+
+          let out = '';
+          for (let i = 0; i < len; i++) {
+            if (i < revealed) {
+              out += finalText[i];
+            } else if (finalText[i] === ' ') {
+              out += ' ';
+            } else {
+              out += SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+            }
+          }
+          el.textContent = out;
+          if (progress < 1) rafId = requestAnimationFrame(tick);
+          else el.textContent = finalText;
+        }
+
+        setTimeout(() => { rafId = requestAnimationFrame(tick); }, delay);
+        return () => cancelAnimationFrame(rafId);
+      }
+
+      // ================================================================
+      //  FEATURE 6 — MORPHING TEXT
+      //  em#morph-word cycles through luxury words with per-char
+      //  staggered exit (fly up) and entrance (fly in from below).
+      // ================================================================
+
+      (function setupMorphText() {
+        const morphEl = document.getElementById('morph-word');
+        if (!morphEl) return;
+
+        const words = [
+          'Extraordinary.',
+          'Luxurious.',
+          'Timeless.',
+          'Unrivalled.',
+          'Elevated.',
+          'Immaculate.'
+        ];
+        let idx = 0;
+        let isMorphing = false;
+
+        function morphTo(nextWord) {
+          if (isMorphing) return;
+          isMorphing = true;
+
+          const currentChars = splitChars(morphEl);
+
+          // Phase 1 — exit: chars fly up + fade out with stagger
+          const exitTl = gsap.timeline({
+            onComplete: () => {
+              // Phase 2 — swap text, enter: chars fly up from below
+              morphEl.textContent = nextWord;
+              const enterChars = splitChars(morphEl);
+              gsap.fromTo(enterChars,
+                { y: '110%', opacity: 0, rotateX: -40 },
+                {
+                  y: '0%', opacity: 1, rotateX: 0,
+                  duration: 0.55,
+                  stagger: { each: 0.028, from: 'start' },
+                  ease: EASE_LUXE,
+                  onComplete: () => { isMorphing = false; }
+                }
+              );
+            }
+          });
+
+          exitTl.to(currentChars, {
+            y: '-120%',
+            opacity: 0,
+            rotateX: 60,
+            duration: 0.35,
+            stagger: { each: 0.022, from: 'end' },
+            ease: 'power3.in'
+          });
+        }
+
+        // Initial split (so first morph has chars to exit)
+        splitChars(morphEl);
+        // Set initial chars visible
+        gsap.set(morphEl.querySelectorAll('.mchar'), { opacity: 1, y: 0 });
+
+        setInterval(() => {
+          idx = (idx + 1) % words.length;
+          morphTo(words[idx]);
+        }, 3200);
+      })();
+
+      // ================================================================
+      //  FEATURE 7 — HERO ENTRANCE ANIMATION
+      //  Orchestrated timeline: scramble eyebrow → clip-reveal title
+      //  lines → word-split subtitle → fade actions → scroll hint
+      // ================================================================
+
+      (function animateHero() {
+        const eyebrowText = document.getElementById('eyebrow-text');
+        const titleLines  = document.querySelectorAll('.tli');
+        const subEl       = document.getElementById('hero-sub-text');
+        const actions     = document.querySelector('.hero-actions');
+        const scrollHint  = document.querySelector('.hero-scroll');
+
+        // Scramble eyebrow
+        if (eyebrowText) {
+          const original = eyebrowText.textContent;
+          eyebrowText.textContent = ''; // clear for scramble start
+          gsap.set('.hero-eyebrow', { opacity: 1 });
+          scrambleIn(eyebrowText, original, 900, 350);
+        }
+
+        // Eyebrow pulse dot
+        gsap.fromTo('.hero-eyebrow-pulse',
+          { scale: 0 },
+          { scale: 1, duration: 0.5, ease: EASE_SNAP, delay: 0.3 }
+        );
+
+        // Title lines — clip-path reveal (y slides up into overflow:hidden parent)
+        if (titleLines.length) {
+          gsap.to(titleLines, {
+            y: '0%',
+            duration: 1.1,
+            stagger: 0.18,
+            ease: EASE_LUXEOUT,
+            delay: 0.55
+          });
+        }
+
+        // Subtitle — word-by-word reveal
+        if (subEl) {
+          const wordEls = splitWords(subEl);
+          gsap.set(subEl, { opacity: 1 });
+          gsap.to(wordEls, {
+            y: '0%',
+            duration: 0.65,
+            stagger: 0.035,
+            ease: EASE_LUXE,
+            delay: 1.1
+          });
+        }
+
+        // Actions fade in
+        if (actions) {
+          gsap.to(actions, { opacity: 1, y: 0, duration: 0.7, ease: EASE_LUXE, delay: 1.45 });
+        }
+
+        // Scroll hint
+        if (scrollHint) {
+          gsap.to(scrollHint, { opacity: 1, duration: 0.8, delay: 2.0 });
+
+          // Hero scroll line: continuous breathing animation
+          gsap.fromTo('.hero-scroll-line',
+            { scaleY: 0, transformOrigin: 'top' },
+            {
+              scaleY: 1,
+              transformOrigin: 'top',
+              duration: 1.2,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true,
+              delay: 2.2
+            }
+          );
+        }
+
+        // Hero content parallax on scroll
+        gsap.to('.hero-content', {
+          y: -60,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1.5
+          }
+        });
+      })();
+
+      // ================================================================
+      //  FEATURE 8 — SCROLL-VELOCITY MARQUEE
+      //  Base speed via GSAP ticker. Scroll velocity bends speed.
+      //  Hover pauses. Direction-aware (scroll up = slow/reverse).
+      // ================================================================
+
+      (function setupMarquee() {
+        const trackA = document.getElementById('marquee-track-a');
+        const trackB = document.getElementById('marquee-track-b');
+        if (!trackA || !trackB) return;
+
+        const ITEMS = [
+          'Luxury Bath', '✦',
+          'Premium Quality', '✦',
+          'Free Shipping India', '✦',
+          'Crafted Excellence', '✦',
+          'Luviio 2026', '✦',
+          'Handpicked', '✦',
+          "India's Finest", '✦',
+          'Secure Checkout', '✦',
+          'New Collection', '✦',
+          'Artisan Curation', '✦'
+        ];
+
+        // Build HTML for one track
+        function buildTrackHTML() {
+          return ITEMS.map(item =>
+            item === '✦'
+              ? `<span class="mq-sep" aria-hidden="true">✦</span>`
+              : `<span class="mq-item">${item}</span>`
+          ).join('');
+        }
+
+        trackA.innerHTML = buildTrackHTML();
+        trackB.innerHTML = buildTrackHTML();
+
+        // Wait one frame for layout
+        requestAnimationFrame(() => {
+          const W = trackA.offsetWidth; // one track's width
+          if (!W) return;
+
+          let xPos = 0;
+          let speedTarget = -1.2; // px/frame base
+          let speedCurrent = speedTarget;
+          let isPaused = false;
+
+          // Ticker — frame-by-frame position update
+          gsap.ticker.add(() => {
+            if (isPaused) return;
+
+            // Smooth speed interpolation
+            speedCurrent += (speedTarget - speedCurrent) * 0.06;
+
+            xPos += speedCurrent;
+
+            // Seamless wrap: when first track fully exits left, reset
+            if (xPos <= -W) xPos += W;
+            if (xPos >= 0)  xPos -= W;
+
+            // trackA starts at xPos, trackB is exactly one W behind
+            gsap.set(trackA, { x: xPos });
+            gsap.set(trackB, { x: xPos + W });
+          });
+
+          // Scroll velocity hook via ScrollTrigger
+          let velocityTimer;
+          ScrollTrigger.create({
+            trigger: 'body',
+            start: 'top top',
+            end: 'bottom bottom',
+            onUpdate: (self) => {
+              const v = self.getVelocity(); // px/s
+              // Map scroll velocity to marquee speed delta
+              const delta = gsap.utils.clamp(-6, 6, v * 0.0028);
+              speedTarget = -1.2 + delta;
+
+              // Return to base after 600ms of no scroll
+              clearTimeout(velocityTimer);
+              velocityTimer = setTimeout(() => { speedTarget = -1.2; }, 600);
+            }
+          });
+
+          // Hover: pause
+          const wrap = document.getElementById('lv-marquee');
+          if (wrap) {
+            wrap.addEventListener('mouseenter', () => { isPaused = true; });
+            wrap.addEventListener('mouseleave', () => { isPaused = false; });
+          }
+        });
+      })();
+
+      // ================================================================
+      //  FEATURE 9 — SECTION TITLES SCROLL REVEAL
+      // ================================================================
+
+      ScrollTrigger.batch('.section-subtitle', {
+        onEnter: els => gsap.to(els, {
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: EASE_LUXE
+        }),
+        start: 'top 88%'
+      });
+
+      ScrollTrigger.batch('.section-title', {
+        onEnter: els => gsap.to(els, {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          stagger: 0.12,
+          ease: EASE_LUXEOUT
+        }),
+        start: 'top 88%'
+      });
+
+      // ================================================================
+      //  FEATURE 10 — FEATURE CARDS ORCHESTRATED REVEAL
+      //  Cards stagger in, then floating icon micro-animations start.
+      // ================================================================
+
+      ScrollTrigger.create({
+        trigger: '.feature-grid',
+        start: 'top 80%',
+        onEnter: () => {
+          const cards = document.querySelectorAll('.feature-card');
+
+          gsap.to(cards, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.75,
+            stagger: 0.14,
+            ease: EASE_LUXEOUT,
+            onComplete: () => {
+              // After entrance: add top-border animation class
+              cards.forEach((c, i) => {
+                setTimeout(() => c.classList.add('anim-done'), i * 140 + 200);
+              });
+
+              // Floating icons — infinite yoyo, stagger offset per card
+              gsap.to('.feature-icon', {
+                y: -9,
+                duration: 2.2,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut',
+                stagger: { each: 0.55 }
+              });
+            }
+          });
+
+          // From state (set when first paint — opacity:0 already via CSS)
+          gsap.set(cards, { y: 55, scale: 0.97 });
+        }
+      });
+
+      // Card hover tilt micro-interaction
+      document.querySelectorAll('.feature-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width  - 0.5; // -0.5 to 0.5
+          const ny = (e.clientY - r.top)  / r.height - 0.5;
+          gsap.to(card, {
+            rotateY: nx * 4,
+            rotateX: -ny * 4,
+            transformPerspective: 800,
+            duration: 0.35,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            rotateY: 0, rotateX: 0,
+            duration: 0.6,
+            ease: EASE_SNAP,
+            overwrite: 'auto'
+          });
+        });
+      });
+
+      // ================================================================
+      //  FEATURE 11 — FOOTER REVEAL
+      // ================================================================
+
+      ScrollTrigger.create({
+        trigger: '.site-footer',
+        start: 'top 92%',
+        onEnter: () => {
+          gsap.to('.site-footer', {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: EASE_LUXEOUT
+          });
+          gsap.set('.site-footer', { y: 30 });
+        }
+      });
+
+      // ================================================================
+      //  FEATURE 12 — CATEGORY PILLS STAGGER ENTRANCE
+      // ================================================================
+
+      ScrollTrigger.create({
+        trigger: '#cat-strip-wrap',
+        start: 'top 92%',
+        onEnter: () => {
+          const pills = document.querySelectorAll('.cat-pill');
+          gsap.fromTo(pills,
+            { opacity: 0, x: -16, scale: 0.94 },
+            {
+              opacity: 1, x: 0, scale: 1,
+              duration: 0.5,
+              stagger: 0.055,
+              ease: EASE_LUXEOUT
+            }
+          );
+        }
+      });
+
+      // ================================================================
+      //  DATA LOADING — categories + products
+      //  (Identical logic to original, with animation enhancements)
+      // ================================================================
+
       async function loadCategories() {
         try {
           const cats = await API.getCategories();
           const strip = document.getElementById('cat-strip-wrap');
-          const fragment = document.createDocumentFragment();
-          
+          const frag = document.createDocumentFragment();
+
           cats.forEach(cat => {
             const a = document.createElement('a');
             a.className = 'cat-pill';
             a.href = `/shop.html?category=${encodeURIComponent(cat.slug)}`;
             a.textContent = cat.name;
-            fragment.appendChild(a);
+            // Apply magnetic after insert
+            frag.appendChild(a);
           });
-          
-          strip.appendChild(fragment); // Single DOM insertion
+
+          strip.appendChild(frag);
+
+          // Apply magnetic to newly added pills
+          strip.querySelectorAll('.cat-pill').forEach(p => applyMagnetic(p, 0.18, 50));
         } catch {}
       }
-      
-      // 3. Load Featured Products (Optimized with DocumentFragment)
+
       async function loadFeatured() {
         const grid = document.getElementById('featured-grid');
         try {
           const data = await API.getProducts({ page_size: 8, in_stock: true });
           grid.innerHTML = '';
-          
+
           if (!data.items?.length) {
             grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No products yet — check back soon.</p>';
             return;
           }
-          
-          const fragment = document.createDocumentFragment();
-          data.items.slice(0, 8).forEach(p => fragment.appendChild(makeProductCard(p)));
-          
-          grid.appendChild(fragment); // Single DOM insertion
-          
-          if (window.gsap && window.ScrollTrigger) {
-            gsap.fromTo('#featured-grid .product-card', 
-              { opacity: 0, y: 40 },
-              { 
-                opacity: 1, 
-                y: 0, 
-                duration: 0.6, 
-                stagger: 0.1, 
-                ease: "power2.out",
-                scrollTrigger: {
-                  trigger: "#featured-grid",
-                  start: "top 85%", // Triggers when the grid is 85% into the viewport
-                  toggleActions: "play none none none"
-                }
+
+          const frag = document.createDocumentFragment();
+          data.items.slice(0, 8).forEach(p => frag.appendChild(makeProductCard(p)));
+          grid.appendChild(frag);
+
+          // ── Product card scroll entrance ──
+          // Advanced stagger from random positions with scale
+          const cards = grid.querySelectorAll('.product-card');
+          gsap.fromTo(cards,
+            { opacity: 0, y: 60, scale: 0.94 },
+            {
+              opacity: 1, y: 0, scale: 1,
+              duration: 0.7,
+              stagger: { each: 0.1, from: 'start' },
+              ease: EASE_LUXEOUT,
+              scrollTrigger: {
+                trigger: '#featured-grid',
+                start: 'top 85%',
+                toggleActions: 'play none none none'
               }
-            );
-          }
+            }
+          );
+
+          // ── Product image parallax on scroll ──
+          cards.forEach(card => {
+            const img = card.querySelector('.product-card-img img');
+            if (!img) return;
+            gsap.to(img, {
+              y: -20,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1.2
+              }
+            });
+          });
+
         } catch {
           grid.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Could not load products.</p>';
         }
       }
-      
-      // 4. Card Maker Function (Optimized Image Rendering)
+
+      // ================================================================
+      //  CARD BUILDER — Enhanced micro-interactions
+      // ================================================================
+
       function makeProductCard(p) {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.setAttribute('role', 'listitem');
-        
+
+        // ── Image ──
         const imgWrap = document.createElement('div');
         imgWrap.className = 'product-card-img';
-        
+
         if (p.image_url) {
           const img = document.createElement('img');
           img.src = p.image_url;
           img.alt = escapeHTML(p.name);
           img.loading = 'lazy';
-          img.decoding = 'async'; // Prevents UI lag while decoding large images
+          img.decoding = 'async';
           img.width = 400;
           img.height = 500;
           imgWrap.appendChild(img);
@@ -528,42 +1446,44 @@
           ph.textContent = '◈';
           imgWrap.appendChild(ph);
         }
-        
+
+        // ── Body ──
         const body = document.createElement('div');
         body.className = 'product-card-body';
-        
+
         const name = document.createElement('div');
         name.className = 'product-card-name';
         name.textContent = p.name;
-        
+
         const priceRow = document.createElement('div');
         priceRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
-        
+
         const price = document.createElement('div');
         price.className = 'product-card-price';
         price.textContent = formatPrice(p.price);
         priceRow.appendChild(price);
-        
+
         if (p.compare_price) {
           const compare = document.createElement('div');
           compare.className = 'product-card-compare';
           compare.textContent = formatPrice(p.compare_price);
           priceRow.appendChild(compare);
         }
-        
+
         body.appendChild(name);
         body.appendChild(priceRow);
-        
+
         if (p.stock === 0) {
           const oos = document.createElement('span');
           oos.style.cssText = 'font-size:11px;color:var(--error);font-weight:600;';
           oos.textContent = 'Out of stock';
           body.appendChild(oos);
         }
-        
+
+        // ── Action ──
         const action = document.createElement('div');
         action.className = 'product-card-action';
-        
+
         const btn = document.createElement('button');
         btn.className = 'btn btn-primary';
         btn.style.width = '100%';
@@ -571,31 +1491,93 @@
         btn.textContent = p.stock > 0 ? 'Add to Cart' : 'Sold Out';
         btn.disabled = p.stock === 0;
         btn.setAttribute('aria-label', `Add ${p.name} to cart`);
-        
+
+        // Micro: button pop on click + text morph "Added!"
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
+
+          if (btn.disabled) return;
+
+          // Pop animation
+          btn.classList.remove('btn-pop');
+          void btn.offsetWidth; // reflow to restart
+          btn.classList.add('btn-pop');
+
+          // Text morph: "Add to Cart" → "✦ Added!" → back
+          const original = btn.textContent;
+          gsap.to(btn, {
+            scaleY: 0.88,
+            duration: 0.08,
+            ease: 'power2.in',
+            onComplete: () => {
+              btn.textContent = '✦ Added!';
+              gsap.to(btn, { scaleY: 1, duration: 0.3, ease: EASE_SNAP });
+              setTimeout(() => {
+                gsap.to(btn, {
+                  scaleY: 0.88,
+                  duration: 0.08,
+                  ease: 'power2.in',
+                  onComplete: () => {
+                    btn.textContent = original;
+                    gsap.to(btn, { scaleY: 1, duration: 0.3, ease: EASE_SNAP });
+                  }
+                });
+              }, 1400);
+            }
+          });
+
           CART.add(p, 1);
           showToast(`${p.name} added to cart`, 'success');
         });
-        
+
         action.appendChild(btn);
         card.appendChild(imgWrap);
         card.appendChild(body);
         card.appendChild(action);
-        
+
+        // ── Card click navigation ──
         card.addEventListener('click', (e) => {
           if (e.target.tagName === 'BUTTON') return;
           window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
         });
-        
+
+        // ── Card tilt micro-interaction ──
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width  - 0.5;
+          const ny = (e.clientY - r.top)  / r.height - 0.5;
+          gsap.to(card, {
+            rotateY: nx * 5,
+            rotateX: -ny * 4,
+            transformPerspective: 900,
+            duration: 0.4,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            rotateY: 0, rotateX: 0,
+            duration: 0.7,
+            ease: EASE_SNAP,
+            overwrite: 'auto'
+          });
+        });
+
         return card;
       }
-      
+
+      // ── Fire data loading ──
       loadCategories();
       loadFeatured();
-    });
+
+    }); // end gsap.context
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => ctx.revert());
+
+  }); // end requestAnimationFrame
   </script>
 </body>
-
 </html>
