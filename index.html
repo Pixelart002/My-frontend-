@@ -584,8 +584,8 @@
           <span id="eyebrow-text">New Collection 2026</span>
         </p>
 
-        <h1 class="hero-title" aria-label="Wear the Extraordinary.">
-          <span class="tl"><span class="tli">Wear the</span></span>
+        <h1 class="hero-title" aria-label="Elevate the Extraordinary.">
+          <span class="tl"><span class="tli">Elevate the</span></span>
           <span class="tl"><em><span class="tli" id="morph-word">Extraordinary.</span></em></span>
         </h1>
 
@@ -1575,7 +1575,12 @@
     }); // end gsap.context
 
     // Cleanup on page unload
-    window.addEventListener('beforeunload', () => ctx.revert());
+  window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    gsap.fromTo('#lv-transition', { scaleY: 1 }, { scaleY: 0, duration: 0.9 });
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+});
 
   }); // end requestAnimationFrame
   </script>
