@@ -13,7 +13,8 @@
     { "source": "/checkout", "destination": "/checkout.html" },
     { "source": "/orders",   "destination": "/orders.html"   },
     { "source": "/profile",  "destination": "/profile.html"  },
-    { "source": "/product",  "destination": "/product.html"  }
+    { "source": "/product",  "destination": "/product.html"  },
+    {"source": "/ads.txt","destination":"/ads.txt"}
   ],
   "headers": [
     {
