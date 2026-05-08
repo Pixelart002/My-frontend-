@@ -10,7 +10,7 @@
      crossorigin="anonymous"></script>
 
   <title>Luviio — Luxury Bath & Sanitation Products India</title>
-  <meta name="description" content="Shop Luviio's curated collection of premium bath & sanitation products. Free shipping on orders above ₹75. Secure checkout via Stripe. Delivered across India.">
+  <meta name="description" content="Shop Luviio's curated collection of premium bath & sanitation products. Free shipping on orders above ₹1,499. Secure checkout via Stripe. Delivered across India.">
   <meta name="keywords" content="luxury bath products, premium sanitation, bath accessories India, Luviio, luxury bathroom, bath essentials">
   <meta name="author" content="Luviio">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -21,7 +21,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Luviio">
   <meta property="og:title" content="Luviio — Luxury Bath & Sanitation Products India">
-  <meta property="og:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹75. Shop now at luviio.in">
+  <meta property="og:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹1,499. Shop now at luviio.in">
   <meta property="og:url" content="https://luviio.in/">
   <meta property="og:image" content="https://luviio.in/images/og-cover.jpg">
   <meta property="og:image:width" content="1200">
@@ -31,7 +31,7 @@
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Luviio — Luxury Bath & Sanitation Products India">
-  <meta name="twitter:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹75.">
+  <meta name="twitter:description" content="Curated premium bath & sanitation products. Free shipping on orders above ₹1,499.">
   <meta name="twitter:image" content="https://luviio.in/images/og-cover.jpg">
   <meta name="twitter:image:alt" content="Luviio — Premium Bath Products">
 
@@ -563,7 +563,18 @@
 <body>
   <div id="lv-grain" aria-hidden="true"></div>
 
-  <div id="lv-transition" aria-hidden="true"></div>
+     <div id="lv-transition" aria-hidden="true">
+    <div id="splash-logo" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 1; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      
+      <img src="/src/logo.png" alt="Luviio Icon" style="width: 80px; height: auto;">
+      
+      <span style="color: var(--gold, #c9a55e); font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; letter-spacing: 6px;">
+        LUVIIO
+      </span>
+      
+    </div>
+  </div>
+
 
   <div id="lv-scroll-progress" aria-hidden="true"></div>
 
@@ -584,8 +595,8 @@
           <span id="eyebrow-text">New Collection 2026</span>
         </p>
 
-        <h1 class="hero-title" aria-label="Elevate the Extraordinary.">
-          <span class="tl"><span class="tli">Elevate the</span></span>
+        <h1 class="hero-title" aria-label="Experience the Extraordinary.">
+          <span class="tl"><span class="tli">Experience  the</span></span>
           <span class="tl"><em><span class="tli" id="morph-word">Extraordinary.</span></em></span>
         </h1>
 
@@ -652,7 +663,7 @@
         <div class="feature-card">
           <div class="feature-icon" aria-hidden="true">🚚</div>
           <h3 class="feature-title">Free Shipping</h3>
-          <p class="feature-text">On orders above ₹75. Fast, tracked delivery to your door across India.</p>
+          <p class="feature-text">On orders above ₹1,499. Fast, tracked delivery to your door across India.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon" aria-hidden="true">🔒</div>
@@ -865,19 +876,26 @@
       //  FEATURE 3 — PAGE TRANSITION
       //  Curtain wipe on outbound navigation.
       // ================================================================
-
       (function setupPageTransition() {
         const curtain = document.getElementById('lv-transition');
+        const splashLogo = document.getElementById('splash-logo');
         if (!curtain) return;
 
-        // Entry: curtain is already scaleY(0) via CSS.
-        // Animate it away on load.
-        gsap.fromTo(curtain,
+        // Splash Screen Timeline
+        const tl = gsap.timeline();
+
+        // Pehle logo fade out hoga (0.5s delay ke baad)
+        if (splashLogo) {
+          tl.to(splashLogo, { opacity: 0, y: -20, duration: 0.5, delay: 0.5, ease: 'power2.out' });
+        }
+
+        // Fir black curtain upar wipe ho jayega
+        tl.fromTo(curtain,
           { scaleY: 1, transformOrigin: 'top' },
-          { scaleY: 0, transformOrigin: 'top', duration: 0.9, ease: EASE_LUXE, delay: 0.1 }
+          { scaleY: 0, transformOrigin: 'top', duration: 0.9, ease: EASE_LUXE }
         );
 
-        // Exit: wipe down before navigating
+        // Exit: wipe down before navigating (doosre page par jane ke liye)
         document.addEventListener('click', (e) => {
           const link = e.target.closest?.('a[href]');
           if (!link) return;
@@ -886,6 +904,9 @@
               href.startsWith('tel:') || link.target === '_blank') return;
 
           e.preventDefault();
+          // Hide logo instantly when leaving the page
+          if (splashLogo) gsap.set(splashLogo, { display: 'none' }); 
+          
           gsap.fromTo(curtain,
             { scaleY: 0, transformOrigin: 'bottom' },
             {
@@ -896,6 +917,7 @@
           );
         });
       })();
+
 
       // ================================================================
       //  FEATURE 4 — MAGNETIC BUTTONS
