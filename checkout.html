@@ -61,13 +61,10 @@
         <span>Checkout</span>
       </nav>
 
-      <!-- ── Main checkout ── -->
       <div id="main-content">
         <div class="checkout-layout">
 
-          <!-- Left: address + payment -->
           <div>
-            <!-- Shipping -->
             <div class="checkout-section">
               <div class="checkout-section-title">Shipping Address</div>
               <div id="address-section"><div style="height:120px;" class="skeleton"></div></div>
@@ -106,7 +103,6 @@
               </div>
             </div>
 
-            <!-- Payment -->
             <div class="checkout-section">
               <div class="checkout-section-title">Payment</div>
               <div id="stripe-elements-wrap" style="display:none;">
@@ -126,7 +122,6 @@
             </p>
           </div>
 
-          <!-- Right: order summary -->
           <div class="summary-sticky">
             <div class="card" style="padding:28px;">
               <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:20px;">Order Summary</div>
@@ -138,7 +133,6 @@
         </div>
       </div>
 
-      <!-- ── Success screen ── -->
       <div id="success-screen" style="display:none;">
         <div class="success-screen">
           <div class="success-icon">✅</div>
@@ -148,7 +142,6 @@
             You'll receive a confirmation email shortly.
           </p>
 
-          <!-- Push notification prompt — shown only if not subscribed -->
           <div id="push-prompt-card" class="push-card" style="display:none;">
             <div class="push-card-icon">🔔</div>
             <div class="push-card-text">
@@ -422,12 +415,27 @@
             intentData.client_secret,
             { payment_method: { card: cardElement } }
           );
+          
           if (stripeErr) {
+            // 1. UI me error dikhayein
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
+            
+            // 2. BACKEND KO TURANT NOTIFY KAREIN (Push notification bhejne ke liye)
+            try {
+              await API.notifyPaymentFailed(
+                order.id, 
+                intentData.payment_intent_id, 
+                stripeErr.message
+              );
+            } catch (notifyErr) {
+              console.warn("Failed to notify backend of payment error (non-fatal)", notifyErr);
+            }
+
             hideLoader(btn); btn.disabled = false;
             return;
           }
+
           if (paymentIntent.status === 'succeeded') {
             // ── FIX: Webhook pe rely mat karo — directly backend ko bolo ──
             // Webhook sirf tab kaam karta hai jab Stripe Dashboard mein configure ho.

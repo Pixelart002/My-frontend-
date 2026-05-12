@@ -121,6 +121,13 @@ const API = (() => {
     cancelOrder: (id) => API.post(`/orders/my/${id}/cancel`, {}),
     
     createPaymentIntent: (orderId) => API.post('/payments/create-intent', { order_id: orderId }),
+    // ADDED: Endpoint for frontend Stripe errors
+    notifyPaymentFailed: (orderId, paymentIntentId, errorMessage) => 
+      API.post('/payments/notify-failed', { 
+        order_id: orderId, 
+        payment_intent_id: paymentIntentId, 
+        error_message: errorMessage 
+      }),
     
     getMe: () => API.get('/users/me'),
     updateMe: (data) => API.patch('/users/me', data),
