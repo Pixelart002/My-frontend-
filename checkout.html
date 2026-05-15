@@ -167,15 +167,6 @@
     </div>
   </div>
 
-<script>
-  atOptions = {
-    'key' : 'b2152b3abb67293d550b8f3d8925dc47',
-    'format' : 'iframe',
-    'height' : 90,
-    'width' : 728,
-    'params' : {}
-  };
-</script>
 <script src="https://www.highperformanceformat.com/b2152b3abb67293d550b8f3d8925dc47/invoke.js"></script>
 
   <script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
@@ -213,7 +204,7 @@
     function renderOrderSummary() {
       const items    = CART.get();
       const subtotal = CART.total();
-      const shipping = subtotal >= 75 ? 0 : 9.99;
+      const shipping = subtotal >= 1499 ? 0 : 99;
       const tax      = (subtotal + shipping) * 0.08;
       const total    = subtotal + shipping + tax;
 
