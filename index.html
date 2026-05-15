@@ -59,58 +59,107 @@
 
   <meta name="google-adsense-account" content="ca-pub-8360942174797973">
 
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://luviio.in/#website",
-        "url": "https://luviio.in/",
-        "name": "Luviio",
-        "description": "Premium luxury bath and sanitation products for India",
-        "inLanguage": "en-IN",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": { "@type": "EntryPoint", "urlTemplate": "https://luviio.in/shop.html?search={search_term_string}" },
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@type": "Organization",
-        "@id": "https://luviio.in/#organization",
-        "name": "Luviio",
-        "url": "https://luviio.in/",
-        "logo": { "@type": "ImageObject", "url": "https://luviio.in/images/logo.png", "width": 400, "height": 100 },
-        "contactPoint": { "@type": "ContactPoint", "email": "support@luviio.in", "contactType": "customer service", "availableLanguage": ["English", "Hindi"], "areaServed": "IN" },
-        "sameAs": []
-      },
-      {
-        "@type": "WebPage",
-        "@id": "https://luviio.in/#webpage",
-        "url": "https://luviio.in/",
-        "name": "Luviio — Luxury Bath & Sanitation Products India",
-        "isPartOf": { "@id": "https://luviio.in/#website" },
-        "about": { "@id": "https://luviio.in/#organization" },
-        "description": "Shop Luviio's curated collection of premium bath & sanitation products.",
-        "inLanguage": "en-IN",
-        "breadcrumb": { "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://luviio.in/" }] }
-      },
-      {
-        "@type": "OnlineStore",
-        "@id": "https://luviio.in/#store",
-        "name": "Luviio",
-        "url": "https://luviio.in/",
-        "description": "Curated luxury bath and sanitation products",
-        "image": "https://luviio.in/images/og-cover.jpg",
-        "priceRange": "₹₹",
-        "currenciesAccepted": "INR",
-        "paymentAccepted": "Credit Card, Debit Card, UPI",
-        "areaServed": { "@type": "Country", "name": "India" },
-        "hasOfferCatalog": { "@type": "OfferCatalog", "name": "Bath & Sanitation Products" }
-      }]
-    }
   </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://luviio.in/#website",
+      "url": "https://luviio.in/",
+      "name": "Luviio",
+      "description": "Premium luxury bath and sanitation products for India",
+      "inLanguage": "en-IN",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://luviio.in/shop.html?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://luviio.in/#organization",
+      "name": "Luviio",
+      "url": "https://luviio.in/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://luviio.in/images/logo.png",
+        "width": 400,
+        "height": 100
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@luviio.in",
+        "contactType": "customer service",
+        "availableLanguage": ["English", "Hindi"],
+        "areaServed": "IN"
+      },
+      "sameAs": [
+        "https://blog.luviio.in/"
+      ]
+    },
+    {
+      "@type": "Blog",
+      "@id": "https://blog.luviio.in/#blog",
+      "url": "https://blog.luviio.in/",
+      "name": "Luviio Official Blog",
+      "description": "Latest US Google Trends, tech news, and sports insights.",
+      "publisher": {
+        "@id": "https://luviio.in/#organization"
+      },
+      "inLanguage": "en-US"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://luviio.in/#webpage",
+      "url": "https://luviio.in/",
+      "name": "Luviio — Luxury Bath & Sanitation Products India",
+      "isPartOf": {
+        "@id": "https://luviio.in/#website"
+      },
+      "about": {
+        "@id": "https://luviio.in/#organization"
+      },
+      "description": "Shop Luviio's curated collection of premium bath & sanitation products.",
+      "inLanguage": "en-IN",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://luviio.in/"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "OnlineStore",
+      "@id": "https://luviio.in/#store",
+      "name": "Luviio",
+      "url": "https://luviio.in/",
+      "description": "Curated luxury bath and sanitation products",
+      "image": "https://luviio.in/images/og-cover.jpg",
+      "priceRange": "₹₹",
+      "currenciesAccepted": "INR",
+      "paymentAccepted": "Credit Card, Debit Card, UPI",
+      "areaServed": {
+        "@type": "Country",
+        "name": "India"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Bath & Sanitation Products"
+      }
+    }
+  ]
+}
+</script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
