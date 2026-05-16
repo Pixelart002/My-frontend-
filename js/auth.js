@@ -1,25 +1,25 @@
 /* ============================================================
-   LUVIIO — Auth  (v2 — fixed)
+   LUVIIO — Auth  (v3 — HttpOnly Cookie Secure Flow)
    ============================================================
    FIXES:
-   1. Profile cached in sessionStorage with 5-min TTL
-      → Eliminates /users/me call on every page load
-   2. storage event listener clears tokens if another tab logs out
-      → Prevents stale token reuse across tabs
-   3. clearTokens() now also removes profile cache
-   4. Token never logged, never in URL params
-   5. Added wasRecentlyRefreshed() guard to skip refresh spam
+   1. SECURED: Refresh Token is NO LONGER stored in sessionStorage.
+      It relies entirely on the browser's HttpOnly cookie.
+   2. FIXED "Login Loop": init() no longer checks for local refresh 
+      token. It blindly pings /auth/refresh with credentials.
+   3. CROSS-TAB SYNC: Uses localStorage event to securely log out
+      all open tabs when the user logs out in one.
+   4. Profile cached in sessionStorage with 5-min TTL.
    ============================================================ */
 
 const AUTH = (() => {
   let _accessToken = null;
   let _userProfile = null;
   
-  const RT_KEY = '__lv_rt';
   const PROFILE_KEY = '__lv_profile';
   const PROFILE_TTL = 5 * 60 * 1000; // 5 minutes
   const REFRESH_KEY = '__lv_last_refresh';
   const REFRESH_GAP = 30 * 1000; // don't re-refresh within 30s
+  const SYNC_LOGOUT_KEY = '__lv_logout_sync'; // Cross-tab sync
   
   // ── Safe sessionStorage wrappers ──────────────────────────
   const ss = {
@@ -45,14 +45,14 @@ const AUTH = (() => {
     } catch { return null; }
   }
   
-  // ── Listen for logout in other tabs ───────────────────────
-  // If another tab clears the refresh token, we wipe ours too
+  // ── Listen for logout in other tabs (Cross-Tab Sync) ──────
   window.addEventListener('storage', (e) => {
-    // sessionStorage events don't cross tabs in most browsers,
-    // but this guard handles shared localStorage if ever used
-    if (e.key === RT_KEY && !e.newValue) {
+    // If another tab triggers logout, clear this tab's memory as well
+    if (e.key === SYNC_LOGOUT_KEY) {
       _accessToken = null;
       _userProfile = null;
+      ss.del(PROFILE_KEY);
+      ss.del(REFRESH_KEY);
       window.dispatchEvent(new CustomEvent('auth:logout'));
     }
   });
@@ -60,24 +60,23 @@ const AUTH = (() => {
   return {
     getToken() { return _accessToken; },
     
-    setTokens(access, refresh) {
+    // Notice: We no longer accept or store a refresh token argument
+    setTokens(access) {
       _accessToken = access;
-      if (refresh) {
-        ss.set(RT_KEY, refresh);
-        ss.set(REFRESH_KEY, String(Date.now()));
-      }
+      ss.set(REFRESH_KEY, String(Date.now()));
     },
     
     clearTokens() {
       _accessToken = null;
       _userProfile = null;
-      ss.del(RT_KEY);
       ss.del(PROFILE_KEY);
       ss.del(REFRESH_KEY);
+      
+      // Broadcast logout to other open tabs
+      try { localStorage.setItem(SYNC_LOGOUT_KEY, String(Date.now())); } catch {}
+      
       window.dispatchEvent(new CustomEvent('auth:logout'));
     },
-    
-    getRefreshToken() { return ss.get(RT_KEY); },
     
     isLoggedIn() { return !!_accessToken; },
     
@@ -104,34 +103,39 @@ const AUTH = (() => {
       return last && (Date.now() - Number(last)) < REFRESH_GAP;
     },
     
+    // ── Initialize Auth State on Page Load ──────────────────
     async init() {
-      const rt = this.getRefreshToken();
-      if (!rt) return false;
-      
-      // If we have a valid access token already, skip
+      // If we have a valid access token in memory already, skip
       if (_accessToken) return true;
       
-      // Debounce: avoid hammering refresh endpoint
+      // Debounce: avoid hammering refresh endpoint if already checking
       if (this._wasRecentlyRefreshed() && _loadProfileCache()) {
-        // We probably already have a valid session from this tab open;
-        // still need a new access token though, so proceed but mark as
-        // debounced to avoid edge cases
+        // Debounce handled gracefully
       }
       
       try {
+        // We DO NOT send a JSON body here anymore. 
+        // "credentials: 'include'" tells the browser to automatically attach the HttpOnly cookie!
         const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refresh_token: rt }),
+          credentials: 'include', // <--- CRITICAL FOR SECURE COOKIES
           signal: AbortSignal.timeout(8000), // 8s max
         });
-        if (!res.ok) { this.clearTokens(); return false; }
+        
+        if (!res.ok) { 
+          // No valid cookie found, user is genuinely logged out
+          this.clearTokens(); 
+          return false; 
+        }
         
         const data = await res.json();
-        this.setTokens(data.access_token, data.refresh_token);
+        this.setTokens(data.access_token);
         window.dispatchEvent(new CustomEvent('auth:login'));
         return true;
-      } catch {
+        
+      } catch (err) {
+        console.warn("Auth initialization failed", err);
         this.clearTokens();
         return false;
       }

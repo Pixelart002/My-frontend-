@@ -479,7 +479,8 @@
       
       try {
         const data = await API.login(email, pass);
-        AUTH.setTokens(data.access_token, data.refresh_token);
+        // FIX: Only pass access_token, refresh token is securely handled via HttpOnly cookie
+        AUTH.setTokens(data.access_token);
         window.location.href = safeRedirect(getParam('redirect'));
       } catch (err) {
         // Fallback to show error on both fields if login fails generic
