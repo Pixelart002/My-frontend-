@@ -109,7 +109,6 @@
     .input-wrapper:focus-within svg.input-icon { color: var(--gold); }
     .form-group:focus-within .form-label { color: var(--gold); }
 
-    /* ERROR STATE STYLES FOR INPUTS */
     .input-wrapper.error { border-color: var(--error) !important; }
     .input-wrapper.error svg.input-icon { color: var(--error) !important; }
 
@@ -127,12 +126,10 @@
     }
     .icon-btn:hover { color: var(--gold); transform: scale(1.1); }
 
-    /* Password Strength Line */
     .strength-bar-wrap { opacity: 0; transition: opacity 0.4s ease; height: 2px; border-radius: 2px; background: var(--border); margin-top: 12px; overflow: hidden; }
     .strength-bar-wrap.visible { opacity: 1; }
     .strength-fill { height: 100%; border-radius: 2px; width: 0; transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease; }
 
-    /* Custom T&C Checkbox */
     .tc-checkbox-wrap {
       display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
       margin-bottom: 24px; transition: color 0.3s;
@@ -150,12 +147,10 @@
     .tc-text a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border-light); transition: border-color 0.2s; }
     .tc-text a:hover { border-color: var(--gold); }
 
-    /* Error State for T&C */
     .tc-checkbox-wrap.error .custom-checkbox { border-color: var(--error); }
     .tc-checkbox-wrap.error .tc-text { color: var(--error); }
     .tc-checkbox-wrap.error a { color: var(--error); border-color: var(--error); }
 
-    /* ── BUTTONS ── */
     .btn-primary {
       width: 100%; padding: 16px; background: var(--text); color: var(--bg);
       border: none; border-radius: var(--radius); font-family: var(--font-ui); font-size: 13px; 
@@ -180,7 +175,6 @@
     .auth-divider { display: flex; align-items: center; gap: 16px; margin: 32px 0 24px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
     .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    /* ── FORGOT PASSWORD MODAL ── */
     .modal-overlay {
       display: none; position: fixed; inset: 0; z-index: 9999;
       background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
@@ -332,7 +326,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <script>
-    /* ── Initial Route Check ─────────────────────────────── */
+    /* ── Initial Route Check (V4 Guaranteed Bypass) ── */
     (async () => {
       await AUTH.init();
       if (AUTH.isLoggedIn()) {
@@ -425,27 +419,23 @@
 
     /* ── UI Error & Notification System (No Layout Shifts) ── */
     function showError(inputId, msg) {
-      // Show notification Toast globally
       if (typeof showToast === 'function') {
         showToast(msg, 'error');
       } else {
-        alert(msg); // Fallback
+        alert(msg);
       }
 
-      // Highlight exact field
       if (inputId) {
         const wrap = document.getElementById(`wrap-${inputId}`);
         if (wrap) {
           wrap.classList.add('error');
-          // GSAP Shake Effect
           gsap.fromTo(wrap, { x: -6 }, { x: 0, duration: 0.4, ease: "elastic.out(2, 0.4)" });
           
-          // Remove error state on input
           const removeErr = () => wrap.classList.remove('error');
           const inputEl = document.getElementById(inputId);
           if(inputEl) {
             inputEl.addEventListener('input', removeErr, { once: true });
-            inputEl.addEventListener('change', removeErr, { once: true }); // for checkboxes
+            inputEl.addEventListener('change', removeErr, { once: true });
           }
           setTimeout(removeErr, 4000);
         }
@@ -462,7 +452,7 @@
       }
     }
 
-    /* ── Login Logic ───────────────────────── */
+    /* ── Login Submission Flow ───────────────────────── */
     document.getElementById('login-form').addEventListener('submit', async e => {
       e.preventDefault(); 
       
@@ -479,11 +469,32 @@
       
       try {
         const data = await API.login(email, pass);
-        // FIX: Only pass access_token, refresh token is securely handled via HttpOnly cookie
+        
+        // 1. Save access token to storage to persist login
         AUTH.setTokens(data.access_token);
+        
+        // 🔥 2. CRITICAL CACHE UPDATE: Fetch full profile to get "full_name" and "role"
+        try {
+          const profileRes = await fetch(`${CONFIG.API_BASE}/users/me`, {
+            headers: { 
+              'Authorization': `Bearer ${data.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            AUTH.setProfile(profileData); 
+          } else if (data.user) {
+            AUTH.setProfile(data.user); // Fallback to basic user data if /users/me fails
+          }
+        } catch (profileErr) {
+          if (data.user) AUTH.setProfile(data.user); // Fallback
+        }
+        
+        // 3. Complete strict redirection
         window.location.href = safeRedirect(getParam('redirect'));
       } catch (err) {
-        // Fallback to show error on both fields if login fails generic
         showError('login-email', err.message || 'Invalid email or password.');
         document.getElementById('wrap-login-pass').classList.add('error');
       } finally {

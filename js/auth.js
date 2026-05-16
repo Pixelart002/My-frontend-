@@ -1,34 +1,42 @@
 /* ============================================================
-   LUVIIO — Auth  (v3 — HttpOnly Cookie Secure Flow)
+   LUVIIO — Auth  (v4.1 — Ultra Strict Ghost Request Fix)
    ============================================================
    FIXES:
-   1. SECURED: Refresh Token is NO LONGER stored in sessionStorage.
-      It relies entirely on the browser's HttpOnly cookie.
-   2. FIXED "Login Loop": init() no longer checks for local refresh 
-      token. It blindly pings /auth/refresh with credentials.
-   3. CROSS-TAB SYNC: Uses localStorage event to securely log out
-      all open tabs when the user logs out in one.
-   4. Profile cached in sessionStorage with 5-min TTL.
+   1. GHOST REQUEST FIX: Added `SESSION_HINT` in localStorage. 
+      The /auth/refresh API will NEVER fire on page load for guest 
+      users, keeping the network tab 100% clean.
+   2. REDIRECT PROOF: Token in sessionStorage survives navigation.
+   3. CONCURRENCY LOCK: Prevents double-firing refresh calls.
    ============================================================ */
 
 const AUTH = (() => {
   let _accessToken = null;
   let _userProfile = null;
+  let _currentRefreshPromise = null; 
   
+  const AT_KEY = '__lv_at'; 
   const PROFILE_KEY = '__lv_profile';
-  const PROFILE_TTL = 5 * 60 * 1000; // 5 minutes
+  const PROFILE_TTL = 5 * 60 * 1000; 
   const REFRESH_KEY = '__lv_last_refresh';
-  const REFRESH_GAP = 30 * 1000; // don't re-refresh within 30s
-  const SYNC_LOGOUT_KEY = '__lv_logout_sync'; // Cross-tab sync
+  const REFRESH_GAP = 30 * 1000; 
+  const SYNC_LOGOUT_KEY = '__lv_logout_sync'; 
+  const SESSION_HINT = '__lv_has_session'; // 🔥 NAYA: Guest check hint
   
-  // ── Safe sessionStorage wrappers ──────────────────────────
+  // ── Safe storage wrappers ──────────────────────────
   const ss = {
     get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { sessionStorage.setItem(k, v); } catch {} },
     del(k) { try { sessionStorage.removeItem(k); } catch {} },
   };
+  const ls = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
   
-  // ── Profile cache ─────────────────────────────────────────
+  // Instantly recover access token from storage on page evaluation
+  _accessToken = ss.get(AT_KEY);
+  
   function _saveProfileCache(profile) {
     try {
       ss.set(PROFILE_KEY, JSON.stringify({ data: profile, ts: Date.now() }));
@@ -47,12 +55,13 @@ const AUTH = (() => {
   
   // ── Listen for logout in other tabs (Cross-Tab Sync) ──────
   window.addEventListener('storage', (e) => {
-    // If another tab triggers logout, clear this tab's memory as well
     if (e.key === SYNC_LOGOUT_KEY) {
       _accessToken = null;
       _userProfile = null;
+      ss.del(AT_KEY);
       ss.del(PROFILE_KEY);
       ss.del(REFRESH_KEY);
+      ls.del(SESSION_HINT);
       window.dispatchEvent(new CustomEvent('auth:logout'));
     }
   });
@@ -60,19 +69,21 @@ const AUTH = (() => {
   return {
     getToken() { return _accessToken; },
     
-    // Notice: We no longer accept or store a refresh token argument
     setTokens(access) {
       _accessToken = access;
+      ss.set(AT_KEY, access); 
       ss.set(REFRESH_KEY, String(Date.now()));
+      ls.set(SESSION_HINT, '1'); // 🔥 Login hote hi hint ON kar diya
     },
     
     clearTokens() {
       _accessToken = null;
       _userProfile = null;
+      ss.del(AT_KEY);
       ss.del(PROFILE_KEY);
       ss.del(REFRESH_KEY);
+      ls.del(SESSION_HINT); // 🔥 Logout hote hi hint OFF kar diya
       
-      // Broadcast logout to other open tabs
       try { localStorage.setItem(SYNC_LOGOUT_KEY, String(Date.now())); } catch {}
       
       window.dispatchEvent(new CustomEvent('auth:logout'));
@@ -80,7 +91,6 @@ const AUTH = (() => {
     
     isLoggedIn() { return !!_accessToken; },
     
-    // ── Profile: memory → cache → null ────────────────────
     setProfile(p) {
       _userProfile = p;
       _saveProfileCache(p);
@@ -88,57 +98,75 @@ const AUTH = (() => {
     
     getProfile() {
       if (_userProfile) return _userProfile;
-      // Try cache before returning null
       const cached = _loadProfileCache();
       if (cached) { _userProfile = cached; return cached; }
       return null;
     },
     
-    // Returns cached profile without API call (for nav render speed)
     getCachedProfile() { return _loadProfileCache(); },
     
-    // ── Avoid refresh-token spam ───────────────────────────
     _wasRecentlyRefreshed() {
       const last = ss.get(REFRESH_KEY);
       return last && (Date.now() - Number(last)) < REFRESH_GAP;
     },
     
-    // ── Initialize Auth State on Page Load ──────────────────
     async init() {
-      // If we have a valid access token in memory already, skip
-      if (_accessToken) return true;
-      
-      // Debounce: avoid hammering refresh endpoint if already checking
-      if (this._wasRecentlyRefreshed() && _loadProfileCache()) {
-        // Debounce handled gracefully
-      }
-      
-      try {
-        // We DO NOT send a JSON body here anymore. 
-        // "credentials: 'include'" tells the browser to automatically attach the HttpOnly cookie!
-        const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', // <--- CRITICAL FOR SECURE COOKIES
-          signal: AbortSignal.timeout(8000), // 8s max
-        });
-        
-        if (!res.ok) { 
-          // No valid cookie found, user is genuinely logged out
-          this.clearTokens(); 
-          return false; 
-        }
-        
-        const data = await res.json();
-        this.setTokens(data.access_token);
+      // 1. Agar token memory/cache mein hai, toh API mat bulao
+      if (_accessToken) {
         window.dispatchEvent(new CustomEvent('auth:login'));
         return true;
-        
-      } catch (err) {
-        console.warn("Auth initialization failed", err);
-        this.clearTokens();
+      }
+
+      // 🔥 2. ULTRA STRICT GHOST REQUEST FIX: 
+      // Agar hint null hai (yani user kabhi login nahi hua ya usne logout daba diya hai)
+      // toh network request STRICTLY BAN hai!
+      if (!ls.get(SESSION_HINT)) {
         return false;
       }
+
+      // 3. Login page bypass
+      const path = window.location.pathname;
+      if (path.includes('login.html') || path === '/login' || path.endsWith('/login')) {
+        return false; 
+      }
+      
+      // 4. Concurrency Lock
+      if (_currentRefreshPromise) return _currentRefreshPromise;
+      
+      _currentRefreshPromise = (async () => {
+        try {
+          const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', 
+            signal: AbortSignal.timeout(8000), 
+          }).catch(err => {
+            throw new Error("Network unreachable");
+          });
+          
+          if (!res || !res.ok) { 
+            this.clearTokens(); 
+            return false; 
+          }
+          
+          const data = await res.json();
+          if (data && data.access_token) {
+            this.setTokens(data.access_token);
+            window.dispatchEvent(new CustomEvent('auth:login'));
+            return true;
+          }
+          return false;
+          
+        } catch (err) {
+          console.warn("Cookie verification skipped locally:", err.message);
+          this.clearTokens();
+          return false;
+        } finally {
+          _currentRefreshPromise = null; 
+        }
+      })();
+      
+      return _currentRefreshPromise;
     },
     
     requireAuth() {
