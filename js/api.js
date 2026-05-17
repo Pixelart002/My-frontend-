@@ -1,14 +1,11 @@
 /* ============================================================
-   LUVIIO — API  (v3.1 — CORS Fixed & Cache Optimized)
+   LUVIIO — API  (v4.2 — Flat Structure + All Endpoints)
    ============================================================
    FIXES:
-   1. AbortSignal.timeout(10000) on every request — no more hangs
-   2. Error messages sanitized — don't leak stack traces
-   3. 401 on /auth/* endpoints never triggers refresh loop
-   4. Token never added to GET requests for public endpoints
-   5. OPTIMIZED: getMe() strictly checks AUTH cache before fetching
-   6. CORS FIX: Removed global credentials:'include' that was blocking 
-      public APIs like /categories on localhost.
+   1. BACKWARD COMPATIBLE: Kept the flat structure (API.getProducts) 
+      so your frontend UI does not break.
+   2. ALL ENDPOINTS ADDED: Cart, Pricing, Admin, Invoices, Push, etc.
+   3. CORS & CACHE FIXED: Maintains the v3.1 CORS & getMe() cache fixes.
    ============================================================ */
 
 class APIError extends Error {
@@ -21,7 +18,7 @@ class APIError extends Error {
 
 const API = (() => {
   // Public endpoints that don't need Authorization header
-  const PUBLIC_PREFIXES = ['/products', '/categories'];
+  const PUBLIC_PREFIXES = ['/products', '/categories', '/pricing/config', '/health', '/push/vapid-key'];
   
   function _isPublic(path) {
     return PUBLIC_PREFIXES.some(p => path.startsWith(p));
@@ -94,59 +91,117 @@ const API = (() => {
     
     return data;
   }
+
+  // Helper for binary file downloads (e.g. PDF Invoices)
+  async function _downloadBlob(path, defaultFilename) {
+    const token = AUTH.getToken();
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${CONFIG.API_BASE}${path}`, { method: 'GET', headers, signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new APIError('Failed to download file', res.status);
+    
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = defaultFilename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
+  }
   
   return {
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
     patch: (path, body) => request('PATCH', path, body),
+    put: (path, body) => request('PUT', path, body),
     delete: (path) => request('DELETE', path),
     
-    login: (email, pass) => API.post('/auth/login', { email, password: pass }),
-    register: (email, pass, name) => API.post('/auth/register', { email, password: pass, full_name: name }),
-    
+    // --- AUTH ---
+    login: (email, pass) => request('POST', '/auth/login', { email, password: pass }),
+    register: (email, pass, name) => request('POST', '/auth/register', { email, password: pass, full_name: name }),
     logout: async () => {
-      try { await API.post('/auth/logout', {}); } catch (e) { console.warn('Logout API failed locally:', e); }
+      try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed locally:', e); }
       AUTH.clearTokens();
     },
+    forgotPw: (email) => request('POST', '/auth/forgot-password', { email }),
+    resetPw: (newPassword) => request('POST', '/auth/reset-password', { new_password: newPassword }),
     
-    forgotPw: (email) => API.post('/auth/forgot-password', { email }),
-    
-    getProducts(params = {}) {
-      const q = new URLSearchParams(
-        Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))
-      ).toString();
-      return API.get(`/products${q ? '?' + q : ''}`);
+    // --- PRODUCTS ---
+    getProducts: (params = {}) => {
+      const q = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''))).toString();
+      return request('GET', `/products${q ? '?' + q : ''}`);
     },
-    getProduct: (slug) => API.get(`/products/${encodeURIComponent(slug)}`),
-    getCategories: () => API.get('/categories'),
+    getProduct: (slug) => request('GET', `/products/${encodeURIComponent(slug)}`),
+    createProduct: (data) => request('POST', '/products', data), // Admin
+    updateProduct: (id, data) => request('PATCH', `/products/${encodeURIComponent(id)}`, data), // Admin
+    deleteProduct: (id) => request('DELETE', `/products/${encodeURIComponent(id)}`), // Admin
+    uploadProductImage: (id, file) => { // Admin
+      const fd = new FormData(); fd.append('file', file);
+      return request('POST', `/products/${encodeURIComponent(id)}/images`, fd);
+    },
+    deleteProductImage: (id, index) => request('DELETE', `/products/${encodeURIComponent(id)}/images/${encodeURIComponent(index)}`), // Admin
+    reorderProductImages: (id, urls) => request('PUT', `/products/${encodeURIComponent(id)}/images/reorder`, urls), // Admin
+
+    // --- CATEGORIES ---
+    getCategories: () => request('GET', '/categories'),
+    createCategory: (data) => request('POST', '/categories', data), // Admin
+    deleteCategory: (id) => request('DELETE', `/categories/${encodeURIComponent(id)}`), // Admin
     
-    createOrder: (data) => API.post('/orders/', data),
-    getMyOrders: (page) => API.get(`/orders/my?page=${page}&page_size=10`),
-    getMyOrder: (id) => API.get(`/orders/my/${id}`),
-    cancelOrder: (id) => API.post(`/orders/my/${id}/cancel`, {}),
-    
-    createPaymentIntent: (orderId) => API.post('/payments/create-intent', { order_id: orderId }),
-    notifyPaymentFailed: (orderId, paymentIntentId, errorMessage) => 
-      API.post('/payments/notify-failed', { 
-        order_id: orderId, 
-        payment_intent_id: paymentIntentId, 
-        error_message: errorMessage 
-      }),
-    
-    // Profile Data Caching
+    // --- USERS / PROFILE ---
     getMe: async () => {
       const cached = AUTH.getProfile();
       if (cached) return cached;
-      
-      const data = await API.get('/users/me');
+      const data = await request('GET', '/users/me');
       if (data) AUTH.setProfile(data);
-      
       return data;
     },
+    updateMe: (data) => request('PATCH', '/users/me', data),
+    getAddresses: () => request('GET', '/users/me/addresses'),
+    addAddress: (data) => request('POST', '/users/me/addresses', data),
+    deleteAddress: (id) => request('DELETE', `/users/me/addresses/${encodeURIComponent(id)}`),
+    getUsersAdmin: (page = 1, pageSize = 20) => request('GET', `/users/?page=${page}&page_size=${pageSize}`), // Admin
+    updateUserAdmin: (id, data) => request('PATCH', `/users/${encodeURIComponent(id)}`, data), // Admin
+
+    // --- CART ---
+    getCart: () => request('GET', '/cart'),
+    clearCart: () => request('DELETE', '/cart'),
+    addCartItem: (productId, quantity) => request('POST', '/cart/items', { product_id: productId, quantity }),
+    updateCartItem: (productId, quantity) => request('PUT', `/cart/items/${encodeURIComponent(productId)}`, { quantity }),
+    removeCartItem: (productId) => request('DELETE', `/cart/items/${encodeURIComponent(productId)}`),
+    getAbandonedCartsAdmin: (hours = 24, page = 1) => request('GET', `/cart/admin/abandoned?hours=${hours}&page=${page}`), // Admin
+    sendCartReminderAdmin: (cartId) => request('POST', `/cart/admin/remind/${encodeURIComponent(cartId)}`, {}), // Admin
+
+    // --- PRICING ---
+    calculatePricing: (items) => request('POST', '/pricing/calculate', { items }),
+    getPricingConfig: () => request('GET', '/pricing/config'),
+
+    // --- ORDERS ---
+    createOrder: (data) => request('POST', '/orders/', data),
+    getMyOrders: (page = 1, pageSize = 10) => request('GET', `/orders/my?page=${page}&page_size=${pageSize}`),
+    getMyOrder: (id) => request('GET', `/orders/my/${encodeURIComponent(id)}`),
+    cancelOrder: (id) => request('POST', `/orders/my/${encodeURIComponent(id)}/cancel`, {}),
+    getAllOrdersAdmin: (page = 1, pageSize = 20, status = null) => { // Admin
+       let url = `/orders/?page=${page}&page_size=${pageSize}`;
+       if(status) url += `&status_filter=${encodeURIComponent(status)}`;
+       return request('GET', url);
+    },
+    updateOrderAdmin: (id, data) => request('PATCH', `/orders/${encodeURIComponent(id)}`, data), // Admin
+    downloadInvoice: (id) => _downloadBlob(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
     
-    updateMe: (data) => API.patch('/users/me', data),
-    getAddresses: () => API.get('/users/me/addresses'),
-    addAddress: (data) => API.post('/users/me/addresses', data),
-    deleteAddress: (id) => API.delete(`/users/me/addresses/${id}`),
+    // --- PAYMENTS ---
+    createPaymentIntent: (orderId) => request('POST', '/payments/create-intent', { order_id: orderId }),
+    confirmPayment: (orderId, paymentIntentId) => request('POST', '/payments/confirm', { order_id: orderId, payment_intent_id: paymentIntentId }),
+    notifyPaymentFailed: (orderId, paymentIntentId, errorMessage) => request('POST', '/payments/notify-failed', { order_id: orderId, payment_intent_id: paymentIntentId, error_message: errorMessage }),
+    
+    // --- PUSH NOTIFICATIONS ---
+    getVapidKey: () => request('GET', '/push/vapid-key'),
+    subscribePush: (data) => request('POST', '/push/subscribe', data),
+    unsubscribePush: (data) => request('DELETE', '/push/unsubscribe', data),
+
+    // --- SYSTEM / ADMIN ---
+    verifyAdmin: () => request('GET', '/admin/verify'), // Admin
+    getHealth: () => request('GET', '/health')
   };
 })();
