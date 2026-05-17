@@ -1,11 +1,5 @@
 /* ============================================================
-   LUVIIO — Nav  (v7 — The Ultimate Luxury & Window-Level Push Fix)
-   ============================================================
-   FIXES INCLUDED:
-   1. Luxury UI matching Luviio's black/gold theme.
-   2. Window-Level Event Binding (Guarantees click works instantly).
-   3. Loading state added to "Allow" button (WAIT...).
-   4. Crash-free pageInit() using safe AUTH.getProfile() logic.
+   LUVIIO — Nav  (v1 — Original As-Is Template)
    ============================================================ */
 
 const NAV = {
@@ -59,16 +53,14 @@ const NAV = {
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>
 
-      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a0a0a; border-radius: 8px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 24px 48px rgba(0,0,0,0.9); z-index: 99999; width: 90%; max-width: 420px; border: 1px solid #222222;">
-        <div style="color: #c9a55e; display: flex; align-items: center; justify-content: center;">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        </div>
+      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 99999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
+        <div style="font-size: 24px;">🔔</div>
         <div style="flex: 1;">
-          <h4 style="margin: 0; color: #f4f0ea; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Enable Notifications</h4>
-          <p style="margin: 4px 0 0; color: #8c8881; font-size: 12px; font-family: 'Jost', sans-serif;">Get exclusive updates and order tracking.</p>
+          <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
+          <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
         </div>
-        <button id="btn-allow-push" onclick="window.handlePushAllow(this)" style="background: #c9a55e; color: #000; border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; transition: all 0.2s;">ALLOW</button>
-        <button id="btn-close-push" onclick="window.handlePushClose()" style="background: none; border: none; color: #8c8881; font-size: 20px; cursor: pointer; padding: 0; display: flex; align-items: center; transition: color 0.2s;">✕</button>
+        <button id="btn-allow-push" onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
+        <button id="btn-close-push" onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
       </div>
     `;
     
@@ -108,48 +100,15 @@ const NAV = {
     window.addEventListener('auth:login', () => AUTH.updateNavUI());
     window.addEventListener('auth:logout', () => AUTH.updateNavUI());
 
-    // 🔥 THE CRITICAL FIX: Global functions attached to window
-    window.handlePushAllow = async function(btn) {
-      const originalText = btn.textContent;
-      btn.textContent = 'WAIT...';
-      btn.style.opacity = '0.7';
-      btn.style.pointerEvents = 'none';
-
-      try {
-        if (typeof PUSH !== 'undefined' && typeof PUSH.subscribe === 'function') {
-          const success = await PUSH.subscribe();
-          if (success) {
-            window.handlePushClose();
-            if (typeof showToast === 'function') showToast('Notifications Enabled!', 'success');
-          } else {
-            btn.textContent = 'FAILED';
-            setTimeout(() => {
-              btn.textContent = originalText;
-              btn.style.opacity = '1';
-              btn.style.pointerEvents = 'auto';
-            }, 2000);
-            if (typeof showToast === 'function') showToast('Permission blocked or setup failed.', 'error');
-          }
-        } else {
-          console.error("push.js script is missing or not loaded yet.");
-          alert("Script is still loading, please try again in a moment.");
-          btn.textContent = originalText;
-          btn.style.opacity = '1';
-          btn.style.pointerEvents = 'auto';
+    // Original smart logic context
+    const banner = document.getElementById('notification-banner');
+    if (banner) {
+      if ('Notification' in window && 'serviceWorker' in navigator) {
+        if (Notification.permission === 'default') {
+          banner.style.display = 'flex';
         }
-      } catch (err) {
-        console.error("Push logic error: ", err);
-        btn.textContent = originalText;
-        btn.style.opacity = '1';
-        btn.style.pointerEvents = 'auto';
       }
-    };
-
-    window.handlePushClose = function() {
-      const banner = document.getElementById('notification-banner');
-      if (banner) banner.style.display = 'none';
-      sessionStorage.setItem('push_dismissed', '1');
-    };
+    }
   },
 };
 
@@ -157,14 +116,16 @@ const NAV = {
 async function pageInit(opts = {}) {
   NAV.inject();
   
+  // 🔥 CRITICAL BUG FIX: Changed getCachedProfile() to getProfile() to stop fatal page crashes
   const cachedProfile = AUTH.getProfile();
+  
   if (cachedProfile) {
     AUTH.setProfile(cachedProfile);
     AUTH.updateNavUI();
   }
   
   try {
-    const loggedIn = await AUTH.init(); 
+    const loggedIn = await AUTH.init(); // refreshes access token
     
     if (loggedIn) {
       if (!cachedProfile) {
@@ -172,8 +133,11 @@ async function pageInit(opts = {}) {
           const profile = await API.getMe();
           AUTH.setProfile(profile);
           AUTH.updateNavUI();
-        } catch (e) {}
-      } else {
+        } catch (e) {
+          console.warn("Could not fetch profile:", e);
+        }
+      } 
+      else {
         setTimeout(async () => {
           try {
             const profile = await API.getMe();
@@ -181,23 +145,16 @@ async function pageInit(opts = {}) {
           } catch {}
         }, 2000);
       }
-
-      // 🔔 SMART BANNER DISPLAY LOGIC
-      const banner = document.getElementById('notification-banner');
-      if (banner && 'Notification' in window && 'serviceWorker' in navigator) {
-        if (Notification.permission === 'default' && !sessionStorage.getItem('push_dismissed')) {
-          setTimeout(() => { banner.style.display = 'flex'; }, 2500); 
-        }
-      }
     }
     
     if (opts.requireAuth && !loggedIn) {
       AUTH.requireAuth();
       return false;
     }
+    
     return true;
   } catch (error) {
-    console.warn("Auth init failed silently:", error);
+    console.warn("pageInit Auth Check Failed safely:", error);
     return false;
   }
 }
