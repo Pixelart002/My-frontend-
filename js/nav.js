@@ -1,11 +1,12 @@
 /* ============================================================
-   LUVIIO — Nav  (v4 — Bulletproof Push Banner + Event Delegation)
+   LUVIIO — Nav  (v5 — Luxury Push Banner + Event Delegation)
    ============================================================
    FIXES:
    1. pageInit() uses AUTH.getProfile() directly to prevent crash.
    2. try/catch wrapper added around AUTH.init() for absolute safety.
    3. Notification Banner globally injected via Nav + Smart Hide Logic.
    4. Event Delegation added for Push Buttons so they NEVER fail.
+   5. UI UPDATED: Luxury Black & Gold theme to match Luviio!
    ============================================================ */
 
 const NAV = {
@@ -59,14 +60,16 @@ const NAV = {
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>
 
-      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 99999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
-        <div style="font-size: 24px;">🔔</div>
-        <div style="flex: 1;">
-          <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
-          <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
+      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a0a0a; border-radius: 8px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 99999; width: 90%; max-width: 420px; border: 1px solid #222222;">
+        <div style="color: #c9a55e; display: flex; align-items: center; justify-content: center;">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         </div>
-        <button id="btn-allow-push" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
-        <button id="btn-close-push" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
+        <div style="flex: 1;">
+          <h4 style="margin: 0; color: #f4f0ea; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Enable Notifications</h4>
+          <p style="margin: 4px 0 0; color: #8c8881; font-size: 13px; font-family: 'Jost', sans-serif;">Get exclusive updates and order tracking.</p>
+        </div>
+        <button id="btn-allow-push" style="background: #c9a55e; color: #000; border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; transition: transform 0.2s, box-shadow 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">Allow</button>
+        <button id="btn-close-push" style="background: none; border: none; color: #8c8881; font-size: 20px; cursor: pointer; padding: 0; display: flex; align-items: center; transition: color 0.2s;" onmouseover="this.style.color='#c9a55e'" onmouseout="this.style.color='#8c8881'">✕</button>
       </div>
     `;
     
