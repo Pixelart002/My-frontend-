@@ -1,11 +1,45 @@
 /* ============================================================
-   LUVIIO — Nav  (v1 — Original As-Is Template)
+   LUVIIO — Nav  (v9 — Conditional Multi-Banner System)
    ============================================================ */
 
 const NAV = {
   inject() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
+
+    // 🔥 PAGE CHECKER LOGIC
+    const path = window.location.pathname;
+    let bannerHTML = '';
+
+    if (path === '/' || path.includes('index.html')) {
+      // 🟦 BLUE BANNER ONLY FOR INDEX / HOME PAGE
+      bannerHTML = `
+        <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 99999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
+          <div style="font-size: 24px;">🔔</div>
+          <div style="flex: 1;">
+            <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
+            <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
+          </div>
+          <button id="btn-allow-push" onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
+          <button id="btn-close-push" onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
+        </div>
+      `;
+    } else if (path.includes('cart.html') || path.endsWith('/cart')) {
+      // 👑 LUXURY GOLD BANNER ONLY FOR CART PAGE
+      bannerHTML = `
+        <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a0a0a; border-radius: 8px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 99999; width: 90%; max-width: 420px; border: 1px solid #222222;">
+          <div style="color: #c9a55e; display: flex; align-items: center; justify-content: center;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          </div>
+          <div style="flex: 1;">
+            <h4 style="margin: 0; color: #f4f0ea; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Enable Notifications</h4>
+            <p style="margin: 4px 0 0; color: #8c8881; font-size: 12px; font-family: 'Jost', sans-serif;">Get exclusive updates and order tracking.</p>
+          </div>
+          <button id="btn-allow-push" onclick="enableNotifications()" style="background: #c9a55e; color: #000; border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 11px;">ALLOW</button>
+          <button id="btn-close-push" onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #8c8881; font-size: 20px; cursor: pointer; padding: 0; display: flex; align-items: center;">✕</button>
+        </div>
+      `;
+    }
     
     nav.innerHTML = `
       <div class="nav-inner">
@@ -53,16 +87,7 @@ const NAV = {
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>
 
-      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 99999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
-        <div style="font-size: 24px;">🔔</div>
-        <div style="flex: 1;">
-          <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
-          <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
-        </div>
-        <button id="btn-allow-push" onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
-        <button id="btn-close-push" onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
-      </div>
-    `;
+      \${bannerHTML} `;
     
     this._bindEvents();
     CART.init();
@@ -116,7 +141,6 @@ const NAV = {
 async function pageInit(opts = {}) {
   NAV.inject();
   
-  // 🔥 CRITICAL BUG FIX: Changed getCachedProfile() to getProfile() to stop fatal page crashes
   const cachedProfile = AUTH.getProfile();
   
   if (cachedProfile) {
@@ -125,7 +149,7 @@ async function pageInit(opts = {}) {
   }
   
   try {
-    const loggedIn = await AUTH.init(); // refreshes access token
+    const loggedIn = await AUTH.init(); 
     
     if (loggedIn) {
       if (!cachedProfile) {
