@@ -1,11 +1,12 @@
 /* ============================================================
-   LUVIIO — API  (v4.2 — Flat Structure + All Endpoints)
+   LUVIIO — API  (v4.3 — Flat Structure + Cross-Domain Cookies)
    ============================================================
    FIXES:
    1. BACKWARD COMPATIBLE: Kept the flat structure (API.getProducts) 
       so your frontend UI does not break.
    2. ALL ENDPOINTS ADDED: Cart, Pricing, Admin, Invoices, Push, etc.
-   3. CORS & CACHE FIXED: Maintains the v3.1 CORS & getMe() cache fixes.
+   3. CROSS-DOMAIN COOKIE: Added `credentials: 'include'` strictly 
+      for `/auth/*` endpoints so the browser accepts the login cookie.
    ============================================================ */
 
 class APIError extends Error {
@@ -38,6 +39,12 @@ const API = (() => {
       headers,
       signal: AbortSignal.timeout(10000), // 10s timeout — no more hangs
     };
+
+    // 🔥 THE CRITICAL FIX: Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
+    // Iske bina cross-domain (Koyeb -> luviio.in) cookies kaam nahi karengi!
+    if (path.startsWith('/auth/')) {
+      opts.credentials = 'include';
+    }
     
     if (body !== null && !(body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
