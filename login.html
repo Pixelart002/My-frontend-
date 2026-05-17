@@ -213,7 +213,7 @@
         </div>
 
         <div class="tab-panel active" id="tab-login">
-          <form id="login-form" method="POST" action="/api/login" novalidate>
+          <form id="login-form" novalidate>
             <div class="gsap-form-stagger">
               
               <div class="form-group">
@@ -248,7 +248,7 @@
         </div>
 
         <div class="tab-panel" id="tab-register">
-          <form id="register-form" method="POST" action="/api/register" novalidate>
+          <form id="register-form" novalidate>
             <div class="gsap-form-stagger-reg">
               
               <div class="form-group">
@@ -326,19 +326,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <script>
-    /* ── Initial Route Check (V4 Guaranteed Bypass) ── */
-    (async () => {
-      await AUTH.init();
+    /* ── FIX: Improved Safe Redirect ── */
+    function safeRedirect(url) {
+      if (!url || url === '/' || url.toLowerCase().includes('login')) return '/index.html';
+      if (/^\/[^/\\]/.test(url)) return url;
+      return '/index.html';
+    }
+
+    /* ── FIX: Core Initialization & Route Check (Race Condition Fixed) ── */
+    document.addEventListener('DOMContentLoaded', async () => {
+      
+      // 1. Initialize page + wait for auth check FIRST
+      await pageInit();
+
+      // 2. If user is logged in, replace URL so they can't hit "Back" and get stuck
       if (AUTH.isLoggedIn()) {
         const redirect = safeRedirect(getParam('redirect'));
-        window.location.href = redirect;
+        window.location.replace(redirect);
+        return; // Don't animate in the login form
       }
-    })();
 
-    pageInit();
-
-    /* ── GSAP Animations ────────────────────── */
-    document.addEventListener("DOMContentLoaded", () => {
+      // 3. Only if guest, animate the auth card in
       gsap.to("#auth-card", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
       gsap.fromTo(".gsap-form-stagger", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.2 });
     });
@@ -473,7 +481,7 @@
         // 1. Save access token to storage to persist login
         AUTH.setTokens(data.access_token);
         
-        // 🔥 2. CRITICAL CACHE UPDATE: Fetch full profile to get "full_name" and "role"
+        // 2. Fetch full profile to get "full_name" and "role"
         try {
           const profileRes = await fetch(`${CONFIG.API_BASE}/users/me`, {
             headers: { 
@@ -486,14 +494,14 @@
             const profileData = await profileRes.json();
             AUTH.setProfile(profileData); 
           } else if (data.user) {
-            AUTH.setProfile(data.user); // Fallback to basic user data if /users/me fails
+            AUTH.setProfile(data.user); 
           }
         } catch (profileErr) {
-          if (data.user) AUTH.setProfile(data.user); // Fallback
+          if (data.user) AUTH.setProfile(data.user);
         }
         
-        // 3. Complete strict redirection
-        window.location.href = safeRedirect(getParam('redirect'));
+        // 🔥 FIX: Complete strict redirection using location.replace()
+        window.location.replace(safeRedirect(getParam('redirect')));
       } catch (err) {
         showError('login-email', err.message || 'Invalid email or password.');
         document.getElementById('wrap-login-pass').classList.add('error');

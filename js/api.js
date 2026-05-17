@@ -1,5 +1,5 @@
 /* ============================================================
-   LUVIIO — API  (v4.4 — Loop Trap Fixed + Cross-Domain Cookies)
+   LUVIIO — API  (v4.5 — Final Loop & CORS Fix)
    ============================================================
    FIXES:
    1. LOOP TRAP FIXED: Removed global window.location redirect from 
@@ -40,8 +40,8 @@ const API = (() => {
       signal: AbortSignal.timeout(10000), // 10s timeout — no more hangs
     };
 
-    // 🔥 Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
-    // Iske bina cross-domain (Koyeb -> luviio.in) cookies kaam nahi karengi!
+    // 🔥 THE CRITICAL FIX: Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
+    // Iske bina cross-domain (Koyeb/Vercel -> luviio.in) cookies kaam nahi karengi!
     if (path.startsWith('/auth/')) {
       opts.credentials = 'include';
     }
