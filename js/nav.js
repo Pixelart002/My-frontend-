@@ -1,10 +1,11 @@
 /* ============================================================
-   LUVIIO — Nav  (v3 — Crash-Proof + Global Push Banner)
+   LUVIIO — Nav  (v4 — Bulletproof Push Banner + Event Delegation)
    ============================================================
    FIXES:
    1. pageInit() uses AUTH.getProfile() directly to prevent crash.
    2. try/catch wrapper added around AUTH.init() for absolute safety.
    3. Notification Banner globally injected via Nav + Smart Hide Logic.
+   4. Event Delegation added for Push Buttons so they NEVER fail.
    ============================================================ */
 
 const NAV = {
@@ -64,8 +65,8 @@ const NAV = {
           <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
           <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
         </div>
-        <button onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
-        <button onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
+        <button id="btn-allow-push" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
+        <button id="btn-close-push" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
       </div>
     `;
     
@@ -104,6 +105,21 @@ const NAV = {
     
     window.addEventListener('auth:login', () => AUTH.updateNavUI());
     window.addEventListener('auth:logout', () => AUTH.updateNavUI());
+
+    // 🔔 BULLETPROOF EVENT DELEGATION FOR PUSH BUTTONS
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'btn-allow-push') {
+        if (typeof enableNotifications === 'function') {
+          enableNotifications();
+        } else {
+          console.error("push.js is not loaded yet.");
+        }
+      }
+      if (e.target.id === 'btn-close-push') {
+        const banner = document.getElementById('notification-banner');
+        if (banner) banner.style.display = 'none';
+      }
+    });
 
     // 🔔 SMART BANNER LOGIC: Hide banner if already granted/denied or unsupported
     const banner = document.getElementById('notification-banner');
