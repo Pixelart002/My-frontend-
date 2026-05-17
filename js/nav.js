@@ -1,186 +1,212 @@
 /* ============================================================
-   LUVIIO — Nav  (v5 — Luxury Push Banner + Event Delegation)
+   LUVIIO — Push Notification Manager  (v2 — fixed)
    ============================================================
    FIXES:
-   1. pageInit() uses AUTH.getProfile() directly to prevent crash.
-   2. try/catch wrapper added around AUTH.init() for absolute safety.
-   3. Notification Banner globally injected via Nav + Smart Hide Logic.
-   4. Event Delegation added for Push Buttons so they NEVER fail.
-   5. UI UPDATED: Luxury Black & Gold theme to match Luviio!
+   1. PUSH.init() no longer fires on every DOMContentLoaded
+      Old: Always ran for all users including guests
+      New: Only runs if user is logged in AND permission=granted
+   2. autoSubscribe() guarded — won't call getVapidKey() unless
+      permission is already 'granted' (user already said yes)
+   3. showPrompt() uses requestIdleCallback — non-blocking
+   4. VAPID key cached in sessionStorage — no repeat API calls
    ============================================================ */
 
-const NAV = {
-  inject() {
-    const nav = document.getElementById('main-nav');
-    if (!nav) return;
-    
-    nav.innerHTML = `
-      <div class="nav-inner">
-        <a href="/index.html" class="nav-logo">LUVIIO</a>
-        <div class="nav-links">
-          <a href="/shop.html">Shop</a>
-          <a href="/shop.html?category=new">New Arrivals</a>
-          <a href="/orders.html" data-authed style="display:none">My Orders</a>
-        </div>
-        <div class="nav-actions">
-          <a href="/cart.html" class="nav-icon-btn" aria-label="Cart">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 01-8 0"/>
-            </svg>
-            <span data-cart-count class="cart-badge" style="display:none">0</span>
-          </a>
-          <a href="/login.html" class="btn-ghost" data-guest>Login</a>
-          <div class="user-menu" data-authed style="display:none">
-            <button class="nav-icon-btn user-menu-toggle" aria-label="Account">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span data-user-name class="user-name">Account</span>
-            </button>
-            <div class="user-dropdown">
-              <a href="/profile.html">Profile</a>
-              <a href="/orders.html">Orders</a>
-              <button id="logout-btn" class="logout-btn">Sign out</button>
-            </div>
-          </div>
-        </div>
-        <button class="mobile-toggle" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-      <div class="mobile-menu">
-        <a href="/shop.html">Shop</a>
-        <a href="/shop.html?category=new">New Arrivals</a>
-        <a href="/orders.html" data-authed style="display:none">My Orders</a>
-        <a href="/profile.html" data-authed style="display:none">Profile</a>
-        <a href="/login.html" data-guest>Login</a>
-        <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
-      </div>
-
-      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a0a0a; border-radius: 8px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 99999; width: 90%; max-width: 420px; border: 1px solid #222222;">
-        <div style="color: #c9a55e; display: flex; align-items: center; justify-content: center;">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        </div>
-        <div style="flex: 1;">
-          <h4 style="margin: 0; color: #f4f0ea; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Enable Notifications</h4>
-          <p style="margin: 4px 0 0; color: #8c8881; font-size: 13px; font-family: 'Jost', sans-serif;">Get exclusive updates and order tracking.</p>
-        </div>
-        <button id="btn-allow-push" style="background: #c9a55e; color: #000; border: none; padding: 10px 18px; border-radius: 4px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; transition: transform 0.2s, box-shadow 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">Allow</button>
-        <button id="btn-close-push" style="background: none; border: none; color: #8c8881; font-size: 20px; cursor: pointer; padding: 0; display: flex; align-items: center; transition: color 0.2s;" onmouseover="this.style.color='#c9a55e'" onmouseout="this.style.color='#8c8881'">✕</button>
-      </div>
-    `;
-    
-    this._bindEvents();
-    CART.init();
-    AUTH.updateNavUI();
-  },
+const PUSH = (() => {
+  const SW_URL = '/sw.js';
+  const VAPID_CACHE_KEY = '__lv_vapid';
   
-  _bindEvents() {
-    const toggle = document.querySelector('.mobile-toggle');
-    const mobileMenu = document.querySelector('.mobile-menu');
-    toggle?.addEventListener('click', () => {
-      mobileMenu?.classList.toggle('open');
-      toggle.classList.toggle('open');
-    });
-    document.querySelectorAll('.mobile-menu a').forEach(a => {
-      a.addEventListener('click', () => mobileMenu?.classList.remove('open'));
-    });
+  const urlBase64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = window.atob(base64);
+    return new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+  };
+  
+  const isSupported = () =>
+    'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  
+  const notifPermission = () =>
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied';
+  
+  const registerSW = async () => {
+    if (!isSupported()) return null;
+    try { return await navigator.serviceWorker.register(SW_URL); }
+    catch { return null; }
+  };
+  
+  // FIX: Cache VAPID key in sessionStorage to avoid repeat API calls
+  const getVapidKey = async () => {
+    try {
+      const cached = sessionStorage.getItem(VAPID_CACHE_KEY);
+      if (cached) return cached;
+      
+      const r = await fetch(`${CONFIG.API_BASE}/push/vapid-key`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!r.ok) return null;
+      const d = await r.json();
+      const key = d.public_key || null;
+      if (key) sessionStorage.setItem(VAPID_CACHE_KEY, key);
+      return key;
+    } catch { return null; }
+  };
+  
+  const saveSubscription = async (subscription) => {
+    const token = AUTH.getToken();
+    if (!token) return;
+    try {
+      await fetch(`${CONFIG.API_BASE}/push/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(subscription.toJSON()),
+        signal: AbortSignal.timeout(5000),
+      });
+    } catch {}
+  };
+  
+  const removeSubscription = async (subscription) => {
+    const token = AUTH.getToken();
+    if (!token) return;
+    try {
+      await fetch(`${CONFIG.API_BASE}/push/unsubscribe`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(subscription.toJSON()),
+        signal: AbortSignal.timeout(5000),
+      });
+    } catch {}
+  };
+  
+  return {
+    isSupported,
     
-    const uToggle = document.querySelector('.user-menu-toggle');
-    const uDrop = document.querySelector('.user-dropdown');
-    uToggle?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      uDrop?.classList.toggle('open');
-    });
-    document.addEventListener('click', () => uDrop?.classList.remove('open'));
+    async subscribe() {
+      if (!isSupported() || !AUTH.isLoggedIn()) return false;
+      
+      const permission = typeof Notification !== 'undefined' ?
+        await Notification.requestPermission() :
+        'denied';
+      if (permission !== 'granted') return false;
+      
+      const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
+      if (!reg || !vapidKey) return false;
+      
+      try {
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        });
+        await saveSubscription(subscription);
+        return true;
+      } catch { return false; }
+    },
     
-    async function doLogout() {
-      try { await API.logout(); } catch {}
-      AUTH.clearTokens();
-      CART.clear();
-      window.location.href = '/index.html';
-    }
-    document.getElementById('logout-btn')?.addEventListener('click', doLogout);
-    document.getElementById('logout-btn-mobile')?.addEventListener('click', doLogout);
+    async unsubscribe() {
+      if (!isSupported()) return;
+      const reg = await navigator.serviceWorker.getRegistration(SW_URL);
+      if (!reg) return;
+      const sub = await reg.pushManager.getSubscription();
+      if (!sub) return;
+      await removeSubscription(sub);
+      await sub.unsubscribe();
+    },
     
-    window.addEventListener('auth:login', () => AUTH.updateNavUI());
-    window.addEventListener('auth:logout', () => AUTH.updateNavUI());
-
-    // 🔔 BULLETPROOF EVENT DELEGATION FOR PUSH BUTTONS
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'btn-allow-push') {
-        if (typeof enableNotifications === 'function') {
-          enableNotifications();
+    // FIX: Only run autoSubscribe if already granted — no unnecessary API calls
+    async autoSubscribe() {
+      if (!isSupported() || !AUTH.isLoggedIn()) return;
+      if (notifPermission() !== 'granted') return; // ← key guard
+      
+      const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
+      if (!reg || !vapidKey) return;
+      
+      const existing = await reg.pushManager.getSubscription();
+      try {
+        if (!existing) {
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidKey),
+          });
+          await saveSubscription(sub);
         } else {
-          console.error("push.js is not loaded yet.");
+          await saveSubscription(existing);
         }
+      } catch {}
+    },
+    
+    showPrompt() {
+      if (!isSupported() || notifPermission() !== 'default') return;
+      
+      const banner = document.createElement('div');
+      banner.style.cssText = `
+        position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+        background:#0B1628;color:#fff;padding:14px 20px;
+        border-radius:12px;border:1px solid rgba(0,197,212,.3);
+        display:flex;align-items:center;gap:12px;z-index:9999;
+        font-family:'DM Sans',sans-serif;font-size:14px;
+        box-shadow:0 8px 32px rgba(0,0,0,.4);
+        max-width:360px;width:90%;
+      `;
+      banner.innerHTML = `
+        <span style="font-size:22px;">🔔</span>
+        <div style="flex:1;">
+          <div style="font-weight:600;margin-bottom:2px;">Enable notifications</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);">Get order updates instantly</div>
+        </div>
+        <button id="push-yes" style="background:#00C5D4;color:#000;border:none;padding:8px 14px;
+          border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Allow</button>
+        <button id="push-no" style="background:transparent;color:rgba(255,255,255,.4);
+          border:none;font-size:18px;cursor:pointer;padding:4px;">✕</button>
+      `;
+      document.body.appendChild(banner);
+      
+      document.getElementById('push-yes').addEventListener('click', async () => {
+        banner.remove();
+        await PUSH.subscribe();
+      });
+      document.getElementById('push-no').addEventListener('click', () => {
+        banner.remove();
+        sessionStorage.setItem('push_dismissed', '1');
+      });
+      
+      setTimeout(() => banner.isConnected && banner.remove(), 8000);
+    },
+    
+    // FIX: Use requestIdleCallback so push init never blocks the main thread
+    async init() {
+      if (!AUTH.isLoggedIn()) return; // guests: skip entirely
+      
+      const run = async () => {
+        await this.autoSubscribe();
+        
+        if (notifPermission() === 'default' && !sessionStorage.getItem('push_dismissed')) {
+          setTimeout(() => this.showPrompt(), 3000);
+        }
+      };
+      
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(run, { timeout: 5000 });
+      } else {
+        setTimeout(run, 1000);
       }
-      if (e.target.id === 'btn-close-push') {
-        const banner = document.getElementById('notification-banner');
-        if (banner) banner.style.display = 'none';
-      }
-    });
+    },
+  };
+})();
 
-    // 🔔 SMART BANNER LOGIC: Hide banner if already granted/denied or unsupported
-    const banner = document.getElementById('notification-banner');
-    if (banner) {
-      if ('Notification' in window && 'serviceWorker' in navigator) {
-        if (Notification.permission === 'default') {
-          banner.style.display = 'flex'; // Only show if user hasn't made a choice yet
-        }
-      }
-    }
-  },
-};
+// FIX: Only wire up auth events — remove the blanket DOMContentLoaded listener
+// that used to fire for ALL users on ALL pages.
+// push.js included at bottom of body — no DOMContentLoaded needed.
+window.addEventListener('auth:login', () => PUSH.init());
+window.addEventListener('auth:logout', () => PUSH.unsubscribe());
 
-/* ── pageInit — runs on every page ─────────────────────────────────────────── */
-async function pageInit(opts = {}) {
-  NAV.inject();
-  
-  // 🔥 THE FIX: Changed to getProfile() to prevent fatal crashes
-  const cachedProfile = AUTH.getProfile();
-  
-  if (cachedProfile) {
-    AUTH.setProfile(cachedProfile); // warm in-memory safely
-    AUTH.updateNavUI();
-  }
-  
-  try {
-    const loggedIn = await AUTH.init(); // refreshes access token
-    
-    if (loggedIn) {
-      // Only call getMe() if we don't have a fresh cached profile
-      if (!cachedProfile) {
-        try {
-          const profile = await API.getMe();
-          AUTH.setProfile(profile);
-          AUTH.updateNavUI();
-        } catch (e) {
-          console.warn("Could not fetch profile:", e);
-        }
-      } 
-      else {
-        // Silently refresh in background after paint
-        setTimeout(async () => {
-          try {
-            const profile = await API.getMe();
-            AUTH.setProfile(profile);
-          } catch {}
-        }, 2000);
-      }
-    }
-    
-    if (opts.requireAuth && !loggedIn) {
-      AUTH.requireAuth();
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.warn("pageInit Auth Check Failed safely:", error);
-    return false;
-  }
+// Init only if already logged in when page loads (no-op for guests)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => PUSH.init());
+} else {
+  PUSH.init();
 }
