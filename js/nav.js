@@ -1,12 +1,10 @@
 /* ============================================================
-   LUVIIO — Nav  (v2 — fixed)
+   LUVIIO — Nav  (v3 — Crash-Proof + Global Push Banner)
    ============================================================
    FIXES:
-   1. pageInit() uses cached profile → skips /users/me API call
-      when profile is fresh (<5 min old). This eliminates the
-      most common cause of page-load lag.
-   2. getMe() only called when: logged in + no fresh cache
-   3. NAV.inject() is synchronous — no await needed
+   1. pageInit() uses AUTH.getProfile() directly to prevent crash.
+   2. try/catch wrapper added around AUTH.init() for absolute safety.
+   3. Notification Banner globally injected via Nav + Smart Hide Logic.
    ============================================================ */
 
 const NAV = {
@@ -59,6 +57,16 @@ const NAV = {
         <a href="/login.html" data-guest>Login</a>
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>
+
+      <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 99999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
+        <div style="font-size: 24px;">🔔</div>
+        <div style="flex: 1;">
+          <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
+          <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
+        </div>
+        <button onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
+        <button onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
+      </div>
     `;
     
     this._bindEvents();
@@ -96,59 +104,64 @@ const NAV = {
     
     window.addEventListener('auth:login', () => AUTH.updateNavUI());
     window.addEventListener('auth:logout', () => AUTH.updateNavUI());
+
+    // 🔔 SMART BANNER LOGIC: Hide banner if already granted/denied or unsupported
+    const banner = document.getElementById('notification-banner');
+    if (banner) {
+      if ('Notification' in window && 'serviceWorker' in navigator) {
+        if (Notification.permission === 'default') {
+          banner.style.display = 'flex'; // Only show if user hasn't made a choice yet
+        }
+      }
+    }
   },
 };
 
-/* ── pageInit — runs on every page ───────────────────────────────────────────
-   FIX: The old version made 2 API calls on every page:
-     1. POST /auth/refresh  (AUTH.init)
-     2. GET  /users/me      (API.getMe)
-
-   New version:
-     1. POST /auth/refresh  — still needed to get a fresh access token
-     2. GET  /users/me      — SKIPPED if profile cache is fresh (<5 min)
-        → saves 1 API call on ~99% of page loads
-   ─────────────────────────────────────────────────────────────────────────── */
+/* ── pageInit — runs on every page ─────────────────────────────────────────── */
 async function pageInit(opts = {}) {
   NAV.inject();
   
-  // Render nav immediately using cached profile (no API call yet)
-  const cachedProfile = AUTH.getCachedProfile();
+  // 🔥 THE FIX: Changed to getProfile() to prevent fatal crashes
+  const cachedProfile = AUTH.getProfile();
+  
   if (cachedProfile) {
-    AUTH._userProfile = cachedProfile; // warm in-memory too
+    AUTH.setProfile(cachedProfile); // warm in-memory safely
     AUTH.updateNavUI();
   }
   
-  const loggedIn = await AUTH.init(); // refreshes access token
-  
-  if (loggedIn) {
-    // Only call getMe() if we don't have a fresh cached profile
-    if (!cachedProfile) {
-      try {
-        const profile = await API.getMe();
-        AUTH.setProfile(profile); // saves to cache + memory
-        AUTH.updateNavUI();
-      } catch {
-        // Profile fetch failed — still logged in (access token valid)
-        // Nav will show authed state even without profile name
-      }
-    }
-    // If cache was used, silently refresh in background after paint
-    // so next page load gets updated profile if it changed
-    else {
-      setTimeout(async () => {
+  try {
+    const loggedIn = await AUTH.init(); // refreshes access token
+    
+    if (loggedIn) {
+      // Only call getMe() if we don't have a fresh cached profile
+      if (!cachedProfile) {
         try {
           const profile = await API.getMe();
           AUTH.setProfile(profile);
-        } catch {}
-      }, 2000);
+          AUTH.updateNavUI();
+        } catch (e) {
+          console.warn("Could not fetch profile:", e);
+        }
+      } 
+      else {
+        // Silently refresh in background after paint
+        setTimeout(async () => {
+          try {
+            const profile = await API.getMe();
+            AUTH.setProfile(profile);
+          } catch {}
+        }, 2000);
+      }
     }
-  }
-  
-  if (opts.requireAuth && !AUTH.isLoggedIn()) {
-    AUTH.requireAuth();
+    
+    if (opts.requireAuth && !loggedIn) {
+      AUTH.requireAuth();
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.warn("pageInit Auth Check Failed safely:", error);
     return false;
   }
-  
-  return true;
 }
