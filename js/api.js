@@ -1,11 +1,11 @@
 /* ============================================================
-   LUVIIO — API  (v4.3 — Flat Structure + Cross-Domain Cookies)
+   LUVIIO — API  (v4.4 — Loop Trap Fixed + Cross-Domain Cookies)
    ============================================================
    FIXES:
-   1. BACKWARD COMPATIBLE: Kept the flat structure (API.getProducts) 
-      so your frontend UI does not break.
-   2. ALL ENDPOINTS ADDED: Cart, Pricing, Admin, Invoices, Push, etc.
-   3. CROSS-DOMAIN COOKIE: Added `credentials: 'include'` strictly 
+   1. LOOP TRAP FIXED: Removed global window.location redirect from 
+      inside request() on 401 failure. Public pages like Shop/Home 
+      will no longer enter an infinite reload loop for guests.
+   2. CROSS-DOMAIN COOKIE: Maintained credentials: 'include' strictly 
       for `/auth/*` endpoints so the browser accepts the login cookie.
    ============================================================ */
 
@@ -40,7 +40,7 @@ const API = (() => {
       signal: AbortSignal.timeout(10000), // 10s timeout — no more hangs
     };
 
-    // 🔥 THE CRITICAL FIX: Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
+    // 🔥 Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
     // Iske bina cross-domain (Koyeb -> luviio.in) cookies kaam nahi karengi!
     if (path.startsWith('/auth/')) {
       opts.credentials = 'include';
@@ -71,13 +71,9 @@ const API = (() => {
       const refreshed = await AUTH.init();
       if (refreshed) return request(method, path, body, true);
       
+      // 🔥 THE LOOP FIX: Sirf tokens clear karo, forcefully redirect mat karo!
+      // Isse background APIs ki wajah se public pages loop mein fassenge nahi.
       AUTH.clearTokens();
-      const current = window.location.pathname;
-      const isOnLogin = current === '/login.html' || current === '/login' || current.endsWith('/login.html');
-      if (!isOnLogin) {
-        const redirect = encodeURIComponent(current + window.location.search);
-        window.location.href = `/login.html?redirect=${redirect}`;
-      }
       return null;
     }
     
