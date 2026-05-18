@@ -1,5 +1,5 @@
 /* ============================================================
-   LUVIIO — Nav  (v11 — Banner Position Fix)
+   LUVIIO — Nav  (v13 — Clean Navigation, Banner removed)
    ============================================================ */
 
 const NAV = {
@@ -54,25 +54,8 @@ const NAV = {
       </div>
     `;
 
-    // 🔥 FIX: Inject Banner directly into the BODY, completely outside the Navbar
-    const path = window.location.pathname;
-    if (path === '/' || path.endsWith('index.html')) {
-      if (!document.getElementById('notification-banner')) {
-        const bannerContainer = document.createElement('div');
-        bannerContainer.innerHTML = `
-          <div id="notification-banner" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0a1122; border-radius: 12px; padding: 16px 20px; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 999999; width: 90%; max-width: 400px; border: 1px solid #1e293b;">
-            <div style="font-size: 24px;">🔔</div>
-            <div style="flex: 1;">
-              <h4 style="margin: 0; color: #fff; font-size: 15px; font-family: 'Jost', sans-serif; font-weight: 600;">Enable notifications</h4>
-              <p style="margin: 4px 0 0; color: #94a3b8; font-size: 13px; font-family: 'Jost', sans-serif;">Get order updates instantly</p>
-            </div>
-            <button id="btn-allow-push" onclick="enableNotifications()" style="background: #00d2ff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Jost', sans-serif; transition: 0.2s;">Allow</button>
-            <button id="btn-close-push" onclick="document.getElementById('notification-banner').style.display='none'" style="background: none; border: none; color: #64748b; font-size: 20px; cursor: pointer; padding: 0;">✕</button>
-          </div>
-        `;
-        document.body.appendChild(bannerContainer.firstElementChild);
-      }
-    }
+    // Removed any accidental left-over banners just in case
+    document.querySelectorAll('#notification-banner, #push-notification-banner').forEach(b => b.remove());
     
     this._bindEvents();
     CART.init();
@@ -109,16 +92,6 @@ const NAV = {
     
     window.addEventListener('auth:login', () => AUTH.updateNavUI());
     window.addEventListener('auth:logout', () => AUTH.updateNavUI());
-
-    // Display logic for the banner
-    const banner = document.getElementById('notification-banner');
-    if (banner) {
-      if ('Notification' in window && 'serviceWorker' in navigator) {
-        if (Notification.permission === 'default') {
-          banner.style.display = 'flex';
-        }
-      }
-    }
   },
 };
 
@@ -142,9 +115,7 @@ async function pageInit(opts = {}) {
           const profile = await API.getMe();
           AUTH.setProfile(profile);
           AUTH.updateNavUI();
-        } catch (e) {
-          console.warn("Could not fetch profile:", e);
-        }
+        } catch (e) {}
       } 
       else {
         setTimeout(async () => {
@@ -163,7 +134,6 @@ async function pageInit(opts = {}) {
     
     return true;
   } catch (error) {
-    console.warn("pageInit Auth Check Failed safely:", error);
     return false;
   }
 }
