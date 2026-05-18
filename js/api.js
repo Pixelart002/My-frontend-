@@ -1,12 +1,11 @@
 /* ============================================================
-   LUVIIO — API  (v4.5 — Final Loop & CORS Fix)
+   LUVIIO — API  (v6.1 — Auto-Retry + Direct Slash Fix)
    ============================================================
-   FIXES:
-   1. LOOP TRAP FIXED: Removed global window.location redirect from 
-      inside request() on 401 failure. Public pages like Shop/Home 
-      will no longer enter an infinite reload loop for guests.
-   2. CROSS-DOMAIN COOKIE: Maintained credentials: 'include' strictly 
-      for `/auth/*` endpoints so the browser accepts the login cookie.
+   FIXES INCLUDED:
+   1. AUTO-RETRY (Cold Start Fix): Retries up to 2 times in background.
+   2. LOOP TRAP FIXED: No infinite reload loops on 401.
+   3. CROSS-DOMAIN COOKIE: 'include' strictly for /auth/ endpoints.
+   4. SLASH FIX: Removed regex builder, using direct template literals.
    ============================================================ */
 
 class APIError extends Error {
@@ -25,9 +24,10 @@ const API = (() => {
     return PUBLIC_PREFIXES.some(p => path.startsWith(p));
   }
   
-  async function request(method, path, body = null, isRetry = false) {
+  // 🔥 Retry Fix: Added 'retriesLeft' parameter to auto-try if server is sleeping
+  async function request(method, path, body = null, isRetry = false, retriesLeft = 2) {
     const headers = {};
-    const token = AUTH.getToken();
+    const token = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
     
     // Don't send token to public endpoints (reduces exposure)
     if (token && !_isPublic(path)) {
@@ -37,11 +37,10 @@ const API = (() => {
     const opts = {
       method,
       headers,
-      signal: AbortSignal.timeout(10000), // 10s timeout — no more hangs
+      signal: AbortSignal.timeout(12000), // 12s timeout
     };
 
-    // 🔥 THE CRITICAL FIX: Accept cookies ONLY for Auth endpoints (Login/Logout/Refresh)
-    // Iske bina cross-domain (Koyeb/Vercel -> luviio.in) cookies kaam nahi karengi!
+    // THE CRITICAL FIX: Accept cookies ONLY for Auth endpoints
     if (path.startsWith('/auth/')) {
       opts.credentials = 'include';
     }
@@ -56,8 +55,16 @@ const API = (() => {
     
     let res;
     try {
+      // 🔥 SLASH FIX: Direct concatenation — fast, simple, no regex breaking
       res = await fetch(`${CONFIG.API_BASE}${path}`, opts);
     } catch (networkErr) {
+      // THE ASLI FIX: Agar request fail hui (e.g. server sleeping), 1 second ruk kar retry karo!
+      if (retriesLeft > 0) {
+        console.warn(`[API] Server wake-up delay. Retrying in background...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return request(method, path, body, isRetry, retriesLeft - 1);
+      }
+
       if (networkErr.name === 'TimeoutError') {
         throw new APIError('Request timed out — please try again', 0);
       }
@@ -68,12 +75,14 @@ const API = (() => {
     
     // Auto-refresh on 401 — but NOT for auth endpoints (avoid loops)
     if (res.status === 401 && !isRetry && !isAuthEndpoint) {
-      const refreshed = await AUTH.init();
-      if (refreshed) return request(method, path, body, true);
-      
-      // 🔥 THE LOOP FIX: Sirf tokens clear karo, forcefully redirect mat karo!
-      // Isse background APIs ki wajah se public pages loop mein fassenge nahi.
-      AUTH.clearTokens();
+      if (typeof AUTH !== 'undefined') {
+        const refreshed = await AUTH.init();
+        // Pass retriesLeft forward so refreshed request doesn't lose safety
+        if (refreshed) return request(method, path, body, true, retriesLeft);
+        
+        // THE LOOP FIX: Sirf tokens clear karo, forcefully redirect mat karo!
+        AUTH.clearTokens();
+      }
       return null;
     }
     
@@ -97,7 +106,7 @@ const API = (() => {
 
   // Helper for binary file downloads (e.g. PDF Invoices)
   async function _downloadBlob(path, defaultFilename) {
-    const token = AUTH.getToken();
+    const token = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -125,6 +134,7 @@ const API = (() => {
     login: (email, pass) => request('POST', '/auth/login', { email, password: pass }),
     register: (email, pass, name) => request('POST', '/auth/register', { email, password: pass, full_name: name }),
     logout: async () => {
+      if (typeof AUTH === 'undefined') return;
       try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed locally:', e); }
       AUTH.clearTokens();
     },
@@ -154,6 +164,7 @@ const API = (() => {
     
     // --- USERS / PROFILE ---
     getMe: async () => {
+      if (typeof AUTH === 'undefined') return null;
       const cached = AUTH.getProfile();
       if (cached) return cached;
       const data = await request('GET', '/users/me');
@@ -174,7 +185,8 @@ const API = (() => {
     updateCartItem: (productId, quantity) => request('PUT', `/cart/items/${encodeURIComponent(productId)}`, { quantity }),
     removeCartItem: (productId) => request('DELETE', `/cart/items/${encodeURIComponent(productId)}`),
     getAbandonedCartsAdmin: (hours = 24, page = 1) => request('GET', `/cart/admin/abandoned?hours=${hours}&page=${page}`), // Admin
-    sendCartReminderAdmin: (cartId) => request('POST', `/cart/admin/remind/${encodeURIComponent(cartId)}`, {}), // Admin
+    sendCartReminderAdmin: (cartId) => request('POST', `/cart/admin/remind/${encodeURIComponent(cartId)}`, {}),
+    // Admin
 
     // --- PRICING ---
     calculatePricing: (items) => request('POST', '/pricing/calculate', { items }),
