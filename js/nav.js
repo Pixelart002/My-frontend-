@@ -87,7 +87,7 @@ const NAV = {
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>
 
-      \${bannerHTML} `;
+      ${bannerHTML} `;
     
     this._bindEvents();
     CART.init();
