@@ -184,6 +184,29 @@
     let stripe            = null;
     let cardElement       = null;
 
+    // ── Idempotency Key Management ────────────────────────────────────────────────
+    const IDEM_KEY_STORAGE = 'lv_checkout_idem_key';
+
+    function _getOrCreateIdempotencyKey() {
+      let key = sessionStorage.getItem(IDEM_KEY_STORAGE);
+      if (!key) {
+        // Crypto UUID — browser support 95%+, fallback for older
+        key = typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+              const r = Math.random() * 16 | 0;
+              return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        sessionStorage.setItem(IDEM_KEY_STORAGE, key);
+      }
+      return key;
+    }
+
+    function _clearIdempotencyKey() {
+      sessionStorage.removeItem(IDEM_KEY_STORAGE);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────────
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
@@ -201,7 +224,7 @@
 
     init();
 
-    /* ── Order summary ─────────────────────────────────────── */
+    /* ── Order summary ───────────────────────────────────────────────────────────── */
     function renderOrderSummary() {
       const items    = CART.get();
       const subtotal = CART.total();
@@ -264,7 +287,7 @@
       totalsEl.appendChild(totalRow);
     }
 
-    /* ── Addresses ─────────────────────────────────────────── */
+    /* ── Addresses ───────────────────────────────────────────────────────────────── */
     async function loadAddresses() {
       try {
         addresses = await API.getAddresses();
@@ -321,37 +344,47 @@
     });
 
     document.getElementById('save-address-btn').addEventListener('click', async () => {
-      const line1    = document.getElementById('a-line1').value.trim().substring(0, 255);
-      const line2    = document.getElementById('a-line2').value.trim().substring(0, 255);
-      const city     = document.getElementById('a-city').value.trim().substring(0, 100);
-      const state    = document.getElementById('a-state').value.trim().substring(0, 100);
-      const postal   = document.getElementById('a-postal').value.trim().substring(0, 20);
-      const country  = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
+      const line1     = document.getElementById('a-line1').value.trim().substring(0, 255);
+      const line2     = document.getElementById('a-line2').value.trim().substring(0, 255);
+      const city      = document.getElementById('a-city').value.trim().substring(0, 100);
+      const state     = document.getElementById('a-state').value.trim().substring(0, 100);
+      const postal    = document.getElementById('a-postal').value.trim().substring(0, 20);
+      const country   = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
       const isDefault = document.getElementById('a-default').checked;
-      const btn      = document.getElementById('save-address-btn');
+      const btn       = document.getElementById('save-address-btn');
+
       if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Please fill all required address fields', 'error'); return;
+        showToast('Please fill all required address fields', 'error');
+        return;
       }
       showLoader(btn, 'Saving…');
       try {
-        const addr = await API.addAddress({ line1, line2: line2||null, city, state: state||null, postal_code: postal, country, is_default: isDefault });
+        const addr = await API.addAddress({
+          line1, line2: line2 || null, city,
+          state: state || null, postal_code: postal,
+          country, is_default: isDefault,
+        });
         addresses.push(addr);
         selectedAddressId = addr.id;
         renderAddresses();
         document.getElementById('new-address-form').style.display = 'none';
         showToast('Address saved!', 'success');
-      } catch (err) { showToast(err.message, 'error'); }
-      finally { hideLoader(btn); }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
     });
 
-    /* ── Stripe ────────────────────────────────────────────── */
+    /* ── Stripe ──────────────────────────────────────────────────────────────────── */
     function initStripe() {
       const placeholder  = document.getElementById('stripe-placeholder');
       const elementsWrap = document.getElementById('stripe-elements-wrap');
+
       if (!CONFIG.STRIPE_PK || CONFIG.STRIPE_PK.includes('REPLACE')) {
         placeholder.style.cssText = 'height:auto;';
         placeholder.classList.remove('skeleton');
-        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">⚠ Stripe not configured. Add your publishable key to js/config.js.</p>';
+        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">⚠ Stripe not configured.</p>';
         document.getElementById('pay-btn').disabled = false;
         return;
       }
@@ -360,8 +393,12 @@
         const elements = stripe.elements({
           appearance: {
             theme: 'night',
-            variables: { colorPrimary:'#c9a96e', colorBackground:'#1a1a1a', colorText:'#f0ece4', colorDanger:'#e05252', fontFamily:'DM Sans, sans-serif', borderRadius:'8px' }
-          }
+            variables: {
+              colorPrimary: '#c9a96e', colorBackground: '#1a1a1a',
+              colorText: '#f0ece4', colorDanger: '#e05252',
+              fontFamily: 'DM Sans, sans-serif', borderRadius: '8px',
+            },
+          },
         });
         cardElement = elements.create('card', { hidePostalCode: true });
         placeholder.style.display = 'none';
@@ -384,101 +421,107 @@
       document.getElementById('pay-btn').disabled = !selectedAddressId;
     }
 
-    /* ── Place order ───────────────────────────────────────── */
+    /* ── Place order ──────────────────────────────────────────────────────────────── */
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn    = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
       errDiv.style.display = 'none';
 
       if (!selectedAddressId) { showToast('Please select a shipping address', 'error'); return; }
-      if (!AUTH.isLoggedIn()) { AUTH.requireAuth(); return; }
-      if (!CART.count()) { showToast('Your cart is empty', 'warn'); return; }
+      if (!AUTH.isLoggedIn())  { AUTH.requireAuth(); return; }
+      if (!CART.count())       { showToast('Your cart is empty', 'warn'); return; }
+
+      // IDEMPOTENCY: Key pehle se exist kar sakti hai (retry case)
+      const idempotencyKey = _getOrCreateIdempotencyKey();
 
       showLoader(btn, '🔒 Processing…');
+
       try {
+        // ── Step 1: Order create (idempotent) ────────────────────────────────────
+        // Same key pe retry karo — server existing order return karega
         const order = await API.createOrder({
           items: CART.get().map(i => ({ product_id: i.id, quantity: i.qty })),
           shipping_address_id: selectedAddressId,
+          idempotency_key: idempotencyKey,   // ← IDEMPOTENCY
         });
 
         if (stripe && cardElement) {
+          // ── Step 2: Payment Intent (server-side idempotency key already set) ───
           const intentData = await API.createPaymentIntent(order.id);
+
+          // ── Step 3: Stripe card confirmation ─────────────────────────────────
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
             intentData.client_secret,
             { payment_method: { card: cardElement } }
           );
-          
+
           if (stripeErr) {
-            // 1. UI me error dikhayein
+            // Payment failed — key mat clear karo (user retry kar sakta hai)
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
-            
-            // 2. BACKEND KO TURANT NOTIFY KAREIN (Push notification bhejne ke liye)
+
+            // Backend ko notify karo (instant push notification)
             try {
               await API.notifyPaymentFailed(
-                order.id, 
-                intentData.payment_intent_id, 
-                stripeErr.message
+                order.id,
+                intentData.payment_intent_id,
+                stripeErr.message,
               );
             } catch (notifyErr) {
-              console.warn("Failed to notify backend of payment error (non-fatal)", notifyErr);
+              console.warn('notify-failed non-critical:', notifyErr);
             }
 
-            hideLoader(btn); btn.disabled = false;
+            hideLoader(btn);
+            btn.disabled = false;
             return;
           }
 
           if (paymentIntent.status === 'succeeded') {
-            // ── FIX: Webhook pe rely mat karo — directly backend ko bolo ──
-            // Webhook sirf tab kaam karta hai jab Stripe Dashboard mein configure ho.
-            // /confirm endpoint Stripe se verify karke order paid mark karta hai.
+            // ── Step 4: Backend confirm (idempotent — duplicate ignored) ─────────
             try {
-              await API.post('/payments/confirm', {
-                order_id: order.id,
-                payment_intent_id: paymentIntent.id,
-              });
+              await API.confirmPayment(order.id, paymentIntent.id);
             } catch (confirmErr) {
-              console.warn('Confirm endpoint error (non-fatal):', confirmErr.message);
               // Non-fatal — webhook backup karega
+              console.warn('Confirm endpoint error (non-fatal):', confirmErr.message);
             }
+
+            // SUCCESS: Idempotency key clear karo — naya order allow karo
+            _clearIdempotencyKey();
             CART.clear();
             showSuccess();
           }
+
         } else {
-          // Stripe nahi hai (demo mode) — order create ho gaya, confirm karo
+          // Demo mode (no Stripe configured)
           try {
-            await API.post('/payments/confirm', {
-              order_id: order.id,
-              payment_intent_id: 'demo_' + order.id,
-            });
-          } catch (e) { /* demo mode mein ignore */ }
+            await API.confirmPayment(order.id, 'demo_' + order.id);
+          } catch (e) { /* demo mode ignore */ }
+
+          _clearIdempotencyKey();
           CART.clear();
           showSuccess();
         }
+
       } catch (err) {
+        // Network / server error — key mat clear karo (retry safe hai)
         errDiv.textContent = err.message || 'Order failed. Please try again.';
         errDiv.style.display = 'block';
-        hideLoader(btn); btn.disabled = false;
+        hideLoader(btn);
+        btn.disabled = false;
       }
     });
 
-    /* ── Show success + push prompt ────────────────────────── */
+    /* ── Success screen + push prompt ────────────────────────────────────────────── */
     function showSuccess() {
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Show push prompt only if:
-      // 1. Browser supports it
-      // 2. Permission not yet granted/denied
-      // 3. User hasn't skipped before
       setTimeout(() => {
-        const notifPermission = typeof Notification !== 'undefined'
-          ? Notification.permission
-          : 'denied';
+        const perm = typeof Notification !== 'undefined' ? Notification.permission : 'denied';
         if (
           PUSH.isSupported() &&
-          notifPermission === 'default' &&
+          perm === 'default' &&
           !sessionStorage.getItem('push_dismissed')
         ) {
           document.getElementById('push-prompt-card').style.display = 'flex';
@@ -486,7 +529,6 @@
       }, 800);
     }
 
-    /* ── Push prompt buttons ───────────────────────────────── */
     document.getElementById('push-allow-btn').addEventListener('click', async () => {
       const btn = document.getElementById('push-allow-btn');
       btn.textContent = '…';
