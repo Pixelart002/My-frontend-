@@ -13,7 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   
   <style>
-    /* ── BASE & VARIABLES ── */
     :root {
       --font-display: 'Playfair Display', serif;
       --font-ui: 'Jost', sans-serif;
@@ -25,7 +24,6 @@
       color: var(--text, #f4f0ea);
     }
 
-    /* ── LAYOUT ── */
     .product-layout { 
       display: grid; 
       grid-template-columns: 1fr 1fr; 
@@ -34,7 +32,6 @@
       align-items: start;
     }
 
-    /* ── BREADCRUMBS ── */
     .breadcrumb { 
       display: flex; 
       align-items: center;
@@ -55,7 +52,6 @@
       display: inline-block;
     }
 
-    /* ── SWIPEABLE IMAGE CAROUSEL ── */
     .product-gallery-wrap { 
       display: flex; 
       flex-direction: column; 
@@ -120,7 +116,6 @@
       text-transform: uppercase; padding: 6px 12px; border-radius: 4px; z-index: 10;
     }
 
-    /* ── PRODUCT INFO & TYPOGRAPHY ── */
     .product-info { 
       display: flex; flex-direction: column; gap: 20px; 
     }
@@ -153,7 +148,6 @@
       border: none; border-top: 1px solid var(--border, #222); margin: 0; width: 100%; 
     }
 
-    /* ── ADD TO CART SECTION ── */
     .add-to-cart-section { 
       display: flex; gap: 12px; align-items: center; flex-wrap: nowrap;
       width: 100%; margin-top: 8px;
@@ -195,7 +189,6 @@
     .btn-pop { animation: btnPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes btnPop { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
-    /* ── COLLAPSIBLE DESCRIPTION ACCORDION ── */
     .product-accordion {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
@@ -240,16 +233,14 @@
       font-size: 15px;
       color: #a09d98;
       line-height: 1.8;
-      white-space: pre-line; /* Preserves line breaks from the full description */
+      white-space: pre-line;
     }
 
-    /* ── META INFO ── */
     .product-meta { display: flex; flex-direction: column; gap: 12px; margin-top: 8px;}
     .product-meta-row { display: flex; gap: 16px; font-size: 13px; }
     .product-meta-label { color: var(--text-muted); min-width: 80px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
     .product-meta-value { color: var(--text); }
 
-    /* ── STOCK BAR ── */
     .stock-bar-wrap { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .stock-bar-track { height: 4px; background: var(--surface-2, #222); border-radius: 2px; overflow: hidden; }
     .stock-bar-fill  { height: 100%; border-radius: 2px; width: 0%; }
@@ -303,12 +294,10 @@
   
   
   <script src="/js/keys.js"></script>
-
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
-  <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
 
@@ -327,6 +316,7 @@
     if (!slug) { window.location.href = '/shop.html'; }
     else { loadProduct(slug); }
 
+    // ── Load Product from Server ──────────────────────────────────
     async function loadProduct(slug) {
       try {
         product = await API.getProduct(slug);
@@ -372,7 +362,7 @@
 
       const images = p.images && p.images.length > 0 ? p.images : (p.image_url ? [p.image_url] : []);
 
-      // ── Image Gallery (Swipeable Carousel) ───────────────────────────────────
+      // ── Image Gallery ─────────────────────────────────────────────────
       const imgSec = document.createElement('div');
       imgSec.className = 'gsap-img-sec';
       const galleryWrap = document.createElement('div');
@@ -382,12 +372,12 @@
       carouselContainer.className = 'carousel-container';
 
       if (images.length > 0) {
-        images.forEach((imgUrl, index) => {
+        images.forEach((imgUrl) => {
           const slide = document.createElement('div');
           slide.className = 'carousel-slide';
           const img = document.createElement('img');
           img.src = escapeHTML(imgUrl);
-          img.alt = `${escapeHTML(p.name)} - View ${index + 1}`;
+          img.alt = `${escapeHTML(p.name)}`;
           slide.appendChild(img);
           carouselContainer.appendChild(slide);
         });
@@ -412,32 +402,23 @@
       if (images.length > 1) {
         const dotsWrap = document.createElement('div');
         dotsWrap.className = 'carousel-dots';
-        
         const dots = [];
-        images.forEach((_, index) => {
+        images.forEach((_, i) => {
           const dot = document.createElement('div');
-          dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+          dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
           dotsWrap.appendChild(dot);
           dots.push(dot);
         });
-
-        // Sync dots on scroll
         carouselContainer.addEventListener('scroll', () => {
-          const slideWidth = carouselContainer.clientWidth;
-          const scrollPosition = carouselContainer.scrollLeft;
-          const activeIndex = Math.round(scrollPosition / slideWidth);
-          
-          dots.forEach((dot, idx) => {
-            dot.classList.toggle('active', idx === activeIndex);
-          });
+          const idx = Math.round(carouselContainer.scrollLeft / carouselContainer.clientWidth);
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
         });
-
         galleryWrap.appendChild(dotsWrap);
       }
       
       imgSec.appendChild(galleryWrap);
 
-      // ── Info Section ───────────────────────────────────────────────────────
+      // ── Info Section ───────────────────────────────────────────────────
       const info = document.createElement('div');
       info.className = 'product-info gsap-info-sec';
 
@@ -451,13 +432,11 @@
       title.className = 'product-title gsap-item'; title.textContent = p.name;
       info.appendChild(title);
 
-      // Price Row
       const priceRow = document.createElement('div');
       priceRow.className = 'product-price-row gsap-item';
       const priceEl = document.createElement('div');
       priceEl.className = 'product-price'; priceEl.textContent = formatPrice(p.price);
       priceRow.appendChild(priceEl);
-
       if (p.compare_price) {
         const cmp = document.createElement('div');
         cmp.className = 'product-compare'; cmp.textContent = formatPrice(p.compare_price);
@@ -470,27 +449,24 @@
       stockInfo.wrapper.className += ' gsap-item';
       info.appendChild(stockInfo.wrapper);
 
-      // ── Add to cart UI ───────────────────────────
+      // ── Add to Cart (SERVER API) ──────────────────────────────────────
       const addSec = document.createElement('div');
       addSec.className = 'add-to-cart-section gsap-item';
 
       if (!isOOS) {
         const qtyCtrl = document.createElement('div');
         qtyCtrl.className = 'qty-control';
-
         const qtyMinus = document.createElement('button');
         qtyMinus.className = 'qty-btn'; qtyMinus.textContent = '−';
-
         const qtyDisp = document.createElement('div');
         qtyDisp.className = 'qty-display'; qtyDisp.textContent = qty;
-
         const qtyPlus = document.createElement('button');
         qtyPlus.className = 'qty-btn'; qtyPlus.textContent = '+';
 
         const updateQtyUI = () => {
           qtyDisp.textContent = qty;
-          qtyMinus.style.opacity = qty <= 1        ? '0.4' : '1';
-          qtyPlus.style.opacity  = qty >= maxStock ? '0.4' : '1';
+          qtyMinus.style.opacity = qty <= 1 ? '0.4' : '1';
+          qtyPlus.style.opacity = qty >= maxStock ? '0.4' : '1';
         };
 
         qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; updateQtyUI(); } });
@@ -509,145 +485,143 @@
       addBtn.textContent = isOOS ? 'Sold Out' : 'ADD TO CART';
       addBtn.disabled = isOOS;
 
-      addBtn.addEventListener('click', () => {
+      // 🔥 SERVER API: Add to Cart Handler
+      addBtn.addEventListener('click', async () => {
+        if (addBtn.disabled) return;
+
+        // Check auth
+        if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
+          showToast('Please sign in to add items to cart', 'warn');
+          setTimeout(() => window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`, 1200);
+          return;
+        }
+
+        // Pop animation
         addBtn.classList.remove('btn-pop');
         void addBtn.offsetWidth;
         addBtn.classList.add('btn-pop');
 
-        const added = CART.add(p, qty);
-        if (added !== false) {
-          showToast(`${p.name} × ${qty} added`, 'success');
-          
-          const ogText = addBtn.textContent;
-          gsap.to(addBtn, { opacity: 0, duration: 0.15, onComplete: () => {
-            addBtn.textContent = '✓ ADDED TO CART';
-            addBtn.style.background = 'var(--gold)'; addBtn.style.color = '#000';
-            gsap.to(addBtn, { opacity: 1, duration: 0.15 });
-          }});
+        const ogText = addBtn.textContent;
+        addBtn.disabled = true;
+        addBtn.textContent = 'ADDING...';
+        addBtn.style.opacity = '0.7';
 
-          setTimeout(() => { 
-            gsap.to(addBtn, { opacity: 0, duration: 0.15, onComplete: () => {
-              addBtn.textContent = ogText;
-              addBtn.style.background = ''; addBtn.style.color = '';
-              gsap.to(addBtn, { opacity: 1, duration: 0.15 });
-            }});
-          }, 1500);
+        try {
+          // 🔥 SERVER API CALL: POST /cart/items
+          await API.post('/cart/items', { 
+            product_id: p.id, 
+            quantity: qty 
+          });
+
+          // Success
+          showToast(`${p.name} × ${qty} added to cart`, 'success');
+          
+          addBtn.textContent = '✓ ADDED TO CART';
+          addBtn.style.background = 'var(--gold)';
+          addBtn.style.color = '#000';
+          addBtn.style.opacity = '1';
+
+          // Update nav badge from server
+          await updateCartBadge();
+
+          // Reset button
+          setTimeout(() => {
+            addBtn.textContent = ogText;
+            addBtn.style.background = '';
+            addBtn.style.color = '';
+            addBtn.disabled = false;
+          }, 2000);
+
+        } catch (err) {
+          // Error
+          console.error('Add to cart error:', err);
+          showToast(err.message || 'Failed to add item', 'error');
+          
+          addBtn.textContent = ogText;
+          addBtn.style.opacity = '1';
+          addBtn.disabled = false;
         }
       });
 
       addSec.appendChild(addBtn);
       info.appendChild(addSec);
 
-      // ── Collapsible Full Description (Accordion) ──
+      // ── Collapsible Description ────────────────────────────────────────
       if (p.description || p.short_description) {
         const accordion = document.createElement('div');
         accordion.className = 'product-accordion gsap-item';
-
         const header = document.createElement('div');
         header.className = 'accordion-header';
-        
-        // Use SVG for a clean arrow
-        header.innerHTML = `
-          <span>Product Details</span>
-          <span class="accordion-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </span>
-        `;
-
+        header.innerHTML = `<span>Product Details</span><span class="accordion-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`;
         const contentWrap = document.createElement('div');
         contentWrap.className = 'accordion-content-wrap';
-        
         const content = document.createElement('div');
         content.className = 'accordion-content';
-        
         const inner = document.createElement('div');
         inner.className = 'accordion-inner';
-        // Display full description, fallback to short if full is missing
         inner.textContent = p.description || p.short_description;
-
         content.appendChild(inner);
         contentWrap.appendChild(content);
-        
         accordion.appendChild(header);
         accordion.appendChild(contentWrap);
-
-        // Toggle click event
-        header.addEventListener('click', () => {
-          header.classList.toggle('active');
-        });
-
+        header.addEventListener('click', () => header.classList.toggle('active'));
         info.appendChild(accordion);
       }
 
-      // Meta Data (SKU, Weight)
+      // Meta Data
       if (p.sku || p.weight_grams) {
         const meta = document.createElement('div'); meta.className = 'product-meta gsap-item';
         const addMeta = (label, val) => {
           const row = document.createElement('div'); row.className = 'product-meta-row';
-          const l = document.createElement('span'); l.className = 'product-meta-label'; l.textContent = label;
-          const v = document.createElement('span'); v.className = 'product-meta-value'; v.textContent = val;
-          row.appendChild(l); row.appendChild(v); meta.appendChild(row);
+          row.innerHTML = `<span class="product-meta-label">${label}</span><span class="product-meta-value">${val}</span>`;
+          meta.appendChild(row);
         };
-        if (p.sku)            addMeta('SKU', p.sku);
-        if (p.weight_grams)   addMeta('Weight', `${p.weight_grams}g`);
+        if (p.sku) addMeta('SKU', p.sku);
+        if (p.weight_grams) addMeta('Weight', `${p.weight_grams}g`);
         info.appendChild(meta);
       }
 
       layout.appendChild(imgSec);
       layout.appendChild(info);
 
-      // ── GSAP Staggered Entrance Animations ──
-      gsap.fromTo(".gsap-img-sec", 
-        { opacity: 0, x: -20 }, 
-        { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }
-      );
-
-      gsap.fromTo(".gsap-item", 
-        { opacity: 0, y: 15 }, 
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.06, ease: "power2.out", delay: 0.1 }
-      );
+      // GSAP Entrance
+      gsap.fromTo(".gsap-img-sec", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+      gsap.fromTo(".gsap-item", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.06, ease: "power2.out", delay: 0.1 });
 
       if(stockInfo.fillElement && stockInfo.targetWidth) {
-        gsap.fromTo(stockInfo.fillElement, 
-          { width: "0%" }, 
-          { width: stockInfo.targetWidth, duration: 1.2, ease: "power3.out", delay: 0.5 }
-        );
+        gsap.fromTo(stockInfo.fillElement, { width: "0%" }, { width: stockInfo.targetWidth, duration: 1.2, ease: "power3.out", delay: 0.5 });
       }
     }
 
-    // ── Stock indicator Logic ────────────────────────
+    // ── Stock Indicator ────────────────────────────────────────────────
     function buildStockIndicator(stock, threshold) {
       const wrap = document.createElement('div');
       wrap.className = 'stock-bar-wrap';
-
       const label = document.createElement('div');
       label.className = 'stock-label';
-
       const track = document.createElement('div');
       track.className = 'stock-bar-track';
       const fill = document.createElement('div');
       fill.className = 'stock-bar-fill';
-
       let targetWidth = "0%";
 
       if (stock === 0) {
         label.className += ' oos';
-        label.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:-2px"><path d="M6 18L18 6M6 6l12 12"/></svg> Out of stock';
-        targetWidth = '0%';
+        label.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg> Out of stock';
         fill.style.background = 'var(--error)';
       } else if (stock <= 3) {
         label.className += ' low';
-        label.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:-2px"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Only ${stock} left — order soon!`;
+        label.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Only ${stock} left — order soon!`;
         targetWidth = `${Math.min(stock / threshold * 100, 100)}%`;
         fill.style.background = 'var(--error)';
       } else if (stock <= threshold) {
         label.className += ' low';
-        label.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:-2px"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Low stock — ${stock} remaining`;
+        label.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Low stock — ${stock} remaining`;
         targetWidth = `${Math.min(stock / threshold * 100, 100)}%`;
         fill.style.background = 'var(--gold)';
       } else {
         label.className += ' ok';
-        label.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:-2px"><path d="M5 13l4 4L19 7"/></svg> In stock & ready to ship';
+        label.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> In stock & ready to ship';
         targetWidth = '100%';
         fill.style.background = '#6dbb63';
       }
@@ -655,8 +629,22 @@
       track.appendChild(fill);
       wrap.appendChild(label);
       if (stock > 0) wrap.appendChild(track);
-
       return { wrapper: wrap, fillElement: fill, targetWidth: targetWidth };
+    }
+
+    // ── Update Nav Cart Badge from Server ──────────────────────────────
+    async function updateCartBadge() {
+      if (typeof AUTH === 'undefined' || !AUTH.isLoggedIn()) return;
+      try {
+        const cart = await API.get('/cart');
+        const count = (cart.items || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
+        document.querySelectorAll('[data-cart-count]').forEach(el => {
+          el.textContent = count;
+          el.style.display = count > 0 ? 'flex' : 'none';
+        });
+      } catch (err) {
+        console.warn('Cart badge:', err.message);
+      }
     }
   </script>
 </body>

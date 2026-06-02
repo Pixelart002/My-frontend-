@@ -42,6 +42,10 @@
     .push-card-btns  { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     @media(max-width:900px){.checkout-layout{grid-template-columns:1fr;} .summary-sticky{position:static;} .address-grid{grid-template-columns:1fr;}}
+    
+    .address-card { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; position: relative; }
+    .address-card.selected { border-color: var(--gold); background: rgba(201,165,94,0.05); }
+    .badge-default { position: absolute; top: 10px; right: 10px; background: var(--gold); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -160,16 +164,19 @@
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
-  <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  
   <script>
     let selectedAddressId = null;
-    let addresses         = [];
-    let stripe            = null;
-    let cardElement       = null;
+    let addresses = [];
+    let stripe = null;
+    let cardElement = null;
+    
+    // Cart data from SINGLE API call (pricing already included)
+    let cartData = null;
 
-    // ── Idempotency Key Management ─────────────────────────────────────────
+    // ── Idempotency Key ────────────────────────────────────────────────────
     const IDEM_KEY_STORAGE = 'lv_checkout_idem_key';
 
     function _getOrCreateIdempotencyKey() {
@@ -190,77 +197,132 @@
       sessionStorage.removeItem(IDEM_KEY_STORAGE);
     }
 
-    // ── Init ───────────────────────────────────────────────────────────────
+    // ── Init (SINGLE API CALL — cart includes pricing) ────────────────────
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
-      if (!CART.count()) {
-        showToast('Your cart is empty', 'warn');
+      
+      try {
+        // SINGLE call — /cart now returns pricing built-in
+        cartData = await API.get('/cart');
+        
+        const items = cartData?.items || [];
+        
+        if (!items.length) {
+          showToast('Your cart is empty', 'warn');
+          setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
+          return;
+        }
+
+        // Check for unavailable items
+        if (cartData?.has_unavailable_items) {
+          showToast('Some items are unavailable. Please review your cart.', 'warn');
+        }
+
+        renderOrderSummary();
+        await loadAddresses();
+        initStripe();
+      } catch (err) {
+        console.error('Checkout Init Error:', err);
+        showToast('Could not load checkout. Redirecting...', 'error');
         setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
-        return;
       }
-      renderOrderSummary();
-      await loadAddresses();
-      initStripe();
     }
     init();
 
-    // ── Order Summary ──────────────────────────────────────────────────────
+    // ── Order Summary (data from cart response) ───────────────────────────
     function renderOrderSummary() {
-      const items    = CART.get();
-      const subtotal = CART.total();
-      const shipping = subtotal >= 1499 ? 0 : 99;
-      const tax      = (subtotal + shipping) * 0.08;
-      const total    = subtotal + shipping + tax;
-
       const wrap = document.getElementById('order-items-preview');
       wrap.innerHTML = '';
+      
+      const items = cartData?.items || [];
+      
       items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'order-item';
+        
         const img = document.createElement('div');
         img.className = 'order-item-img';
-        if (item.image) {
+        if (item.image_url) {
           const i = document.createElement('img');
-          i.src = item.image; i.alt = item.name;
+          i.src = item.image_url;
+          i.alt = item.name;
           img.appendChild(i);
-        } else { img.textContent = '◈'; }
+        } else {
+          img.textContent = '◈';
+        }
+        
         const info = document.createElement('div');
         info.className = 'order-item-info';
+        
         const name = document.createElement('div');
-        name.className = 'order-item-name'; name.textContent = item.name;
+        name.className = 'order-item-name';
+        name.textContent = item.name;
+        
         const meta = document.createElement('div');
-        meta.className = 'order-item-meta'; meta.textContent = `Qty: ${item.qty}`;
-        info.appendChild(name); info.appendChild(meta);
+        meta.className = 'order-item-meta';
+        meta.textContent = `Qty: ${item.quantity}`;
+        
+        info.appendChild(name);
+        info.appendChild(meta);
+        
         const price = document.createElement('div');
         price.className = 'order-item-price';
-        price.textContent = formatPrice(item.price * item.qty);
-        row.appendChild(img); row.appendChild(info); row.appendChild(price);
+        price.textContent = formatPrice(item.line_total);
+        
+        row.appendChild(img);
+        row.appendChild(info);
+        row.appendChild(price);
         wrap.appendChild(row);
       });
 
+      // Totals from cart response
       const totalsEl = document.getElementById('order-totals');
       totalsEl.innerHTML = '';
+      
+      const subtotal = cartData?.subtotal || 0;
+      const shipping = cartData?.shipping_cost || 0;
+      const taxAmount = cartData?.tax_amount || 0;
+      const taxRate = cartData?.tax_rate_pct || 18;
+      const grandTotal = cartData?.total_amount || 0;
+      const isFreeShipping = cartData?.free_shipping_eligible || false;
+      const toFreeShip = cartData?.amount_to_free_shipping || 0;
+
       [
         ['Subtotal', formatPrice(subtotal)],
-        ['Shipping', shipping === 0 ? 'Free 🎉' : formatPrice(shipping)],
-        ['Tax (8%)', formatPrice(tax)],
-      ].forEach(([l, v]) => {
+        [`GST (${taxRate}%)`, formatPrice(taxAmount)],
+        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping]
+      ].forEach(([label, value, isFree]) => {
         const row = document.createElement('div');
         row.className = 'order-row';
-        const ll = document.createElement('span'); ll.textContent = l;
-        const vv = document.createElement('span'); vv.textContent = v;
-        if (v === 'Free 🎉') vv.style.color = 'var(--success)';
-        row.appendChild(ll); row.appendChild(vv);
+        
+        const ll = document.createElement('span');
+        ll.textContent = label;
+        
+        const vv = document.createElement('span');
+        if (isFree) {
+          vv.innerHTML = '<i class="ri-truck-line"></i> Free';
+          vv.style.color = 'var(--success)';
+        } else {
+          vv.textContent = value;
+        }
+        
+        row.appendChild(ll);
+        row.appendChild(vv);
         totalsEl.appendChild(row);
       });
 
+      if (!isFreeShipping && toFreeShip > 0) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;padding:6px 0;';
+        hint.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(toFreeShip)} more for free shipping`;
+        totalsEl.appendChild(hint);
+      }
+
       const totalRow = document.createElement('div');
       totalRow.className = 'order-row total';
-      totalRow.style.cssText = 'border-top:2px solid var(--border);margin-top:8px;padding-top:16px;';
-      const tl = document.createElement('span'); tl.textContent = 'Total';
-      const tv = document.createElement('span'); tv.textContent = formatPrice(total);
-      totalRow.appendChild(tl); totalRow.appendChild(tv);
+      totalRow.style.cssText = 'border-top:2px solid var(--border);margin-top:12px;padding-top:16px;font-size:16px;font-weight:600;';
+      totalRow.innerHTML = `<span>Total</span><span style="color:var(--gold);">${formatPrice(grandTotal)}</span>`;
       totalsEl.appendChild(totalRow);
     }
 
@@ -279,10 +341,7 @@
       const wrap = document.getElementById('address-section');
       wrap.innerHTML = '';
       if (!addresses.length) {
-        const p = document.createElement('p');
-        p.style.cssText = 'font-size:14px;color:var(--text-muted);';
-        p.textContent = 'No saved addresses. Add one below.';
-        wrap.appendChild(p);
+        wrap.innerHTML = '<p style="font-size:14px;color:var(--text-muted);">No saved addresses. Add one below.</p>';
         return;
       }
       const grid = document.createElement('div');
@@ -296,12 +355,14 @@
         }
         if (addr.is_default) {
           const badge = document.createElement('span');
-          badge.className = 'badge-default'; badge.textContent = 'Default';
+          badge.className = 'badge-default';
+          badge.textContent = 'Default';
           card.appendChild(badge);
         }
         const p = document.createElement('p');
-        p.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.8;';
-        p.textContent = [addr.line1,addr.line2,addr.city,addr.state,addr.postal_code,addr.country].filter(Boolean).join(', ');
+        p.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;';
+        p.textContent = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country]
+          .filter(Boolean).join(', ');
         card.appendChild(p);
         card.addEventListener('click', () => {
           selectedAddressId = addr.id;
@@ -321,38 +382,51 @@
     });
 
     document.getElementById('save-address-btn').addEventListener('click', async () => {
-      const line1     = document.getElementById('a-line1').value.trim().substring(0, 255);
-      const line2     = document.getElementById('a-line2').value.trim().substring(0, 255);
-      const city      = document.getElementById('a-city').value.trim().substring(0, 100);
-      const state     = document.getElementById('a-state').value.trim().substring(0, 100);
-      const postal    = document.getElementById('a-postal').value.trim().substring(0, 20);
-      const country   = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
+      const line1 = document.getElementById('a-line1').value.trim().substring(0, 255);
+      const line2 = document.getElementById('a-line2').value.trim().substring(0, 255);
+      const city = document.getElementById('a-city').value.trim().substring(0, 100);
+      const state = document.getElementById('a-state').value.trim().substring(0, 100);
+      const postal = document.getElementById('a-postal').value.trim().substring(0, 20);
+      const country = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
       const isDefault = document.getElementById('a-default').checked;
-      const btn       = document.getElementById('save-address-btn');
+      const btn = document.getElementById('save-address-btn');
+      
       if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Please fill all required address fields', 'error'); return;
+        showToast('Please fill all required address fields', 'error');
+        return;
       }
+      
       showLoader(btn, 'Saving…');
       try {
-        const addr = await API.addAddress({ line1, line2: line2||null, city, state: state||null, postal_code: postal, country, is_default: isDefault });
+        const addr = await API.addAddress({
+          line1, line2: line2 || null, city,
+          state: state || null, postal_code: postal,
+          country, is_default: isDefault
+        });
         addresses.push(addr);
         selectedAddressId = addr.id;
         renderAddresses();
         document.getElementById('new-address-form').style.display = 'none';
+        ['a-line1', 'a-line2', 'a-city', 'a-state', 'a-postal'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
         showToast('Address saved!', 'success');
-      } catch (err) { showToast(err.message, 'error'); }
-      finally { hideLoader(btn); }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
     });
 
     // ── Stripe ─────────────────────────────────────────────────────────────
     function initStripe() {
-      const placeholder  = document.getElementById('stripe-placeholder');
+      const placeholder = document.getElementById('stripe-placeholder');
       const elementsWrap = document.getElementById('stripe-elements-wrap');
       if (!CONFIG.STRIPE_PK || CONFIG.STRIPE_PK.includes('REPLACE')) {
         placeholder.style.cssText = 'height:auto;';
         placeholder.classList.remove('skeleton');
-        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">Stripe not configured.</p>';
-        document.getElementById('pay-btn').disabled = false;
+        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">Stripe not configured. Running in Demo Mode.</p>';
+        checkPayBtnState();
         return;
       }
       try {
@@ -360,7 +434,14 @@
         const elements = stripe.elements({
           appearance: {
             theme: 'night',
-            variables: { colorPrimary:'#c9a96e', colorBackground:'#1a1a1a', colorText:'#f0ece4', colorDanger:'#e05252', fontFamily:'DM Sans, sans-serif', borderRadius:'8px' }
+            variables: {
+              colorPrimary: '#c9a96e',
+              colorBackground: '#1a1a1a',
+              colorText: '#f0ece4',
+              colorDanger: '#e05252',
+              fontFamily: 'DM Sans, sans-serif',
+              borderRadius: '8px'
+            }
           }
         });
         cardElement = elements.create('card', { hidePostalCode: true });
@@ -369,14 +450,17 @@
         cardElement.mount('#stripe-card-element');
         cardElement.on('change', e => {
           const errDiv = document.getElementById('stripe-errors');
-          if (e.error) { errDiv.textContent = e.error.message; errDiv.style.display = 'block'; }
-          else { errDiv.style.display = 'none'; }
-          checkPayBtnState();
+          if (e.error) {
+            errDiv.textContent = e.error.message;
+            errDiv.style.display = 'block';
+          } else {
+            errDiv.style.display = 'none';
+          }
         });
       } catch (err) {
         placeholder.classList.remove('skeleton');
         placeholder.style.height = 'auto';
-        placeholder.innerHTML = `<p class="form-error">Stripe failed to load: ${escapeHTML(err.message)}</p>`;
+        placeholder.innerHTML = `<p class="form-error">Stripe failed: ${escapeHTML(err.message)}</p>`;
       }
     }
 
@@ -386,30 +470,30 @@
 
     // ── Place Order ────────────────────────────────────────────────────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
-      const btn    = document.getElementById('pay-btn');
+      const btn = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
       errDiv.style.display = 'none';
 
-      if (!selectedAddressId) { showToast('Please select a shipping address', 'error'); return; }
-      if (!AUTH.isLoggedIn())  { AUTH.requireAuth(); return; }
-      if (!CART.count())       { showToast('Your cart is empty', 'warn'); return; }
+      if (!selectedAddressId) { showToast('Select a shipping address', 'error'); return; }
+      if (!AUTH.isLoggedIn()) { AUTH.requireAuth(); return; }
+      if (!cartData?.items?.length) { showToast('Cart is empty', 'warn'); return; }
+      if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
 
       const idempotencyKey = _getOrCreateIdempotencyKey();
       showLoader(btn, '🔒 Processing…');
 
       try {
-        // Step 1: Order create (idempotent — same key = same order)
         const order = await API.createOrder({
-          items: CART.get().map(i => ({ product_id: i.id, quantity: i.qty })),
+          items: cartData.items.map(i => ({
+            product_id: i.product_id,
+            quantity: i.quantity
+          })),
           shipping_address_id: selectedAddressId,
-          idempotency_key: idempotencyKey,
+          idempotency_key: idempotencyKey
         });
 
         if (stripe && cardElement) {
-          // Step 2: Payment intent
           const intentData = await API.createPaymentIntent(order.id);
-
-          // Step 3: Stripe card confirmation
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
             intentData.client_secret,
             { payment_method: { card: cardElement } }
@@ -418,42 +502,34 @@
           if (stripeErr) {
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
-            // Instant push notification to customer
             try { await API.notifyPaymentFailed(order.id, intentData.payment_intent_id, stripeErr.message); } catch {}
-            hideLoader(btn); btn.disabled = false;
+            hideLoader(btn);
             return;
           }
 
           if (paymentIntent.status === 'succeeded') {
-            // Step 4: Backend confirm (webhook is backup)
-            try { await API.confirmPayment(order.id, paymentIntent.id); }
-            catch (e) { console.warn('Confirm non-fatal:', e.message); }
-            _clearIdempotencyKey();
-            CART.clear();
-            showSuccess();
+            try { await API.confirmPayment(order.id, paymentIntent.id); } catch (e) { console.warn('Confirm:', e.message); }
+            completeCheckout();
           }
-
         } else {
-          // Demo mode (Stripe not configured)
           try { await API.confirmPayment(order.id, 'demo_' + order.id); } catch {}
-          _clearIdempotencyKey();
-          CART.clear();
-          showSuccess();
+          completeCheckout();
         }
-
       } catch (err) {
-        // Key NOT cleared — retry is safe
-        errDiv.textContent = err.message || 'Order failed. Please try again.';
+        errDiv.textContent = err.message || 'Order failed.';
         errDiv.style.display = 'block';
-        hideLoader(btn); btn.disabled = false;
+        hideLoader(btn);
       }
     });
 
-    // ── Success + Push Prompt ──────────────────────────────────────────────
-    function showSuccess() {
+    async function completeCheckout() {
+      _clearIdempotencyKey();
+      try { await API.delete('/cart'); } catch(e) {}
+      
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       setTimeout(() => {
         const perm = typeof Notification !== 'undefined' ? Notification.permission : 'denied';
         if (PUSH.isSupported() && perm === 'default' && !sessionStorage.getItem('push_dismissed')) {
@@ -462,6 +538,7 @@
       }, 800);
     }
 
+    // ── Push Prompt ────────────────────────────────────────────────────────
     document.getElementById('push-allow-btn').addEventListener('click', async () => {
       const btn = document.getElementById('push-allow-btn');
       btn.textContent = '…'; btn.disabled = true;

@@ -68,7 +68,6 @@
     .stock-banner i { font-size: 16px; }
     .stock-banner.error { background: rgba(224,82,82,.08); border-color: rgba(224,82,82,.25); color: var(--error); }
 
-    /* Summary Card (Hidden initially) */
     .summary-card {
       display: none;
       background: var(--surface); border: 1px solid var(--border);
@@ -106,7 +105,10 @@
       <div id="stock-warnings"></div>
 
       <div class="cart-layout" id="main-cart-layout">
-        <div id="cart-items"></div>
+        <div id="cart-items">
+          <div class="skeleton" style="height: 120px; border-radius: var(--radius); margin-bottom: 16px;"></div>
+          <div class="skeleton" style="height: 120px; border-radius: var(--radius);"></div>
+        </div>
 
         <div class="summary-card" id="summary-card">
           <div class="summary-title">Order Summary</div>
@@ -119,7 +121,7 @@
             Continue Shopping
           </a>
           <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px;line-height:1.6;">
-            <i class="ri-lock-line"></i> Secure checkout via Stripe.<br>All prices are inclusive of GST.
+            <i class="ri-lock-line"></i> Secure checkout via Stripe.
           </p>
         </div>
       </div>
@@ -135,63 +137,103 @@
     </footer>
   </div>
 
-
-
- <script src="/js/keys.js"></script>
+  <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
-  <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  
   <script>
-    pageInit();
-    renderCart();
-    checkLiveStock();
+    let serverCartData = null;
+    let serverCartItems = [];
+    let isUpdating = false;
 
-    window.addEventListener('cart:updated', renderCart);
-
-    // ── Live stock check ─────────────────────────────────────────────────────
-    async function checkLiveStock() {
-      const warnings = await CART.checkStock();
-      const bannerEl = document.getElementById('stock-warnings');
-      bannerEl.innerHTML = '';
-
-      if (!warnings.length) return;
-
-      warnings.forEach(w => {
-        const div = document.createElement('div');
-        div.className = 'stock-banner' + (w.reason === 'out_of_stock' ? ' error' : '');
-        if (w.reason === 'out_of_stock') {
-          div.innerHTML = `<i class="ri-error-warning-line"></i><span><strong>${escapeHTML(w.name)}</strong> is now out of stock and has been removed from your cart.</span>`;
-          CART.remove(w.id);
-        } else {
-          div.innerHTML = `<i class="ri-alert-line"></i><span>Only <strong>${w.liveStock}</strong> units of <strong>${escapeHTML(w.name)}</strong> available. Your quantity has been adjusted.</span>`;
-          CART.update(w.id, w.liveStock);
-        }
-        bannerEl.appendChild(div);
-      });
-
-      if (warnings.length) renderCart();
+    // ── Entry Point ────────────────────────────────────────────────────────
+    async function initCartPage() {
+      await pageInit();
+      
+      if (!AUTH.isLoggedIn()) {
+        showGuestCartState();
+        return;
+      }
+      
+      await fetchServerCart();
     }
 
-    // ── Render cart ──────────────────────────────────────────────────────────
-    function renderCart() {
-      const items = CART.get();
-      const wrap  = document.getElementById('cart-items');
-      const sub   = document.getElementById('cart-subtitle');
+    initCartPage();
+
+    // ── Fetch Cart from Server (SINGLE API CALL — pricing included!) ──────
+    async function fetchServerCart() {
+      const wrap = document.getElementById('cart-items');
+      
+      try {
+        // SINGLE API call — cart endpoint now returns pricing built-in
+        const data = await API.get('/cart');
+        
+        serverCartData = data;
+        serverCartItems = (data.items || []).map(item => ({
+          product_id: item.product_id,
+          name: item.name || 'Product',
+          price: item.unit_price,
+          image: item.image_url || null,
+          slug: item.slug || '',
+          qty: item.quantity,
+          in_stock: item.in_stock,
+          price_changed: item.price_changed,
+          stock: item.stock || 0
+        }));
+
+        renderCartUI();
+        updateNavBadge();
+      } catch (err) {
+        console.error("Cart Fetch Error:", err);
+        wrap.innerHTML = `<div class="empty-state"><p class="form-error">Could not load cart: ${escapeHTML(err.message)}</p></div>`;
+        document.getElementById('summary-card').style.display = 'none';
+      }
+    }
+
+    // ── Render Cart UI ────────────────────────────────────────────────────
+    function renderCartUI() {
+      const items = serverCartItems;
+      const wrap = document.getElementById('cart-items');
+      const sub = document.getElementById('cart-subtitle');
       const sumCard = document.getElementById('summary-card');
       const sumRows = document.getElementById('summary-rows');
-      const layout  = document.getElementById('main-cart-layout');
-      const total = CART.count();
+      const layout = document.getElementById('main-cart-layout');
+      const checkoutBtn = document.getElementById('checkout-btn');
+      
+      const totalCount = items.reduce((sum, item) => sum + item.qty, 0);
+      sub.textContent = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
 
-      sub.textContent = `${total} item${total !== 1 ? 's' : ''}`;
+      // Stock warnings
+      const bannerEl = document.getElementById('stock-warnings');
+      bannerEl.innerHTML = '';
+      let hasCheckoutBlocker = false;
 
+      items.forEach(item => {
+        if (!item.in_stock) {
+          bannerEl.innerHTML += `<div class="stock-banner error"><i class="ri-error-warning-line"></i><span><strong>${escapeHTML(item.name)}</strong> is unavailable. Please remove it to continue.</span></div>`;
+          hasCheckoutBlocker = true;
+        }
+        if (item.price_changed) {
+          bannerEl.innerHTML += `<div class="stock-banner"><i class="ri-information-line"></i><span><strong>${escapeHTML(item.name)}</strong> price has been updated from your last visit.</span></div>`;
+        }
+      });
+      
+      if (serverCartData?.has_unavailable_items) {
+        hasCheckoutBlocker = true;
+      }
+      
+      checkoutBtn.style.pointerEvents = hasCheckoutBlocker ? 'none' : 'auto';
+      checkoutBtn.style.opacity = hasCheckoutBlocker ? '0.5' : '1';
+      checkoutBtn.title = hasCheckoutBlocker ? 'Remove unavailable items to proceed' : '';
+
+      // Empty cart state
       if (!items.length) {
         layout.style.gridTemplateColumns = '1fr';
         sumCard.style.display = 'none';
-        
         wrap.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon"><i class="ri-shopping-bag-line"></i></div>
@@ -203,64 +245,76 @@
         return;
       }
 
-      if(window.innerWidth > 900) {
+      if (window.innerWidth > 900) {
         layout.style.gridTemplateColumns = '1fr 360px';
       }
       sumCard.style.display = 'block';
 
+      // Render cart items
       wrap.innerHTML = '';
       items.forEach(item => wrap.appendChild(makeItemRow(item)));
 
-      const subtotal = CART.total();
-      const shipping = subtotal >= 1499 ? 0 : 99; 
-      const grandTotal = subtotal + shipping;
+      // ── Pricing from cart response (already calculated server-side) ──
+      const subtotal = serverCartData?.subtotal || 0;
+      const shipping = serverCartData?.shipping_cost || 0;
+      const taxAmount = serverCartData?.tax_amount || 0;
+      const taxRate = serverCartData?.tax_rate_pct || 18;
+      const grandTotal = serverCartData?.total_amount || 0;
+      const toFreeShip = serverCartData?.amount_to_free_shipping || 0;
+      const isFreeShipping = serverCartData?.free_shipping_eligible || false;
 
       sumRows.innerHTML = '';
-      [
-        ['Subtotal (Incl. GST)', formatPrice(subtotal)],
-        ['Shipping', shipping === 0 ? 'Free' : formatPrice(shipping)]
-      ].forEach(([label, val]) => {
+      
+      const breakdownItems = [
+        ['Subtotal', formatPrice(subtotal)],
+        [`GST (${taxRate}%)`, formatPrice(taxAmount)],
+        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping]
+      ];
+      
+      breakdownItems.forEach(([label, val, isFree]) => {
         const row = document.createElement('div');
         row.className = 'order-row';
-        const l = document.createElement('span'); l.textContent = label;
-        const v = document.createElement('span'); 
         
-        // Emojis removed, strictly icons now
-        if (val === 'Free') {
+        const l = document.createElement('span');
+        l.textContent = label;
+        
+        const v = document.createElement('span');
+        if (isFree) {
           v.innerHTML = '<i class="ri-truck-line"></i> Free';
           v.style.color = 'var(--success)';
         } else {
           v.textContent = val;
         }
         
-        row.appendChild(l); row.appendChild(v);
+        row.appendChild(l);
+        row.appendChild(v);
         sumRows.appendChild(row);
       });
 
+      // Total
       const totalRow = document.createElement('div');
       totalRow.className = 'order-row total';
-      const tl = document.createElement('span'); tl.textContent = 'Total';
-      const tv = document.createElement('span'); tv.textContent = formatPrice(grandTotal);
-      totalRow.appendChild(tl); totalRow.appendChild(tv);
+      totalRow.innerHTML = `<span>Total</span><span style="color:var(--gold);font-weight:700;">${formatPrice(grandTotal)}</span>`;
       sumRows.appendChild(totalRow);
 
-      if (shipping > 0) {
+      // Free shipping hint
+      if (!isFreeShipping && toFreeShip > 0) {
         const note = document.createElement('p');
         note.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;';
-        note.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(1499 - subtotal)} more for free shipping`;
+        note.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(toFreeShip)} more for free shipping`;
         sumRows.appendChild(note);
       }
     }
 
-    // ── Build item row ───────────────────────────────────────────────────────
+    // ── Build Cart Item Row ───────────────────────────────────────────────
     function makeItemRow(item) {
-      const maxStock   = item.maxStock ?? 99;
-      const isLow      = maxStock > 0 && maxStock <= 5;
-      const isOut      = maxStock === 0;
+      const isUnavailable = !item.in_stock;
+      const isLowStock = item.stock > 0 && item.stock <= 5;
 
       const row = document.createElement('div');
-      row.className = 'cart-item' + (isLow || isOut ? ' stock-warn' : '');
+      row.className = 'cart-item' + (isUnavailable || isLowStock ? ' stock-warn' : '');
 
+      // Image
       const imgWrap = document.createElement('div');
       imgWrap.className = 'cart-item-img';
       if (item.image) {
@@ -272,6 +326,7 @@
         imgWrap.innerHTML = '<i class="ri-image-line"></i>';
       }
 
+      // Info
       const info = document.createElement('div');
       info.className = 'cart-item-info';
 
@@ -284,58 +339,83 @@
       unitP.className = 'cart-item-price';
       unitP.textContent = formatPrice(item.price) + ' each';
 
-      if (isOut) {
+      info.appendChild(nameEl);
+      info.appendChild(unitP);
+
+      // Stock/Price pills
+      if (isUnavailable) {
         const pill = document.createElement('span');
         pill.className = 'stock-pill out';
         pill.innerHTML = '<i class="ri-close-circle-line"></i> Out of stock';
-        info.appendChild(nameEl);
-        info.appendChild(unitP);
         info.appendChild(pill);
-      } else if (isLow) {
+      } else if (item.price_changed) {
         const pill = document.createElement('span');
         pill.className = 'stock-pill low';
-        pill.innerHTML = `<i class="ri-error-warning-line"></i> Only ${maxStock} left`;
-        info.appendChild(nameEl);
-        info.appendChild(unitP);
+        pill.innerHTML = '<i class="ri-information-line"></i> Price updated';
         info.appendChild(pill);
-      } else {
-        info.appendChild(nameEl);
-        info.appendChild(unitP);
+      } else if (isLowStock) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill low';
+        pill.innerHTML = `<i class="ri-error-warning-line"></i> Only ${item.stock} left`;
+        info.appendChild(pill);
       }
 
+      // Controls
       const controls = document.createElement('div');
       controls.className = 'cart-item-controls';
 
       const qtyCtrl = document.createElement('div');
       qtyCtrl.className = 'qty-control';
 
+      // Minus
       const minus = document.createElement('button');
       minus.className = 'qty-btn';
       minus.innerHTML = '<i class="ri-subtract-line"></i>';
-      minus.addEventListener('click', () => CART.update(item.id, item.qty - 1));
+      minus.addEventListener('click', async () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        try {
+          if (item.qty <= 1) {
+            await API.delete(`/cart/items/${item.product_id}`);
+            showToast('Item removed', 'info');
+          } else {
+            await API.put(`/cart/items/${item.product_id}`, { quantity: item.qty - 1 });
+          }
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
+        }
+      });
 
+      // Quantity display
       const disp = document.createElement('div');
       disp.className = 'qty-display';
       disp.textContent = item.qty;
 
+      // Plus
       const plus = document.createElement('button');
       plus.className = 'qty-btn';
       plus.innerHTML = '<i class="ri-add-line"></i>';
-      plus.disabled = item.qty >= maxStock;
-      plus.style.opacity = item.qty >= maxStock ? '0.4' : '1';
-      plus.title = item.qty >= maxStock ? `Max ${maxStock} available` : '';
-      plus.addEventListener('click', () => {
-        if (item.qty >= maxStock) {
-          showToast(`Only ${maxStock} in stock`, 'warn');
-          return;
+      plus.addEventListener('click', async () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        try {
+          await API.put(`/cart/items/${item.product_id}`, { quantity: item.qty + 1 });
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
         }
-        CART.update(item.id, item.qty + 1);
       });
 
       qtyCtrl.appendChild(minus);
       qtyCtrl.appendChild(disp);
       qtyCtrl.appendChild(plus);
 
+      // Right side
       const right = document.createElement('div');
       right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:6px;';
 
@@ -346,33 +426,61 @@
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-btn';
       removeBtn.innerHTML = '<i class="ri-delete-bin-line"></i> Remove';
-      removeBtn.addEventListener('click', () => {
-        CART.remove(item.id);
-        showToast('Item removed', 'info');
+      removeBtn.addEventListener('click', async () => {
+        if (isUpdating) return;
+        if (!confirm(`Remove ${item.name} from cart?`)) return;
+        isUpdating = true;
+        try {
+          await API.delete(`/cart/items/${item.product_id}`);
+          showToast('Item removed', 'info');
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
+        }
       });
 
       right.appendChild(subtotalEl);
       right.appendChild(removeBtn);
-
       controls.appendChild(qtyCtrl);
       controls.appendChild(right);
-
       info.appendChild(controls);
       row.appendChild(imgWrap);
       row.appendChild(info);
+      
       return row;
     }
 
+    // ── Nav Badge ─────────────────────────────────────────────────────────
+    function updateNavBadge() {
+      const count = serverCartItems.reduce((sum, item) => sum + item.qty, 0);
+      document.querySelectorAll('[data-cart-count]').forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'flex' : 'none';
+      });
+    }
+
+    // ── Guest State ───────────────────────────────────────────────────────
+    function showGuestCartState() {
+      document.getElementById('main-cart-layout').style.gridTemplateColumns = '1fr';
+      document.getElementById('summary-card').style.display = 'none';
+      document.getElementById('cart-items').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="ri-user-shared-line"></i></div>
+          <h3>Sign in to view your cart</h3>
+          <p style="margin-bottom: 24px; color: var(--text-muted);">Access your saved items securely across all devices.</p>
+          <a href="/login.html" class="btn btn-primary">Log In to Account</a>
+        </div>
+      `;
+    }
+
+    // Responsive
     window.addEventListener('resize', () => {
-        const layout = document.getElementById('main-cart-layout');
-        const items = CART.get();
-        if(items.length > 0) {
-            if(window.innerWidth > 900) {
-                layout.style.gridTemplateColumns = '1fr 360px';
-            } else {
-                layout.style.gridTemplateColumns = '1fr';
-            }
-        }
+      const layout = document.getElementById('main-cart-layout');
+      if (serverCartItems.length > 0) {
+        layout.style.gridTemplateColumns = window.innerWidth > 900 ? '1fr 360px' : '1fr';
+      }
     });
   </script>
 </body>

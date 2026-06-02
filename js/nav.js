@@ -5,13 +5,14 @@
    - enableNotifications() function removed
    - bannerHTML variable removed (home + cart dono)
    - _bindEvents() se banner show logic removed
+   - ADDED: Safe checks for CART and AUTH to prevent "is not defined" errors.
    ============================================================ */
 
 const NAV = {
   inject() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
-
+    
     // ── FIX: String concatenation, no bannerHTML ──
     nav.innerHTML =
       `<div class="nav-inner">
@@ -58,15 +59,23 @@ const NAV = {
         <a href="/login.html" data-guest>Login</a>
         <button id="logout-btn-mobile" class="logout-btn" data-authed style="display:none">Sign out</button>
       </div>`;
-
+    
     this._bindEvents();
-    CART.init();
-    AUTH.updateNavUI();
+    
+    // SAFE CHECK: Agar CART exist karta hai tabhi init call hoga
+    if (typeof CART !== 'undefined') {
+      CART.init();
+    }
+    
+    // SAFE CHECK: Agar AUTH exist karta hai tabhi UI update hogi
+    if (typeof AUTH !== 'undefined') {
+      AUTH.updateNavUI();
+    }
   },
-
+  
   _bindEvents() {
     // ── Mobile menu toggle ────────────────────────────────
-    const toggle     = document.querySelector('.mobile-toggle');
+    const toggle = document.querySelector('.mobile-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');
     toggle?.addEventListener('click', () => {
       mobileMenu?.classList.toggle('open');
@@ -75,30 +84,44 @@ const NAV = {
     document.querySelectorAll('.mobile-menu a').forEach(a => {
       a.addEventListener('click', () => mobileMenu?.classList.remove('open'));
     });
-
+    
     // ── User dropdown ─────────────────────────────────────
     const uToggle = document.querySelector('.user-menu-toggle');
-    const uDrop   = document.querySelector('.user-dropdown');
+    const uDrop = document.querySelector('.user-dropdown');
     uToggle?.addEventListener('click', (e) => {
       e.stopPropagation();
       uDrop?.classList.toggle('open');
     });
     document.addEventListener('click', () => uDrop?.classList.remove('open'));
-
+    
     // ── Logout ────────────────────────────────────────────
     async function doLogout() {
       try { await API.logout(); } catch {}
-      AUTH.clearTokens();
-      CART.clear();
+      
+      // SAFE CHECK
+      if (typeof AUTH !== 'undefined') {
+        AUTH.clearTokens();
+      }
+      
+      // SAFE CHECK
+      if (typeof CART !== 'undefined') {
+        CART.clear();
+      }
+      
       window.location.href = '/index.html';
     }
+    
     document.getElementById('logout-btn')?.addEventListener('click', doLogout);
     document.getElementById('logout-btn-mobile')?.addEventListener('click', doLogout);
-
+    
     // ── Auth events → nav update ──────────────────────────
-    window.addEventListener('auth:login',  () => AUTH.updateNavUI());
-    window.addEventListener('auth:logout', () => AUTH.updateNavUI());
-
+    window.addEventListener('auth:login', () => {
+      if (typeof AUTH !== 'undefined') AUTH.updateNavUI();
+    });
+    window.addEventListener('auth:logout', () => {
+      if (typeof AUTH !== 'undefined') AUTH.updateNavUI();
+    });
+    
     // NOTE: Push notification banner logic removed entirely.
   },
 };
@@ -106,16 +129,19 @@ const NAV = {
 /* ── pageInit — runs on every page ──────────────────────────── */
 async function pageInit(opts = {}) {
   NAV.inject();
-
+  
+  // SAFE CHECK: Agar AUTH file load nahi hui hai toh error na de
+  if (typeof AUTH === 'undefined') return true;
+  
   const cachedProfile = AUTH.getProfile();
   if (cachedProfile) {
     AUTH.setProfile(cachedProfile);
     AUTH.updateNavUI();
   }
-
+  
   try {
     const loggedIn = await AUTH.init();
-
+    
     if (loggedIn) {
       if (!cachedProfile) {
         try {
@@ -135,12 +161,12 @@ async function pageInit(opts = {}) {
         }, 2000);
       }
     }
-
+    
     if (opts.requireAuth && !loggedIn) {
       AUTH.requireAuth();
       return false;
     }
-
+    
     return true;
   } catch (error) {
     console.warn('pageInit auth check failed safely:', error);
