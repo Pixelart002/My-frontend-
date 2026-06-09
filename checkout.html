@@ -173,7 +173,7 @@
     let stripe = null;
     let cardElement = null;
     
-    // Cart data from SINGLE API call (pricing already included)
+    // Cart data from SINGLE API call
     let cartData = null;
 
     // ── Idempotency Key ────────────────────────────────────────────────────
@@ -197,15 +197,27 @@
       sessionStorage.removeItem(IDEM_KEY_STORAGE);
     }
 
-    // ── Init (SINGLE API CALL — cart includes pricing) ────────────────────
+    // ── Cart Badge Update Helper ──────────────────────────────────────────
+    function updateCartBadgeUI(count) {
+      const badges = document.querySelectorAll('.cart-badge');
+      badges.forEach(badge => {
+        if (count > 0) {
+          badge.textContent = count;
+          badge.style.display = 'flex';
+        } else {
+          badge.textContent = '0';
+          badge.style.display = 'none';
+        }
+      });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
       
       try {
-        // SINGLE call — /cart now returns pricing built-in
         cartData = await API.get('/cart');
-        
         const items = cartData?.items || [];
         
         if (!items.length) {
@@ -214,10 +226,12 @@
           return;
         }
 
-        // Check for unavailable items
         if (cartData?.has_unavailable_items) {
           showToast('Some items are unavailable. Please review your cart.', 'warn');
         }
+
+        // Set cart badge on load
+        updateCartBadgeUI(cartData.item_count || 0);
 
         renderOrderSummary();
         await loadAddresses();
@@ -230,7 +244,7 @@
     }
     init();
 
-    // ── Order Summary (data from cart response) ───────────────────────────
+    // ── Order Summary ─────────────────────────────────────────────────────
     function renderOrderSummary() {
       const wrap = document.getElementById('order-items-preview');
       wrap.innerHTML = '';
@@ -276,7 +290,6 @@
         wrap.appendChild(row);
       });
 
-      // Totals from cart response
       const totalsEl = document.getElementById('order-totals');
       totalsEl.innerHTML = '';
       
@@ -468,7 +481,7 @@
       document.getElementById('pay-btn').disabled = !selectedAddressId;
     }
 
-    // ── Place Order ────────────────────────────────────────────────────────
+    // ── Place Order (JIT Flow — No Order ID in Payment Calls) ────────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
@@ -480,20 +493,17 @@
       if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
 
       const idempotencyKey = _getOrCreateIdempotencyKey();
-      showLoader(btn, '🔒 Processing…');
+      showLoader(btn, '🔒 Processing Payment…');
 
       try {
-        const order = await API.createOrder({
-          items: cartData.items.map(i => ({
-            product_id: i.product_id,
-            quantity: i.quantity
-          })),
-          shipping_address_id: selectedAddressId,
-          idempotency_key: idempotencyKey
+        // STEP 1: Create Intent — No order_id sent (order doesn't exist yet)
+        const intentData = await API.post('/payments/create-intent', {
+          idempotency_key: idempotencyKey,
+          shipping_address_id: selectedAddressId
         });
 
+        // STEP 2: Confirm with Stripe
         if (stripe && cardElement) {
-          const intentData = await API.createPaymentIntent(order.id);
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
             intentData.client_secret,
             { payment_method: { card: cardElement } }
@@ -502,21 +512,33 @@
           if (stripeErr) {
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
-            try { await API.notifyPaymentFailed(order.id, intentData.payment_intent_id, stripeErr.message); } catch {}
+            // Notify failure — no order_id, only payment_intent_id
+            try { 
+              await API.post('/payments/notify-failed', { 
+                payment_intent_id: intentData.payment_intent_id, 
+                error_message: stripeErr.message 
+              }); 
+            } catch {}
             hideLoader(btn);
             return;
           }
 
+          // STEP 3: Confirm order on backend only if payment succeeded
           if (paymentIntent.status === 'succeeded') {
-            try { await API.confirmPayment(order.id, paymentIntent.id); } catch (e) { console.warn('Confirm:', e.message); }
+            await API.post('/payments/confirm', {
+              payment_intent_id: paymentIntent.id
+            });
             completeCheckout();
           }
         } else {
-          try { await API.confirmPayment(order.id, 'demo_' + order.id); } catch {}
+          // Demo mode fallback (no Stripe configured)
+          await API.post('/payments/confirm', {
+            payment_intent_id: "demo_" + idempotencyKey
+          });
           completeCheckout();
         }
       } catch (err) {
-        errDiv.textContent = err.message || 'Order failed.';
+        errDiv.textContent = err.message || 'Checkout failed.';
         errDiv.style.display = 'block';
         hideLoader(btn);
       }
@@ -524,7 +546,9 @@
 
     async function completeCheckout() {
       _clearIdempotencyKey();
-      try { await API.delete('/cart'); } catch(e) {}
+      
+      // Clear cart UI state instantly
+      updateCartBadgeUI(0);
       
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
