@@ -12,10 +12,16 @@
   
   <style>
     /* ── UI/UX Base Polish ───────────────────────────── */
-    body { background: var(--bg); }
+    body { background: var(--bg); margin: 0; overflow-x: hidden; }
     .ico { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .ico svg { display: block; }
     
+    /* Custom Scrollbar for Admin Panel */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
     /* ── Admin shell ─────────────────────────────────── */
     .admin-wrap {
       display: grid;
@@ -166,7 +172,7 @@
     .modal-close:hover { color: var(--error); border-color: var(--error); background: var(--error-dim); }
     
     .modal-bd-inner { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
-    .modal-ft { display: flex; gap: 12px; justify-content: flex-end; padding: 20px 28px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .modal-ft { display: flex; gap: 12px; justify-content: flex-end; padding: 20px 28px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); position: sticky; bottom: 0; backdrop-filter: blur(10px); }
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     
     /* ── Image drop zone ─────────────────────────────── */
@@ -224,10 +230,8 @@
   <div class="page-wrapper">
     <div class="admin-wrap">
       
-      <!-- Mobile Overlay -->
       <div class="mobile-sidebar-overlay" onclick="toggleMobileSidebar()"></div>
       
-      <!-- Sidebar -->
       <aside class="admin-sidebar" id="admin-sidebar">
         <div class="sidebar-section">
           <div class="sidebar-label">Overview</div>
@@ -279,15 +283,12 @@
         </div>
       </aside>
       
-      <!-- Main Content -->
       <main class="admin-main">
         
-        <!-- Mobile Header Toggle -->
         <button class="mobile-nav-toggle" onclick="toggleMobileSidebar()" style="margin-bottom: 20px;">
           <i class="ri-menu-4-line"></i> Admin Menu
         </button>
 
-        <!-- DASHBOARD PANEL -->
         <div id="panel-dashboard" class="admin-panel active">
           <div class="admin-header">
             <div>
@@ -369,7 +370,6 @@
           </div>
         </div>
         
-        <!-- PRODUCTS PANEL -->
         <div id="panel-products" class="admin-panel">
           <div class="admin-header">
             <div>
@@ -392,7 +392,7 @@
             <div class="table-toolbar">
               <div class="t-search">
                 <i class="ri-search-line"></i>
-                <input type="text" placeholder="Search products…" id="prod-search" oninput="filterProducts(this.value)">
+                <input type="text" placeholder="Search products…" id="prod-search" oninput="handleProdSearch(this.value)">
               </div>
               <select class="t-select" id="prod-cat-f" onchange="filterProducts(document.getElementById('prod-search').value)">
                 <option value="">All Categories</option>
@@ -424,7 +424,6 @@
           </div>
         </div>
         
-        <!-- CATEGORIES PANEL -->
         <div id="panel-categories" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Categories</div>
@@ -447,7 +446,6 @@
           </div>
         </div>
         
-        <!-- INVENTORY PANEL -->
         <div id="panel-inventory" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Inventory</div>
@@ -456,7 +454,7 @@
           <div class="hint-bar"><i class="ri-lightbulb-flash-line" style="font-size:18px;"></i> Click any stock number to edit inline. Press Enter or click the check button to save.</div>
           <div class="admin-table-wrap">
             <div class="table-toolbar">
-              <div class="t-search" style="max-width:240px;"><i class="ri-search-line"></i><input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)"></div>
+              <div class="t-search" style="max-width:240px;"><i class="ri-search-line"></i><input type="text" placeholder="Filter products…" id="inv-search" oninput="handleInvSearch(this.value)"></div>
               <select class="t-select" id="inv-sf" onchange="filterInv(document.getElementById('inv-search').value)">
                 <option value="">All Stock</option>
                 <option value="out">Out of Stock</option>
@@ -482,7 +480,6 @@
           </div>
         </div>
         
-        <!-- ORDERS PANEL -->
         <div id="panel-orders" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Orders</div>
@@ -519,11 +516,10 @@
           </div>
         </div>
         
-        <!-- USERS PANEL -->
         <div id="panel-users" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">Users</div>
-            <div class="t-search"><i class="ri-search-line"></i><input type="text" placeholder="Search by email…" id="user-search" oninput="filterUsers(this.value)"></div>
+            <div class="t-search"><i class="ri-search-line"></i><input type="text" placeholder="Search by email…" id="user-search" oninput="handleUserSearch(this.value)"></div>
           </div>
           <div class="admin-table-wrap">
             <div class="table-responsive">
@@ -547,7 +543,6 @@
           </div>
         </div>
 
-        <!-- SETTINGS PANEL -->
         <div id="panel-settings" class="admin-panel">
           <div class="admin-header">
             <div class="admin-title">System Settings</div>
@@ -583,8 +578,7 @@
     </div>
   </div>
   
-  <!-- PRODUCT MODAL -->
-  <div id="modal-product" class="modal-bd" onclick="closeModal('modal-product',event)">
+  <div id="modal-product" class="modal-bd">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
         <div class="modal-title" id="pm-title">Add Product</div>
@@ -597,7 +591,7 @@
           <div class="form-group"><label class="form-label">Slug *</label><input type="text" id="pm-slug" class="form-input" maxlength="280"></div>
         </div>
         <div class="form-group"><label class="form-label">Short Description</label><input type="text" id="pm-sdesc" class="form-input" maxlength="255"></div>
-        <div class="form-group"><label class="form-label">Full Description</label><textarea id="pm-desc" class="form-input" rows="3" style="resize:vertical;"></textarea></div>
+        <div class="form-group"><label class="form-label">Full Description</label><textarea id="pm-desc" class="form-input" rows="4" style="resize:vertical;"></textarea></div>
         <div class="g2">
           <div class="form-group"><label class="form-label">Price *</label><input type="number" id="pm-price" class="form-input" min="0" step="0.01"></div>
           <div class="form-group"><label class="form-label">Compare Price</label><input type="number" id="pm-compare" class="form-input" min="0" step="0.01"></div>
@@ -629,7 +623,7 @@
           <div id="pm-img-previews" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;"></div>
         </div>
         
-        <label class="filter-option" style="gap:10px;"><input type="checkbox" id="pm-active" checked style="accent-color:var(--gold); width:16px; height:16px;">Active — visible in shop</label>
+        <label class="filter-option" style="gap:10px; margin-top:10px;"><input type="checkbox" id="pm-active" checked style="accent-color:var(--gold); width:16px; height:16px;">Active — visible in shop</label>
       </div>
       <div class="modal-ft">
         <button class="btn btn-outline" style="padding:10px 20px;" onclick="closeModal('modal-product')">Cancel</button>
@@ -638,7 +632,6 @@
     </div>
   </div>
   
-  <!-- CATEGORY MODAL -->
   <div id="modal-cat" class="modal-bd" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -657,7 +650,6 @@
     </div>
   </div>
   
-  <!-- ORDER MODAL -->
   <div id="modal-order" class="modal-bd" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-hd">
@@ -693,7 +685,7 @@
   
   <script>
     /* ══════════════════════════════════════
-       STATE
+       STATE & HELPERS
     ══════════════════════════════════════ */
     let allProducts = [];
     let allCategories = [];
@@ -706,9 +698,23 @@
     
     let pProdPage = 1, pOrderPage = 1, pUserPage = 1;
     const PS = 20;
+
+    // 🔥 FIX: Debounce helper for Search inputs
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => { clearTimeout(timeout); func(...args); };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    const handleProdSearch = debounce((val) => filterProducts(val), 300);
+    const handleInvSearch = debounce((val) => filterInv(val), 300);
+    const handleUserSearch = debounce((val) => filterUsers(val), 300);
     
     /* ══════════════════════════════════════
-       ADMIN API (100% Server Integrated via api.js)
+       ADMIN API
     ══════════════════════════════════════ */
     const ADMIN = {
       getProducts: (p = 1) => API.get(`/products?page=${p}&page_size=${PS}`),
@@ -716,10 +722,22 @@
       updateProduct: (id, d) => API.patch(`/products/${id}`, d),
       deleteProduct: id => API.delete(`/products/${id}`),
       
-      uploadImages: (id, files) => {
+      // 🔥 FIX: Critical bug fixed. FormData cannot be sent with 'application/json' Content-Type
+      uploadImages: async (id, files) => {
         const fd = new FormData();
         Array.from(files).forEach(file => fd.append('files', file)); 
-        return API.post(`/products/${id}/images`, fd);
+        
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`${CONFIG.API_URL}/products/${id}/images`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }, // NO content-type here, browser sets boundary
+          body: fd
+        });
+        if (!res.ok) {
+           const err = await res.json().catch(()=>({}));
+           throw new Error(err.detail || 'Image upload failed');
+        }
+        return res.json();
       },
       
       getCategories: () => API.get('/categories'),
@@ -732,9 +750,9 @@
       getUsers: (p = 1) => API.get(`/users/?page=${p}&page_size=${PS}`), 
       updateUser: (id, d) => API.patch(`/users/${id}`, d),
 
-      // Pricing / Settings
       getPricingConfig: () => API.get('/pricing/config'),
-      updatePricingConfig: (d) => API.patch('/pricing/config', d) // Make sure this endpoint exists in FastAPI backend
+      // Important: Ensure your backend has a PUT or PATCH /pricing/config route
+      updatePricingConfig: (d) => API.put('/pricing/config', d) 
     };
     
     /* ══════════════════════════════════════
@@ -828,45 +846,45 @@
     /* ══════════════════════════════════════
        SETTINGS (TAX / SHIPPING)
     ══════════════════════════════════════ */
-  async function loadSettings() {
-  try {
-    const config = await ADMIN.getPricingConfig();
-    
-    // Use the correct field names from the API response
-    document.getElementById('set-tax-rate').value = config.tax_rate || 8;
-    document.getElementById('set-shipping-cost').value = config.shipping_flat || 99;
-    document.getElementById('set-shipping-threshold').value = config.shipping_threshold || 1499;
-  } catch (e) {
-    console.warn("Could not fetch settings, using defaults", e);
-    // Fallback to defaults if API fails
-    document.getElementById('set-tax-rate').value = 8;
-    document.getElementById('set-shipping-cost').value = 99;
-    document.getElementById('set-shipping-threshold').value = 1499;
-  }
-}
-async function saveSettings() {
-  const btn = document.getElementById('save-settings-btn');
-  showLoader(btn, 'Saving...');
-  try {
-    const payload = {
-      tax_rate: parseFloat(document.getElementById('set-tax-rate').value),
-      shipping_flat: parseFloat(document.getElementById('set-shipping-cost').value),
-      shipping_threshold: parseFloat(document.getElementById('set-shipping-threshold').value),
-      currency: "INR",  // Keep the existing currency
-      tax_enabled: true,
-      shipping_enabled: true
-    };
-    
-    // Use PUT method to match your backend endpoint
-    await API.put('/pricing/config', payload);
-    
-    showToast('Settings saved successfully!', 'success');
-  } catch (e) {
-    showToast('Update failed: ' + e.message, 'error');
-  } finally {
-    hideLoader(btn);
-  }
-}
+    async function loadSettings() {
+      try {
+        const config = await ADMIN.getPricingConfig();
+        document.getElementById('set-tax-rate').value = config.tax_rate || 8;
+        document.getElementById('set-shipping-cost').value = config.shipping_flat || 99;
+        document.getElementById('set-shipping-threshold').value = config.shipping_threshold || 1499;
+      } catch (e) {
+        console.warn("Could not fetch settings", e);
+        document.getElementById('set-tax-rate').value = 8;
+        document.getElementById('set-shipping-cost').value = 99;
+        document.getElementById('set-shipping-threshold').value = 1499;
+      }
+    }
+
+    async function saveSettings() {
+      const btn = document.getElementById('save-settings-btn');
+      showLoader(btn, 'Saving...');
+      try {
+        const payload = {
+          tax_rate: parseFloat(document.getElementById('set-tax-rate').value),
+          shipping_flat: parseFloat(document.getElementById('set-shipping-cost').value),
+          shipping_threshold: parseFloat(document.getElementById('set-shipping-threshold').value),
+          currency: "INR",
+          tax_enabled: true,
+          shipping_enabled: true
+        };
+        await ADMIN.updatePricingConfig(payload);
+        showToast('Settings saved successfully!', 'success');
+      } catch (e) {
+        // Fallback info if PUT route is missing in backend
+        if (e.message.includes('404')) {
+           showToast('Backend settings endpoint missing (404).', 'error');
+        } else {
+           showToast('Update failed: ' + e.message, 'error');
+        }
+      } finally {
+        hideLoader(btn);
+      }
+    }
 
 
     /* ══════════════════════════════════════
@@ -1116,7 +1134,7 @@ async function saveSettings() {
           try {
             await ADMIN.uploadImages(saved.id, pendingImages);
           } catch (e) {
-            showToast('Product saved, but some images failed: ' + e.message, 'warn');
+            showToast('Product saved, but images failed: ' + e.message, 'warn');
           }
         }
         
@@ -1215,14 +1233,11 @@ async function saveSettings() {
       const tbody = document.getElementById('inventory-body');
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-dim);"><div class="skeleton" style="height:40px; border-radius:4px; margin-bottom:8px;"></div></td></tr>`;
       try {
-        const first = await ADMIN.getProducts(1);
-        let items = first?.items || [];
-        for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) { 
-          const d = await ADMIN.getProducts(p);
-          items = items.concat(d?.items || []); 
-        }
-        allInventory = items;
-        renderInv(items);
+        // Optimized: Only fetch page 1 for inventory dashboard initial load, 
+        // Real systems should use a backend endpoint that aggregates this.
+        const data = await ADMIN.getProducts(1);
+        allInventory = data?.items || [];
+        renderInv(allInventory);
       } catch (err) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
     }
     
@@ -1245,8 +1260,8 @@ async function saveSettings() {
           <td><span class="sbadge ${sc}">${sl}</span></td>
           <td>
             <div class="stk-edit" id="se-${p.id}" style="display:none;">
-              <input type="number" class="stk-input" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')">
-              <button class="btn-xs bxs" onclick="saveStock('${p.id}')" title="Save"><i class="ri-check-line"></i></button>
+              <input type="number" class="stk-input" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}', this)">
+              <button class="btn-xs bxs" onclick="saveStock('${p.id}', this)" title="Save"><i class="ri-check-line"></i></button>
               <button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})" title="Cancel"><i class="ri-close-line"></i></button>
             </div>
           </td>
@@ -1267,10 +1282,14 @@ async function saveSettings() {
       if (v) v.style.display = ''; 
     }
     
-    async function saveStock(id) {
+    async function saveStock(id, btnEl) {
       const inp = document.getElementById(`si-${id}`);
       const newStock = parseInt(inp.value);
       if (isNaN(newStock) || newStock < 0) { showToast('Invalid value', 'error'); return; }
+      
+      const origText = btnEl.innerHTML;
+      btnEl.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+      
       try {
         await ADMIN.updateProduct(id, { stock: newStock });
         const p = allInventory.find(p => p.id === id);
@@ -1291,7 +1310,11 @@ async function saveSettings() {
           } 
         }
         showToast('Stock updated', 'success');
-      } catch (err) { showToast(err.message, 'error'); }
+      } catch (err) { 
+        showToast(err.message, 'error'); 
+      } finally {
+        btnEl.innerHTML = origText;
+      }
     }
     
     function filterInv(q) {
@@ -1355,7 +1378,10 @@ async function saveSettings() {
       if (items.length) {
         let html = '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">Item Breakdown</div>';
         
-        html += items.map(i => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span>${escapeHTML(i.product_name)} <span style="color:var(--text-dim);">×${i.quantity}</span></span><span class="td-gold">${formatPrice(i.subtotal || (i.price_snapshot * i.quantity))}</span></div>`).join('');
+        html += items.map(i => {
+           const lTotal = i.subtotal || (i.price_snapshot * i.quantity);
+           return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span>${escapeHTML(i.product_name)} <span style="color:var(--text-dim);">×${i.quantity}</span></span><span class="td-gold">${formatPrice(lTotal)}</span></div>`;
+        }).join('');
         
         const subtotal = o.subtotal || items.reduce((sum, i) => sum + (i.subtotal || (i.price_snapshot * i.quantity)), 0);
         const tax = o.tax_amount || 0;
