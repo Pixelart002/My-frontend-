@@ -5,1168 +5,354 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Luviio</title>
-  <link rel="stylesheet" href="/css/luviio.css">
   
-  
-  
-  
-  <link rel="preload" href="/css/luviio.css" as="style">
-  <link rel="preload" href="/css/admin.css" as="style">
-  
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" as="style">
-  
-  <link rel="prefetch" href="/js/config.js">
-  <link rel="prefetch" href="/js/utils.js">
-  <link rel="prefetch" href="/js/auth.js">
-  <link rel="prefetch" href="/js/api.js">
-  <link rel="prefetch" href="/js/cart.js">
-  <link rel="prefetch" href="/js/nav.js">
-  <link rel="prefetch" href="/js/admin.js">
-  <link rel="prefetch" href="/js/validation.js">
-  <link rel="prefetch" href="/js/formatting.js">
-  
-  <link rel="prefetch" href="/images/logo.png">
-  <link rel="prefetch" href="/images/logo-dark.png">
-  <link rel="prefetch" href="/images/default-product.jpg">
-  <link rel="prefetch" href="/images/avatar-placeholder.jpg">
-  <link rel="prefetch" href="/images/no-image.jpg">
-  <link rel="prefetch" href="/favicon.ico">
-  <link rel="prefetch" href="/apple-touch-icon.png">
-  
-  <link rel="prefetch" href="/api/dashboard/stats">
-  <link rel="prefetch" href="/api/products?page=1&page_size=20">
-  <link rel="prefetch" href="/api/categories">
-  <link rel="prefetch" href="/api/orders?page=1&page_size=20">
-  <link rel="prefetch" href="/api/users?page=1&page_size=20">
-  <link rel="prefetch" href="/api/dashboard/recent-orders?limit=5">
-  <link rel="prefetch" href="/api/dashboard/low-stock">
-  
-  <link rel="prefetch" href="/api/products?page=2&page_size=20">
-  <link rel="prefetch" href="/api/products?page=3&page_size=20">
-  <link rel="prefetch" href="/api/products/count">
-  <link rel="prefetch" href="/api/products/featured">
-  <link rel="prefetch" href="/api/products/recent">
-  <link rel="prefetch" href="/api/products/top-selling">
-  
-  <link rel="prefetch" href="/api/categories/tree">
-  <link rel="prefetch" href="/api/categories/stats">
-  <link rel="prefetch" href="/api/categories/featured">
-  <link rel="prefetch" href="/api/categories/parents">
-  
-  <link rel="prefetch" href="/api/inventory/low-stock">
-  <link rel="prefetch" href="/api/inventory/out-of-stock">
-  <link rel="prefetch" href="/api/inventory/restock-needed">
-  <link rel="prefetch" href="/api/inventory/audit-log?limit=10">
-  <link rel="prefetch" href="/api/inventory/stock-value">
-  
-  <link rel="prefetch" href="/api/orders/pending">
-  <link rel="prefetch" href="/api/orders/processing">
-  <link rel="prefetch" href="/api/orders/shipped">
-  <link rel="prefetch" href="/api/orders/delivered">
-  <link rel="prefetch" href="/api/orders/cancelled">
-  <link rel="prefetch" href="/api/orders/today">
-  <link rel="prefetch" href="/api/orders/this-week">
-  <link rel="prefetch" href="/api/orders/status-counts">
-  <link rel="prefetch" href="/api/orders/recent?limit=10">
-  <link rel="prefetch" href="/api/orders?page=2&page_size=20">
-  
-  <link rel="prefetch" href="/api/users/new-this-week">
-  <link rel="prefetch" href="/api/users/active">
-  <link rel="prefetch" href="/api/users/inactive">
-  <link rel="prefetch" href="/api/users/admins">
-  <link rel="prefetch" href="/api/users/customers">
-  <link rel="prefetch" href="/api/users/stats">
-  <link rel="prefetch" href="/api/users/activity">
-  <link rel="prefetch" href="/api/users?page=2&page_size=20">
-  
-  <link rel="prefetch" href="/api/reports/sales-today">
-  <link rel="prefetch" href="/api/reports/sales-week">
-  <link rel="prefetch" href="/api/reports/sales-month">
-  <link rel="prefetch" href="/api/reports/sales-year">
-  <link rel="prefetch" href="/api/reports/top-products">
-  <link rel="prefetch" href="/api/reports/top-categories">
-  <link rel="prefetch" href="/api/reports/conversion-rate">
-  <link rel="prefetch" href="/api/reports/revenue">
-  
-  <link rel="prefetch" href="/api/settings/store">
-  <link rel="prefetch" href="/api/settings/shipping">
-  <link rel="prefetch" href="/api/settings/payment">
-  <link rel="prefetch" href="/api/settings/tax">
-  <link rel="prefetch" href="/api/settings/email-templates">
-  
-  <link rel="prefetch" href="/api/notifications/unread">
-  <link rel="prefetch" href="/api/notifications/alerts">
-  <link rel="prefetch" href="/api/admin/messages">
-  
-  <link rel="prefetch" href="/sitemap.xml">
-  <link rel="prefetch" href="/robots.txt">
-  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
+
   <link rel="stylesheet" href="/css/luviio.css">
   <link rel="stylesheet" href="/css/admin.css">
-  
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
-  
-  <style>
-    /* ── SVG Icon helper ─────────────────────────────── */
-    .ico {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .ico svg {
-      display: block;
-    }
-    
-    /* ── Admin shell ─────────────────────────────────── */
-    .admin-wrap {
-      display: grid;
-      grid-template-columns: 230px 1fr;
-      min-height: calc(100vh - var(--nav-h));
-    }
-    
-    /* ── Sidebar ─────────────────────────────────────── */
-    .admin-sidebar {
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 20px 0;
-      position: sticky;
-      top: var(--nav-h);
-      height: calc(100vh - var(--nav-h));
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .sidebar-section {
-      padding: 0 12px;
-      margin-bottom: 20px;
-    }
-    
-    .sidebar-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      padding: 0 10px;
-      margin-bottom: 6px;
-    }
-    
-    .sidebar-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 9px 12px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      color: var(--text-muted);
-      background: none;
-      border: none;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    
-    .sidebar-btn:hover {
-      background: var(--surface-2);
-      color: var(--text);
-    }
-    
-    .sidebar-btn.active {
-      background: var(--gold-dim);
-      color: var(--gold);
-      font-weight: 600;
-    }
-    
-    .sidebar-btn.active svg {
-      stroke: var(--gold);
-    }
-    
-    .sidebar-divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 8px 12px;
-    }
-    
-    .sidebar-live {
-      margin-top: auto;
-      padding: 16px 22px;
-      border-top: 1px solid var(--border);
-    }
-    
-    .live-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 10px;
-    }
-    
-    .live-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-      font-size: 12px;
-    }
-    
-    .live-row-label {
-      color: var(--text-dim);
-    }
-    
-    .live-row-val {
-      color: var(--gold);
-      font-weight: 700;
-      font-family: 'Playfair Display', serif;
-    }
-    
-    /* ── Main ────────────────────────────────────────── */
-    .admin-main {
-      padding: 32px 40px;
-      background: var(--bg);
-    }
-    
-    .admin-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    
-    .admin-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    
-    .admin-subtitle {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    
-    .admin-panel {
-      display: none;
-    }
-    
-    .admin-panel.active {
-      display: block;
-    }
-    
-    /* ── Stats row ───────────────────────────────────── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .stat-card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .stat-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    
-    .stat-card-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius);
-      background: var(--gold-dim);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .stat-card-icon svg {
-      stroke: var(--gold);
-    }
-    
-    .stat-card-val {
-      font-size: 30px;
-      font-weight: 700;
-      color: var(--gold);
-      font-family: 'Playfair Display', serif;
-      line-height: 1;
-    }
-    
-    .stat-card-sub {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-    
-    /* ── Quick Actions ───────────────────────────────── */
-    .quick-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-    
-    .quick-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    
-    .quick-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-    
-    .quick-card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius);
-      background: var(--surface-2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    
-    .quick-card:hover .quick-card-icon {
-      background: var(--gold-dim);
-    }
-    
-    .quick-card:hover .quick-card-icon svg {
-      stroke: var(--gold);
-    }
-    
-    .quick-card-icon svg {
-      stroke: var(--text-dim);
-      transition: stroke 0.2s;
-    }
-    
-    .quick-card-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      transition: color 0.2s;
-    }
-    
-    .quick-card:hover .quick-card-label {
-      color: var(--text);
-    }
-    
-    /* ── Table ───────────────────────────────────────── */
-    .admin-table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-    
-    .table-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    
-    .t-search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 7px 12px;
-      flex: 1;
-      max-width: 280px;
-      transition: border-color 0.2s;
-    }
-    
-    .t-search:focus-within {
-      border-color: var(--gold);
-    }
-    
-    .t-search svg {
-      stroke: var(--text-dim);
-      flex-shrink: 0;
-    }
-    
-    .t-search input {
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 13px;
-      width: 100%;
-    }
-    
-    .t-select {
-      padding: 7px 12px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-muted);
-      font-size: 12px;
-      outline: none;
-      cursor: pointer;
-    }
-    
-    .t-select:focus {
-      border-color: var(--gold);
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    
-    th {
-      text-align: left;
-      padding: 11px 16px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-2);
-      white-space: nowrap;
-    }
-    
-    td {
-      padding: 13px 16px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-muted);
-      vertical-align: middle;
-    }
-    
-    tr:last-child td {
-      border-bottom: none;
-    }
-    
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.015);
-    }
-    
-    .td-primary {
-      color: var(--text);
-      font-weight: 500;
-    }
-    
-    .td-gold {
-      color: var(--gold);
-      font-weight: 700;
-    }
-    
-    .td-dim {
-      color: var(--text-dim);
-      font-size: 12px;
-    }
-    
-    /* ── Action buttons ──────────────────────────────── */
-    .action-btns {
-      display: flex;
-      gap: 5px;
-    }
-    
-    .btn-xs {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    
-    .btn-xs svg {
-      flex-shrink: 0;
-    }
-    
-    .bxp {
-      background: var(--gold-dim);
-      color: var(--gold);
-    }
-    
-    .bxp:hover {
-      background: var(--gold);
-      color: #000;
-    }
-    
-    .bxp:hover svg {
-      stroke: #000;
-    }
-    
-    .bxd {
-      background: var(--error-dim);
-      color: var(--error);
-    }
-    
-    .bxd:hover {
-      background: var(--error);
-      color: #fff;
-    }
-    
-    .bxd:hover svg {
-      stroke: #fff;
-    }
-    
-    .bxo {
-      background: none;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-    
-    .bxo:hover {
-      border-color: var(--gold);
-      color: var(--gold);
-    }
-    
-    .bxs {
-      background: var(--success-dim);
-      color: var(--success);
-    }
-    
-    .bxs:hover {
-      background: var(--success);
-      color: #000;
-    }
-    
-    /* ── Stock badges & Status dots ──────────────────── */
-    .sbadge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    
-    .sb-ok {
-      background: var(--success-dim);
-      color: var(--success);
-    }
-    
-    .sb-low {
-      background: #e0a95222;
-      color: var(--warn);
-    }
-    
-    .sb-out {
-      background: var(--error-dim);
-      color: var(--error);
-    }
-    
-    .status-dot {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    
-    .status-dot::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    
-    .status-dot.active::before {
-      background: var(--success);
-    }
-    
-    .status-dot.inactive::before {
-      background: var(--error);
-    }
-    
-    .status-dot.active {
-      color: var(--success);
-    }
-    
-    .status-dot.inactive {
-      color: var(--error);
-    }
-    
-    /* ── Bulk bar & Footer ───────────────────────────── */
-    .bulk-bar {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 16px;
-      background: var(--gold-dim);
-      border: 1px solid var(--gold);
-      border-radius: var(--radius);
-      margin-bottom: 10px;
-      font-size: 13px;
-    }
-    
-    .bulk-bar.visible {
-      display: flex;
-    }
-    
-    .bulk-bar-label {
-      color: var(--gold);
-      font-weight: 600;
-      flex: 1;
-    }
-    
-    .table-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 11px 18px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-    
-    /* ── Modal ───────────────────────────────────────── */
-    .modal-bd {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.72);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      backdrop-filter: blur(4px);
-    }
-    
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    
-    .modal-hd {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--surface);
-      z-index: 1;
-    }
-    
-    .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 700;
-    }
-    
-    .modal-close {
-      background: none;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      border-radius: 6px;
-      transition: all 0.15s;
-    }
-    
-    .modal-close:hover {
-      color: var(--text);
-      background: var(--surface-2);
-    }
-    
-    .modal-bd-inner {
-      padding: 22px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .modal-ft {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      padding: 16px 24px;
-      border-top: 1px solid var(--border);
-    }
-    
-    .g2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    
-    /* ── Image drop zone & Multiple Previews ─────────── */
-    .drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .drop-zone:hover {
-      border-color: var(--gold);
-    }
-    
-    .drop-zone.over {
-      border-color: var(--gold);
-      background: var(--gold-dim);
-    }
-    
-    .drop-zone-txt {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-    
-    /* New styles for multiple images */
-    .img-preview-wrap {
-      position: relative;
-      width: 68px;
-      height: 84px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      background: var(--surface-2);
-    }
-    
-    .img-preview-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .img-remove-btn {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: rgba(0, 0, 0, 0.65);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1;
-      backdrop-filter: blur(2px);
-    }
-    
-    .img-remove-btn:hover {
-      background: var(--error);
-    }
-    
-    /* ── Inventory inline ────────────────────────────── */
-    .stk-input {
-      width: 72px;
-      padding: 5px 8px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 12px;
-      text-align: center;
-      outline: none;
-    }
-    
-    .stk-input:focus {
-      border-color: var(--gold);
-    }
-    
-    .stk-edit {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    
-    .hint-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 16px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    
-    @media(max-width:1100px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: 'var(--gold, #d4af37)',
+            'gold-dim': 'var(--gold-dim, #d4af3722)',
+            surface: 'var(--surface, #1e1e1e)',
+            'surface-2': 'var(--surface-2, #2a2a2a)',
+            border: 'var(--border, #333333)',
+            'border-light': 'var(--border-light, #444444)',
+            text: 'var(--text, #eeeeee)',
+            'text-muted': 'var(--text-muted, #aaaaaa)',
+            'text-dim': 'var(--text-dim, #777777)',
+            bg: 'var(--bg, #121212)',
+            success: 'var(--success, #28a745)',
+            'success-dim': 'var(--success-dim, #28a74522)',
+            error: 'var(--error, #dc3545)',
+            'error-dim': 'var(--error-dim, #dc354522)',
+            warn: 'var(--warn, #ffc107)'
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+          }
+        }
       }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer components {
+      /* Layout & Shell */
+      .admin-wrap { @apply grid grid-cols-[230px_1fr] min-h-[calc(100vh-var(--nav-h))] max-md:grid-cols-1; }
+      .admin-sidebar { @apply bg-surface border-r border-border py-5 sticky top-[var(--nav-h)] h-[calc(100vh-var(--nav-h))] overflow-y-auto flex flex-col max-md:hidden; }
+      .admin-main { @apply p-6 lg:p-10 bg-bg min-w-0; } /* Added min-w-0 to prevent horizontal grid blowout */
       
-      .quick-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    @media(max-width:900px) {
-      .admin-wrap {
-        grid-template-columns: 180px 1fr;
-      }
+      /* Sidebar */
+      .sidebar-label { @apply text-[10px] font-bold tracking-[2px] uppercase text-text-dim px-2.5 mb-1.5; }
+      .sidebar-btn { @apply flex items-center gap-2.5 w-full py-2 px-3 rounded-md text-[13px] text-text-muted hover:bg-surface-2 hover:text-text transition-colors text-left cursor-pointer; }
+      .sidebar-btn.active { @apply bg-gold-dim text-gold font-semibold; }
       
-      .admin-main {
-        padding: 20px 24px;
-      }
-    }
-    
-    @media(max-width:768px) {
-      .admin-sidebar {
-        display: none;
-      }
+      /* Typography & Headers */
+      .admin-title { @apply font-serif text-[26px] font-bold text-text; }
       
-      .admin-wrap {
-        grid-template-columns: 1fr;
-      }
+      /* Stats & Cards */
+      .stats-grid { @apply grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8; }
+      .stat-card { @apply bg-surface border border-border rounded-xl p-5 flex flex-col gap-2; }
+      .stat-card-icon { @apply w-8 h-8 rounded bg-gold-dim text-gold flex items-center justify-center text-lg; }
+      .quick-grid { @apply grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8; }
+      .quick-card { @apply bg-surface border border-border rounded-xl p-5 cursor-pointer transition-all hover:border-gold hover:-translate-y-0.5 shadow-sm flex items-center gap-3.5; }
+      .quick-card-icon { @apply w-10 h-10 rounded bg-surface-2 flex items-center justify-center shrink-0 transition-colors text-text-dim text-xl; }
+      .quick-card:hover .quick-card-icon { @apply bg-gold-dim text-gold; }
+
+      /* Tables & Toolbar */
+      .admin-table-wrap { @apply bg-surface border border-border rounded-xl overflow-hidden flex flex-col; }
+      .table-toolbar { @apply flex items-center gap-2.5 p-4 border-b border-border flex-wrap; }
+      .t-search { @apply flex items-center gap-2 bg-surface-2 border border-border rounded-md px-3 py-1.5 flex-1 max-w-[280px] focus-within:border-gold transition-colors text-text-dim; }
+      .t-search input { @apply bg-transparent border-none outline-none text-text text-[13px] w-full min-w-0; }
+      .t-select { @apply px-3 py-1.5 bg-surface-2 border border-border rounded-md text-text-muted text-xs outline-none cursor-pointer focus:border-gold; }
+      
+      th { @apply text-left px-4 py-3 text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim border-b border-border bg-surface-2 whitespace-nowrap; }
+      td { @apply px-4 py-3 border-b border-border text-text-muted align-middle transition-colors group-hover:bg-white/5; }
+      tr:last-child td { @apply border-b-0; }
+      .td-primary { @apply text-text font-medium; }
+      .td-gold { @apply text-gold font-bold; }
+      .td-dim { @apply text-text-dim text-xs; }
+
+      /* Buttons & Badges */
+      .btn-xs { @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold tracking-[0.3px] rounded-md border-none cursor-pointer transition-colors whitespace-nowrap; }
+      .bxp { @apply bg-gold-dim text-gold hover:bg-gold hover:text-black; }
+      .bxd { @apply bg-error-dim text-error hover:bg-error hover:text-white; }
+      .bxo { @apply bg-transparent text-text-muted border border-border hover:border-gold hover:text-gold; }
+      .bxs { @apply bg-success-dim text-success hover:bg-success hover:text-black; }
+
+      .sbadge { @apply inline-block px-2 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap; }
+      .sb-ok { @apply bg-success-dim text-success; }
+      .sb-low { @apply bg-[#e0a95222] text-warn; }
+      .sb-out { @apply bg-error-dim text-error; }
+
+      .status-dot { @apply inline-flex items-center gap-1.5 text-xs font-bold whitespace-nowrap; }
+      .status-dot::before { content: ''; @apply w-1.5 h-1.5 rounded-full inline-block shrink-0; }
+      .status-dot.active::before { @apply bg-success; }
+      .status-dot.inactive::before { @apply bg-error; }
+      .status-dot.active { @apply text-success; }
+      .status-dot.inactive { @apply text-error; }
+
+      /* Modals & Forms */
+      .modal-bd { @apply fixed inset-0 bg-black/70 z-[2000] flex items-center justify-center p-6 backdrop-blur-sm; }
+      .modal { @apply bg-surface border border-border rounded-xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto; }
+      .form-group { @apply mb-4; }
+      .form-label { @apply block text-xs font-bold text-text-dim mb-1.5 uppercase tracking-wide; }
+      .form-input { @apply w-full bg-surface-2 border border-border rounded-md px-3 py-2 text-sm text-text focus:outline-none focus:border-gold transition-colors; }
+      
+      .drop-zone { @apply border-2 border-dashed border-border rounded-md p-7 text-center cursor-pointer transition-colors hover:border-gold; }
+      .drop-zone.over { @apply border-gold bg-gold-dim; }
     }
   </style>
 </head>
 
-<body>
+<body class="bg-bg text-text text-[13px] antialiased overflow-x-hidden">
   <nav id="main-nav"></nav>
   
   <div class="page-wrapper">
     <div class="admin-wrap">
       
       <aside class="admin-sidebar">
-        <div class="sidebar-section">
+        <div class="px-3 mb-5">
           <div class="sidebar-label">Overview</div>
           <button class="sidebar-btn active" onclick="showPanel('dashboard')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-            Dashboard
+            <i class="ri-dashboard-line text-lg"></i> Dashboard
           </button>
         </div>
         
-        <div class="sidebar-section">
+        <div class="px-3 mb-5">
           <div class="sidebar-label">Catalogue</div>
           <button class="sidebar-btn" onclick="showPanel('products')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-              <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-            </svg>
-            Products
+            <i class="ri-price-tag-3-line text-lg"></i> Products
           </button>
           <button class="sidebar-btn" onclick="showPanel('categories')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-            </svg>
-            Categories
+            <i class="ri-folder-2-line text-lg"></i> Categories
           </button>
           <button class="sidebar-btn" onclick="showPanel('inventory')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-              <line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
-            Inventory
+            <i class="ri-archive-line text-lg"></i> Inventory
           </button>
         </div>
         
-        <hr class="sidebar-divider">
+        <hr class="border-t border-border mx-3 my-2">
         
-        <div class="sidebar-section">
+        <div class="px-3 mb-5">
           <div class="sidebar-label">Commerce</div>
           <button class="sidebar-btn" onclick="showPanel('orders')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 01-8 0" />
-            </svg>
-            Orders
+            <i class="ri-shopping-cart-2-line text-lg"></i> Orders
           </button>
           <button class="sidebar-btn" onclick="showPanel('users')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87" />
-              <path d="M16 3.13a4 4 0 010 7.75" />
-            </svg>
-            Users
+            <i class="ri-group-line text-lg"></i> Users
           </button>
         </div>
         
-        <div class="sidebar-live">
-          <div class="live-label">Live Stats</div>
-          <div class="live-row"><span class="live-row-label">Products</span><span class="live-row-val" id="sb-products">—</span></div>
-          <div class="live-row"><span class="live-row-label">Orders</span><span class="live-row-val" id="sb-orders">—</span></div>
-          <div class="live-row"><span class="live-row-label">Pending</span><span class="live-row-val" id="sb-pending" style="color:var(--warn)">—</span></div>
-          <div class="live-row"><span class="live-row-label">Users</span><span class="live-row-val" id="sb-users">—</span></div>
+        <div class="mt-auto px-[22px] py-4 border-t border-border">
+          <div class="sidebar-label !px-0 mb-2.5">Live Stats</div>
+          <div class="flex justify-between items-center py-1 text-xs"><span class="text-text-dim">Products</span><span class="text-gold font-bold font-serif" id="sb-products">—</span></div>
+          <div class="flex justify-between items-center py-1 text-xs"><span class="text-text-dim">Orders</span><span class="text-gold font-bold font-serif" id="sb-orders">—</span></div>
+          <div class="flex justify-between items-center py-1 text-xs"><span class="text-text-dim">Pending</span><span class="font-bold font-serif text-warn" id="sb-pending">—</span></div>
+          <div class="flex justify-between items-center py-1 text-xs"><span class="text-text-dim">Users</span><span class="text-gold font-bold font-serif" id="sb-users">—</span></div>
         </div>
       </aside>
       
       <main class="admin-main">
-        <div id="panel-dashboard" class="admin-panel active">
-          <div class="admin-header">
+        
+        <div id="panel-dashboard" class="admin-panel block">
+          <div class="flex items-center justify-between mb-7 flex-wrap gap-3">
             <div>
               <div class="admin-title">Dashboard</div>
-              <div class="admin-subtitle" id="dash-greeting">Welcome back</div>
+              <div class="text-[13px] text-text-muted mt-0.5" id="dash-greeting">Welcome back</div>
             </div>
-            <div style="font-size:12px;color:var(--text-dim);" id="dash-time"></div>
+            <div class="text-xs text-text-dim" id="dash-time"></div>
           </div>
           
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-card-top">
-                <div class="stat-card-label">Products</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                    <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-                  </svg></div>
+              <div class="flex items-center justify-between">
+                <div class="text-[11px] font-bold tracking-[1.5px] uppercase text-text-dim">Products</div>
+                <div class="stat-card-icon"><i class="ri-price-tag-3-line"></i></div>
               </div>
-              <div class="stat-card-val" id="stat-products">—</div>
-              <div class="stat-card-sub">Active listings</div>
+              <div class="text-3xl font-bold text-gold font-serif leading-none mt-1" id="stat-products">—</div>
+              <div class="text-xs text-text-dim mt-1">Active listings</div>
             </div>
             <div class="stat-card">
-              <div class="stat-card-top">
-                <div class="stat-card-label">Total Orders</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 01-8 0" />
-                  </svg></div>
+              <div class="flex items-center justify-between">
+                <div class="text-[11px] font-bold tracking-[1.5px] uppercase text-text-dim">Total Orders</div>
+                <div class="stat-card-icon"><i class="ri-shopping-cart-2-line"></i></div>
               </div>
-              <div class="stat-card-val" id="stat-orders">—</div>
-              <div class="stat-card-sub">All time</div>
+              <div class="text-3xl font-bold text-gold font-serif leading-none mt-1" id="stat-orders">—</div>
+              <div class="text-xs text-text-dim mt-1">All time</div>
             </div>
             <div class="stat-card">
-              <div class="stat-card-top">
-                <div class="stat-card-label">Pending</div>
-                <div class="stat-card-icon" style="background:var(--warn)22;"><svg width="16" height="16" fill="none" stroke="var(--warn)" stroke-width="1.8" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg></div>
+              <div class="flex items-center justify-between">
+                <div class="text-[11px] font-bold tracking-[1.5px] uppercase text-text-dim">Pending</div>
+                <div class="stat-card-icon bg-warn/10 text-warn"><i class="ri-time-line"></i></div>
               </div>
-              <div class="stat-card-val" id="stat-pending" style="color:var(--warn)">—</div>
-              <div class="stat-card-sub">Needs action</div>
+              <div class="text-3xl font-bold text-warn font-serif leading-none mt-1" id="stat-pending">—</div>
+              <div class="text-xs text-text-dim mt-1">Needs action</div>
             </div>
             <div class="stat-card">
-              <div class="stat-card-top">
-                <div class="stat-card-label">Users</div>
-                <div class="stat-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 00-3-3.87" />
-                    <path d="M16 3.13a4 4 0 010 7.75" />
-                  </svg></div>
+              <div class="flex items-center justify-between">
+                <div class="text-[11px] font-bold tracking-[1.5px] uppercase text-text-dim">Users</div>
+                <div class="stat-card-icon"><i class="ri-group-line"></i></div>
               </div>
-              <div class="stat-card-val" id="stat-users">—</div>
-              <div class="stat-card-sub">Registered</div>
+              <div class="text-3xl font-bold text-gold font-serif leading-none mt-1" id="stat-users">—</div>
+              <div class="text-xs text-text-dim mt-1">Registered</div>
             </div>
           </div>
           
-          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">Quick Actions</div>
-          <div class="quick-grid" style="margin-bottom:32px;">
+          <div class="text-[11px] font-bold tracking-[2px] uppercase text-text-dim mb-3">Quick Actions</div>
+          <div class="quick-grid">
             <div class="quick-card" onclick="showPanel('products');openProductModal()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg></div><span class="quick-card-label">Add Product</span>
+              <div class="quick-card-icon"><i class="ri-add-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">Add Product</span>
             </div>
             <div class="quick-card" onclick="showPanel('categories');openCatModal()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-                  <line x1="12" y1="11" x2="12" y2="17" />
-                  <line x1="9" y1="14" x2="15" y2="14" />
-                </svg></div><span class="quick-card-label">Add Category</span>
+              <div class="quick-card-icon"><i class="ri-folder-add-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">Add Category</span>
             </div>
             <div class="quick-card" onclick="showPanel('orders')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 01-8 0" />
-                </svg></div><span class="quick-card-label">View Orders</span>
+              <div class="quick-card-icon"><i class="ri-file-list-3-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">View Orders</span>
             </div>
             <div class="quick-card" onclick="showPanel('inventory')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg></div><span class="quick-card-label">Update Stock</span>
+              <div class="quick-card-icon"><i class="ri-archive-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">Update Stock</span>
             </div>
             <div class="quick-card" onclick="showPanel('users')">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 00-3-3.87" />
-                  <path d="M16 3.13a4 4 0 010 7.75" />
-                </svg></div><span class="quick-card-label">Manage Users</span>
+              <div class="quick-card-icon"><i class="ri-user-settings-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">Manage Users</span>
             </div>
             <div class="quick-card" onclick="loadDashboard()">
-              <div class="quick-card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-                </svg></div><span class="quick-card-label">Refresh Stats</span>
+              <div class="quick-card-icon"><i class="ri-refresh-line"></i></div>
+              <span class="text-[13px] font-semibold text-text-muted group-hover:text-text">Refresh Stats</span>
             </div>
           </div>
           
-          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">Recent Orders</div>
+          <div class="text-[11px] font-bold tracking-[2px] uppercase text-text-dim mb-3">Recent Orders</div>
           <div class="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody id="dash-orders-body">
-                <tr>
-                  <td colspan="5" style="text-align:center;padding:32px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-orders-body" class="group">
+                  <tr><td colspan="5" class="text-center p-8 text-text-dim">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         
-        <div id="panel-products" class="admin-panel">
-          <div class="admin-header">
+        <div id="panel-products" class="admin-panel hidden">
+          <div class="flex items-center justify-between mb-7">
             <div>
               <div class="admin-title">Products</div>
-              <div class="admin-subtitle" id="prod-subtitle"></div>
+              <div class="text-[13px] text-text-muted mt-0.5" id="prod-subtitle"></div>
             </div>
-            <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openProductModal()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg> Add Product
+            <button class="bg-gold text-black font-semibold rounded-md px-5 py-2.5 flex items-center gap-2 hover:bg-yellow-500 transition" onclick="openProductModal()">
+              <i class="ri-add-line"></i> Add Product
             </button>
           </div>
           
-          <div id="prod-bulk-bar" class="bulk-bar">
-            <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24">
-              <polyline points="9 11 12 14 22 4" />
-              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-            </svg>
-            <span class="bulk-bar-label" id="prod-bulk-label">0 selected</span>
-            <button class="btn-xs bxd" onclick="bulkDeleteProducts()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-              </svg> Delete Selected</button>
+          <div id="prod-bulk-bar" class="hidden items-center gap-2.5 px-4 py-2 bg-gold-dim border border-gold rounded-md mb-2.5 text-[13px]">
+            <i class="ri-checkbox-multiple-line text-gold text-lg"></i>
+            <span class="text-gold font-semibold flex-1" id="prod-bulk-label">0 selected</span>
+            <button class="btn-xs bxd" onclick="bulkDeleteProducts()"><i class="ri-delete-bin-line"></i> Delete Selected</button>
             <button class="btn-xs bxo" onclick="clearProdSel()">Clear</button>
           </div>
           
           <div class="admin-table-wrap">
             <div class="table-toolbar">
               <div class="t-search">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
+                <i class="ri-search-line"></i>
                 <input type="text" placeholder="Search products…" id="prod-search" oninput="filterProducts(this.value)">
               </div>
               <select class="t-select" id="prod-cat-f" onchange="filterProducts(document.getElementById('prod-search').value)">
                 <option value="">All Categories</option>
               </select>
-              <div style="margin-left:auto;" id="prod-count"></div>
+              <div class="ml-auto text-xs text-text-muted" id="prod-count"></div>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:36px;"><input type="checkbox" id="prod-chk-all" style="accent-color:var(--gold)" onchange="toggleAllProds(this.checked)"></th>
-                  <th>Product</th>
-                  <th>SKU</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="products-body">
-                <tr>
-                  <td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="table-footer"><span id="prod-info"></span>
-              <div class="pagination" id="prod-pages" style="margin:0;gap:4px;"></div>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th class="w-9"><input type="checkbox" id="prod-chk-all" class="accent-gold" onchange="toggleAllProds(this.checked)"></th>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="products-body" class="group">
+                  <tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex items-center justify-between px-4 py-2.5 border-t border-border text-xs text-text-dim">
+              <span id="prod-info"></span>
+              <div class="flex gap-1 m-0" id="prod-pages"></div>
             </div>
           </div>
         </div>
         
-        <div id="panel-categories" class="admin-panel">
-          <div class="admin-header">
+        <div id="panel-categories" class="admin-panel hidden">
+          <div class="flex items-center justify-between mb-7">
             <div class="admin-title">Categories</div>
-            <button class="btn btn-primary" style="padding:10px 20px;gap:8px;" onclick="openCatModal()">Add Category</button>
+            <button class="bg-gold text-black font-semibold rounded-md px-5 py-2.5 flex items-center gap-2 hover:bg-yellow-500 transition" onclick="openCatModal()">
+              <i class="ri-add-line"></i> Add Category
+            </button>
           </div>
           <div class="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Slug</th>
-                  <th>Description</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="categories-body"></tbody>
-            </table>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-body" class="group"></tbody>
+              </table>
+            </div>
           </div>
         </div>
         
-        <div id="panel-inventory" class="admin-panel">
-          <div class="admin-header">
-            <div class="admin-title">Inventory</div><button class="btn btn-outline" style="padding:10px 18px;gap:8px;" onclick="loadInventory()">Refresh</button>
+        <div id="panel-inventory" class="admin-panel hidden">
+          <div class="flex items-center justify-between mb-7">
+            <div class="admin-title">Inventory</div>
+            <button class="border border-border text-text rounded-md px-4 py-2 flex items-center gap-2 hover:border-gold hover:text-gold transition" onclick="loadInventory()">
+              <i class="ri-refresh-line"></i> Refresh
+            </button>
           </div>
-          <div class="hint-bar">Click any stock number to edit inline. Press Enter or click the check button to save.</div>
+          <div class="flex items-center gap-2 px-3.5 py-2.5 bg-surface border border-border rounded-md mb-4 text-xs text-text-muted">
+            <i class="ri-information-line text-gold"></i> Click any stock number to edit inline. Press Enter or click check to save.
+          </div>
           <div class="admin-table-wrap">
             <div class="table-toolbar">
-              <div class="t-search" style="max-width:240px;"><input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)"></div>
+              <div class="t-search max-w-[240px]">
+                <i class="ri-search-line"></i>
+                <input type="text" placeholder="Filter products…" id="inv-search" oninput="filterInv(this.value)">
+              </div>
               <select class="t-select" id="inv-sf" onchange="filterInv(document.getElementById('inv-search').value)">
                 <option value="">All Stock</option>
                 <option value="out">Out of Stock</option>
@@ -1174,24 +360,26 @@
                 <option value="ok">In Stock</option>
               </select>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>SKU</th>
-                  <th>Stock</th>
-                  <th>Threshold</th>
-                  <th>Status</th>
-                  <th>Edit</th>
-                </tr>
-              </thead>
-              <tbody id="inventory-body"></tbody>
-            </table>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Stock</th>
+                    <th>Threshold</th>
+                    <th>Status</th>
+                    <th>Edit</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-body" class="group"></tbody>
+              </table>
+            </div>
           </div>
         </div>
         
-        <div id="panel-orders" class="admin-panel">
-          <div class="admin-header">
+        <div id="panel-orders" class="admin-panel hidden">
+          <div class="flex items-center justify-between mb-7">
             <div class="admin-title">Orders</div>
             <select class="t-select" id="order-sf" onchange="loadOrders(1)">
               <option value="">All Statuses</option>
@@ -1203,48 +391,57 @@
             </select>
           </div>
           <div class="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Tracking</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="orders-body"></tbody>
-            </table>
-            <div class="table-footer"><span id="orders-info"></span>
-              <div class="pagination" id="orders-pages"></div>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Tracking</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-body" class="group"></tbody>
+              </table>
+            </div>
+            <div class="flex items-center justify-between px-4 py-2.5 border-t border-border text-xs text-text-dim">
+              <span id="orders-info"></span>
+              <div class="flex gap-1" id="orders-pages"></div>
             </div>
           </div>
         </div>
         
-        <div id="panel-users" class="admin-panel">
-          <div class="admin-header">
+        <div id="panel-users" class="admin-panel hidden">
+          <div class="flex items-center justify-between mb-7">
             <div class="admin-title">Users</div>
-            <div class="t-search"><input type="text" placeholder="Search by email…" id="user-search" oninput="filterUsers(this.value)"></div>
+            <div class="t-search">
+              <i class="ri-search-line"></i>
+              <input type="text" placeholder="Search by email…" id="user-search" oninput="filterUsers(this.value)">
+            </div>
           </div>
           <div class="admin-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Joined</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="users-body"></tbody>
-            </table>
-            <div class="table-footer"><span id="users-info"></span>
-              <div class="pagination" id="users-pages"></div>
+            <div class="overflow-x-auto w-full">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="users-body" class="group"></tbody>
+              </table>
+            </div>
+            <div class="flex items-center justify-between px-4 py-2.5 border-t border-border text-xs text-text-dim">
+              <span id="users-info"></span>
+              <div class="flex gap-1" id="users-pages"></div>
             </div>
           </div>
         </div>
@@ -1252,108 +449,106 @@
     </div>
   </div>
   
-  <div id="modal-product" class="modal-bd" style="display:none;" onclick="closeModal('modal-product',event)">
+  <div id="modal-product" class="modal-bd hidden" onclick="closeModal('modal-product',event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-hd">
-        <div class="modal-title" id="pm-title">Add Product</div>
-        <button class="modal-close" onclick="closeModal('modal-product')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg></button>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-surface z-10">
+        <div class="font-serif text-lg font-bold" id="pm-title">Add Product</div>
+        <button class="p-1 text-text-dim hover:text-text hover:bg-surface-2 rounded-md transition" onclick="closeModal('modal-product')"><i class="ri-close-line text-xl"></i></button>
       </div>
-      <div class="modal-bd-inner">
+      <div class="p-6 flex flex-col gap-4">
         <input type="hidden" id="pm-id">
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Name *</label><input type="text" id="pm-name" class="form-input" maxlength="255" oninput="autoSlug(this.value)"></div>
-          <div class="form-group"><label class="form-label">Slug *</label><input type="text" id="pm-slug" class="form-input" maxlength="280"></div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="form-group mb-0"><label class="form-label">Name *</label><input type="text" id="pm-name" class="form-input" maxlength="255" oninput="autoSlug(this.value)"></div>
+          <div class="form-group mb-0"><label class="form-label">Slug *</label><input type="text" id="pm-slug" class="form-input" maxlength="280"></div>
         </div>
-        <div class="form-group"><label class="form-label">Short Description</label><input type="text" id="pm-sdesc" class="form-input" maxlength="255"></div>
-        <div class="form-group"><label class="form-label">Full Description</label><textarea id="pm-desc" class="form-input" rows="3" style="resize:vertical;"></textarea></div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Price *</label><input type="number" id="pm-price" class="form-input" min="0" step="0.01"></div>
-          <div class="form-group"><label class="form-label">Compare Price</label><input type="number" id="pm-compare" class="form-input" min="0" step="0.01"></div>
+        <div class="form-group mb-0"><label class="form-label">Short Description</label><input type="text" id="pm-sdesc" class="form-input" maxlength="255"></div>
+        <div class="form-group mb-0"><label class="form-label">Full Description</label><textarea id="pm-desc" class="form-input" rows="3" style="resize:vertical;"></textarea></div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="form-group mb-0"><label class="form-label">Price *</label><input type="number" id="pm-price" class="form-input" min="0" step="0.01"></div>
+          <div class="form-group mb-0"><label class="form-label">Compare Price</label><input type="number" id="pm-compare" class="form-input" min="0" step="0.01"></div>
         </div>
-        <div class="g2">
-          <div class="form-group"><label class="form-label">Stock</label><input type="number" id="pm-stock" class="form-input" min="0" value="0"></div>
-          <div class="form-group"><label class="form-label">SKU</label><input type="text" id="pm-sku" class="form-input" maxlength="100"></div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="form-group mb-0"><label class="form-label">Stock</label><input type="number" id="pm-stock" class="form-input" min="0" value="0"></div>
+          <div class="form-group mb-0"><label class="form-label">SKU</label><input type="text" id="pm-sku" class="form-input" maxlength="100"></div>
         </div>
-        <div class="g2">
-          <div class="form-group">
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="form-group mb-0">
             <label class="form-label">Category</label>
-            <select id="pm-cat" class="form-input form-select">
+            <select id="pm-cat" class="form-input">
               <option value="">— None —</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">Weight (grams)</label><input type="number" id="pm-weight" class="form-input" min="0"></div>
+          <div class="form-group mb-0"><label class="form-label">Weight (grams)</label><input type="number" id="pm-weight" class="form-input" min="0"></div>
         </div>
         
-        <div class="form-group">
+        <div class="form-group mb-0">
           <label class="form-label">Product Images (Max 10)</label>
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pm-img-file').click()">
             <div id="drop-zone-txt">
-              <svg width="28" height="28" fill="none" stroke="var(--text-dim)" stroke-width="1.4" viewBox="0 0 24 24" style="margin:0 auto 8px;">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              <div class="drop-zone-txt">Click or drag images here</div>
-              <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">JPEG · PNG · WebP — max 5MB per image</div>
+              <i class="ri-image-add-line text-3xl text-text-dim block mb-2"></i>
+              <div class="text-xs text-text-dim">Click or drag images here</div>
+              <div class="text-[11px] text-text-dim mt-1">JPEG · PNG · WebP — max 5MB per image</div>
             </div>
-            <input type="file" id="pm-img-file" accept="image/*" multiple style="display:none;" onchange="handleImgs(this)">
+            <input type="file" id="pm-img-file" accept="image/*" multiple class="hidden" onchange="handleImgs(this)">
           </div>
-          <div id="pm-img-previews" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
+          <div id="pm-img-previews" class="flex gap-2.5 flex-wrap mt-3.5"></div>
         </div>
         
-        <label class="filter-option" style="gap:10px;"><input type="checkbox" id="pm-active" checked style="accent-color:var(--gold)">Active — visible in shop</label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="pm-active" checked class="accent-gold w-4 h-4">Active — visible in shop</label>
       </div>
-      <div class="modal-ft">
-        <button class="btn btn-outline" style="padding:10px 18px;" onclick="closeModal('modal-product')">Cancel</button>
-        <button class="btn btn-primary" style="padding:10px 24px;" id="pm-save" onclick="saveProduct()">Save Product</button>
+      <div class="flex gap-2.5 justify-end p-4 border-t border-border">
+        <button class="px-4 py-2 rounded-md border border-border text-text hover:border-gold hover:text-gold transition" onclick="closeModal('modal-product')">Cancel</button>
+        <button class="px-5 py-2 bg-gold text-black font-semibold rounded-md hover:bg-yellow-500 transition" id="pm-save" onclick="saveProduct()">Save Product</button>
       </div>
     </div>
   </div>
   
-  <div id="modal-cat" class="modal-bd" style="display:none;" onclick="closeModal('modal-cat',event)">
+  <div id="modal-cat" class="modal-bd hidden" onclick="closeModal('modal-cat',event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-hd">
-        <div class="modal-title">Add Category</div><button class="modal-close" onclick="closeModal('modal-cat')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg></button>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div class="font-serif text-lg font-bold">Add Category</div>
+        <button class="p-1 text-text-dim hover:text-text hover:bg-surface-2 rounded-md transition" onclick="closeModal('modal-cat')"><i class="ri-close-line text-xl"></i></button>
       </div>
-      <div class="modal-bd-inner">
-        <div class="form-group"><label class="form-label">Name *</label><input type="text" id="cm-name" class="form-input" maxlength="100" oninput="autoCatSlug(this.value)"></div>
-        <div class="form-group"><label class="form-label">Slug * (lowercase, hyphens only)</label><input type="text" id="cm-slug" class="form-input" maxlength="120" pattern="[a-z0-9-]+"></div>
-        <div class="form-group"><label class="form-label">Description</label><textarea id="cm-desc" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
+      <div class="p-6 flex flex-col gap-4">
+        <div class="form-group mb-0"><label class="form-label">Name *</label><input type="text" id="cm-name" class="form-input" maxlength="100" oninput="autoCatSlug(this.value)"></div>
+        <div class="form-group mb-0"><label class="form-label">Slug * (lowercase, hyphens only)</label><input type="text" id="cm-slug" class="form-input" maxlength="120" pattern="[a-z0-9-]+"></div>
+        <div class="form-group mb-0"><label class="form-label">Description</label><textarea id="cm-desc" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
       </div>
-      <div class="modal-ft"><button class="btn btn-outline" onclick="closeModal('modal-cat')">Cancel</button><button class="btn btn-primary" id="cm-save" onclick="saveCategory()">Save</button></div>
+      <div class="flex gap-2.5 justify-end p-4 border-t border-border">
+        <button class="px-4 py-2 rounded-md border border-border text-text hover:border-gold transition" onclick="closeModal('modal-cat')">Cancel</button>
+        <button class="px-5 py-2 bg-gold text-black font-semibold rounded-md hover:bg-yellow-500 transition" id="cm-save" onclick="saveCategory()">Save</button>
+      </div>
     </div>
   </div>
   
-  <div id="modal-order" class="modal-bd" style="display:none;" onclick="closeModal('modal-order',event)">
+  <div id="modal-order" class="modal-bd hidden" onclick="closeModal('modal-order',event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-hd">
-        <div class="modal-title" id="om-title">Update Order</div><button class="modal-close" onclick="closeModal('modal-order')"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg></button>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div class="font-serif text-lg font-bold" id="om-title">Update Order</div>
+        <button class="p-1 text-text-dim hover:text-text hover:bg-surface-2 rounded-md transition" onclick="closeModal('modal-order')"><i class="ri-close-line text-xl"></i></button>
       </div>
-      <div class="modal-bd-inner">
+      <div class="p-6 flex flex-col gap-4">
         <input type="hidden" id="om-id">
-        <div class="form-group"><label class="form-label">Status</label><select id="om-status" class="form-input form-select">
+        <div class="form-group mb-0">
+          <label class="form-label">Status</label>
+          <select id="om-status" class="form-input">
             <option value="pending">Pending</option>
             <option value="paid">Paid</option>
             <option value="shipped">Shipped</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
-          </select></div>
-        <div class="form-group"><label class="form-label">Tracking Number</label><input type="text" id="om-tracking" class="form-input" maxlength="100"></div>
-        <div id="om-items" style="background:var(--surface-2);border-radius:var(--radius);padding:14px;font-size:13px;color:var(--text-muted);"></div>
+          </select>
+        </div>
+        <div class="form-group mb-0"><label class="form-label">Tracking Number</label><input type="text" id="om-tracking" class="form-input" maxlength="100"></div>
+        <div id="om-items" class="bg-surface-2 rounded-md p-3.5 text-[13px] text-text-muted mt-2"></div>
       </div>
-      <div class="modal-ft"><button class="btn btn-outline" onclick="closeModal('modal-order')">Cancel</button><button class="btn btn-primary" id="om-save" onclick="saveOrder()">Update Order</button></div>
+      <div class="flex gap-2.5 justify-end p-4 border-t border-border">
+        <button class="px-4 py-2 rounded-md border border-border text-text hover:border-gold transition" onclick="closeModal('modal-order')">Cancel</button>
+        <button class="px-5 py-2 bg-gold text-black font-semibold rounded-md hover:bg-yellow-500 transition" id="om-save" onclick="saveOrder()">Update Order</button>
+      </div>
     </div>
   </div>
-  
+
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -1361,23 +556,14 @@
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  
   <script>
     /* ══════════════════════════════════════
        STATE
     ══════════════════════════════════════ */
-    let allProducts = [];
-    let allCategories = [];
-    let allUsers = [];
-    let allInventory = [];
-    let selectedProds = new Set();
-    
-    // UPDATED FOR MULTIPLE IMAGES
-    let pendingImages = [];
-    let currentProductData = null; // Track currently editing product
-    
-    let pProdPage = 1,
-      pOrderPage = 1,
-      pUserPage = 1;
+    let allProducts = [], allCategories = [], allUsers = [], allInventory = [];
+    let selectedProds = new Set(), pendingImages = [], currentProductData = null;
+    let pProdPage = 1, pOrderPage = 1, pUserPage = 1;
     const PS = 20;
     
     /* ══════════════════════════════════════
@@ -1396,12 +582,9 @@
         if (!res.ok) throw new Error(d?.detail || `Error ${res.status}`);
         return d;
       },
-      // UPDATED TO SUPPORT LIST OF FILES
       async uploadImages(id, files) {
         const fd = new FormData();
-        files.forEach(file => {
-          fd.append('files', file); // 'files' matches FastAPI variable name
-        });
+        files.forEach(file => fd.append('files', file));
         const res = await fetch(`${CONFIG.API_BASE}/products/${id}/images`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
@@ -1425,14 +608,14 @@
     };
     
     /* ══════════════════════════════════════
-       INIT & DASHBOARD (Unchanged)
+       INIT & DASHBOARD
     ══════════════════════════════════════ */
     async function init() {
-      const ok = await pageInit({ requireAuth: true });
+      const ok = typeof pageInit === 'function' ? await pageInit({ requireAuth: true }) : true; // Fallback if no pageInit
       if (!ok) return;
       const profile = AUTH.getProfile();
       if (!profile || profile.role !== 'admin') {
-        showToast('Admin access required', 'error');
+        if(typeof showToast === 'function') showToast('Admin access required', 'error');
         setTimeout(() => location.href = '/index.html', 1400);
         return;
       }
@@ -1440,12 +623,13 @@
       setInterval(() => { const el = document.getElementById('dash-time'); if (el) el.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true }); }, 1000);
       loadDashboard();
     }
-    init();
+    setTimeout(init, 100);
     
     function showPanel(name) {
-      document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.admin-panel').forEach(p => { p.classList.remove('block'); p.classList.add('hidden'); });
       document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`panel-${name}`).classList.add('active');
+      const tgt = document.getElementById(`panel-${name}`);
+      if(tgt) { tgt.classList.remove('hidden'); tgt.classList.add('block'); }
       document.querySelectorAll('.sidebar-btn').forEach(b => { if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active'); });
       if (name === 'products') loadProducts();
       if (name === 'categories') loadCategories();
@@ -1455,38 +639,32 @@
     }
     
     async function loadDashboard() {
-      // Logic same as original
       try {
         const [prods, orders, users] = await Promise.all([ADMIN.getProducts(), ADMIN.getOrders(), ADMIN.getUsers()]);
         const pending = orders?.items?.filter(o => o.status === 'pending').length ?? 0;
         [
-          ['stat-products', prods?.total],
-          ['stat-orders', orders?.total],
-          ['stat-pending', pending],
-          ['stat-users', users?.total],
-          ['sb-products', prods?.total],
-          ['sb-orders', orders?.total],
-          ['sb-pending', pending],
-          ['sb-users', users?.total]
+          ['stat-products', prods?.total], ['stat-orders', orders?.total], ['stat-pending', pending], ['stat-users', users?.total],
+          ['sb-products', prods?.total], ['sb-orders', orders?.total], ['sb-pending', pending], ['sb-users', users?.total]
         ].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; });
+        
         const tbody = document.getElementById('dash-orders-body');
         tbody.innerHTML = '';
         (orders?.items?.slice(0, 8) || []).forEach(o => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim">${escapeHTML(o.users?.email || '—')}</td><td class="td-gold">${formatPrice(o.total_amount)}</td><td>${statusBadge(o.status).outerHTML}</td><td class="td-dim">${formatDate(o.created_at)}</td>`;
+          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim">${escapeHTML(o.users?.email || '—')}</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</td><td>${typeof statusBadge==='function'?statusBadge(o.status).outerHTML:o.status}</td><td class="td-dim">${typeof formatDate==='function'?formatDate(o.created_at):o.created_at}</td>`;
           tbody.appendChild(tr);
         });
-        if (!orders?.items?.length) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">No orders yet</td></tr>';
-      } catch (err) { showToast('Dashboard error: ' + err.message, 'error'); }
+        if (!orders?.items?.length) tbody.innerHTML = '<tr><td colspan="5" class="text-center p-6 text-text-dim">No orders yet</td></tr>';
+      } catch (err) { if(typeof showToast==='function') showToast('Dashboard error: ' + err.message, 'error'); }
     }
     
     /* ══════════════════════════════════════
-       PRODUCTS & IMAGES UPLOAD
+       PRODUCTS & IMAGES
     ══════════════════════════════════════ */
     async function loadProducts(page = 1) {
       pProdPage = page;
       const tbody = document.getElementById('products-body');
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
       try {
         await ensureCategories();
         const data = await ADMIN.getProducts(page);
@@ -1494,7 +672,7 @@
         populateCatSelects();
         renderProducts(allProducts, data?.total || 0, data?.pages || 1);
         document.getElementById('prod-subtitle').textContent = `${data?.total || 0} products total`;
-      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
     }
     
     function renderProducts(items, total, pages) {
@@ -1502,20 +680,21 @@
       tbody.innerHTML = '';
       document.getElementById('prod-count').textContent = `${total} items`;
       document.getElementById('prod-info').textContent = `Showing ${items.length} of ${total}`;
-      if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No products found</td></tr>'; return; }
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-10 text-text-dim">No products found</td></tr>'; return; }
+      
       items.forEach(p => {
         const sc = p.stock === 0 ? 'sb-out' : p.stock <= 10 ? 'sb-low' : 'sb-ok';
         const sl = p.stock === 0 ? 'Out' : p.stock <= 10 ? `Low (${p.stock})` : p.stock;
         const catName = allCategories.find(c => c.id === p.category_id)?.name || '—';
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><input type="checkbox" style="accent-color:var(--gold)" ${selectedProds.has(p.id)?'checked':''} onchange="toggleProdSel('${p.id}',this.checked)"></td>
-          <td><div style="display:flex;align-items:center;gap:10px;">
-              ${p.image_url ? `<img src="${escapeHTML(p.image_url)}" style="width:34px;height:42px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0;">` : `<div style="width:34px;height:42px;background:var(--surface-2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="14" height="14" fill="none" stroke="var(--border-light)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+          <td><input type="checkbox" class="accent-gold w-4 h-4 cursor-pointer" ${selectedProds.has(p.id)?'checked':''} onchange="toggleProdSel('${p.id}',this.checked)"></td>
+          <td><div class="flex items-center gap-2.5">
+              ${p.image_url ? `<img src="${escapeHTML(p.image_url)}" class="w-9 h-11 object-cover rounded border border-border shrink-0">` : `<div class="w-9 h-11 bg-surface-2 rounded flex items-center justify-center shrink-0 border border-border"><i class="ri-image-line text-text-dim"></i></div>`}
               <div><div class="td-primary">${escapeHTML(p.name)}</div><div class="td-dim">${escapeHTML(p.slug)}</div></div></div></td>
-          <td class="td-dim">${escapeHTML(p.sku||'—')}</td><td class="td-gold">${formatPrice(p.price)}</td><td><span class="sbadge ${sc}">${sl}</span></td><td class="td-dim">${escapeHTML(catName)}</td>
+          <td class="td-dim">${escapeHTML(p.sku||'—')}</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(p.price):p.price}</td><td><span class="sbadge ${sc}">${sl}</span></td><td class="td-dim">${escapeHTML(catName)}</td>
           <td><span class="status-dot ${p.is_active?'active':'inactive'}">${p.is_active?'Active':'Hidden'}</span></td>
-          <td><div class="action-btns"><button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button><button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button></div></td>
+          <td><div class="flex gap-1.5"><button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button><button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')"><i class="ri-delete-bin-line"></i></button></div></td>
         `;
         tbody.appendChild(tr);
       });
@@ -1530,386 +709,160 @@
     }
     
     function toggleProdSel(id, checked) { checked ? selectedProds.add(id) : selectedProds.delete(id); const bar = document.getElementById('prod-bulk-bar');
-      bar.classList.toggle('visible', selectedProds.size > 0);
+      checked || selectedProds.size > 0 ? bar.classList.replace('hidden','flex') : bar.classList.replace('flex','hidden');
       document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
     
     function toggleAllProds(checked) { allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = checked);
-      document.getElementById('prod-bulk-bar').classList.toggle('visible', selectedProds.size > 0);
+      const bar = document.getElementById('prod-bulk-bar');
+      checked && allProducts.length ? bar.classList.replace('hidden','flex') : bar.classList.replace('flex','hidden');
       document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
     
     function clearProdSel() { selectedProds.clear();
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = false);
       document.getElementById('prod-chk-all').checked = false;
-      document.getElementById('prod-bulk-bar').classList.remove('visible'); }
+      document.getElementById('prod-bulk-bar').classList.replace('flex','hidden'); }
     
     async function bulkDeleteProducts() {
       if (!selectedProds.size || !confirm(`Delete ${selectedProds.size} products?`)) return;
-      let ok = 0,
-        fail = 0;
-      for (const id of selectedProds) { try { await ADMIN.deleteProduct(id);
-          ok++; } catch { fail++; } }
-      showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
-      clearProdSel();
-      loadProducts(pProdPage);
+      let ok = 0, fail = 0;
+      for (const id of selectedProds) { try { await ADMIN.deleteProduct(id); ok++; } catch { fail++; } }
+      if(typeof showToast==='function') showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
+      clearProdSel(); loadProducts(pProdPage);
     }
     
-    // UPDATED PRODUCT MODAL LOGIC
     function openProductModal(p = null) {
-      currentProductData = p; // Track for images logic
-      pendingImages = []; // Reset newly selected images
-      
-      const fields = [
-        ['pm-id', p?.id || ''],
-        ['pm-name', p?.name || ''],
-        ['pm-slug', p?.slug || ''],
-        ['pm-sdesc', p?.short_description || ''],
-        ['pm-desc', p?.description || ''],
-        ['pm-price', p?.price || ''],
-        ['pm-compare', p?.compare_price || ''],
-        ['pm-stock', p?.stock ?? 0],
-        ['pm-sku', p?.sku || ''],
-        ['pm-weight', p?.weight_grams || ''],
-      ];
+      currentProductData = p; pendingImages = [];
+      const fields = [['pm-id', p?.id || ''], ['pm-name', p?.name || ''], ['pm-slug', p?.slug || ''], ['pm-sdesc', p?.short_description || ''], ['pm-desc', p?.description || ''], ['pm-price', p?.price || ''], ['pm-compare', p?.compare_price || ''], ['pm-stock', p?.stock ?? 0], ['pm-sku', p?.sku || ''], ['pm-weight', p?.weight_grams || '']];
       fields.forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
       document.getElementById('pm-active').checked = p ? p.is_active : true;
       document.getElementById('pm-title').textContent = p ? `Edit — ${p.name}` : 'Add Product';
-      
       document.getElementById('pm-img-file').value = '';
       populateCatSelects();
       if (p?.category_id) document.getElementById('pm-cat').value = p.category_id;
-      
-      renderImagePreviews(); // Draw existing/empty images
-      document.getElementById('modal-product').style.display = 'flex';
+      renderImagePreviews();
+      document.getElementById('modal-product').classList.remove('hidden');
     }
     
     function editProduct(p) { openProductModal(p); }
-    
     function autoSlug(val) { if (!document.getElementById('pm-id').value) document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
     
-    // RENDER IMAGES PREVIEW (EXISTING + PENDING)
     function renderImagePreviews() {
-      const wrap = document.getElementById('pm-img-previews');
-      wrap.innerHTML = '';
-      
-      // Render existing images from server
+      const wrap = document.getElementById('pm-img-previews'); wrap.innerHTML = '';
       if (currentProductData && currentProductData.images && currentProductData.images.length > 0) {
-        currentProductData.images.forEach(url => {
-          wrap.innerHTML += `
-            <div class="img-preview-wrap" title="Already uploaded">
-              <img src="${escapeHTML(url)}">
-            </div>
-          `;
-        });
+        currentProductData.images.forEach(url => { wrap.innerHTML += `<div class="relative w-[68px] h-[84px] rounded border border-border overflow-hidden bg-surface-2"><img src="${escapeHTML(url)}" class="w-full h-full object-cover"></div>`; });
       }
-      
-      // Render new pending images
       pendingImages.forEach((file, idx) => {
         const r = new FileReader();
         r.onload = e => {
-          const div = document.createElement('div');
-          div.className = 'img-preview-wrap';
-          div.innerHTML = `
-            <img src="${e.target.result}">
-            <button class="img-remove-btn" onclick="removePendingImg(${idx}, event)">×</button>
-          `;
+          const div = document.createElement('div'); div.className = 'relative w-[68px] h-[84px] rounded border border-border overflow-hidden bg-surface-2';
+          div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover"><button class="absolute top-1 right-1 bg-black/70 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-xs hover:bg-error backdrop-blur-sm" onclick="removePendingImg(${idx}, event)"><i class="ri-close-line"></i></button>`;
           wrap.appendChild(div);
         };
         r.readAsDataURL(file);
       });
     }
     
-    // MULTIPLE FILES HANDLER
-    function handleImgs(input) {
-      if (input.files.length > 0) addFilesToPending(input.files);
-      input.value = ''; // Reset input to allow selecting same files again
-    }
-    
+    function handleImgs(input) { if (input.files.length > 0) addFilesToPending(input.files); input.value = ''; }
     function addFilesToPending(files) {
       const existingCount = (currentProductData?.images?.length) || 0;
       const newFiles = Array.from(files);
       const totalCount = existingCount + pendingImages.length + newFiles.length;
-      
-      if (totalCount > 10) {
-        showToast(`Cannot upload. Max limit is 10 images.`, 'error');
-        // Only accept files up to limit
-        const allowedCount = 10 - (existingCount + pendingImages.length);
-        if (allowedCount > 0) newFiles.splice(allowedCount);
-        else return;
-      }
-      
-      newFiles.forEach(file => {
-        if (file.size > 5 * 1024 * 1024) {
-          showToast(`${file.name} is larger than 5MB limit`, 'error');
-          return;
-        }
-        pendingImages.push(file);
-      });
-      
+      if (totalCount > 10) { if(typeof showToast==='function') showToast(`Max 10 images allowed.`, 'error'); const allowedCount = 10 - (existingCount + pendingImages.length); if (allowedCount > 0) newFiles.splice(allowedCount); else return; }
+      newFiles.forEach(file => { if (file.size > 5 * 1024 * 1024) { if(typeof showToast==='function') showToast(`${file.name} > 5MB limit`, 'error'); return; } pendingImages.push(file); });
       renderImagePreviews();
     }
+    function removePendingImg(index, event) { event.stopPropagation(); pendingImages.splice(index, 1); renderImagePreviews(); }
     
-    function removePendingImg(index, event) {
-      event.stopPropagation();
-      pendingImages.splice(index, 1);
-      renderImagePreviews();
-    }
-    
-    // DRAG AND DROP
     const dz = document.getElementById('drop-zone');
-    dz.addEventListener('dragover', e => { e.preventDefault();
-      dz.classList.add('over'); });
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-    dz.addEventListener('drop', e => {
-      e.preventDefault();
-      dz.classList.remove('over');
-      if (e.dataTransfer.files.length > 0) addFilesToPending(e.dataTransfer.files);
-    });
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length > 0) addFilesToPending(e.dataTransfer.files); });
     
-    // UPDATED SAVING LOGIC
     async function saveProduct() {
-      const id = document.getElementById('pm-id').value;
-      const btn = document.getElementById('pm-save');
-      const payload = {
-        name: document.getElementById('pm-name').value.trim(),
-        slug: document.getElementById('pm-slug').value.trim(),
-        short_description: document.getElementById('pm-sdesc').value.trim() || null,
-        description: document.getElementById('pm-desc').value.trim() || null,
-        price: parseFloat(document.getElementById('pm-price').value),
-        compare_price: parseFloat(document.getElementById('pm-compare').value) || null,
-        stock: parseInt(document.getElementById('pm-stock').value) || 0,
-        sku: document.getElementById('pm-sku').value.trim() || null,
-        weight_grams: parseInt(document.getElementById('pm-weight').value) || null,
-        is_active: document.getElementById('pm-active').checked,
-        category_id: document.getElementById('pm-cat').value || null,
-      };
-      
-      if (!payload.name || !payload.slug || isNaN(payload.price)) { showToast('Name, Slug and Price are required', 'error'); return; }
-      
-      showLoader(btn, 'Saving…');
+      const id = document.getElementById('pm-id').value; const btn = document.getElementById('pm-save');
+      const payload = { name: document.getElementById('pm-name').value.trim(), slug: document.getElementById('pm-slug').value.trim(), short_description: document.getElementById('pm-sdesc').value.trim() || null, description: document.getElementById('pm-desc').value.trim() || null, price: parseFloat(document.getElementById('pm-price').value), compare_price: parseFloat(document.getElementById('pm-compare').value) || null, stock: parseInt(document.getElementById('pm-stock').value) || 0, sku: document.getElementById('pm-sku').value.trim() || null, weight_grams: parseInt(document.getElementById('pm-weight').value) || null, is_active: document.getElementById('pm-active').checked, category_id: document.getElementById('pm-cat').value || null };
+      if (!payload.name || !payload.slug || isNaN(payload.price)) { if(typeof showToast==='function') showToast('Name, Slug & Price required', 'error'); return; }
+      if(typeof showLoader==='function') showLoader(btn, 'Saving…');
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
-        
-        // Upload any newly selected images
-        if (pendingImages.length > 0 && saved?.id) {
-          try {
-            await ADMIN.uploadImages(saved.id, pendingImages);
-          } catch (e) {
-            showToast('Product saved, but some images failed to upload: ' + e.message, 'warn');
-          }
-        }
-        
-        showToast(id ? 'Product updated!' : 'Product created!', 'success');
-        closeModal('modal-product');
-        loadProducts(pProdPage);
-      } catch (err) { showToast(err.message, 'error'); }
-      finally { hideLoader(btn); }
+        if (pendingImages.length > 0 && saved?.id) { try { await ADMIN.uploadImages(saved.id, pendingImages); } catch (e) { if(typeof showToast==='function') showToast('Saved, but some images failed: ' + e.message, 'warn'); } }
+        if(typeof showToast==='function') showToast(id ? 'Updated!' : 'Created!', 'success');
+        closeModal('modal-product'); loadProducts(pProdPage);
+      } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); }
     }
     
     /* ══════════════════════════════════════
-       CATEGORIES, INVENTORY, ORDERS, USERS (Unchanged scripts)
+       OTHERS (Categories, Inventory, etc.)
     ══════════════════════════════════════ */
     async function ensureCategories() { if (!allCategories.length) allCategories = await ADMIN.getCategories() || []; }
     async function loadCategories() {
-      allCategories = [];
-      await ensureCategories();
-      const tbody = document.getElementById('categories-body');
-      tbody.innerHTML = '';
-      if (!allCategories.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-dim);">No categories yet</td></tr>'; return; }
+      allCategories = []; await ensureCategories(); const tbody = document.getElementById('categories-body'); tbody.innerHTML = '';
+      if (!allCategories.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-10 text-text-dim">No categories yet</td></tr>'; return; }
       allCategories.forEach(c => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="td-primary">${escapeHTML(c.name)}</td><td class="td-dim">${escapeHTML(c.slug)}</td><td class="td-dim">${escapeHTML(c.description || '—')}</td><td><button class="btn-xs bxd" onclick="deleteCategory('${c.id}','${escapeHTML(c.name).replace(/'/g,"\\'")}')">Delete</button></td>`;
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(c.name)}</td><td class="td-dim">${escapeHTML(c.slug)}</td><td class="td-dim">${escapeHTML(c.description || '—')}</td><td><button class="btn-xs bxd" onclick="deleteCategory('${c.id}','${escapeHTML(c.name).replace(/'/g,"\\'")}')"><i class="ri-delete-bin-line"></i> Delete</button></td>`;
         tbody.appendChild(tr);
       });
     }
-    
     function populateCatSelects() { const sf = document.getElementById('prod-cat-f'); const pm = document.getElementById('pm-cat'); const cur = sf.value;
-      sf.innerHTML = '<option value="">All Categories</option>';
-      pm.innerHTML = '<option value="">— None —</option>';
-      allCategories.forEach(c => { sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`;
-        pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`; }); }
-    
-    function openCatModal() {
-      ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      document.getElementById('modal-cat').style.display = 'flex'; }
-    
+      sf.innerHTML = '<option value="">All Categories</option>'; pm.innerHTML = '<option value="">— None —</option>';
+      allCategories.forEach(c => { sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`; pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`; }); }
+    function openCatModal() { ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('modal-cat').classList.remove('hidden'); }
     function autoCatSlug(val) { document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
     async function saveCategory() {
-      const btn = document.getElementById('cm-save');
-      const name = document.getElementById('cm-name').value.trim();
-      const slug = document.getElementById('cm-slug').value.trim();
-      const desc = document.getElementById('cm-desc').value.trim();
-      if (!name || !slug || !/^[a-z0-9-]+$/.test(slug)) { showToast('Name and valid slug required', 'error'); return; }
-      showLoader(btn, 'Saving…');
-      try { await ADMIN.createCategory({ name, slug, description: desc || null });
-        showToast('Category created!', 'success');
-        allCategories = [];
-        closeModal('modal-cat');
-        loadCategories(); } catch (err) { showToast(err.message, 'error'); } finally { hideLoader(btn); }
+      const btn = document.getElementById('cm-save'), name = document.getElementById('cm-name').value.trim(), slug = document.getElementById('cm-slug').value.trim(), desc = document.getElementById('cm-desc').value.trim();
+      if (!name || !slug || !/^[a-z0-9-]+$/.test(slug)) { if(typeof showToast==='function') showToast('Name and valid slug required', 'error'); return; }
+      if(typeof showLoader==='function') showLoader(btn, 'Saving…');
+      try { await ADMIN.createCategory({ name, slug, description: desc || null }); if(typeof showToast==='function') showToast('Category created!', 'success'); allCategories = []; closeModal('modal-cat'); loadCategories(); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); }
     }
-    async function deleteCategory(id, name) { if (!confirm(`Delete category "${name}"?`)) return; try { await ADMIN.deleteCategory(id);
-        showToast('Deleted', 'info');
-        allCategories = [];
-        loadCategories(); } catch (err) { showToast(err.message, 'error'); } }
+    async function deleteCategory(id, name) { if (!confirm(`Delete category "${name}"?`)) return; try { await ADMIN.deleteCategory(id); if(typeof showToast==='function') showToast('Deleted', 'info'); allCategories = []; loadCategories(); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } }
     
-    // Inventory
     async function loadInventory() {
-      const tbody = document.getElementById('inventory-body');
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
-      try {
-        const first = await ADMIN.getProducts(1);
-        let items = first?.items || [];
-        for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) { const d = await ADMIN.getProducts(p);
-          items = items.concat(d?.items || []); }
-        allInventory = items;
-        renderInv(items);
-      } catch (err) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
+      const tbody = document.getElementById('inventory-body'); tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
+      try { const first = await ADMIN.getProducts(1); let items = first?.items || []; for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) { const d = await ADMIN.getProducts(p); items = items.concat(d?.items || []); } allInventory = items; renderInv(items); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
     }
-    
     function renderInv(items) {
-      const tbody = document.getElementById('inventory-body');
-      tbody.innerHTML = '';
-      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No products</td></tr>'; return; }
+      const tbody = document.getElementById('inventory-body'); tbody.innerHTML = '';
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-10 text-text-dim">No products</td></tr>'; return; }
       items.forEach(p => {
-        const thr = p.low_stock_threshold || 10;
-        const sc = p.stock === 0 ? 'sb-out' : p.stock <= thr ? 'sb-low' : 'sb-ok';
-        const sl = p.stock === 0 ? 'Out of Stock' : p.stock <= thr ? 'Low Stock' : 'In Stock';
-        const tr = document.createElement('tr');
-        tr.dataset.id = p.id;
-        tr.innerHTML = `<td class="td-primary">${escapeHTML(p.name)}</td><td class="td-dim">${escapeHTML(p.sku||'—')}</td><td><span class="inv-val" data-id="${p.id}" style="cursor:pointer;font-weight:600;color:var(--text);text-decoration:underline dotted var(--border-light);" onclick="startStockEdit('${p.id}',${p.stock},this)">${p.stock}</span></td><td class="td-dim">${thr}</td><td><span class="sbadge ${sc}">${sl}</span></td><td><div class="stk-edit" id="se-${p.id}" style="display:none;"><input type="number" class="stk-input" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')"><button class="btn-xs bxs" onclick="saveStock('${p.id}')">✓</button><button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})">✕</button></div></td>`;
+        const thr = p.low_stock_threshold || 10, sc = p.stock === 0 ? 'sb-out' : p.stock <= thr ? 'sb-low' : 'sb-ok', sl = p.stock === 0 ? 'Out of Stock' : p.stock <= thr ? 'Low Stock' : 'In Stock';
+        const tr = document.createElement('tr'); tr.dataset.id = p.id;
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(p.name)}</td><td class="td-dim">${escapeHTML(p.sku||'—')}</td><td><span class="inv-val underline decoration-dashed decoration-border-light font-semibold text-text cursor-pointer" data-id="${p.id}" onclick="startStockEdit('${p.id}',${p.stock},this)">${p.stock}</span></td><td class="td-dim">${thr}</td><td><span class="sbadge ${sc}">${sl}</span></td><td><div class="hidden items-center gap-1.5" id="se-${p.id}"><input type="number" class="w-16 px-2 py-1 bg-surface-2 border border-border rounded text-center text-xs outline-none focus:border-gold" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')"><button class="btn-xs bxs" onclick="saveStock('${p.id}')"><i class="ri-check-line"></i></button><button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})"><i class="ri-close-line"></i></button></div></td>`;
         tbody.appendChild(tr);
       });
     }
-    
-    function startStockEdit(id, stock, el) { document.getElementById(`se-${id}`).style.display = 'flex';
-      el.style.display = 'none';
-      document.getElementById(`si-${id}`).focus(); }
-    
-    function cancelStockEdit(id, stock) { document.getElementById(`se-${id}`).style.display = 'none'; const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) v.style.display = ''; }
+    function startStockEdit(id, stock, el) { document.getElementById(`se-${id}`).classList.replace('hidden', 'flex'); el.style.display = 'none'; document.getElementById(`si-${id}`).focus(); }
+    function cancelStockEdit(id, stock) { document.getElementById(`se-${id}`).classList.replace('flex', 'hidden'); const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) v.style.display = ''; }
     async function saveStock(id) {
-      const inp = document.getElementById(`si-${id}`);
-      const newStock = parseInt(inp.value);
-      if (isNaN(newStock) || newStock < 0) { showToast('Invalid value', 'error'); return; }
-      try {
-        await ADMIN.updateProduct(id, { stock: newStock });
-        const p = allInventory.find(p => p.id === id);
-        if (p) p.stock = newStock;
-        const v = document.querySelector(`.inv-val[data-id="${id}"]`);
-        if (v) { v.textContent = newStock;
-          v.style.display = ''; }
-        document.getElementById(`se-${id}`).style.display = 'none';
-        const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10;
-        const tr = document.querySelector(`tr[data-id="${id}"]`);
-        if (tr) { const badge = tr.querySelector('.sbadge'); if (badge) { badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok');
-            badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock'; } }
-        showToast('Stock updated', 'success');
-      } catch (err) { showToast(err.message, 'error'); }
+      const inp = document.getElementById(`si-${id}`), newStock = parseInt(inp.value);
+      if (isNaN(newStock) || newStock < 0) { if(typeof showToast==='function') showToast('Invalid value', 'error'); return; }
+      try { await ADMIN.updateProduct(id, { stock: newStock }); const p = allInventory.find(p => p.id === id); if (p) p.stock = newStock; const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) { v.textContent = newStock; v.style.display = ''; } document.getElementById(`se-${id}`).classList.replace('flex','hidden'); const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10; const tr = document.querySelector(`tr[data-id="${id}"]`); if (tr) { const badge = tr.querySelector('.sbadge'); if (badge) { badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok'); badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock'; } } if(typeof showToast==='function') showToast('Stock updated', 'success'); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); }
     }
+    function filterInv(q) { const sf = document.getElementById('inv-sf').value, lower = q.toLowerCase(); const f = allInventory.filter(p => { const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower); const thr = p.low_stock_threshold || 10; let mk = true; if (sf === 'out') mk = p.stock === 0; else if (sf === 'low') mk = p.stock > 0 && p.stock <= thr; else if (sf === 'ok') mk = p.stock > thr; return ms && mk; }); renderInv(f); }
     
-    function filterInv(q) {
-      const sf = document.getElementById('inv-sf').value;
-      const lower = q.toLowerCase();
-      const f = allInventory.filter(p => { const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower); const thr = p.low_stock_threshold || 10; let mk = true; if (sf === 'out') mk = p.stock === 0;
-        else if (sf === 'low') mk = p.stock > 0 && p.stock <= thr;
-        else if (sf === 'ok') mk = p.stock > thr; return ms && mk; });
-      renderInv(f);
-    }
-    
-    // Orders
     async function loadOrders(page = 1) {
-      pOrderPage = page;
-      const tbody = document.getElementById('orders-body');
-      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
+      pOrderPage = page; const tbody = document.getElementById('orders-body'); tbody.innerHTML = `<tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
       const sf = document.getElementById('order-sf').value;
-      try {
-        const data = await ADMIN.getOrders(page, sf);
-        const items = data?.items || [];
-        document.getElementById('orders-info').textContent = `${data?.total||0} orders`;
-        tbody.innerHTML = '';
-        if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-dim);">No orders</td></tr>'; return; }
-        items.forEach(o => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td><td class="td-dim">${(o.order_items||[]).length} items</td><td class="td-gold">${formatPrice(o.total_amount)}</td><td>${statusBadge(o.status).outerHTML}</td><td class="td-dim" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(o.tracking_number||'—')}</td><td class="td-dim">${formatDate(o.created_at)}</td><td><button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'>Edit</button></td>`;
-          tbody.appendChild(tr);
-        });
-        renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders);
-      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
+      try { const data = await ADMIN.getOrders(page, sf); const items = data?.items || []; document.getElementById('orders-info').textContent = `${data?.total||0} orders`; tbody.innerHTML = '';
+        if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-10 text-text-dim">No orders</td></tr>'; return; }
+        items.forEach(o => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim max-w-[140px] truncate">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td><td class="td-dim">${(o.order_items||[]).length} items</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</td><td>${typeof statusBadge==='function'?statusBadge(o.status).outerHTML:o.status}</td><td class="td-dim max-w-[100px] truncate">${escapeHTML(o.tracking_number||'—')}</td><td class="td-dim">${typeof formatDate==='function'?formatDate(o.created_at):o.created_at}</td><td><button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button></td>`; tbody.appendChild(tr); });
+        renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders); } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
     }
+    function openOrderModal(o) { document.getElementById('om-id').value = o.id; document.getElementById('om-status').value = o.status; document.getElementById('om-tracking').value = o.tracking_number || ''; document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`; const el = document.getElementById('om-items'); const items = o.order_items || []; el.innerHTML = items.length ? '<div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2">Items</div>' + items.map(i => `<div class="flex justify-between py-1.5 border-b border-border"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${typeof formatPrice==='function'?formatPrice(i.subtotal):i.subtotal}</span></div>`).join('') + `<div class="flex justify-between py-2 font-bold text-gold"><span>Total</span><span>${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</span></div>` : ''; document.getElementById('modal-order').classList.remove('hidden'); }
+    async function saveOrder() { const id = document.getElementById('om-id').value, btn = document.getElementById('om-save'); if(typeof showLoader==='function') showLoader(btn, 'Updating…'); try { await ADMIN.updateOrder(id, { status: document.getElementById('om-status').value, tracking_number: document.getElementById('om-tracking').value.trim() || null }); if(typeof showToast==='function') showToast('Order updated!', 'success'); closeModal('modal-order'); loadOrders(pOrderPage); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); } }
     
-    function openOrderModal(o) {
-      document.getElementById('om-id').value = o.id;
-      document.getElementById('om-status').value = o.status;
-      document.getElementById('om-tracking').value = o.tracking_number || '';
-      document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`;
-      const el = document.getElementById('om-items');
-      const items = o.order_items || [];
-      el.innerHTML = items.length ? '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>' + items.map(i => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${formatPrice(i.subtotal)}</span></div>`).join('') + `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--gold);"><span>Total</span><span>${formatPrice(o.total_amount)}</span></div>` : '';
-      document.getElementById('modal-order').style.display = 'flex';
-    }
-    async function saveOrder() {
-      const id = document.getElementById('om-id').value;
-      const btn = document.getElementById('om-save');
-      showLoader(btn, 'Updating…');
-      try { await ADMIN.updateOrder(id, { status: document.getElementById('om-status').value, tracking_number: document.getElementById('om-tracking').value.trim() || null });
-        showToast('Order updated!', 'success');
-        closeModal('modal-order');
-        loadOrders(pOrderPage); } catch (err) { showToast(err.message, 'error'); } finally { hideLoader(btn); }
-    }
+    async function loadUsers(page = 1) { pUserPage = page; const tbody = document.getElementById('users-body'); tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`; try { const data = await ADMIN.getUsers(page); allUsers = data?.items || []; document.getElementById('users-info').textContent = `${data?.total||0} users`; renderUsers(allUsers, data?.total || 0, data?.pages || 1); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; } }
+    function renderUsers(items, total, pages) { const tbody = document.getElementById('users-body'); tbody.innerHTML = ''; if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-10 text-text-dim">No users</td></tr>'; return; } const myId = AUTH.getProfile()?.id; items.forEach(u => { const me = u.id === myId; const tr = document.createElement('tr'); tr.innerHTML = `<td class="td-primary">${escapeHTML(u.email)}</td><td class="td-dim">${escapeHTML(u.full_name||'—')}</td><td><select class="t-select w-full max-w-[100px]" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)"><option value="customer" ${u.role==='customer'?'selected':''}>Customer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td><td class="td-dim">${typeof formatDate==='function'?formatDate(u.created_at):u.created_at}</td><td><button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Deactivate':'Activate'}</button></td>`; tbody.appendChild(tr); }); renderPaging('users-pages', pUserPage, pages, loadUsers); }
+    function filterUsers(q) { const lower = q.toLowerCase(); renderUsers(allUsers.filter(u => u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)), 0, 1); }
+    async function updateRole(id, role) { try { await ADMIN.updateUser(id, { role }); if(typeof showToast==='function') showToast('Role updated', 'success'); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); loadUsers(pUserPage); } }
+    async function toggleUser(id, activate) { if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return; try { await ADMIN.updateUser(id, { is_active: activate }); if(typeof showToast==='function') showToast(`User ${activate?'activated':'deactivated'}`, 'info'); loadUsers(pUserPage); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } }
     
-    // Users
-    async function loadUsers(page = 1) {
-      pUserPage = page;
-      const tbody = document.getElementById('users-body');
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-dim);">Loading…</td></tr>`;
-      try { const data = await ADMIN.getUsers(page);
-        allUsers = data?.items || [];
-        document.getElementById('users-info').textContent = `${data?.total||0} users`;
-        renderUsers(allUsers, data?.total || 0, data?.pages || 1); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);">${escapeHTML(err.message)}</td></tr>`; }
-    }
+    function closeModal(id, e) { if (e && e.target !== document.getElementById(id)) return; document.getElementById(id).classList.add('hidden'); }
+    function renderPaging(cid, cur, pages, fn) { const wrap = document.getElementById(cid); if (!wrap) return; wrap.innerHTML = ''; if (pages <= 1) return; const mk = (label, pg, active = false) => { const btn = document.createElement('button'); btn.className = `w-7 h-7 text-xs flex items-center justify-center rounded-md ${active ? 'bg-gold-dim text-gold font-bold' : 'text-text-muted hover:bg-surface-2 transition'}`; btn.textContent = label; btn.addEventListener('click', () => fn(pg)); return btn; }; if (cur > 1) wrap.appendChild(mk('‹', cur - 1)); for (let i = 1; i <= pages; i++) { if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue; wrap.appendChild(mk(i, i, i === cur)); } if (cur < pages) wrap.appendChild(mk('›', cur + 1)); }
     
-    function renderUsers(items, total, pages) {
-      const tbody = document.getElementById('users-body');
-      tbody.innerHTML = '';
-      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-dim);">No users</td></tr>'; return; }
-      const myId = AUTH.getProfile()?.id;
-      items.forEach(u => {
-        const me = u.id === myId;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="td-primary">${escapeHTML(u.email)}</td><td class="td-dim">${escapeHTML(u.full_name||'—')}</td><td><select class="t-select" style="font-size:12px;" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)"><option value="customer" ${u.role==='customer'?'selected':''}>Customer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td><td class="td-dim">${formatDate(u.created_at)}</td><td><button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Deactivate':'Activate'}</button></td>`;
-        tbody.appendChild(tr);
-      });
-      renderPaging('users-pages', pUserPage, pages, loadUsers);
-    }
-    
-    function filterUsers(q) { const lower = q.toLowerCase();
-      renderUsers(allUsers.filter(u => u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)), 0, 1); }
-    async function updateRole(id, role) { try { await ADMIN.updateUser(id, { role });
-        showToast('Role updated', 'success'); } catch (err) { showToast(err.message, 'error');
-        loadUsers(pUserPage); } }
-    async function toggleUser(id, activate) { if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return; try { await ADMIN.updateUser(id, { is_active: activate });
-        showToast(`User ${activate?'activated':'deactivated'}`, 'info');
-        loadUsers(pUserPage); } catch (err) { showToast(err.message, 'error'); } }
-    
-    // Utilities
-    function closeModal(id, e) { if (e && e.target !== document.getElementById(id)) return;
-      document.getElementById(id).style.display = 'none'; }
-    
-    function renderPaging(cid, cur, pages, fn) {
-      const wrap = document.getElementById(cid);
-      if (!wrap) return;
-      wrap.innerHTML = '';
-      if (pages <= 1) return;
-      const mk = (label, pg, active = false) => { const btn = document.createElement('button');
-        btn.className = 'page-btn' + (active ? ' active' : '');
-        btn.style.cssText = 'width:30px;height:30px;font-size:12px;';
-        btn.textContent = label;
-        btn.addEventListener('click', () => fn(pg)); return btn; };
-      if (cur > 1) wrap.appendChild(mk('‹', cur - 1));
-      for (let i = 1; i <= pages; i++) { if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue;
-        wrap.appendChild(mk(i, i, i === cur)); }
-      if (cur < pages) wrap.appendChild(mk('›', cur + 1));
-    }
+    // Safefallbacks if external utils are missing:
+    if(typeof escapeHTML !== 'function') { window.escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag])); }
   </script>
 </body>
-
 </html>
