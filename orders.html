@@ -5,596 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Orders — Luviio</title>
 
-  <!-- FIX: Preconnect so fonts don't cause FOUT -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/luviio.css">
 
-  <style>
-
-    /* ── CSS Variable Fallbacks for undefined vars ─────────────────────────── */
-    /* FIX: Define missing variables that luviio.css may not have */
-    :root {
-      --radius-lg:    16px;
-      --border-light: rgba(255,255,255,0.06);  /* FIX: was undefined → fallback */
-      --error-dim:    rgba(248,113,113,0.08);  /* FIX: was undefined → fallback */
-      --gold-dim:     rgba(201,169,110,0.12);
-    }
-
-    /* ── Layout ───────────────────────────────────────────────────────────── */
-    .orders-layout {
-      padding: 40px 0 80px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .orders-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    /* ── Order Card ───────────────────────────────────────────────────────── */
-    .order-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      margin-bottom: 20px;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    }
-    .order-card:hover {
-      border-color: rgba(201,169,110,0.3);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-      transform: translateY(-2px);
-    }
-
-    /* ── Order Header ─────────────────────────────────────────────────────── */
-    /* FIX: Removed position:relative here — chevron was using absolute
-       but order-header-right used flex, causing double-positioning conflict.
-       Now chevron is purely flex — no absolute positioning at all. */
-    .order-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 28px;
-      cursor: pointer;
-      gap: 16px;
-      user-select: none;
-    }
-    .order-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      min-width: 0;
-    }
-    .order-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .order-date {
-      font-size: 12px;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .order-header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-shrink: 0;  /* FIX: prevents squishing on narrow screens */
-    }
-    .order-total {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--gold);
-      white-space: nowrap;
-    }
-
-    /* FIX: Chevron — pure flex item, no absolute/relative games */
-    .chevron {
-      transition: all 0.3s ease;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      min-width: 32px;  /* FIX: prevents flex shrink */
-      border-radius: 50%;
-      background: var(--surface-2);
-      flex-shrink: 0;
-    }
-    .order-card:hover .chevron {
-      background: rgba(201,169,110,0.1);
-      color: var(--gold);
-    }
-    .chevron.open {
-      transform: rotate(180deg);
-      background: var(--gold);
-      color: #000;
-    }
-
-    /* ── Order Body ───────────────────────────────────────────────────────── */
-    .order-body {
-      display: none;
-      border-top: 1px solid var(--border);
-    }
-    .order-body.open {
-      display: block;
-      animation: slideDown 0.3s ease forwards;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .order-body-inner { padding: 28px; }
-
-    /* ── Status Badge ─────────────────────────────────────────────────────── */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      white-space: nowrap;
-    }
-    .status-pending   { background: rgba(224,169,82,.1);  color: var(--warn);    border: 1px solid rgba(224,169,82,.2); }
-    .status-paid      { background: rgba(56,189,248,.1);  color: #38bdf8;        border: 1px solid rgba(56,189,248,.2); }
-    .status-shipped   { background: rgba(167,139,250,.1); color: #a78bfa;        border: 1px solid rgba(167,139,250,.2); }
-    .status-delivered { background: rgba(74,222,128,.1);  color: var(--success); border: 1px solid rgba(74,222,128,.2); }
-    .status-cancelled,
-    .status-refunded  { background: rgba(248,113,113,.1); color: var(--error);   border: 1px solid rgba(248,113,113,.2); }
-
-    /* ── Status Timeline ──────────────────────────────────────────────────── */
-    /* FIX: Was causing full-page horizontal scroll on mobile.
-       overflow-x on the timeline itself + padding prevents page blowout. */
-    .status-timeline {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 32px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      padding-left: 2px;
-      padding-right: 2px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .status-timeline::-webkit-scrollbar { display: none; }
-
-    .tl-step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-      min-width: 72px;  /* FIX: was causing steps to shrink below icon size */
-      max-width: 120px;
-      position: relative;
-    }
-    .tl-step:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      top: 15px;
-      left: calc(50% + 16px);
-      width: calc(100% - 32px);
-      height: 2px;
-      background: var(--border);
-    }
-    .tl-step.done:not(:last-child)::after { background: var(--gold); }
-
-    .tl-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: var(--surface-2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      position: relative;
-      z-index: 1;
-      transition: all 0.3s;
-      flex-shrink: 0;
-    }
-    .tl-step.done .tl-dot    { border-color: var(--gold);  background: var(--gold-dim); color: var(--gold); }
-    .tl-step.current .tl-dot { border-color: var(--gold);  background: var(--gold);     color: #000; box-shadow: 0 0 0 4px rgba(201,169,110,0.2); }
-    .tl-step.cancelled .tl-dot { border-color: var(--error); background: var(--error-dim); color: var(--error); }  /* FIX: var(--error-dim) now defined above */
-
-    .tl-label {
-      font-size: 10px;
-      font-weight: 600;
-      margin-top: 8px;
-      color: var(--text-dim);
-      text-align: center;
-      white-space: nowrap;
-      letter-spacing: 0.5px;
-    }
-    .tl-step.done .tl-label,
-    .tl-step.current .tl-label { color: var(--text); }
-
-    /* ── Details Grid ─────────────────────────────────────────────────────── */
-    .details-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .info-box {
-      padding: 16px 20px;
-      background: var(--surface-2);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-    }
-    .info-box-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .info-box-text {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* ── Order Items ──────────────────────────────────────────────────────── */
-    .oi-row {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px dashed var(--border);
-    }
-    .oi-row:last-child { border-bottom: none; }
-
-    /* FIX: var(--border-light) was undefined → now uses defined fallback */
-    .oi-img {
-      width: 56px;
-      height: 70px;
-      border-radius: var(--radius);
-      background: var(--surface-2);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: var(--border-light);  /* now resolves correctly */
-    }
-    .oi-img img { width: 100%; height: 100%; object-fit: cover; }
-
-    .oi-info { flex: 1; min-width: 0; }
-    .oi-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .oi-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    .oi-price {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--gold);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── Order Bottom (Summary + Actions) ────────────────────────────────── */
-    /* FIX: Removed column-reverse — summary showing above actions is confusing.
-       Natural order: actions on left, summary on right (desktop).
-       Mobile: actions top, summary bottom (logical flow). */
-    .order-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 24px;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .order-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .order-summary {
-      width: 100%;
-      max-width: 280px;
-    }
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--text-muted);
-      padding: 5px 0;
-    }
-    .summary-row.total {
-      font-weight: 700;
-      color: var(--text);
-      font-size: 15px;
-      border-top: 2px solid var(--border);
-      margin-top: 8px;
-      padding-top: 12px;
-    }
-
-    /* ── Pagination ───────────────────────────────────────────────────────── */
-    .pagination-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      margin-top: 48px;
-      flex-wrap: wrap;
-    }
-    .page-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      min-width: 36px;
-      height: 36px;
-      padding: 0 10px;
-      border-radius: 18px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      line-height: 1;
-    }
-    .page-btn:hover:not(:disabled):not(.active) {
-      background: var(--surface-2);
-      color: var(--text);
-    }
-    .page-btn.active {
-      background: var(--gold);
-      color: #000;
-      box-shadow: 0 4px 12px rgba(201,169,110,0.3);
-      cursor: default;
-      pointer-events: none;
-    }
-    .page-btn.nav-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .page-btn.nav-btn:hover:not(:disabled) {
-      border-color: var(--gold);
-      color: var(--gold);
-    }
-    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ── Spinner ──────────────────────────────────────────────────────────── */
-    .spinner-sm {
-      border: 2px solid rgba(201,169,110,0.2);
-      border-top-color: var(--gold);
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      animation: spin 0.8s linear infinite;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Empty / Error State ──────────────────────────────────────────────── */
-    .orders-empty {
-      text-align: center;
-      padding: 64px 24px;
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-lg);
-    }
-    .orders-empty .empty-icon {
-      font-size: 52px;
-      color: var(--border);
-      margin-bottom: 16px;
-      line-height: 1;
-    }
-    .orders-empty h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .orders-empty p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 28px;
-    }
-
-    /* ================================================================
-       MEDIA QUERIES — Complete responsive breakpoints
-       ================================================================ */
-
-    /* ── 900px — Narrow desktop / large tablet ──────────────────── */
-    @media (max-width: 900px) {
-      .orders-layout { padding: 32px 0 64px; }
-    }
-
-    /* ── 768px — Tablet ──────────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .orders-layout { padding: 24px 0 60px; }
-
-      .orders-header { margin-bottom: 24px; }
-      .orders-header .section-title { font-size: 22px; }
-
-      /* Order header: stack meta and right-side info */
-      .order-header {
-        padding: 16px 18px;
-        /* FIX: flex-wrap so content doesn't overflow on small tablets */
-        flex-wrap: wrap;
-        gap: 12px;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: '#0d0c0a',
+            'surface-2': '#1a1814',
+            border: '#1e1c18',
+            gold: '#c9a55e',
+            text: '#f0ece4',
+            'text-muted': '#7a7368',
+            error: '#f87171',
+            success: '#4ade80',
+            warn: '#e0a952'
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          keyframes: {
+            slideDown: {
+              '0%': { opacity: '0', transform: 'translateY(-8px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            spin: {
+              '100%': { transform: 'rotate(360deg)' }
+            }
+          },
+          animation: {
+            slideDown: 'slideDown 0.3s ease forwards',
+            'spin-fast': 'spin 0.8s linear infinite',
+          }
+        }
       }
-      .order-meta { flex: 1 1 calc(100% - 50px); }
-      /* FIX: Right side moves to second row, chevron stays in top-right */
-      .order-header-right {
-        width: 100%;
-        justify-content: space-between;
-        order: 2;
-      }
-      /* FIX: Chevron fixed to top-right corner of card header — clean approach */
-      .chevron {
-        position: absolute;
-        top: 16px;
-        right: 18px;
-        margin: 0;
-      }
-      /* Required for absolute chevron positioning */
-      .order-header { position: relative; padding-right: 58px; }
-
-      .order-body-inner { padding: 20px 18px; }
-
-      .details-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-
-      .order-bottom {
-        flex-direction: column;   /* FIX: natural order, not column-reverse */
-        align-items: stretch;
-        gap: 16px;
-      }
-      .order-summary { max-width: 100%; }
-
-      .order-actions { width: 100%; }
-      .order-actions .btn { flex: 1; justify-content: center; }
     }
+  </script>
 
-    /* ── 600px — Large phone ─────────────────────────────────────── */
-    @media (max-width: 600px) {
-      .orders-layout { padding: 20px 0 48px; }
-
-      .orders-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-      .orders-header .btn { width: 100%; justify-content: center; }
-
-      .order-num { font-size: 14px; }
-      .order-total { font-size: 14px; }
-      .status-badge { font-size: 10px; padding: 3px 8px; }
-
-      /* Timeline: smaller dots on phones */
-      .tl-dot { width: 28px; height: 28px; font-size: 12px; }
-      .tl-step:not(:last-child)::after { top: 13px; left: calc(50% + 14px); width: calc(100% - 28px); }
-      .tl-label { font-size: 9px; }
-
-      /* Items: smaller thumbnail */
-      .oi-img { width: 48px; height: 60px; }
-      .oi-name { font-size: 13px; }
-      .oi-price { font-size: 14px; }
-
-      .info-box { padding: 12px 16px; }
-    }
-
-    /* ── 480px — Small phone ─────────────────────────────────────── */
-    @media (max-width: 480px) {
-      .orders-empty { padding: 48px 16px; }
-      .orders-empty .empty-icon { font-size: 44px; }
-      .orders-empty h3 { font-size: 18px; }
-
-      .order-header { padding: 14px 14px; padding-right: 52px; }
-      .chevron { right: 14px; top: 14px; width: 28px; height: 28px; }
-      .chevron i { font-size: 17px !important; }
-
-      .order-body-inner { padding: 16px 14px; }
-
-      /* Pagination: smaller on tiny screens */
-      .page-btn { min-width: 32px; height: 32px; font-size: 12px; padding: 0 8px; }
-      .pagination-wrapper { gap: 4px; margin-top: 32px; }
-
-      /* Summary row: tighter */
-      .summary-row { font-size: 12px; }
-      .summary-row.total { font-size: 14px; }
-
-      /* Buttons: full width on very small screens */
-      .order-actions { flex-direction: column; }
-      .order-actions .btn { width: 100%; }
-    }
-
-    /* ── 380px — Very small (Galaxy A series etc.) ───────────────── */
-    @media (max-width: 380px) {
-      .order-header-right { gap: 8px; }
-      .order-num { font-size: 13px; }
-      .status-badge { display: none; } /* too cramped — status visible in timeline */
-      .order-total { font-size: 13px; }
-
-      /* Show status indicator dot instead */
-      .order-meta::after {
-        content: attr(data-status);
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--gold);
-        text-transform: capitalize;
-      }
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     }
   </style>
 </head>
-<body>
+<body class="bg-black text-text font-sans antialiased">
 
   <nav id="main-nav"></nav>
 
-  <div class="page-wrapper">
-    <div class="container orders-layout">
+  <div class="min-h-screen">
+    <div class="pt-8 pb-16 sm:pt-10 sm:pb-20 max-w-[900px] mx-auto px-4 sm:px-6">
 
-      <div class="orders-header">
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-6 sm:mb-8 gap-4">
         <div>
-          <h1 class="section-title" style="margin-bottom:6px;">My Orders</h1>
-          <p style="color:var(--text-muted);font-size:14px;">
-            <i class="ri-history-line" style="margin-right:6px;vertical-align:middle;"></i>
+          <h1 class="font-serif text-[22px] sm:text-3xl font-bold text-gold tracking-wide mb-1 sm:mb-2">My Orders</h1>
+          <p class="text-text-muted text-[13px] sm:text-sm flex items-center gap-1.5">
+            <i class="ri-history-line"></i>
             Track and manage your purchases
           </p>
         </div>
-        <a href="/shop.html" class="btn btn-outline" style="padding:10px 20px;">
-          <i class="ri-shopping-bag-3-line" style="margin-right:8px;"></i> Continue Shopping
+        <a href="/shop.html" class="w-full sm:w-auto inline-flex items-center justify-center font-bold rounded-lg border border-gold text-gold hover:bg-gold hover:text-surface transition-colors text-[13px] sm:text-sm px-5 py-2.5">
+          <i class="ri-shopping-bag-3-line mr-2"></i> Continue Shopping
         </a>
       </div>
 
-      <div id="orders-container">
-        <div style="height:110px;margin-bottom:20px;border-radius:16px;" class="skeleton"></div>
-        <div style="height:110px;margin-bottom:20px;border-radius:16px;" class="skeleton"></div>
-        <div style="height:110px;border-radius:16px;" class="skeleton"></div>
+      <div id="orders-container" class="space-y-5">
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
       </div>
 
-      <div id="orders-pagination" class="pagination-wrapper"></div>
+      <div id="orders-pagination" class="flex justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12 flex-wrap"></div>
 
     </div>
 
     <footer class="site-footer">
-      <div class="container">
-        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="flex justify-center py-6 text-sm text-text-muted">
           <span>© 2026 Luviio. All rights reserved.</span>
         </div>
       </div>
@@ -635,9 +130,9 @@
       const pag = document.getElementById('orders-pagination');
 
       c.innerHTML = `
-        <div style="height:110px;margin-bottom:20px;border-radius:16px;" class="skeleton"></div>
-        <div style="height:110px;margin-bottom:20px;border-radius:16px;" class="skeleton"></div>
-        <div style="height:110px;border-radius:16px;" class="skeleton"></div>`;
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse mb-5"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse mb-5"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>`;
       pag.innerHTML = '';
 
       try {
@@ -647,11 +142,11 @@
 
         if (!data.items?.length) {
           c.innerHTML = `
-            <div class="orders-empty">
-              <div class="empty-icon"><i class="ri-inbox-archive-line"></i></div>
-              <h3>No orders yet</h3>
-              <p>Looks like you haven't made your first purchase yet.</p>
-              <a href="/shop.html" class="btn btn-primary">Start Shopping</a>
+            <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-border rounded-2xl">
+              <div class="text-[44px] sm:text-[52px] text-border mb-4 leading-none"><i class="ri-inbox-archive-line"></i></div>
+              <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">No orders yet</h3>
+              <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">Looks like you haven't made your first purchase yet.</p>
+              <a href="/shop.html" class="inline-flex items-center justify-center font-bold rounded-lg bg-gold text-surface hover:bg-[#b59454] transition-colors text-[13px] sm:text-sm px-6 py-2.5">Start Shopping</a>
             </div>`;
           return;
         }
@@ -661,67 +156,84 @@
 
       } catch (err) {
         c.innerHTML = `
-          <div class="orders-empty" style="border-color:rgba(248,113,113,0.3);">
-            <div class="empty-icon" style="color:var(--error);"><i class="ri-error-warning-line"></i></div>
-            <h3>Could not load orders</h3>
-            <p>${escapeHTML(err.message)}</p>
-            <button class="btn btn-outline" onclick="loadOrders(${currentPage})">
-              <i class="ri-refresh-line" style="margin-right:6px;"></i> Retry
+          <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-error/30 rounded-2xl">
+            <div class="text-[44px] sm:text-[52px] text-error mb-4 leading-none"><i class="ri-error-warning-line"></i></div>
+            <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">Could not load orders</h3>
+            <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">${escapeHTML(err.message)}</p>
+            <button class="inline-flex items-center justify-center font-bold rounded-lg border border-border bg-surface-2 hover:border-gold hover:text-gold transition-colors text-[13px] sm:text-sm px-5 py-2.5 text-text" onclick="loadOrders(${currentPage})">
+              <i class="ri-refresh-line mr-1.5"></i> Retry
             </button>
           </div>`;
       }
     }
 
-    /* ── Status badge HTML (safe) ──────────────────────────────────────── */
+    /* ── Status badge HTML (Tailwind Classes) ──────────────────────────── */
     function getStatusBadgeHTML(status) {
       const icon  = STATUS_ICONS[status] || 'ri-record-circle-line';
       const label = status.charAt(0).toUpperCase() + status.slice(1);
-      // FIX: escapeHTML on status (comes from server)
-      return `<span class="status-badge status-${escapeHTML(status)}"><i class="${icon}"></i> ${escapeHTML(label)}</span>`;
+      
+      const colors = {
+        pending:   'bg-warn/10 text-warn border-warn/20',
+        paid:      'bg-sky-400/10 text-sky-400 border-sky-400/20',
+        shipped:   'bg-purple-400/10 text-purple-400 border-purple-400/20',
+        delivered: 'bg-success/10 text-success border-success/20',
+        cancelled: 'bg-error/10 text-error border-error/20',
+        refunded:  'bg-error/10 text-error border-error/20',
+      }[status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+
+      return `<span class="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider whitespace-nowrap border ${colors}"><i class="${icon}"></i> ${escapeHTML(label)}</span>`;
     }
 
-    /* ── Build order card (DOM, not innerHTML for event-bearing elements) ── */
+    /* ── Build order card ──────────────────────────────────────────────── */
     function makeOrderCard(order) {
-      const card   = document.createElement('div');
-      card.className = 'order-card';
+      const card = document.createElement('div');
+      card.className = 'group bg-surface border border-border rounded-2xl mb-4 sm:mb-5 overflow-hidden transition-all duration-300 hover:border-gold/30 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5';
 
-      // FIX: set data-status on meta for the 380px CSS trick
       const header = document.createElement('div');
-      header.className = 'order-header';
+      header.className = 'flex flex-wrap sm:flex-nowrap items-center justify-between p-3.5 sm:p-5 lg:px-7 cursor-pointer gap-3 sm:gap-4 select-none relative sm:static pr-[52px] sm:pr-7';
 
       const itemCount = (order.order_items || []).length;
+      
       header.innerHTML = `
-        <div class="order-meta" data-status="${escapeHTML(order.status)}">
-          <div class="order-num">Order #${order.id.substring(0, 8).toUpperCase()}</div>
-          <div class="order-date">
-            <i class="ri-calendar-line"></i>
-            ${formatDate(order.created_at)}
-            &middot;
-            ${itemCount} item${itemCount !== 1 ? 's' : ''}
+        <div class="flex flex-col gap-1 flex-1 min-w-0 w-[calc(100%-50px)] sm:w-auto">
+          <div class="font-serif text-[13px] sm:text-base font-bold text-text tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Order #${order.id.substring(0, 8).toUpperCase()}</div>
+          <div class="text-[11px] sm:text-xs text-text-muted flex items-center gap-1.5 flex-wrap">
+            <i class="ri-calendar-line"></i> ${formatDate(order.created_at)} &middot; ${itemCount} item${itemCount !== 1 ? 's' : ''}
           </div>
         </div>
-        <div class="order-header-right">
-          ${getStatusBadgeHTML(order.status)}
-          <div class="order-total">${formatPrice(order.total_amount)}</div>
-          <div class="chevron"><i class="ri-arrow-down-s-line" style="font-size:20px;"></i></div>
+        <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 shrink-0 w-full sm:w-auto order-2 sm:order-none mt-1 sm:mt-0">
+          <div class="hidden min-[381px]:block">${getStatusBadgeHTML(order.status)}</div>
+          <div class="block min-[381px]:hidden text-[11px] font-semibold text-gold capitalize">${escapeHTML(order.status)}</div>
+          <div class="text-[13px] sm:text-base font-bold text-gold whitespace-nowrap">${formatPrice(order.total_amount)}</div>
+        </div>
+        <div class="chevron absolute sm:static top-3.5 right-3.5 sm:m-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] sm:min-w-[32px] rounded-full bg-surface-2 shrink-0 transition-all duration-300 text-text-muted group-hover:bg-gold/10 group-hover:text-gold">
+          <i class="ri-arrow-down-s-line text-[17px] sm:text-[20px]"></i>
         </div>`;
 
-      const body    = document.createElement('div');
-      body.className = 'order-body';
+      const body = document.createElement('div');
+      body.className = 'hidden border-t border-border';
       const chevron = header.querySelector('.chevron');
 
       header.addEventListener('click', async () => {
-        const isOpen = body.classList.contains('open');
-        body.classList.toggle('open');
-        chevron.classList.toggle('open');
+        const isOpen = !body.classList.contains('hidden');
+        
+        if (isOpen) {
+          body.classList.add('hidden');
+          body.classList.remove('animate-slideDown');
+          chevron.classList.remove('rotate-180', 'bg-gold', 'text-black');
+        } else {
+          body.classList.remove('hidden');
+          body.classList.add('animate-slideDown');
+          chevron.classList.add('rotate-180', 'bg-gold', 'text-black');
 
-        if (!isOpen && !body.dataset.loaded) {
-          body.dataset.loaded = 'true';
-          body.innerHTML = '<div class="order-body-inner"><div style="height:80px;border-radius:12px;" class="skeleton"></div></div>';
-          try {
-            renderOrderBody(body, await API.getMyOrder(order.id));
-          } catch (err) {
-            body.innerHTML = `<div class="order-body-inner"><p class="form-error"><i class="ri-alert-line"></i> ${escapeHTML(err.message)}</p></div>`;
+          if (!body.dataset.loaded) {
+            body.dataset.loaded = 'true';
+            body.innerHTML = '<div class="p-4 sm:p-5 lg:p-7"><div class="h-20 rounded-xl bg-surface-2 animate-pulse"></div></div>';
+            try {
+              renderOrderBody(body, await API.getMyOrder(order.id));
+            } catch (err) {
+              body.innerHTML = `<div class="p-4 sm:p-5 lg:p-7"><p class="text-error text-sm font-medium"><i class="ri-alert-line"></i> ${escapeHTML(err.message)}</p></div>`;
+            }
           }
         }
       });
@@ -731,52 +243,59 @@
       return card;
     }
 
-    /* ── Render expanded order body (pure DOM, no innerHTML for user data) ─ */
+    /* ── Render expanded order body ────────────────────────────────────── */
     function renderOrderBody(body, order) {
       const isCancelled = ['cancelled', 'refunded'].includes(order.status);
       const currentIdx  = STATUS_FLOW.indexOf(order.status);
       body.innerHTML    = '';
 
       const inner = document.createElement('div');
-      inner.className = 'order-body-inner';
+      inner.className = 'p-4 sm:p-5 lg:p-7';
 
       // ── Timeline ───────────────────────────────────────────────────────────
       const tl = document.createElement('div');
-      tl.className = 'status-timeline';
+      tl.className = 'flex items-start mb-6 sm:mb-8 overflow-x-auto pb-2 px-0.5 scrollbar-hide';
 
       if (isCancelled) {
         const s = document.createElement('div');
-        s.className = 'tl-step cancelled';
-        const dot = document.createElement('div');
-        dot.className = 'tl-dot';
-        dot.innerHTML = '<i class="ri-close-line"></i>';
-        const lbl = document.createElement('div');
-        lbl.className = 'tl-label';
-        lbl.textContent = order.status.toUpperCase();
-        s.appendChild(dot); s.appendChild(lbl);
+        s.className = 'flex flex-col items-center flex-1 min-w-[72px] max-w-[120px] relative';
+        s.innerHTML = `
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-error bg-error/10 flex items-center justify-center text-xs sm:text-sm relative z-10 shrink-0 text-error"><i class="ri-close-line"></i></div>
+          <div class="text-[9px] sm:text-[10px] font-semibold mt-2 text-error text-center whitespace-nowrap tracking-wider">${order.status.toUpperCase()}</div>`;
         tl.appendChild(s);
       } else {
         STATUS_FLOW.forEach((key, i) => {
-          const state = i < currentIdx ? 'done' : i === currentIdx ? 'current' : '';
-          const s     = document.createElement('div');
-          s.className = `tl-step ${state}`;
-          const dot   = document.createElement('div');
-          dot.className = 'tl-dot';
-          if (state === 'done')    dot.innerHTML = '<i class="ri-check-line"></i>';
-          if (state === 'current') dot.innerHTML = '<i class="ri-loader-4-line"></i>';
-          const lbl   = document.createElement('div');
-          lbl.className = 'tl-label';
-          lbl.textContent = key.toUpperCase();
-          s.appendChild(dot); s.appendChild(lbl);
+          const isDone = i < currentIdx;
+          const isCurr = i === currentIdx;
+          
+          const s = document.createElement('div');
+          s.className = `flex flex-col items-center flex-1 min-w-[72px] max-w-[120px] relative after:content-[''] after:absolute after:top-[13px] sm:after:top-[15px] after:left-[calc(50%+14px)] sm:after:left-[calc(50%+16px)] after:w-[calc(100%-28px)] sm:after:w-[calc(100%-32px)] after:h-0.5 last:after:hidden ${isDone ? 'after:bg-gold' : 'after:bg-border'}`;
+          
+          let dotStyle = 'border-border bg-surface-2 text-text-muted';
+          let iconHTML = '';
+          let lblStyle = 'text-text-muted';
+
+          if (isDone) {
+            dotStyle = 'border-gold bg-gold/10 text-gold';
+            iconHTML = '<i class="ri-check-line"></i>';
+            lblStyle = 'text-text';
+          } else if (isCurr) {
+            dotStyle = 'border-gold bg-gold text-black shadow-[0_0_0_4px_rgba(201,169,110,0.2)]';
+            iconHTML = '<i class="ri-loader-4-line"></i>';
+            lblStyle = 'text-text';
+          }
+
+          s.innerHTML = `
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-sm relative z-10 shrink-0 transition-all duration-300 ${dotStyle}">${iconHTML}</div>
+            <div class="text-[9px] sm:text-[10px] font-semibold mt-2 text-center whitespace-nowrap tracking-wider ${lblStyle}">${key.toUpperCase()}</div>`;
           tl.appendChild(s);
         });
       }
       inner.appendChild(tl);
 
       // ── Details Grid (Address + Tracking) ──────────────────────────────────
-      // FIX: Use DOM instead of innerHTML += to avoid event-listener trashing
       const grid = document.createElement('div');
-      grid.className = 'details-grid';
+      grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6';
       let hasDetails = false;
 
       if (order.shipping_line1) {
@@ -787,26 +306,20 @@
         ].filter(Boolean);
 
         const box = document.createElement('div');
-        box.className = 'info-box';
-        box.innerHTML = `<div class="info-box-label"><i class="ri-map-pin-line"></i> Shipping Address</div>`;
-        const txt = document.createElement('div');
-        txt.className = 'info-box-text';
-        txt.textContent = parts.join(', '); // textContent = XSS safe
-        box.appendChild(txt);
+        box.className = 'p-3 sm:p-4 lg:px-5 bg-surface-2 rounded-xl border border-border';
+        box.innerHTML = `
+          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2 flex items-center gap-1.5"><i class="ri-map-pin-line"></i> Shipping Address</div>
+          <div class="text-[13px] text-text-muted leading-relaxed">${escapeHTML(parts.join(', '))}</div>`;
         grid.appendChild(box);
         hasDetails = true;
       }
 
       if (order.tracking_number) {
         const box = document.createElement('div');
-        box.className = 'info-box';
-        box.style.cssText = 'border-color:var(--gold);background:var(--gold-dim);';
-        box.innerHTML = `<div class="info-box-label" style="color:var(--gold);"><i class="ri-truck-line"></i> Tracking Info</div>`;
-        const txt = document.createElement('div');
-        txt.className = 'info-box-text';
-        txt.style.cssText = 'color:var(--text);font-weight:700;font-size:15px;margin-top:4px;';
-        txt.textContent = order.tracking_number;
-        box.appendChild(txt);
+        box.className = 'p-3 sm:p-4 lg:px-5 bg-gold/10 rounded-xl border border-gold';
+        box.innerHTML = `
+          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-gold mb-2 flex items-center gap-1.5"><i class="ri-truck-line"></i> Tracking Info</div>
+          <div class="text-[14px] sm:text-[15px] font-bold text-text mt-1">${escapeHTML(order.tracking_number)}</div>`;
         grid.appendChild(box);
         hasDetails = true;
       }
@@ -817,40 +330,26 @@
       const items = order.order_items || [];
       if (items.length) {
         const list = document.createElement('div');
-        list.style.marginBottom = '24px';
+        list.className = 'mb-6';
 
         items.forEach(item => {
-          const row    = document.createElement('div');
-          row.className = 'oi-row';
-          const imgBox = document.createElement('div');
-          imgBox.className = 'oi-img';
-
           const imageUrl = item.products?.image_url || null;
-          if (imageUrl) {
-            const img   = document.createElement('img');
-            img.loading = 'lazy';
-            img.alt     = item.product_name;
-            img.src     = imageUrl; // URL from server, not user input
-            imgBox.appendChild(img);
-          } else {
-            imgBox.innerHTML = '<i class="ri-image-line"></i>';
-          }
+          const imgHTML = imageUrl 
+            ? `<img src="${imageUrl}" alt="${escapeHTML(item.product_name)}" loading="lazy" class="w-full h-full object-cover">`
+            : `<i class="ri-image-line"></i>`;
 
-          const info = document.createElement('div');
-          info.className = 'oi-info';
-          const nm = document.createElement('div');
-          nm.className = 'oi-name';
-          nm.textContent = item.product_name; // textContent = XSS safe
-          const mt = document.createElement('div');
-          mt.className = 'oi-meta';
-          mt.textContent = `Qty: ${item.quantity} × ${formatPrice(item.unit_price)}`;
-          info.appendChild(nm); info.appendChild(mt);
-
-          const price = document.createElement('div');
-          price.className = 'oi-price';
-          price.textContent = formatPrice(item.subtotal);
-
-          row.appendChild(imgBox); row.appendChild(info); row.appendChild(price);
+          const row = document.createElement('div');
+          row.className = 'flex gap-3 sm:gap-3.5 items-center py-3.5 border-b border-dashed border-border last:border-0';
+          row.innerHTML = `
+            <div class="w-12 h-[60px] sm:w-14 sm:h-[70px] rounded-xl bg-surface-2 overflow-hidden border border-border shrink-0 flex items-center justify-center text-xl text-white/5">
+              ${imgHTML}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-[13px] sm:text-sm font-medium text-text whitespace-nowrap overflow-hidden text-ellipsis">${escapeHTML(item.product_name)}</div>
+              <div class="text-xs text-text-muted mt-1">Qty: ${item.quantity} × ${formatPrice(item.unit_price)}</div>
+            </div>
+            <div class="text-sm sm:text-[15px] font-bold text-gold whitespace-nowrap shrink-0">${formatPrice(item.subtotal)}</div>
+          `;
           list.appendChild(row);
         });
         inner.appendChild(list);
@@ -858,48 +357,67 @@
 
       // ── Bottom: Actions + Summary ───────────────────────────────────────────
       const bottom = document.createElement('div');
-      bottom.className = 'order-bottom';
+      bottom.className = 'flex flex-col sm:flex-row justify-between items-stretch sm:items-end mt-6 gap-4';
 
       // Actions (left)
       const actions = document.createElement('div');
-      actions.className = 'order-actions';
+      actions.className = 'flex flex-col sm:flex-row gap-2.5 flex-wrap items-center w-full sm:w-auto';
+      
+      const btnBaseClass = "w-full sm:w-auto inline-flex items-center justify-center font-bold rounded-lg transition-colors text-[13px] sm:text-sm px-5 py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed";
 
-      // Download Invoice button
-      // FIX: API.downloadInvoice likely doesn't exist — graceful fallback
+      // 🔥 PAY NOW BUTTON (FIXED)
+      if (order.status === 'pending') {
+        const payBtn = document.createElement('button');
+        payBtn.className = `${btnBaseClass} bg-gold text-surface hover:bg-[#b59454]`;
+        payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5"></i> Pay Now';
+        
+        payBtn.addEventListener('click', async () => {
+          payBtn.disabled = true;
+          payBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-surface/20 border-t-surface rounded-full animate-spin-fast mr-2"></span> Processing...';
+          try {
+            // 🔥 The ultimate clean API call
+            const data = await API.retryPayment(order.id);
+
+            if (data.status === 'paid') {
+              showToast('Payment was already successful!', 'success');
+              loadOrders(currentPage);
+              return;
+            }
+            window.location.href = `/checkout.html?retry_order=${data.order_id}&client_secret=${data.client_secret}`;
+          } catch (err) {
+            showToast(err.message, 'error');
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5"></i> Pay Now';
+          }
+        });
+        actions.appendChild(payBtn);
+      }
+
+      // INVOICE BUTTON
       const dlBtn = document.createElement('button');
-      dlBtn.className = 'btn btn-outline';
-      dlBtn.style.cssText = 'padding:10px 20px;';
-      dlBtn.innerHTML = '<i class="ri-file-download-line" style="margin-right:6px;"></i> Invoice';
+      dlBtn.className = `${btnBaseClass} border border-gold text-gold hover:bg-gold hover:text-surface`;
+      dlBtn.innerHTML = '<i class="ri-file-download-line mr-1.5"></i> Invoice';
       dlBtn.addEventListener('click', async () => {
         const orig = dlBtn.innerHTML;
         dlBtn.disabled = true;
-        dlBtn.innerHTML = '<span class="spinner-sm"></span>';
+        dlBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-gold/20 border-t-gold rounded-full animate-spin-fast"></span>';
         try {
-          if (typeof API.downloadInvoice === 'function') {
-            await API.downloadInvoice(order.id);
-          } else {
-            // Graceful fallback: print/save page as PDF
-            showToast('Invoice download coming soon', 'info');
-          }
-        } catch (err) {
-          showToast('Invoice download failed: ' + err.message, 'error');
-        } finally {
-          dlBtn.disabled = false;
-          dlBtn.innerHTML = orig;
-        }
+          if (typeof API.downloadInvoice === 'function') { await API.downloadInvoice(order.id); } 
+          else { showToast('Invoice download coming soon', 'info'); }
+        } catch (err) { showToast('Invoice download failed: ' + err.message, 'error'); } 
+        finally { dlBtn.disabled = false; dlBtn.innerHTML = orig; }
       });
       actions.appendChild(dlBtn);
 
-      // Cancel button (only for pending)
+      // CANCEL BUTTON
       if (order.status === 'pending') {
         const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn btn-danger';
-        cancelBtn.style.cssText = 'padding:10px 20px;';
-        cancelBtn.innerHTML = '<i class="ri-close-circle-line" style="margin-right:6px;"></i> Cancel';
+        cancelBtn.className = `${btnBaseClass} bg-error/10 text-error hover:bg-error hover:text-white border border-error/20`;
+        cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5"></i> Cancel';
         cancelBtn.addEventListener('click', async () => {
           if (!confirm('Cancel this order? This cannot be undone.')) return;
           cancelBtn.disabled = true;
-          cancelBtn.innerHTML = '<span class="spinner-sm"></span> Cancelling...';
+          cancelBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-error/20 border-t-error rounded-full animate-spin-fast mr-2"></span> Cancelling...';
           try {
             await API.cancelOrder(order.id);
             showToast('Order cancelled', 'info');
@@ -907,7 +425,7 @@
           } catch (err) {
             showToast(err.message, 'error');
             cancelBtn.disabled = false;
-            cancelBtn.innerHTML = '<i class="ri-close-circle-line" style="margin-right:6px;"></i> Cancel';
+            cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5"></i> Cancel';
           }
         });
         actions.appendChild(cancelBtn);
@@ -917,26 +435,15 @@
 
       // Summary (right)
       const summary = document.createElement('div');
-      summary.className = 'order-summary';
-      const rows = [
-        ['Subtotal', formatPrice(order.subtotal)],
-        ['Shipping', order.shipping_cost === 0
-          ? '<span style="color:var(--success)"><i class="ri-truck-line"></i> Free</span>'
-          : formatPrice(order.shipping_cost)],
-        ['Tax', formatPrice(order.tax_amount)],
-      ];
-      rows.forEach(([label, val]) => {
-        const row = document.createElement('div');
-        row.className = 'summary-row';
-        const l = document.createElement('span'); l.textContent = label;
-        const v = document.createElement('span'); v.innerHTML  = val; // safe: formatPrice + our HTML
-        row.appendChild(l); row.appendChild(v);
-        summary.appendChild(row);
-      });
-      const totRow = document.createElement('div');
-      totRow.className = 'summary-row total';
-      totRow.innerHTML = `<span>Total</span><span>${formatPrice(order.total_amount)}</span>`;
-      summary.appendChild(totRow);
+      summary.className = 'w-full sm:max-w-[280px]';
+      const shippingHTML = order.shipping_cost === 0 ? '<span class="text-success"><i class="ri-truck-line"></i> Free</span>' : formatPrice(order.shipping_cost);
+      
+      summary.innerHTML = `
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal)}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Shipping</span><span>${shippingHTML}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount)}</span></div>
+        <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount)}</span></div>
+      `;
 
       bottom.appendChild(summary);
       inner.appendChild(bottom);
@@ -953,7 +460,17 @@
 
       const mkBtn = (html, targetPage, isActive, isNav, isDisabled = false) => {
         const btn = document.createElement('button');
-        btn.className = `page-btn ${isActive ? 'active' : ''} ${isNav ? 'nav-btn' : ''}`;
+        
+        let classes = 'flex items-center justify-center min-w-[32px] sm:min-w-[36px] h-8 sm:h-9 px-2 sm:px-2.5 rounded-full text-xs sm:text-[13px] font-semibold transition-all duration-200 ';
+        if (isActive) {
+          classes += 'bg-gold text-black shadow-[0_4px_12px_rgba(201,169,110,0.3)] cursor-default pointer-events-none';
+        } else if (isNav) {
+          classes += 'bg-surface border border-border hover:border-gold hover:text-gold text-text-muted disabled:opacity-40 disabled:cursor-not-allowed';
+        } else {
+          classes += 'bg-transparent text-text-muted hover:bg-surface-2 hover:text-text disabled:opacity-40 disabled:cursor-not-allowed border border-transparent';
+        }
+
+        btn.className = classes;
         btn.innerHTML = html;
         btn.disabled  = isDisabled || isActive;
         if (!btn.disabled) {
@@ -965,31 +482,26 @@
         return btn;
       };
 
-      // Prev
-      wrap.appendChild(mkBtn('<i class="ri-arrow-left-s-line" style="font-size:18px;"></i>', currentPage - 1, false, true, currentPage === 1));
+      wrap.appendChild(mkBtn('<i class="ri-arrow-left-s-line text-lg"></i>', currentPage - 1, false, true, currentPage === 1));
 
-      // Pages with ellipsis for large counts
       const range = [];
       for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-          range.push(i);
-        } else if (range[range.length - 1] !== '…') {
-          range.push('…');
-        }
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) { range.push(i); } 
+        else if (range[range.length - 1] !== '…') { range.push('…'); }
       }
+      
       range.forEach(p => {
         if (p === '…') {
           const el = document.createElement('span');
+          el.className = 'px-1 text-text-dim text-[13px]';
           el.textContent = '…';
-          el.style.cssText = 'padding:0 4px;color:var(--text-dim);font-size:13px;';
           wrap.appendChild(el);
         } else {
           wrap.appendChild(mkBtn(p, p, p === currentPage, false));
         }
       });
 
-      // Next
-      wrap.appendChild(mkBtn('<i class="ri-arrow-right-s-line" style="font-size:18px;"></i>', currentPage + 1, false, true, currentPage === totalPages));
+      wrap.appendChild(mkBtn('<i class="ri-arrow-right-s-line text-lg"></i>', currentPage + 1, false, true, currentPage === totalPages));
     }
   </script>
 </body>

@@ -1,5 +1,5 @@
 /* ============================================================
-   LUVIIO — API  (v7 — Production Retry)
+   LUVIIO — API  (v7 — Production Retry & AOT Payments)
    ============================================================
    RETRY RULES (Production Standard):
    1. Sirf NETWORK errors pe retry (status=0) — 4xx/5xx pe KABHI NAHI
@@ -157,11 +157,11 @@ const API = (() => {
     get:    (path)        => request('GET',    path),
     post:   (path, body)  => request('POST',   path, body),
     patch:  (path, body)  => request('PATCH',  path, body),
-    put:    (path, body)  => request('PUT',     path, body),
-    delete: (path)        => request('DELETE',  path),
+    put:    (path, body)  => request('PUT',    path, body),
+    delete: (path)        => request('DELETE', path),
 
     // --- AUTH ---
-    login:      (email, pass)     => request('POST', '/auth/login',    { email, password: pass }),
+    login:      (email, pass)       => request('POST', '/auth/login',    { email, password: pass }),
     register:   (email, pass, name) => request('POST', '/auth/register', { email, password: pass, full_name: name }),
     logout: async () => {
       if (typeof AUTH === 'undefined') return;
@@ -233,15 +233,16 @@ const API = (() => {
     updateOrderAdmin: (id, data) => request('PATCH',  `/orders/${encodeURIComponent(id)}`, data),
     downloadInvoice:  (id)       => _downloadBlob(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
 
-    // --- PAYMENTS ---
-    createPaymentIntent:  (orderId)                        => request('POST', '/payments/create-intent', { order_id: orderId }),
-    confirmPayment:       (orderId, piId)                  => request('POST', '/payments/confirm',       { order_id: orderId, payment_intent_id: piId }),
-    notifyPaymentFailed:  (orderId, piId, errMsg)          => request('POST', '/payments/notify-failed', { order_id: orderId, payment_intent_id: piId, error_message: errMsg }),
+    // --- PAYMENTS (AOT Updates) ---
+    createPaymentIntent:  (addressId, idemKey) => request('POST', '/payments/create-intent', { shipping_address_id: addressId, idempotency_key: idemKey }),
+    confirmPayment:       (piId)               => request('POST', '/payments/confirm',       { payment_intent_id: piId }),
+    notifyPaymentFailed:  (piId, errMsg)       => request('POST', '/payments/notify-failed', { payment_intent_id: piId, error_message: errMsg }),
+    retryPayment:         (orderId)            => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
 
     // --- PUSH ---
-    getVapidKey:    ()     => request('GET',    '/push/vapid-key'),
-    subscribePush:  (data) => request('POST',   '/push/subscribe', data),
-    unsubscribePush:(data) => request('DELETE',  '/push/unsubscribe', data),
+    getVapidKey:     ()     => request('GET',    '/push/vapid-key'),
+    subscribePush:   (data) => request('POST',   '/push/subscribe', data),
+    unsubscribePush: (data) => request('DELETE', '/push/unsubscribe', data),
 
     // --- ADMIN / SYSTEM ---
     verifyAdmin: () => request('GET', '/admin/verify'),

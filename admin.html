@@ -7,14 +7,14 @@
   <title>Admin — Luviio</title>
   
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
-
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
-
+  
   <link rel="stylesheet" href="/css/luviio.css">
   <link rel="stylesheet" href="/css/admin.css">
-
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -44,7 +44,7 @@
       }
     }
   </script>
-
+  
   <style type="text/tailwindcss">
     @layer components {
       /* Layout & Shell */
@@ -251,7 +251,9 @@
                   </tr>
                 </thead>
                 <tbody id="dash-orders-body" class="group">
-                  <tr><td colspan="5" class="text-center p-8 text-text-dim">Loading…</td></tr>
+                  <tr>
+                    <td colspan="5" class="text-center p-8 text-text-dim">Loading…</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -302,7 +304,9 @@
                   </tr>
                 </thead>
                 <tbody id="products-body" class="group">
-                  <tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>
+                  <tr>
+                    <td colspan="8" class="text-center p-10 text-text-dim">Loading…</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -548,7 +552,7 @@
       </div>
     </div>
   </div>
-
+  
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -561,9 +565,16 @@
     /* ══════════════════════════════════════
        STATE
     ══════════════════════════════════════ */
-    let allProducts = [], allCategories = [], allUsers = [], allInventory = [];
-    let selectedProds = new Set(), pendingImages = [], currentProductData = null;
-    let pProdPage = 1, pOrderPage = 1, pUserPage = 1;
+    let allProducts = [],
+      allCategories = [],
+      allUsers = [],
+      allInventory = [];
+    let selectedProds = new Set(),
+      pendingImages = [],
+      currentProductData = null;
+    let pProdPage = 1,
+      pOrderPage = 1,
+      pUserPage = 1;
     const PS = 20;
     
     /* ══════════════════════════════════════
@@ -615,7 +626,7 @@
       if (!ok) return;
       const profile = AUTH.getProfile();
       if (!profile || profile.role !== 'admin') {
-        if(typeof showToast === 'function') showToast('Admin access required', 'error');
+        if (typeof showToast === 'function') showToast('Admin access required', 'error');
         setTimeout(() => location.href = '/index.html', 1400);
         return;
       }
@@ -626,10 +637,16 @@
     setTimeout(init, 100);
     
     function showPanel(name) {
-      document.querySelectorAll('.admin-panel').forEach(p => { p.classList.remove('block'); p.classList.add('hidden'); });
+      document.querySelectorAll('.admin-panel').forEach(p => {
+        p.classList.remove('block');
+        p.classList.add('hidden');
+      });
       document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
       const tgt = document.getElementById(`panel-${name}`);
-      if(tgt) { tgt.classList.remove('hidden'); tgt.classList.add('block'); }
+      if (tgt) {
+        tgt.classList.remove('hidden');
+        tgt.classList.add('block');
+      }
       document.querySelectorAll('.sidebar-btn').forEach(b => { if (b.getAttribute('onclick')?.includes(`'${name}'`)) b.classList.add('active'); });
       if (name === 'products') loadProducts();
       if (name === 'categories') loadCategories();
@@ -643,8 +660,14 @@
         const [prods, orders, users] = await Promise.all([ADMIN.getProducts(), ADMIN.getOrders(), ADMIN.getUsers()]);
         const pending = orders?.items?.filter(o => o.status === 'pending').length ?? 0;
         [
-          ['stat-products', prods?.total], ['stat-orders', orders?.total], ['stat-pending', pending], ['stat-users', users?.total],
-          ['sb-products', prods?.total], ['sb-orders', orders?.total], ['sb-pending', pending], ['sb-users', users?.total]
+          ['stat-products', prods?.total],
+          ['stat-orders', orders?.total],
+          ['stat-pending', pending],
+          ['stat-users', users?.total],
+          ['sb-products', prods?.total],
+          ['sb-orders', orders?.total],
+          ['sb-pending', pending],
+          ['sb-users', users?.total]
         ].forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; });
         
         const tbody = document.getElementById('dash-orders-body');
@@ -655,7 +678,7 @@
           tbody.appendChild(tr);
         });
         if (!orders?.items?.length) tbody.innerHTML = '<tr><td colspan="5" class="text-center p-6 text-text-dim">No orders yet</td></tr>';
-      } catch (err) { if(typeof showToast==='function') showToast('Dashboard error: ' + err.message, 'error'); }
+      } catch (err) { if (typeof showToast === 'function') showToast('Dashboard error: ' + err.message, 'error'); }
     }
     
     /* ══════════════════════════════════════
@@ -708,32 +731,58 @@
       renderProducts(filtered, filtered.length, 1);
     }
     
-    function toggleProdSel(id, checked) { checked ? selectedProds.add(id) : selectedProds.delete(id); const bar = document.getElementById('prod-bulk-bar');
-      checked || selectedProds.size > 0 ? bar.classList.replace('hidden','flex') : bar.classList.replace('flex','hidden');
-      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
+    function toggleProdSel(id, checked) {
+      checked ? selectedProds.add(id) : selectedProds.delete(id);
+      const bar = document.getElementById('prod-bulk-bar');
+      checked || selectedProds.size > 0 ? bar.classList.replace('hidden', 'flex') : bar.classList.replace('flex', 'hidden');
+      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
+    }
     
-    function toggleAllProds(checked) { allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
+    function toggleAllProds(checked) {
+      allProducts.forEach(p => checked ? selectedProds.add(p.id) : selectedProds.delete(p.id));
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = checked);
       const bar = document.getElementById('prod-bulk-bar');
-      checked && allProducts.length ? bar.classList.replace('hidden','flex') : bar.classList.replace('flex','hidden');
-      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`; }
+      checked && allProducts.length ? bar.classList.replace('hidden', 'flex') : bar.classList.replace('flex', 'hidden');
+      document.getElementById('prod-bulk-label').textContent = `${selectedProds.size} selected`;
+    }
     
-    function clearProdSel() { selectedProds.clear();
+    function clearProdSel() {
+      selectedProds.clear();
       document.querySelectorAll('#products-body input[type=checkbox]').forEach(cb => cb.checked = false);
       document.getElementById('prod-chk-all').checked = false;
-      document.getElementById('prod-bulk-bar').classList.replace('flex','hidden'); }
+      document.getElementById('prod-bulk-bar').classList.replace('flex', 'hidden');
+    }
     
     async function bulkDeleteProducts() {
       if (!selectedProds.size || !confirm(`Delete ${selectedProds.size} products?`)) return;
-      let ok = 0, fail = 0;
-      for (const id of selectedProds) { try { await ADMIN.deleteProduct(id); ok++; } catch { fail++; } }
-      if(typeof showToast==='function') showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
-      clearProdSel(); loadProducts(pProdPage);
+      let ok = 0,
+        fail = 0;
+      for (const id of selectedProds) {
+        try {
+          await ADMIN.deleteProduct(id);
+          ok++;
+        } catch { fail++; }
+      }
+      if (typeof showToast === 'function') showToast(`Deleted ${ok}${fail ? `, ${fail} failed` : ''}`, ok > 0 ? 'success' : 'error');
+      clearProdSel();
+      loadProducts(pProdPage);
     }
     
     function openProductModal(p = null) {
-      currentProductData = p; pendingImages = [];
-      const fields = [['pm-id', p?.id || ''], ['pm-name', p?.name || ''], ['pm-slug', p?.slug || ''], ['pm-sdesc', p?.short_description || ''], ['pm-desc', p?.description || ''], ['pm-price', p?.price || ''], ['pm-compare', p?.compare_price || ''], ['pm-stock', p?.stock ?? 0], ['pm-sku', p?.sku || ''], ['pm-weight', p?.weight_grams || '']];
+      currentProductData = p;
+      pendingImages = [];
+      const fields = [
+        ['pm-id', p?.id || ''],
+        ['pm-name', p?.name || ''],
+        ['pm-slug', p?.slug || ''],
+        ['pm-sdesc', p?.short_description || ''],
+        ['pm-desc', p?.description || ''],
+        ['pm-price', p?.price || ''],
+        ['pm-compare', p?.compare_price || ''],
+        ['pm-stock', p?.stock ?? 0],
+        ['pm-sku', p?.sku || ''],
+        ['pm-weight', p?.weight_grams || '']
+      ];
       fields.forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
       document.getElementById('pm-active').checked = p ? p.is_active : true;
       document.getElementById('pm-title').textContent = p ? `Edit — ${p.name}` : 'Add Product';
@@ -745,17 +794,20 @@
     }
     
     function editProduct(p) { openProductModal(p); }
+    
     function autoSlug(val) { if (!document.getElementById('pm-id').value) document.getElementById('pm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
     
     function renderImagePreviews() {
-      const wrap = document.getElementById('pm-img-previews'); wrap.innerHTML = '';
+      const wrap = document.getElementById('pm-img-previews');
+      wrap.innerHTML = '';
       if (currentProductData && currentProductData.images && currentProductData.images.length > 0) {
         currentProductData.images.forEach(url => { wrap.innerHTML += `<div class="relative w-[68px] h-[84px] rounded border border-border overflow-hidden bg-surface-2"><img src="${escapeHTML(url)}" class="w-full h-full object-cover"></div>`; });
       }
       pendingImages.forEach((file, idx) => {
         const r = new FileReader();
         r.onload = e => {
-          const div = document.createElement('div'); div.className = 'relative w-[68px] h-[84px] rounded border border-border overflow-hidden bg-surface-2';
+          const div = document.createElement('div');
+          div.className = 'relative w-[68px] h-[84px] rounded border border-border overflow-hidden bg-surface-2';
           div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover"><button class="absolute top-1 right-1 bg-black/70 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-xs hover:bg-error backdrop-blur-sm" onclick="removePendingImg(${idx}, event)"><i class="ri-close-line"></i></button>`;
           wrap.appendChild(div);
         };
@@ -763,33 +815,56 @@
       });
     }
     
-    function handleImgs(input) { if (input.files.length > 0) addFilesToPending(input.files); input.value = ''; }
+    function handleImgs(input) {
+      if (input.files.length > 0) addFilesToPending(input.files);
+      input.value = '';
+    }
+    
     function addFilesToPending(files) {
       const existingCount = (currentProductData?.images?.length) || 0;
       const newFiles = Array.from(files);
       const totalCount = existingCount + pendingImages.length + newFiles.length;
-      if (totalCount > 10) { if(typeof showToast==='function') showToast(`Max 10 images allowed.`, 'error'); const allowedCount = 10 - (existingCount + pendingImages.length); if (allowedCount > 0) newFiles.splice(allowedCount); else return; }
-      newFiles.forEach(file => { if (file.size > 5 * 1024 * 1024) { if(typeof showToast==='function') showToast(`${file.name} > 5MB limit`, 'error'); return; } pendingImages.push(file); });
+      if (totalCount > 10) {
+        if (typeof showToast === 'function') showToast(`Max 10 images allowed.`, 'error');
+        const allowedCount = 10 - (existingCount + pendingImages.length);
+        if (allowedCount > 0) newFiles.splice(allowedCount);
+        else return;
+      }
+      newFiles.forEach(file => { if (file.size > 5 * 1024 * 1024) { if (typeof showToast === 'function') showToast(`${file.name} > 5MB limit`, 'error'); return; } pendingImages.push(file); });
       renderImagePreviews();
     }
-    function removePendingImg(index, event) { event.stopPropagation(); pendingImages.splice(index, 1); renderImagePreviews(); }
+    
+    function removePendingImg(index, event) {
+      event.stopPropagation();
+      pendingImages.splice(index, 1);
+      renderImagePreviews();
+    }
     
     const dz = document.getElementById('drop-zone');
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragover', e => {
+      e.preventDefault();
+      dz.classList.add('over');
+    });
     dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length > 0) addFilesToPending(e.dataTransfer.files); });
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('over');
+      if (e.dataTransfer.files.length > 0) addFilesToPending(e.dataTransfer.files);
+    });
     
     async function saveProduct() {
-      const id = document.getElementById('pm-id').value; const btn = document.getElementById('pm-save');
+      const id = document.getElementById('pm-id').value;
+      const btn = document.getElementById('pm-save');
       const payload = { name: document.getElementById('pm-name').value.trim(), slug: document.getElementById('pm-slug').value.trim(), short_description: document.getElementById('pm-sdesc').value.trim() || null, description: document.getElementById('pm-desc').value.trim() || null, price: parseFloat(document.getElementById('pm-price').value), compare_price: parseFloat(document.getElementById('pm-compare').value) || null, stock: parseInt(document.getElementById('pm-stock').value) || 0, sku: document.getElementById('pm-sku').value.trim() || null, weight_grams: parseInt(document.getElementById('pm-weight').value) || null, is_active: document.getElementById('pm-active').checked, category_id: document.getElementById('pm-cat').value || null };
-      if (!payload.name || !payload.slug || isNaN(payload.price)) { if(typeof showToast==='function') showToast('Name, Slug & Price required', 'error'); return; }
-      if(typeof showLoader==='function') showLoader(btn, 'Saving…');
+      if (!payload.name || !payload.slug || isNaN(payload.price)) { if (typeof showToast === 'function') showToast('Name, Slug & Price required', 'error'); return; }
+      if (typeof showLoader === 'function') showLoader(btn, 'Saving…');
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
-        if (pendingImages.length > 0 && saved?.id) { try { await ADMIN.uploadImages(saved.id, pendingImages); } catch (e) { if(typeof showToast==='function') showToast('Saved, but some images failed: ' + e.message, 'warn'); } }
-        if(typeof showToast==='function') showToast(id ? 'Updated!' : 'Created!', 'success');
-        closeModal('modal-product'); loadProducts(pProdPage);
-      } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); }
+        if (pendingImages.length > 0 && saved?.id) { try { await ADMIN.uploadImages(saved.id, pendingImages); } catch (e) { if (typeof showToast === 'function') showToast('Saved, but some images failed: ' + e.message, 'warn'); } }
+        if (typeof showToast === 'function') showToast(id ? 'Updated!' : 'Created!', 'success');
+        closeModal('modal-product');
+        loadProducts(pProdPage);
+      } catch (err) { if (typeof showToast === 'function') showToast(err.message, 'error'); } finally { if (typeof hideLoader === 'function') hideLoader(btn); }
     }
     
     /* ══════════════════════════════════════
@@ -797,7 +872,10 @@
     ══════════════════════════════════════ */
     async function ensureCategories() { if (!allCategories.length) allCategories = await ADMIN.getCategories() || []; }
     async function loadCategories() {
-      allCategories = []; await ensureCategories(); const tbody = document.getElementById('categories-body'); tbody.innerHTML = '';
+      allCategories = [];
+      await ensureCategories();
+      const tbody = document.getElementById('categories-body');
+      tbody.innerHTML = '';
       if (!allCategories.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center p-10 text-text-dim">No categories yet</td></tr>'; return; }
       allCategories.forEach(c => {
         const tr = document.createElement('tr');
@@ -805,64 +883,246 @@
         tbody.appendChild(tr);
       });
     }
-    function populateCatSelects() { const sf = document.getElementById('prod-cat-f'); const pm = document.getElementById('pm-cat'); const cur = sf.value;
-      sf.innerHTML = '<option value="">All Categories</option>'; pm.innerHTML = '<option value="">— None —</option>';
-      allCategories.forEach(c => { sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`; pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`; }); }
-    function openCatModal() { ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); document.getElementById('modal-cat').classList.remove('hidden'); }
+    
+    function populateCatSelects() {
+      const sf = document.getElementById('prod-cat-f');
+      const pm = document.getElementById('pm-cat');
+      const cur = sf.value;
+      sf.innerHTML = '<option value="">All Categories</option>';
+      pm.innerHTML = '<option value="">— None —</option>';
+      allCategories.forEach(c => {
+        sf.innerHTML += `<option value="${c.id}" ${cur===c.id?'selected':''}>${escapeHTML(c.name)}</option>`;
+        pm.innerHTML += `<option value="${c.id}">${escapeHTML(c.name)}</option>`;
+      });
+    }
+    
+    function openCatModal() {
+      ['cm-name', 'cm-slug', 'cm-desc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('modal-cat').classList.remove('hidden');
+    }
+    
     function autoCatSlug(val) { document.getElementById('cm-slug').value = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
     async function saveCategory() {
-      const btn = document.getElementById('cm-save'), name = document.getElementById('cm-name').value.trim(), slug = document.getElementById('cm-slug').value.trim(), desc = document.getElementById('cm-desc').value.trim();
-      if (!name || !slug || !/^[a-z0-9-]+$/.test(slug)) { if(typeof showToast==='function') showToast('Name and valid slug required', 'error'); return; }
-      if(typeof showLoader==='function') showLoader(btn, 'Saving…');
-      try { await ADMIN.createCategory({ name, slug, description: desc || null }); if(typeof showToast==='function') showToast('Category created!', 'success'); allCategories = []; closeModal('modal-cat'); loadCategories(); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); }
+      const btn = document.getElementById('cm-save'),
+        name = document.getElementById('cm-name').value.trim(),
+        slug = document.getElementById('cm-slug').value.trim(),
+        desc = document.getElementById('cm-desc').value.trim();
+      if (!name || !slug || !/^[a-z0-9-]+$/.test(slug)) { if (typeof showToast === 'function') showToast('Name and valid slug required', 'error'); return; }
+      if (typeof showLoader === 'function') showLoader(btn, 'Saving…');
+      try {
+        await ADMIN.createCategory({ name, slug, description: desc || null });
+        if (typeof showToast === 'function') showToast('Category created!', 'success');
+        allCategories = [];
+        closeModal('modal-cat');
+        loadCategories();
+      } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, 'error');
+      } finally { if (typeof hideLoader === 'function') hideLoader(btn); }
     }
-    async function deleteCategory(id, name) { if (!confirm(`Delete category "${name}"?`)) return; try { await ADMIN.deleteCategory(id); if(typeof showToast==='function') showToast('Deleted', 'info'); allCategories = []; loadCategories(); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } }
+    async function deleteCategory(id, name) {
+      if (!confirm(`Delete category "${name}"?`)) return;
+      try {
+        await ADMIN.deleteCategory(id);
+        if (typeof showToast === 'function') showToast('Deleted', 'info');
+        allCategories = [];
+        loadCategories();
+      } catch (err) { if (typeof showToast === 'function') showToast(err.message, 'error'); }
+    }
     
     async function loadInventory() {
-      const tbody = document.getElementById('inventory-body'); tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
-      try { const first = await ADMIN.getProducts(1); let items = first?.items || []; for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) { const d = await ADMIN.getProducts(p); items = items.concat(d?.items || []); } allInventory = items; renderInv(items); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
+      const tbody = document.getElementById('inventory-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
+      try {
+        const first = await ADMIN.getProducts(1);
+        let items = first?.items || [];
+        for (let p = 2; p <= Math.min(first?.pages || 1, 10); p++) {
+          const d = await ADMIN.getProducts(p);
+          items = items.concat(d?.items || []);
+        }
+        allInventory = items;
+        renderInv(items);
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
     }
+    
     function renderInv(items) {
-      const tbody = document.getElementById('inventory-body'); tbody.innerHTML = '';
+      const tbody = document.getElementById('inventory-body');
+      tbody.innerHTML = '';
       if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-10 text-text-dim">No products</td></tr>'; return; }
       items.forEach(p => {
-        const thr = p.low_stock_threshold || 10, sc = p.stock === 0 ? 'sb-out' : p.stock <= thr ? 'sb-low' : 'sb-ok', sl = p.stock === 0 ? 'Out of Stock' : p.stock <= thr ? 'Low Stock' : 'In Stock';
-        const tr = document.createElement('tr'); tr.dataset.id = p.id;
+        const thr = p.low_stock_threshold || 10,
+          sc = p.stock === 0 ? 'sb-out' : p.stock <= thr ? 'sb-low' : 'sb-ok',
+          sl = p.stock === 0 ? 'Out of Stock' : p.stock <= thr ? 'Low Stock' : 'In Stock';
+        const tr = document.createElement('tr');
+        tr.dataset.id = p.id;
         tr.innerHTML = `<td class="td-primary">${escapeHTML(p.name)}</td><td class="td-dim">${escapeHTML(p.sku||'—')}</td><td><span class="inv-val underline decoration-dashed decoration-border-light font-semibold text-text cursor-pointer" data-id="${p.id}" onclick="startStockEdit('${p.id}',${p.stock},this)">${p.stock}</span></td><td class="td-dim">${thr}</td><td><span class="sbadge ${sc}">${sl}</span></td><td><div class="hidden items-center gap-1.5" id="se-${p.id}"><input type="number" class="w-16 px-2 py-1 bg-surface-2 border border-border rounded text-center text-xs outline-none focus:border-gold" id="si-${p.id}" value="${p.stock}" min="0" onkeydown="if(event.key==='Enter')saveStock('${p.id}')"><button class="btn-xs bxs" onclick="saveStock('${p.id}')"><i class="ri-check-line"></i></button><button class="btn-xs bxo" onclick="cancelStockEdit('${p.id}',${p.stock})"><i class="ri-close-line"></i></button></div></td>`;
         tbody.appendChild(tr);
       });
     }
-    function startStockEdit(id, stock, el) { document.getElementById(`se-${id}`).classList.replace('hidden', 'flex'); el.style.display = 'none'; document.getElementById(`si-${id}`).focus(); }
+    
+    function startStockEdit(id, stock, el) {
+      document.getElementById(`se-${id}`).classList.replace('hidden', 'flex');
+      el.style.display = 'none';
+      document.getElementById(`si-${id}`).focus();
+    }
+    
     function cancelStockEdit(id, stock) { document.getElementById(`se-${id}`).classList.replace('flex', 'hidden'); const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) v.style.display = ''; }
     async function saveStock(id) {
-      const inp = document.getElementById(`si-${id}`), newStock = parseInt(inp.value);
-      if (isNaN(newStock) || newStock < 0) { if(typeof showToast==='function') showToast('Invalid value', 'error'); return; }
-      try { await ADMIN.updateProduct(id, { stock: newStock }); const p = allInventory.find(p => p.id === id); if (p) p.stock = newStock; const v = document.querySelector(`.inv-val[data-id="${id}"]`); if (v) { v.textContent = newStock; v.style.display = ''; } document.getElementById(`se-${id}`).classList.replace('flex','hidden'); const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10; const tr = document.querySelector(`tr[data-id="${id}"]`); if (tr) { const badge = tr.querySelector('.sbadge'); if (badge) { badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok'); badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock'; } } if(typeof showToast==='function') showToast('Stock updated', 'success'); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); }
+      const inp = document.getElementById(`si-${id}`),
+        newStock = parseInt(inp.value);
+      if (isNaN(newStock) || newStock < 0) { if (typeof showToast === 'function') showToast('Invalid value', 'error'); return; }
+      try {
+        await ADMIN.updateProduct(id, { stock: newStock });
+        const p = allInventory.find(p => p.id === id);
+        if (p) p.stock = newStock;
+        const v = document.querySelector(`.inv-val[data-id="${id}"]`);
+        if (v) {
+          v.textContent = newStock;
+          v.style.display = '';
+        }
+        document.getElementById(`se-${id}`).classList.replace('flex', 'hidden');
+        const thr = allInventory.find(p => p.id === id)?.low_stock_threshold || 10;
+        const tr = document.querySelector(`tr[data-id="${id}"]`);
+        if (tr) {
+          const badge = tr.querySelector('.sbadge');
+          if (badge) {
+            badge.className = 'sbadge ' + (newStock === 0 ? 'sb-out' : newStock <= thr ? 'sb-low' : 'sb-ok');
+            badge.textContent = newStock === 0 ? 'Out of Stock' : newStock <= thr ? 'Low Stock' : 'In Stock';
+          }
+        }
+        if (typeof showToast === 'function') showToast('Stock updated', 'success');
+      } catch (err) { if (typeof showToast === 'function') showToast(err.message, 'error'); }
     }
-    function filterInv(q) { const sf = document.getElementById('inv-sf').value, lower = q.toLowerCase(); const f = allInventory.filter(p => { const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower); const thr = p.low_stock_threshold || 10; let mk = true; if (sf === 'out') mk = p.stock === 0; else if (sf === 'low') mk = p.stock > 0 && p.stock <= thr; else if (sf === 'ok') mk = p.stock > thr; return ms && mk; }); renderInv(f); }
+    
+    function filterInv(q) {
+      const sf = document.getElementById('inv-sf').value,
+        lower = q.toLowerCase();
+      const f = allInventory.filter(p => {
+        const ms = !lower || p.name.toLowerCase().includes(lower) || (p.sku || '').toLowerCase().includes(lower);
+        const thr = p.low_stock_threshold || 10;
+        let mk = true;
+        if (sf === 'out') mk = p.stock === 0;
+        else if (sf === 'low') mk = p.stock > 0 && p.stock <= thr;
+        else if (sf === 'ok') mk = p.stock > thr;
+        return ms && mk;
+      });
+      renderInv(f);
+    }
     
     async function loadOrders(page = 1) {
-      pOrderPage = page; const tbody = document.getElementById('orders-body'); tbody.innerHTML = `<tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
+      pOrderPage = page;
+      const tbody = document.getElementById('orders-body');
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
       const sf = document.getElementById('order-sf').value;
-      try { const data = await ADMIN.getOrders(page, sf); const items = data?.items || []; document.getElementById('orders-info').textContent = `${data?.total||0} orders`; tbody.innerHTML = '';
+      try {
+        const data = await ADMIN.getOrders(page, sf);
+        const items = data?.items || [];
+        document.getElementById('orders-info').textContent = `${data?.total||0} orders`;
+        tbody.innerHTML = '';
         if (!items.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-10 text-text-dim">No orders</td></tr>'; return; }
-        items.forEach(o => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim max-w-[140px] truncate">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td><td class="td-dim">${(o.order_items||[]).length} items</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</td><td>${typeof statusBadge==='function'?statusBadge(o.status).outerHTML:o.status}</td><td class="td-dim max-w-[100px] truncate">${escapeHTML(o.tracking_number||'—')}</td><td class="td-dim">${typeof formatDate==='function'?formatDate(o.created_at):o.created_at}</td><td><button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button></td>`; tbody.appendChild(tr); });
-        renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders); } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
+        items.forEach(o => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="td-primary">#${o.id.substring(0,8).toUpperCase()}</td><td class="td-dim max-w-[140px] truncate">${escapeHTML(o.users?.email || o.customer_id?.substring(0,8)||'—')}</td><td class="td-dim">${(o.order_items||[]).length} items</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</td><td>${typeof statusBadge==='function'?statusBadge(o.status).outerHTML:o.status}</td><td class="td-dim max-w-[100px] truncate">${escapeHTML(o.tracking_number||'—')}</td><td class="td-dim">${typeof formatDate==='function'?formatDate(o.created_at):o.created_at}</td><td><button class="btn-xs bxp" onclick='openOrderModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button></td>`;
+          tbody.appendChild(tr);
+        });
+        renderPaging('orders-pages', pOrderPage, data?.pages || 1, loadOrders);
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
     }
-    function openOrderModal(o) { document.getElementById('om-id').value = o.id; document.getElementById('om-status').value = o.status; document.getElementById('om-tracking').value = o.tracking_number || ''; document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`; const el = document.getElementById('om-items'); const items = o.order_items || []; el.innerHTML = items.length ? '<div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2">Items</div>' + items.map(i => `<div class="flex justify-between py-1.5 border-b border-border"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${typeof formatPrice==='function'?formatPrice(i.subtotal):i.subtotal}</span></div>`).join('') + `<div class="flex justify-between py-2 font-bold text-gold"><span>Total</span><span>${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</span></div>` : ''; document.getElementById('modal-order').classList.remove('hidden'); }
-    async function saveOrder() { const id = document.getElementById('om-id').value, btn = document.getElementById('om-save'); if(typeof showLoader==='function') showLoader(btn, 'Updating…'); try { await ADMIN.updateOrder(id, { status: document.getElementById('om-status').value, tracking_number: document.getElementById('om-tracking').value.trim() || null }); if(typeof showToast==='function') showToast('Order updated!', 'success'); closeModal('modal-order'); loadOrders(pOrderPage); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } finally { if(typeof hideLoader==='function') hideLoader(btn); } }
     
-    async function loadUsers(page = 1) { pUserPage = page; const tbody = document.getElementById('users-body'); tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`; try { const data = await ADMIN.getUsers(page); allUsers = data?.items || []; document.getElementById('users-info').textContent = `${data?.total||0} users`; renderUsers(allUsers, data?.total || 0, data?.pages || 1); } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; } }
-    function renderUsers(items, total, pages) { const tbody = document.getElementById('users-body'); tbody.innerHTML = ''; if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-10 text-text-dim">No users</td></tr>'; return; } const myId = AUTH.getProfile()?.id; items.forEach(u => { const me = u.id === myId; const tr = document.createElement('tr'); tr.innerHTML = `<td class="td-primary">${escapeHTML(u.email)}</td><td class="td-dim">${escapeHTML(u.full_name||'—')}</td><td><select class="t-select w-full max-w-[100px]" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)"><option value="customer" ${u.role==='customer'?'selected':''}>Customer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td><td class="td-dim">${typeof formatDate==='function'?formatDate(u.created_at):u.created_at}</td><td><button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Deactivate':'Activate'}</button></td>`; tbody.appendChild(tr); }); renderPaging('users-pages', pUserPage, pages, loadUsers); }
-    function filterUsers(q) { const lower = q.toLowerCase(); renderUsers(allUsers.filter(u => u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)), 0, 1); }
-    async function updateRole(id, role) { try { await ADMIN.updateUser(id, { role }); if(typeof showToast==='function') showToast('Role updated', 'success'); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); loadUsers(pUserPage); } }
-    async function toggleUser(id, activate) { if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return; try { await ADMIN.updateUser(id, { is_active: activate }); if(typeof showToast==='function') showToast(`User ${activate?'activated':'deactivated'}`, 'info'); loadUsers(pUserPage); } catch (err) { if(typeof showToast==='function') showToast(err.message, 'error'); } }
+    function openOrderModal(o) {
+      document.getElementById('om-id').value = o.id;
+      document.getElementById('om-status').value = o.status;
+      document.getElementById('om-tracking').value = o.tracking_number || '';
+      document.getElementById('om-title').textContent = `Order #${o.id.substring(0,8).toUpperCase()}`;
+      const el = document.getElementById('om-items');
+      const items = o.order_items || [];
+      el.innerHTML = items.length ? '<div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2">Items</div>' + items.map(i => `<div class="flex justify-between py-1.5 border-b border-border"><span>${escapeHTML(i.product_name)} ×${i.quantity}</span><span class="td-gold">${typeof formatPrice==='function'?formatPrice(i.subtotal):i.subtotal}</span></div>`).join('') + `<div class="flex justify-between py-2 font-bold text-gold"><span>Total</span><span>${typeof formatPrice==='function'?formatPrice(o.total_amount):o.total_amount}</span></div>` : '';
+      document.getElementById('modal-order').classList.remove('hidden');
+    }
+    async function saveOrder() {
+      const id = document.getElementById('om-id').value,
+        btn = document.getElementById('om-save');
+      if (typeof showLoader === 'function') showLoader(btn, 'Updating…');
+      try {
+        await ADMIN.updateOrder(id, { status: document.getElementById('om-status').value, tracking_number: document.getElementById('om-tracking').value.trim() || null });
+        if (typeof showToast === 'function') showToast('Order updated!', 'success');
+        closeModal('modal-order');
+        loadOrders(pOrderPage);
+      } catch (err) { if (typeof showToast === 'function') showToast(err.message, 'error'); } finally { if (typeof hideLoader === 'function') hideLoader(btn); }
+    }
     
-    function closeModal(id, e) { if (e && e.target !== document.getElementById(id)) return; document.getElementById(id).classList.add('hidden'); }
-    function renderPaging(cid, cur, pages, fn) { const wrap = document.getElementById(cid); if (!wrap) return; wrap.innerHTML = ''; if (pages <= 1) return; const mk = (label, pg, active = false) => { const btn = document.createElement('button'); btn.className = `w-7 h-7 text-xs flex items-center justify-center rounded-md ${active ? 'bg-gold-dim text-gold font-bold' : 'text-text-muted hover:bg-surface-2 transition'}`; btn.textContent = label; btn.addEventListener('click', () => fn(pg)); return btn; }; if (cur > 1) wrap.appendChild(mk('‹', cur - 1)); for (let i = 1; i <= pages; i++) { if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue; wrap.appendChild(mk(i, i, i === cur)); } if (cur < pages) wrap.appendChild(mk('›', cur + 1)); }
+    async function loadUsers(page = 1) {
+      pUserPage = page;
+      const tbody = document.getElementById('users-body');
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-text-dim">Loading…</td></tr>`;
+      try {
+        const data = await ADMIN.getUsers(page);
+        allUsers = data?.items || [];
+        document.getElementById('users-info').textContent = `${data?.total||0} users`;
+        renderUsers(allUsers, data?.total || 0, data?.pages || 1);
+      } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-error">${escapeHTML(err.message)}</td></tr>`; }
+    }
+    
+    function renderUsers(items, total, pages) {
+      const tbody = document.getElementById('users-body');
+      tbody.innerHTML = '';
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center p-10 text-text-dim">No users</td></tr>'; return; }
+      const myId = AUTH.getProfile()?.id;
+      items.forEach(u => {
+        const me = u.id === myId;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="td-primary">${escapeHTML(u.email)}</td><td class="td-dim">${escapeHTML(u.full_name||'—')}</td><td><select class="t-select w-full max-w-[100px]" ${me?'disabled title="Cannot change own role"':''} onchange="updateRole('${u.id}',this.value,this)"><option value="customer" ${u.role==='customer'?'selected':''}>Customer</option><option value="admin" ${u.role==='admin'?'selected':''}>Admin</option></select></td><td><span class="status-dot ${u.is_active?'active':'inactive'}">${u.is_active?'Active':'Inactive'}</span></td><td class="td-dim">${typeof formatDate==='function'?formatDate(u.created_at):u.created_at}</td><td><button class="btn-xs ${u.is_active?'bxd':'bxs'}" ${me?'disabled':''} onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Deactivate':'Activate'}</button></td>`;
+        tbody.appendChild(tr);
+      });
+      renderPaging('users-pages', pUserPage, pages, loadUsers);
+    }
+    
+    function filterUsers(q) {
+      const lower = q.toLowerCase();
+      renderUsers(allUsers.filter(u => u.email.toLowerCase().includes(lower) || (u.full_name || '').toLowerCase().includes(lower)), 0, 1);
+    }
+    async function updateRole(id, role) {
+      try { await ADMIN.updateUser(id, { role }); if (typeof showToast === 'function') showToast('Role updated', 'success'); } catch (err) {
+        if (typeof showToast === 'function') showToast(err.message, 'error');
+        loadUsers(pUserPage);
+      }
+    }
+    async function toggleUser(id, activate) {
+      if (!confirm(`${activate?'Activate':'Deactivate'} this user?`)) return;
+      try {
+        await ADMIN.updateUser(id, { is_active: activate });
+        if (typeof showToast === 'function') showToast(`User ${activate?'activated':'deactivated'}`, 'info');
+        loadUsers(pUserPage);
+      } catch (err) { if (typeof showToast === 'function') showToast(err.message, 'error'); }
+    }
+    
+    function closeModal(id, e) {
+      if (e && e.target !== document.getElementById(id)) return;
+      document.getElementById(id).classList.add('hidden');
+    }
+    
+    function renderPaging(cid, cur, pages, fn) {
+      const wrap = document.getElementById(cid);
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      if (pages <= 1) return;
+      const mk = (label, pg, active = false) => {
+        const btn = document.createElement('button');
+        btn.className = `w-7 h-7 text-xs flex items-center justify-center rounded-md ${active ? 'bg-gold-dim text-gold font-bold' : 'text-text-muted hover:bg-surface-2 transition'}`;
+        btn.textContent = label;
+        btn.addEventListener('click', () => fn(pg));
+        return btn;
+      };
+      if (cur > 1) wrap.appendChild(mk('‹', cur - 1));
+      for (let i = 1; i <= pages; i++) {
+        if (pages > 7 && Math.abs(i - cur) > 2 && i !== 1 && i !== pages) continue;
+        wrap.appendChild(mk(i, i, i === cur));
+      }
+      if (cur < pages) wrap.appendChild(mk('›', cur + 1));
+    }
     
     // Safefallbacks if external utils are missing:
-    if(typeof escapeHTML !== 'function') { window.escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag])); }
+    if (typeof escapeHTML !== 'function') { window.escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' } [tag])); }
   </script>
 </body>
+
 </html>

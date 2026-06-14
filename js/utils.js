@@ -24,6 +24,7 @@ function safeAttr(val) {
 
 /* ── Currency / Date formatters ──────────────────────────── */
 function formatPrice(amount, currency = 'INR') {
+  if (amount === null || amount === undefined || isNaN(amount)) return '₹0.00';
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency,
@@ -72,17 +73,17 @@ function validatePassword(pass) {
 }
 
 /* ── Toast notification system ───────────────────────────── */
-(function initToasts() {
-  const container = document.createElement('div');
-  container.id = 'toast-container';
-  container.style.cssText =
-    'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:12px;pointer-events:none;';
-  document.body.appendChild(container);
-})();
-
 function showToast(message, type = 'info', duration = 4000) {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
+  let container = document.getElementById('toast-container');
+  
+  // Safe Initialization: Create container only when a toast is triggered
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText =
+      'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:12px;pointer-events:none;';
+    document.body.appendChild(container);
+  }
   
   const colors = {
     info: { bg: '#1c1c1c', border: '#c9a96e', icon: 'ℹ' },
@@ -94,7 +95,7 @@ function showToast(message, type = 'info', duration = 4000) {
   
   const toast = document.createElement('div');
   toast.style.cssText = `
-  background:${c.bg};border-left:3px solid ${c.border};
+    background:${c.bg};border-left:3px solid ${c.border};
     color:#f0ece4;padding:14px 18px;border-radius:6px;
     font-family:'DM Sans',sans-serif;font-size:14px;
     box-shadow:0 4px 20px rgba(0,0,0,0.5);
@@ -134,15 +135,29 @@ function showToast(message, type = 'info', duration = 4000) {
 /* ── Loading overlay ─────────────────────────────────────── */
 function showLoader(el, text = 'Loading…') {
   if (!el) return;
-  el.dataset.originalText = el.textContent;
+  // Use innerHTML instead of textContent to preserve icons like 🔒
+  el.dataset.originalHtml = el.innerHTML;
   el.disabled = true;
-  el.textContent = text;
+  
+  // Inject a universal CSS spinner that works everywhere (no external classes needed)
+  el.innerHTML = `
+    <span style="display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle;"></span>
+    <span style="vertical-align:middle;">${escapeHTML(text)}</span>
+  `;
+  
+  // Ensure the spin animation exists in the document
+  if (!document.getElementById('utils-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'utils-spinner-style';
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+  }
 }
 
 function hideLoader(el) {
   if (!el) return;
   el.disabled = false;
-  el.textContent = el.dataset.originalText || el.textContent;
+  el.innerHTML = el.dataset.originalHtml || el.textContent;
 }
 
 /* ── Order status badge ──────────────────────────────────── */

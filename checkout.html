@@ -159,7 +159,6 @@
   </div>
 
   <script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
-  <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -173,7 +172,12 @@
     let stripe = null;
     let cardElement = null;
     
-    // Cart data from SINGLE API call
+    // 🔥 NEW: Retry Logic Variables
+    let isRetryMode = false;
+    let retryClientSecret = null;
+    let retryOrderId = null;
+    let orderData = null;
+    
     let cartData = null;
 
     // ── Idempotency Key ────────────────────────────────────────────────────
@@ -216,26 +220,58 @@
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
       
+      // Check if we are in Retry Mode (URL has parameters)
+      const params = new URLSearchParams(window.location.search);
+      retryOrderId = params.get('retry_order');
+      retryClientSecret = params.get('client_secret');
+      isRetryMode = !!(retryOrderId && retryClientSecret);
+      
       try {
-        cartData = await API.get('/cart');
-        const items = cartData?.items || [];
-        
-        if (!items.length) {
-          showToast('Your cart is empty', 'warn');
-          setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
-          return;
+        if (isRetryMode) {
+          // --- 🔄 RETRY MODE ---
+          orderData = await API.getMyOrder(retryOrderId);
+          if (!orderData || orderData.status !== 'pending') {
+            showToast('Order is no longer pending or already paid.', 'info');
+            setTimeout(() => { window.location.href = '/orders.html'; }, 1500);
+            return;
+          }
+          
+          // Lock Address UI
+          document.getElementById('add-address-toggle').style.display = 'none';
+          document.getElementById('address-section').innerHTML = `
+            <div class="address-card selected" style="cursor:default; border-color:var(--gold);">
+              <div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:bold;">Locked Address</div>
+              <p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;">
+                ${[orderData.shipping_line1, orderData.shipping_line2, orderData.shipping_city, orderData.shipping_state, orderData.shipping_postal_code, orderData.shipping_country].filter(Boolean).join(', ')}
+              </p>
+            </div>
+          `;
+          selectedAddressId = orderData.shipping_address_id; // Bypass validation
+          
+          renderOrderSummary();
+          initStripe();
+          checkPayBtnState();
+          
+        } else {
+          // --- 🛒 NORMAL CHECKOUT MODE ---
+          cartData = await API.getCart();
+          const items = cartData?.items || [];
+          
+          if (!items.length) {
+            showToast('Your cart is empty', 'warn');
+            setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
+            return;
+          }
+
+          if (cartData?.has_unavailable_items) {
+            showToast('Some items are unavailable. Please review your cart.', 'warn');
+          }
+
+          updateCartBadgeUI(cartData.item_count || 0);
+          renderOrderSummary();
+          await loadAddresses();
+          initStripe();
         }
-
-        if (cartData?.has_unavailable_items) {
-          showToast('Some items are unavailable. Please review your cart.', 'warn');
-        }
-
-        // Set cart badge on load
-        updateCartBadgeUI(cartData.item_count || 0);
-
-        renderOrderSummary();
-        await loadAddresses();
-        initStripe();
       } catch (err) {
         console.error('Checkout Init Error:', err);
         showToast('Could not load checkout. Redirecting...', 'error');
@@ -244,62 +280,62 @@
     }
     init();
 
-    // ── Order Summary ─────────────────────────────────────────────────────
+    // ── Order Summary (Supports Both Modes) ───────────────────────────────
     function renderOrderSummary() {
       const wrap = document.getElementById('order-items-preview');
       wrap.innerHTML = '';
       
-      const items = cartData?.items || [];
+      const items = isRetryMode ? (orderData?.order_items || []) : (cartData?.items || []);
       
       items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'order-item';
         
+        // Data mapping depending on mode
+        const imgUrl = isRetryMode ? item.products?.image_url : item.image_url;
+        const nameText = isRetryMode ? item.product_name : item.name;
+        const priceVal = isRetryMode ? item.subtotal : item.line_total;
+
         const img = document.createElement('div');
         img.className = 'order-item-img';
-        if (item.image_url) {
+        if (imgUrl) {
           const i = document.createElement('img');
-          i.src = item.image_url;
-          i.alt = item.name;
+          i.src = imgUrl; i.alt = nameText;
           img.appendChild(i);
         } else {
-          img.textContent = '◈';
+          img.innerHTML = '<i class="ri-image-line"></i>';
         }
         
         const info = document.createElement('div');
         info.className = 'order-item-info';
-        
         const name = document.createElement('div');
         name.className = 'order-item-name';
-        name.textContent = item.name;
-        
+        name.textContent = nameText;
         const meta = document.createElement('div');
         meta.className = 'order-item-meta';
         meta.textContent = `Qty: ${item.quantity}`;
         
-        info.appendChild(name);
-        info.appendChild(meta);
+        info.appendChild(name); info.appendChild(meta);
         
         const price = document.createElement('div');
         price.className = 'order-item-price';
-        price.textContent = formatPrice(item.line_total);
+        price.textContent = formatPrice(priceVal);
         
-        row.appendChild(img);
-        row.appendChild(info);
-        row.appendChild(price);
+        row.appendChild(img); row.appendChild(info); row.appendChild(price);
         wrap.appendChild(row);
       });
 
+      // Totals Mapping
       const totalsEl = document.getElementById('order-totals');
       totalsEl.innerHTML = '';
       
-      const subtotal = cartData?.subtotal || 0;
-      const shipping = cartData?.shipping_cost || 0;
-      const taxAmount = cartData?.tax_amount || 0;
-      const taxRate = cartData?.tax_rate_pct || 18;
-      const grandTotal = cartData?.total_amount || 0;
-      const isFreeShipping = cartData?.free_shipping_eligible || false;
-      const toFreeShip = cartData?.amount_to_free_shipping || 0;
+      const subtotal = isRetryMode ? orderData.subtotal : (cartData?.subtotal || 0);
+      const shipping = isRetryMode ? orderData.shipping_cost : (cartData?.shipping_cost || 0);
+      const taxAmount = isRetryMode ? orderData.tax_amount : (cartData?.tax_amount || 0);
+      const taxRate = isRetryMode ? 18 : (cartData?.tax_rate_pct || 18); // fallback
+      const grandTotal = isRetryMode ? orderData.total_amount : (cartData?.total_amount || 0);
+      const isFreeShipping = isRetryMode ? (shipping === 0) : (cartData?.free_shipping_eligible || false);
+      const toFreeShip = isRetryMode ? 0 : (cartData?.amount_to_free_shipping || 0);
 
       [
         ['Subtotal', formatPrice(subtotal)],
@@ -308,24 +344,17 @@
       ].forEach(([label, value, isFree]) => {
         const row = document.createElement('div');
         row.className = 'order-row';
-        
-        const ll = document.createElement('span');
-        ll.textContent = label;
-        
+        const ll = document.createElement('span'); ll.textContent = label;
         const vv = document.createElement('span');
         if (isFree) {
           vv.innerHTML = '<i class="ri-truck-line"></i> Free';
           vv.style.color = 'var(--success)';
-        } else {
-          vv.textContent = value;
-        }
-        
-        row.appendChild(ll);
-        row.appendChild(vv);
+        } else { vv.textContent = value; }
+        row.appendChild(ll); row.appendChild(vv);
         totalsEl.appendChild(row);
       });
 
-      if (!isFreeShipping && toFreeShip > 0) {
+      if (!isRetryMode && !isFreeShipping && toFreeShip > 0) {
         const hint = document.createElement('div');
         hint.style.cssText = 'font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;padding:6px 0;';
         hint.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(toFreeShip)} more for free shipping`;
@@ -339,14 +368,13 @@
       totalsEl.appendChild(totalRow);
     }
 
-    // ── Addresses ──────────────────────────────────────────────────────────
+    // ── Addresses (Only used in Normal Mode) ───────────────────────────────
     async function loadAddresses() {
       try {
         addresses = await API.getAddresses();
         renderAddresses();
       } catch (err) {
-        document.getElementById('address-section').innerHTML =
-          `<p class="form-error">${escapeHTML(err.message)}</p>`;
+        document.getElementById('address-section').innerHTML = `<p class="form-error">${escapeHTML(err.message)}</p>`;
       }
     }
 
@@ -368,22 +396,20 @@
         }
         if (addr.is_default) {
           const badge = document.createElement('span');
-          badge.className = 'badge-default';
-          badge.textContent = 'Default';
+          badge.className = 'badge-default'; badge.textContent = 'Default';
           card.appendChild(badge);
         }
         const p = document.createElement('p');
         p.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;';
-        p.textContent = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country]
-          .filter(Boolean).join(', ');
-        card.appendChild(p);
+        p.textContent = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ');
+        
         card.addEventListener('click', () => {
           selectedAddressId = addr.id;
           document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
           card.classList.add('selected');
           checkPayBtnState();
         });
-        grid.appendChild(card);
+        card.appendChild(p); grid.appendChild(card);
       });
       wrap.appendChild(grid);
       checkPayBtnState();
@@ -395,40 +421,30 @@
     });
 
     document.getElementById('save-address-btn').addEventListener('click', async () => {
-      const line1 = document.getElementById('a-line1').value.trim().substring(0, 255);
-      const line2 = document.getElementById('a-line2').value.trim().substring(0, 255);
-      const city = document.getElementById('a-city').value.trim().substring(0, 100);
-      const state = document.getElementById('a-state').value.trim().substring(0, 100);
-      const postal = document.getElementById('a-postal').value.trim().substring(0, 20);
-      const country = document.getElementById('a-country').value.trim().substring(0, 2).toUpperCase();
-      const isDefault = document.getElementById('a-default').checked;
+      const line1 = document.getElementById('a-line1').value.trim();
+      const city = document.getElementById('a-city').value.trim();
+      const postal = document.getElementById('a-postal').value.trim();
+      const country = document.getElementById('a-country').value.trim().toUpperCase();
       const btn = document.getElementById('save-address-btn');
       
       if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Please fill all required address fields', 'error');
-        return;
+        showToast('Please fill all required fields', 'error'); return;
       }
       
       showLoader(btn, 'Saving…');
       try {
         const addr = await API.addAddress({
-          line1, line2: line2 || null, city,
-          state: state || null, postal_code: postal,
-          country, is_default: isDefault
+          line1, line2: document.getElementById('a-line2').value.trim() || null, 
+          city, state: document.getElementById('a-state').value.trim() || null, 
+          postal_code: postal, country, is_default: document.getElementById('a-default').checked
         });
         addresses.push(addr);
         selectedAddressId = addr.id;
         renderAddresses();
         document.getElementById('new-address-form').style.display = 'none';
-        ['a-line1', 'a-line2', 'a-city', 'a-state', 'a-postal'].forEach(id => {
-          document.getElementById(id).value = '';
-        });
         showToast('Address saved!', 'success');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        hideLoader(btn);
-      }
+      } catch (err) { showToast(err.message, 'error'); } 
+      finally { hideLoader(btn); }
     });
 
     // ── Stripe ─────────────────────────────────────────────────────────────
@@ -447,14 +463,7 @@
         const elements = stripe.elements({
           appearance: {
             theme: 'night',
-            variables: {
-              colorPrimary: '#c9a96e',
-              colorBackground: '#1a1a1a',
-              colorText: '#f0ece4',
-              colorDanger: '#e05252',
-              fontFamily: 'DM Sans, sans-serif',
-              borderRadius: '8px'
-            }
+            variables: { colorPrimary: '#c9a96e', colorBackground: '#1a1a1a', colorText: '#f0ece4', colorDanger: '#e05252', fontFamily: 'DM Sans', borderRadius: '8px' }
           }
         });
         cardElement = elements.create('card', { hidePostalCode: true });
@@ -463,16 +472,11 @@
         cardElement.mount('#stripe-card-element');
         cardElement.on('change', e => {
           const errDiv = document.getElementById('stripe-errors');
-          if (e.error) {
-            errDiv.textContent = e.error.message;
-            errDiv.style.display = 'block';
-          } else {
-            errDiv.style.display = 'none';
-          }
+          if (e.error) { errDiv.textContent = e.error.message; errDiv.style.display = 'block'; } 
+          else { errDiv.style.display = 'none'; }
         });
       } catch (err) {
-        placeholder.classList.remove('skeleton');
-        placeholder.style.height = 'auto';
+        placeholder.classList.remove('skeleton'); placeholder.style.height = 'auto';
         placeholder.innerHTML = `<p class="form-error">Stripe failed: ${escapeHTML(err.message)}</p>`;
       }
     }
@@ -481,60 +485,60 @@
       document.getElementById('pay-btn').disabled = !selectedAddressId;
     }
 
-    // ── Place Order (JIT Flow — No Order ID in Payment Calls) ────────────
+    // ── Place Order (Supports Normal & Retry Flow) ─────────────────────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
       errDiv.style.display = 'none';
 
       if (!selectedAddressId) { showToast('Select a shipping address', 'error'); return; }
-      if (!AUTH.isLoggedIn()) { AUTH.requireAuth(); return; }
-      if (!cartData?.items?.length) { showToast('Cart is empty', 'warn'); return; }
-      if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
+      
+      // Normal Mode Validations
+      if (!isRetryMode) {
+        if (!cartData?.items?.length) { showToast('Cart is empty', 'warn'); return; }
+        if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
+      }
 
       const idempotencyKey = _getOrCreateIdempotencyKey();
       showLoader(btn, '🔒 Processing Payment…');
 
       try {
-        // STEP 1: Create Intent — No order_id sent (order doesn't exist yet)
-        const intentData = await API.post('/payments/create-intent', {
-          idempotency_key: idempotencyKey,
-          shipping_address_id: selectedAddressId
-        });
+        let clientSecretToUse = retryClientSecret;
+        let paymentIntentId = null;
 
-        // STEP 2: Confirm with Stripe
+        if (!isRetryMode) {
+          // NORMAL MODE: Create fresh intent 
+          const intentData = await API.createPaymentIntent(selectedAddressId, idempotencyKey);
+          clientSecretToUse = intentData.client_secret;
+          paymentIntentId = intentData.payment_intent_id;
+        } else {
+          // RETRY MODE: Extract PI ID from the provided secret
+          paymentIntentId = retryClientSecret.split('_secret_')[0];
+        }
+
+        // CONFIRM WITH STRIPE
         if (stripe && cardElement) {
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
-            intentData.client_secret,
+            clientSecretToUse,
             { payment_method: { card: cardElement } }
           );
 
           if (stripeErr) {
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
-            // Notify failure — no order_id, only payment_intent_id
-            try { 
-              await API.post('/payments/notify-failed', { 
-                payment_intent_id: intentData.payment_intent_id, 
-                error_message: stripeErr.message 
-              }); 
-            } catch {}
+            try { await API.notifyPaymentFailed(paymentIntentId, stripeErr.message); } catch {}
             hideLoader(btn);
             return;
           }
 
-          // STEP 3: Confirm order on backend only if payment succeeded
+          // CONFIRM BACKEND
           if (paymentIntent.status === 'succeeded') {
-            await API.post('/payments/confirm', {
-              payment_intent_id: paymentIntent.id
-            });
+            await API.confirmPayment(paymentIntent.id);
             completeCheckout();
           }
         } else {
-          // Demo mode fallback (no Stripe configured)
-          await API.post('/payments/confirm', {
-            payment_intent_id: "demo_" + idempotencyKey
-          });
+          // DEMO MODE
+          await API.confirmPayment(isRetryMode ? paymentIntentId : "demo_" + idempotencyKey);
           completeCheckout();
         }
       } catch (err) {
@@ -546,8 +550,6 @@
 
     async function completeCheckout() {
       _clearIdempotencyKey();
-      
-      // Clear cart UI state instantly
       updateCartBadgeUI(0);
       
       document.getElementById('main-content').style.display = 'none';
@@ -574,9 +576,7 @@
             <div class="push-card-title">Notifications enabled!</div>
             <div class="push-card-sub">You'll get instant updates on your orders.</div>
           </div>`;
-      } else {
-        document.getElementById('push-prompt-card').style.display = 'none';
-      }
+      } else { document.getElementById('push-prompt-card').style.display = 'none'; }
     });
 
     document.getElementById('push-skip-btn').addEventListener('click', () => {
