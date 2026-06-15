@@ -172,13 +172,15 @@
     let stripe = null;
     let cardElement = null;
     
-    // 🔥 NEW: Retry Logic Variables
+    // 🔥 Retry & Session Variables
     let isRetryMode = false;
     let retryClientSecret = null;
     let retryOrderId = null;
     let orderData = null;
-    
     let cartData = null;
+    
+    // 🔥 NEW: Tracks if an order was created during THIS checkout session
+    let currentOrderId = null; 
 
     // ── Idempotency Key ────────────────────────────────────────────────────
     const IDEM_KEY_STORAGE = 'lv_checkout_idem_key';
@@ -220,7 +222,6 @@
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
       
-      // Check if we are in Retry Mode (URL has parameters)
       const params = new URLSearchParams(window.location.search);
       retryOrderId = params.get('retry_order');
       retryClientSecret = params.get('client_secret');
@@ -236,7 +237,6 @@
             return;
           }
           
-          // Lock Address UI
           document.getElementById('add-address-toggle').style.display = 'none';
           document.getElementById('address-section').innerHTML = `
             <div class="address-card selected" style="cursor:default; border-color:var(--gold);">
@@ -246,7 +246,7 @@
               </p>
             </div>
           `;
-          selectedAddressId = orderData.shipping_address_id; // Bypass validation
+          selectedAddressId = orderData.shipping_address_id; 
           
           renderOrderSummary();
           initStripe();
@@ -291,7 +291,6 @@
         const row = document.createElement('div');
         row.className = 'order-item';
         
-        // Data mapping depending on mode
         const imgUrl = isRetryMode ? item.products?.image_url : item.image_url;
         const nameText = isRetryMode ? item.product_name : item.name;
         const priceVal = isRetryMode ? item.subtotal : item.line_total;
@@ -325,14 +324,13 @@
         wrap.appendChild(row);
       });
 
-      // Totals Mapping
       const totalsEl = document.getElementById('order-totals');
       totalsEl.innerHTML = '';
       
       const subtotal = isRetryMode ? orderData.subtotal : (cartData?.subtotal || 0);
       const shipping = isRetryMode ? orderData.shipping_cost : (cartData?.shipping_cost || 0);
       const taxAmount = isRetryMode ? orderData.tax_amount : (cartData?.tax_amount || 0);
-      const taxRate = isRetryMode ? 18 : (cartData?.tax_rate_pct || 18); // fallback
+      const taxRate = isRetryMode ? 18 : (cartData?.tax_rate_pct || 18);
       const grandTotal = isRetryMode ? orderData.total_amount : (cartData?.total_amount || 0);
       const isFreeShipping = isRetryMode ? (shipping === 0) : (cartData?.free_shipping_eligible || false);
       const toFreeShip = isRetryMode ? 0 : (cartData?.amount_to_free_shipping || 0);
@@ -485,7 +483,7 @@
       document.getElementById('pay-btn').disabled = !selectedAddressId;
     }
 
-    // ── Place Order (Supports Normal & Retry Flow) ─────────────────────────
+    // ── Place Order (Supports Normal, Failure-Retry, and URL-Retry) ────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error');
@@ -493,8 +491,7 @@
 
       if (!selectedAddressId) { showToast('Select a shipping address', 'error'); return; }
       
-      // Normal Mode Validations
-      if (!isRetryMode) {
+      if (!isRetryMode && !currentOrderId) {
         if (!cartData?.items?.length) { showToast('Cart is empty', 'warn'); return; }
         if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
       }
@@ -503,20 +500,31 @@
       showLoader(btn, '🔒 Processing Payment…');
 
       try {
-        let clientSecretToUse = retryClientSecret;
+        let clientSecretToUse = null;
         let paymentIntentId = null;
 
-        if (!isRetryMode) {
-          // NORMAL MODE: Create fresh intent 
+        if (isRetryMode) {
+          // MODE 1: Arrived from orders.html via URL parameters
+          clientSecretToUse = retryClientSecret;
+          paymentIntentId = retryClientSecret.split('_secret_')[0];
+        } else if (currentOrderId) {
+          // 🔥 MODE 2: CHECKOUT PAGE RETRY! 
+          // Order was created in this session, but payment failed. We just fetch a fresh intent.
+          const retryData = await API.retryPayment(currentOrderId);
+          if (retryData.status === 'paid') {
+            completeCheckout();
+            return;
+          }
+          clientSecretToUse = retryData.client_secret;
+          paymentIntentId = retryData.payment_intent_id;
+        } else {
+          // MODE 3: NORMAL FIRST ATTEMPT
           const intentData = await API.createPaymentIntent(selectedAddressId, idempotencyKey);
           clientSecretToUse = intentData.client_secret;
           paymentIntentId = intentData.payment_intent_id;
-        } else {
-          // RETRY MODE: Extract PI ID from the provided secret
-          paymentIntentId = retryClientSecret.split('_secret_')[0];
+          currentOrderId = intentData.order_id; // 🔥 Save the ID. If payment fails, next click triggers Mode 2!
         }
 
-        // CONFIRM WITH STRIPE
         if (stripe && cardElement) {
           const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
             clientSecretToUse,
@@ -524,6 +532,7 @@
           );
 
           if (stripeErr) {
+            // 🔥 Payment failed! User stays on the page. Cart is safe.
             errDiv.textContent = stripeErr.message;
             errDiv.style.display = 'block';
             try { await API.notifyPaymentFailed(paymentIntentId, stripeErr.message); } catch {}
@@ -531,13 +540,11 @@
             return;
           }
 
-          // CONFIRM BACKEND
           if (paymentIntent.status === 'succeeded') {
             await API.confirmPayment(paymentIntent.id);
             completeCheckout();
           }
         } else {
-          // DEMO MODE
           await API.confirmPayment(isRetryMode ? paymentIntentId : "demo_" + idempotencyKey);
           completeCheckout();
         }
