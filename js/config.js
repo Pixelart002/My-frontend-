@@ -20,7 +20,7 @@
    DO NOT commit real keys here.
    ============================================================ */
 const CONFIG = {
-  API_BASE: 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1',
+  API_BASE: 'https://dev-luviio-in.onrender.com/api/v1',
   
   // FIX: Read Stripe key from injected global (set in keys.js, not git-tracked)
   // Fallback to empty string — checkout will show warning if not set.
