@@ -1,19 +1,22 @@
 /* ============================================================
-   LUVIIO — API  (v7 — Production Retry & AOT Payments)
+   LUVIIO — API  (v8 — Enterprise Sync & AOT Payments)
    ============================================================
-   RETRY RULES (Production Standard):
-   1. Sirf NETWORK errors pe retry (status=0) — 4xx/5xx pe KABHI NAHI
-   2. Sirf IDEMPOTENT methods: GET, PUT, HEAD — POST/DELETE/PATCH never
-   3. Exponential backoff: 1s → 2s → 4s (max 3 attempts total)
-   4. Timeout pe retry NAHI — user already wait kar raha hai
-   5. 401 refresh loop fix preserved
+   UPGRADES & RETRY RULES:
+   1. AUTO-UNWRAP: Automatically extracts `.data` from Enterprise 
+      responses ({ success: true, data: ... }).
+   2. Sirf NETWORK errors pe retry (status=0) — 4xx/5xx pe KABHI NAHI.
+   3. Sirf IDEMPOTENT methods: GET, PUT, HEAD — POST/DELETE/PATCH never.
+   4. Exponential backoff: 1s → 2s → 4s (max 3 attempts total).
+   5. Timeout pe retry NAHI — user already wait kar raha hai.
+   6. 401 refresh loop fix preserved.
    ============================================================ */
 
 class APIError extends Error {
-  constructor(message, status) {
+  constructor(message, status, code = null) {
     super(message);
     this.name   = 'APIError';
     this.status = status;
+    this.code   = code;
   }
 }
 
@@ -94,15 +97,19 @@ const API = (() => {
         try { data = await res.json(); } catch { data = {}; }
 
         if (!res.ok) {
-          const raw  = Array.isArray(data?.detail)
+          const rawMessage = Array.isArray(data?.detail)
             ? data.detail.map(d => d.msg || d.message || 'Validation error').join('; ')
-            : (data?.detail || data?.message || `Error ${res.status}`);
-          const safe = String(raw).substring(0, 300);
+            : (data?.message || data?.detail || `Error ${res.status}`);
+          
+          const safe = String(rawMessage).substring(0, 300);
           // 4xx/5xx — server ne respond kiya, retry mat karo
-          throw new APIError(safe, res.status);
+          throw new APIError(safe, res.status, data?.error_code);
         }
 
-        return data;
+        // 🔥 ENTERPRISE SYNC: Auto-unwrap `{ success: true, data: ... }`
+        return (data && data.success !== undefined && data.data !== undefined) 
+          ? data.data 
+          : data;
 
       } catch (err) {
         // APIError (4xx/5xx) — retry kabhi nahi
@@ -110,7 +117,7 @@ const API = (() => {
 
         // Timeout — retry nahi, user already wait kar raha hai
         if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-          throw new APIError('Request timed out — please try again', 0);
+          throw new APIError('Request timed out — please try again', 0, 'TIMEOUT');
         }
 
         // Network error (status=0) — sirf idempotent methods pe retry
@@ -127,7 +134,7 @@ const API = (() => {
     }
 
     // Sab retries exhaust — final error
-    throw new APIError('Network error — please check your connection', 0);
+    throw new APIError('Network error — please check your connection', 0, 'NETWORK_ERROR');
   }
 
   // Binary file download

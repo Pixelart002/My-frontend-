@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973" crossorigin="anonymous"></script>
   <title>Checkout — Luviio</title>
   <link rel="stylesheet" href="/css/luviio.css">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973" crossorigin="anonymous"></script>
   <style>
     .checkout-layout { display: grid; grid-template-columns: 1fr 380px; gap: 48px; padding: 40px 0 80px; }
     .checkout-section { margin-bottom: 36px; }
@@ -24,7 +26,6 @@
     .order-item-meta { font-size:12px;color:var(--text-muted); }
     .order-item-price { font-size:14px;font-weight:700;color:var(--gold); }
     .summary-sticky { position:sticky;top:calc(var(--nav-h)+20px); }
-    .stripe-card-wrap { padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius); }
     .success-screen { text-align:center; padding:60px 24px; }
     .success-icon { font-size:72px; margin-bottom:24px; animation: popIn .5s cubic-bezier(.175,.885,.32,1.275); }
     @keyframes popIn { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
@@ -46,14 +47,37 @@
     .address-card { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; position: relative; }
     .address-card.selected { border-color: var(--gold); background: rgba(201,165,94,0.05); }
     .badge-default { position: absolute; top: 10px; right: 10px; background: var(--gold); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+    /* 🔥 PAYWALL MODAL STYLES */
+    #paywall-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;
+      backdrop-filter: blur(6px);
+    }
+    .paywall-box {
+      background: #1a1f2c; color: white; width: 92%; max-width: 460px; padding: 28px;
+      border-radius: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.7); border: 1px solid #2d3748;
+      position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .paywall-close {
+      position: absolute; right: 20px; top: 18px; cursor: pointer; font-size: 24px; color: #a0aec0;
+    }
   </style>
 </head>
-<body>
+<body class="bg-[#080808] text-[#f0ece4] font-body antialiased overflow-x-hidden selection:bg-gold selection:text-black">
+  
+  <div class="fixed inset-0 z-[9996] pointer-events-none opacity-[0.028]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noise%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23noise)%27/%3E%3C/svg%3E');background-size:200px"></div>
+
+  <div id="lv-transition" class="fixed inset-0 bg-[#080808] z-[99999] pointer-events-none scale-y-0 origin-bottom"></div>
+  <div id="lv-scroll-progress" class="fixed top-0 left-0 w-full h-[2px] z-[9997] origin-left scale-x-0 bg-gradient-to-r from-gold via-white/40 to-gold"></div>
+  <div id="cursor-ring" class="fixed w-11 h-11 border border-gold rounded-full pointer-events-none z-[9998] opacity-0 mix-blend-difference will-change-transform hidden lg:block"></div>
+  <div id="cursor-dot" class="fixed w-[5px] h-[5px] bg-gold rounded-full pointer-events-none z-[9999] opacity-0 will-change-transform hidden lg:block"></div>
+
   <nav id="main-nav"></nav>
 
   <div class="page-wrapper">
     <div class="container">
-      <nav class="breadcrumb">
+      <nav class="breadcrumb" style="margin-top:24px;">
         <a href="/index.html">Home</a><span>›</span>
         <a href="/cart.html">Cart</a><span>›</span>
         <span>Checkout</span>
@@ -66,53 +90,32 @@
               <div class="checkout-section-title">Shipping Address</div>
               <div id="address-section"><div style="height:120px;" class="skeleton"></div></div>
               <button id="add-address-toggle" class="btn btn-outline" style="margin-top:12px;padding:10px 16px;font-size:12px;">+ Add New Address</button>
+              
               <div id="new-address-form" style="display:none;margin-top:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
                 <div class="address-grid" style="margin-bottom:12px;">
-                  <div class="form-group">
-                    <label class="form-label">Address Line 1 *</label>
-                    <input type="text" id="a-line1" class="form-input" maxlength="255" placeholder="123 Main St">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Line 2 (optional)</label>
-                    <input type="text" id="a-line2" class="form-input" maxlength="255" placeholder="Apt 4B">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">City *</label>
-                    <input type="text" id="a-city" class="form-input" maxlength="100">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">State</label>
-                    <input type="text" id="a-state" class="form-input" maxlength="100">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Postal Code *</label>
-                    <input type="text" id="a-postal" class="form-input" maxlength="20">
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Country * (ISO 2-letter)</label>
-                    <input type="text" id="a-country" class="form-input" maxlength="2" placeholder="IN" value="IN">
-                  </div>
+                  <div class="form-group"><label class="form-label">Address Line 1 *</label><input type="text" id="a-line1" class="form-input" maxlength="255" placeholder="123 Main St"></div>
+                  <div class="form-group"><label class="form-label">Line 2 (optional)</label><input type="text" id="a-line2" class="form-input" maxlength="255" placeholder="Apt 4B"></div>
+                  <div class="form-group"><label class="form-label">City *</label><input type="text" id="a-city" class="form-input" maxlength="100"></div>
+                  <div class="form-group"><label class="form-label">State</label><input type="text" id="a-state" class="form-input" maxlength="100"></div>
+                  <div class="form-group"><label class="form-label">Postal Code *</label><input type="text" id="a-postal" class="form-input" maxlength="20"></div>
+                  <div class="form-group"><label class="form-label">Country * (ISO 2-letter)</label><input type="text" id="a-country" class="form-input" maxlength="2" placeholder="IN" value="IN"></div>
                 </div>
-                <label class="filter-option" style="margin-bottom:12px;">
-                  <input type="checkbox" id="a-default"> Set as default address
-                </label>
+                <label class="filter-option" style="margin-bottom:12px;"><input type="checkbox" id="a-default"> Set as default address</label>
                 <button id="save-address-btn" class="btn btn-primary" style="padding:10px 20px;">Save Address</button>
               </div>
             </div>
 
             <div class="checkout-section">
-              <div class="checkout-section-title">Payment</div>
-              <div id="stripe-elements-wrap" style="display:none;">
-                <div class="stripe-card-wrap" id="stripe-card-element"></div>
-                <div id="stripe-errors" class="form-error" style="margin-top:8px;display:none;"></div>
+              <div class="checkout-section-title">Payment Method</div>
+              <div style="padding:16px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); font-size:13px; color:var(--text-muted);">
+                🔒 Amazon-Style 1-Click Checkout. Click below to securely enter Card/UPI details.
               </div>
-              <div id="stripe-placeholder" style="height:52px;" class="skeleton"></div>
             </div>
 
             <div id="order-error" class="form-error" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--error-dim);border-radius:var(--radius);"></div>
 
             <button id="pay-btn" class="btn btn-primary" style="width:100%;justify-content:center;padding:16px;" disabled>
-              🔒 Place Order & Pay
+              🔒 Proceed to Secure Payment
             </button>
             <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:12px;">
               Your payment is encrypted and processed securely by Stripe.
@@ -158,6 +161,28 @@
     </div>
   </div>
 
+  <div id="paywall-modal">
+    <div class="paywall-box">
+      <span class="paywall-close" onclick="closePaywall()">&times;</span>
+      <h3 style="margin:0 0 4px; font-size:18px; color:#fff;">Secure Gateway</h3>
+      <p style="font-size:12px; color:#a0aec0; margin:0 0 20px;">Complete your purchase securely</p>
+      
+      <div id="stripe-payment-element" style="min-height:180px; margin-bottom:18px;"></div>
+      
+      <div id="modal-pay-error" style="display:none; padding:10px; background:rgba(224,82,82,0.15); border:1px solid #e05252; color:#fc8181; font-size:13px; border-radius:6px; margin-bottom:14px;"></div>
+      
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="modal-submit-btn" onclick="confirmModalPayment()" class="btn btn-primary" style="width:100%; justify-content:center; padding:14px;">
+          <span id="modal-btn-text">Pay Now</span>
+          <span id="modal-spinner" style="display:none;">⏳ Verifying Bank...</span>
+        </button>
+        <button id="modal-cancel-btn" onclick="closePaywall()" class="btn btn-outline" style="width:100%; justify-content:center; padding:10px; border-color:#4a5568; color:#a0aec0;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
@@ -165,24 +190,29 @@
   <script src="/js/api.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   
   <script>
+    /* =========================================================================
+       LUVIIO CHECKOUT (Enterprise API Sync + 1-Click Paywall Modal)
+    ========================================================================= */
+    const _esc = (s) => typeof escapeHTML === 'function' ? escapeHTML(s) : String(s||'').replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
+    const _fmt = (n) => typeof formatPrice === 'function' ? formatPrice(n) : '₹' + Number(n||0).toLocaleString('en-IN');
+
     let selectedAddressId = null;
     let addresses = [];
     let stripe = null;
-    let cardElement = null;
+    let stripeElements = null;
+    let activeClientSecret = null;
+    let activePiId = null;
     
-    // 🔥 Retry & Session Variables
     let isRetryMode = false;
     let retryClientSecret = null;
     let retryOrderId = null;
     let orderData = null;
     let cartData = null;
-    
-    // 🔥 NEW: Tracks if an order was created during THIS checkout session
     let currentOrderId = null; 
 
-    // ── Idempotency Key ────────────────────────────────────────────────────
     const IDEM_KEY_STORAGE = 'lv_checkout_idem_key';
 
     function _getOrCreateIdempotencyKey() {
@@ -191,405 +221,254 @@
         key = typeof crypto !== 'undefined' && crypto.randomUUID
           ? crypto.randomUUID()
           : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-              const r = Math.random() * 16 | 0;
-              return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+              const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
         sessionStorage.setItem(IDEM_KEY_STORAGE, key);
       }
       return key;
     }
 
-    function _clearIdempotencyKey() {
-      sessionStorage.removeItem(IDEM_KEY_STORAGE);
-    }
+    function _clearIdempotencyKey() { sessionStorage.removeItem(IDEM_KEY_STORAGE); }
 
-    // ── Cart Badge Update Helper ──────────────────────────────────────────
     function updateCartBadgeUI(count) {
-      const badges = document.querySelectorAll('.cart-badge');
-      badges.forEach(badge => {
-        if (count > 0) {
-          badge.textContent = count;
-          badge.style.display = 'flex';
-        } else {
-          badge.textContent = '0';
-          badge.style.display = 'none';
-        }
-      });
+      document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = count; b.style.display = count > 0 ? 'flex' : 'none'; });
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────
     async function init() {
-      const ok = await pageInit({ requireAuth: true });
-      if (!ok) return;
+      if (typeof pageInit === 'function') await pageInit({ requireAuth: true });
       
+      // Async GSAP & Hardware Cursor
+      if (typeof gsap !== 'undefined') {
+        const curtain = document.getElementById('lv-transition');
+        if (curtain) gsap.to(curtain, { scaleY: 0, duration: 0.7, ease: 'power3.out' });
+      }
+      if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 1024) {
+        const ring = document.getElementById('cursor-ring'), dot = document.getElementById('cursor-dot');
+        if (ring && dot) {
+          let mx=0, my=0, rx=0, ry=0;
+          window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+          const renderCursor = () => {
+            rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+            ring.style.transform = `translate3d(${rx-22}px, ${ry-22}px, 0)`; ring.style.opacity = '1';
+            dot.style.transform = `translate3d(${mx-2.5}px, ${my-2.5}px, 0)`; dot.style.opacity = '1';
+            requestAnimationFrame(renderCursor);
+          };
+          requestAnimationFrame(renderCursor);
+        }
+      }
+
       const params = new URLSearchParams(window.location.search);
       retryOrderId = params.get('retry_order');
       retryClientSecret = params.get('client_secret');
       isRetryMode = !!(retryOrderId && retryClientSecret);
       
+      if (CONFIG.STRIPE_PK && !CONFIG.STRIPE_PK.includes('REPLACE')) { stripe = Stripe(CONFIG.STRIPE_PK); }
+
       try {
         if (isRetryMode) {
-          // --- 🔄 RETRY MODE ---
-          orderData = await API.getMyOrder(retryOrderId);
+          const rawOrder = await API.getMyOrder(retryOrderId);
+          orderData = rawOrder.data || rawOrder; // 🔥 Enterprise Sync
+
           if (!orderData || orderData.status !== 'pending') {
-            showToast('Order is no longer pending or already paid.', 'info');
-            setTimeout(() => { window.location.href = '/orders.html'; }, 1500);
-            return;
+            showToast('Order is no longer pending.', 'info');
+            setTimeout(() => { window.location.href = '/orders.html'; }, 1500); return;
           }
-          
           document.getElementById('add-address-toggle').style.display = 'none';
           document.getElementById('address-section').innerHTML = `
             <div class="address-card selected" style="cursor:default; border-color:var(--gold);">
               <div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:bold;">Locked Address</div>
               <p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;">
-                ${[orderData.shipping_line1, orderData.shipping_line2, orderData.shipping_city, orderData.shipping_state, orderData.shipping_postal_code, orderData.shipping_country].filter(Boolean).join(', ')}
+                ${[orderData.shipping_line1, orderData.shipping_city, orderData.shipping_postal_code].filter(Boolean).join(', ')}
               </p>
-            </div>
-          `;
+            </div>`;
           selectedAddressId = orderData.shipping_address_id; 
-          
-          renderOrderSummary();
-          initStripe();
-          checkPayBtnState();
-          
+          renderOrderSummary(); checkPayBtnState();
         } else {
-          // --- 🛒 NORMAL CHECKOUT MODE ---
-          cartData = await API.getCart();
-          const items = cartData?.items || [];
+          const rawCart = await API.getCart();
+          cartData = rawCart.data || rawCart; // 🔥 Enterprise Sync
           
-          if (!items.length) {
+          if (!cartData?.items?.length) {
             showToast('Your cart is empty', 'warn');
-            setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
-            return;
+            setTimeout(() => { window.location.href = '/cart.html'; }, 1500); return;
           }
-
-          if (cartData?.has_unavailable_items) {
-            showToast('Some items are unavailable. Please review your cart.', 'warn');
-          }
-
           updateCartBadgeUI(cartData.item_count || 0);
-          renderOrderSummary();
-          await loadAddresses();
-          initStripe();
+          renderOrderSummary(); await loadAddresses();
         }
       } catch (err) {
-        console.error('Checkout Init Error:', err);
-        showToast('Could not load checkout. Redirecting...', 'error');
+        showToast('Could not load checkout.', 'error');
         setTimeout(() => { window.location.href = '/cart.html'; }, 1500);
       }
     }
     init();
 
-    // ── Order Summary (Supports Both Modes) ───────────────────────────────
     function renderOrderSummary() {
-      const wrap = document.getElementById('order-items-preview');
-      wrap.innerHTML = '';
-      
+      const wrap = document.getElementById('order-items-preview'); wrap.innerHTML = '';
       const items = isRetryMode ? (orderData?.order_items || []) : (cartData?.items || []);
       
       items.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'order-item';
-        
-        const imgUrl = isRetryMode ? item.products?.image_url : item.image_url;
+        const row = document.createElement('div'); row.className = 'order-item';
+        const imgUrl = isRetryMode ? item.product_image_url : item.image_url;
         const nameText = isRetryMode ? item.product_name : item.name;
         const priceVal = isRetryMode ? item.subtotal : item.line_total;
 
-        const img = document.createElement('div');
-        img.className = 'order-item-img';
-        if (imgUrl) {
-          const i = document.createElement('img');
-          i.src = imgUrl; i.alt = nameText;
-          img.appendChild(i);
-        } else {
-          img.innerHTML = '<i class="ri-image-line"></i>';
-        }
+        const img = document.createElement('div'); img.className = 'order-item-img';
+        img.innerHTML = imgUrl ? `<img src="${_esc(imgUrl)}" alt="${_esc(nameText)}">` : '<i class="ri-image-line"></i>';
         
-        const info = document.createElement('div');
-        info.className = 'order-item-info';
-        const name = document.createElement('div');
-        name.className = 'order-item-name';
-        name.textContent = nameText;
-        const meta = document.createElement('div');
-        meta.className = 'order-item-meta';
-        meta.textContent = `Qty: ${item.quantity}`;
+        const info = document.createElement('div'); info.className = 'order-item-info';
+        info.innerHTML = `<div class="order-item-name">${_esc(nameText)}</div><div class="order-item-meta">Qty: ${item.quantity}</div>`;
         
-        info.appendChild(name); info.appendChild(meta);
+        const price = document.createElement('div'); price.className = 'order-item-price';
+        price.textContent = _fmt(priceVal);
         
-        const price = document.createElement('div');
-        price.className = 'order-item-price';
-        price.textContent = formatPrice(priceVal);
-        
-        row.appendChild(img); row.appendChild(info); row.appendChild(price);
-        wrap.appendChild(row);
+        row.appendChild(img); row.appendChild(info); row.appendChild(price); wrap.appendChild(row);
       });
 
-      const totalsEl = document.getElementById('order-totals');
-      totalsEl.innerHTML = '';
-      
+      const totalsEl = document.getElementById('order-totals'); totalsEl.innerHTML = '';
       const subtotal = isRetryMode ? orderData.subtotal : (cartData?.subtotal || 0);
       const shipping = isRetryMode ? orderData.shipping_cost : (cartData?.shipping_cost || 0);
       const taxAmount = isRetryMode ? orderData.tax_amount : (cartData?.tax_amount || 0);
-      const taxRate = isRetryMode ? 18 : (cartData?.tax_rate_pct || 18);
       const grandTotal = isRetryMode ? orderData.total_amount : (cartData?.total_amount || 0);
-      const isFreeShipping = isRetryMode ? (shipping === 0) : (cartData?.free_shipping_eligible || false);
-      const toFreeShip = isRetryMode ? 0 : (cartData?.amount_to_free_shipping || 0);
 
-      [
-        ['Subtotal', formatPrice(subtotal)],
-        [`GST (${taxRate}%)`, formatPrice(taxAmount)],
-        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping]
-      ].forEach(([label, value, isFree]) => {
-        const row = document.createElement('div');
-        row.className = 'order-row';
-        const ll = document.createElement('span'); ll.textContent = label;
-        const vv = document.createElement('span');
-        if (isFree) {
-          vv.innerHTML = '<i class="ri-truck-line"></i> Free';
-          vv.style.color = 'var(--success)';
-        } else { vv.textContent = value; }
-        row.appendChild(ll); row.appendChild(vv);
-        totalsEl.appendChild(row);
+      [['Subtotal', _fmt(subtotal)], ['GST', _fmt(taxAmount)], ['Shipping', shipping === 0 ? 'FREE' : _fmt(shipping)]].forEach(([l, v]) => {
+        const r = document.createElement('div'); r.className = 'order-row';
+        r.innerHTML = `<span>${l}</span><span>${v}</span>`; totalsEl.appendChild(r);
       });
 
-      if (!isRetryMode && !isFreeShipping && toFreeShip > 0) {
-        const hint = document.createElement('div');
-        hint.style.cssText = 'font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;padding:6px 0;';
-        hint.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(toFreeShip)} more for free shipping`;
-        totalsEl.appendChild(hint);
-      }
-
-      const totalRow = document.createElement('div');
-      totalRow.className = 'order-row total';
-      totalRow.style.cssText = 'border-top:2px solid var(--border);margin-top:12px;padding-top:16px;font-size:16px;font-weight:600;';
-      totalRow.innerHTML = `<span>Total</span><span style="color:var(--gold);">${formatPrice(grandTotal)}</span>`;
-      totalsEl.appendChild(totalRow);
+      const tot = document.createElement('div'); tot.className = 'order-row total';
+      tot.style.cssText = 'border-top:2px solid var(--border);margin-top:12px;padding-top:16px;font-size:16px;font-weight:600;';
+      tot.innerHTML = `<span>Total</span><span style="color:var(--gold);">${_fmt(grandTotal)}</span>`; totalsEl.appendChild(tot);
     }
 
-    // ── Addresses (Only used in Normal Mode) ───────────────────────────────
     async function loadAddresses() {
-      try {
-        addresses = await API.getAddresses();
-        renderAddresses();
-      } catch (err) {
-        document.getElementById('address-section').innerHTML = `<p class="form-error">${escapeHTML(err.message)}</p>`;
-      }
+      try { 
+        const rawAddr = await API.getAddresses(); 
+        addresses = rawAddr.data || rawAddr || []; // 🔥 Enterprise Sync
+        renderAddresses(); 
+      } catch(e) {}
     }
 
     function renderAddresses() {
-      const wrap = document.getElementById('address-section');
-      wrap.innerHTML = '';
-      if (!addresses.length) {
-        wrap.innerHTML = '<p style="font-size:14px;color:var(--text-muted);">No saved addresses. Add one below.</p>';
-        return;
-      }
-      const grid = document.createElement('div');
-      grid.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+      const wrap = document.getElementById('address-section'); wrap.innerHTML = '';
+      if (!addresses.length) { wrap.innerHTML = '<p class="text-sm text-text-muted">No saved addresses.</p>'; return; }
+      
       addresses.forEach(addr => {
-        const card = document.createElement('div');
-        card.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
-        if (addr.is_default && !selectedAddressId) {
+        const c = document.createElement('div');
+        c.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
+        if (addr.is_default && !selectedAddressId) { selectedAddressId = addr.id; c.classList.add('selected'); }
+        c.innerHTML = `<p style="margin:0;font-size:13px;">${_esc([addr.line1, addr.city, addr.postal_code].join(', '))}</p>`;
+        c.onclick = () => {
           selectedAddressId = addr.id;
-          card.classList.add('selected');
-        }
-        if (addr.is_default) {
-          const badge = document.createElement('span');
-          badge.className = 'badge-default'; badge.textContent = 'Default';
-          card.appendChild(badge);
-        }
-        const p = document.createElement('p');
-        p.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;';
-        p.textContent = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ');
-        
-        card.addEventListener('click', () => {
-          selectedAddressId = addr.id;
-          document.querySelectorAll('.address-card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-          checkPayBtnState();
-        });
-        card.appendChild(p); grid.appendChild(card);
+          document.querySelectorAll('.address-card').forEach(x => x.classList.remove('selected'));
+          c.classList.add('selected'); checkPayBtnState();
+        };
+        wrap.appendChild(c);
       });
-      wrap.appendChild(grid);
       checkPayBtnState();
     }
 
-    document.getElementById('add-address-toggle').addEventListener('click', () => {
-      const form = document.getElementById('new-address-form');
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    });
+    document.getElementById('add-address-toggle').onclick = () => {
+      const f = document.getElementById('new-address-form'); f.style.display = f.style.display === 'none' ? 'block' : 'none';
+    };
 
-    document.getElementById('save-address-btn').addEventListener('click', async () => {
-      const line1 = document.getElementById('a-line1').value.trim();
-      const city = document.getElementById('a-city').value.trim();
-      const postal = document.getElementById('a-postal').value.trim();
-      const country = document.getElementById('a-country').value.trim().toUpperCase();
-      const btn = document.getElementById('save-address-btn');
+    document.getElementById('save-address-btn').onclick = async () => {
+      const l1 = document.getElementById('a-line1').value.trim(), ct = document.getElementById('a-city').value.trim(), pc = document.getElementById('a-postal').value.trim();
+      if(!l1 || !ct || !pc) return showToast('Fill required fields', 'error');
       
-      if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Please fill all required fields', 'error'); return;
-      }
-      
-      showLoader(btn, 'Saving…');
+      const btn = document.getElementById('save-address-btn'); showLoader(btn, 'Saving...');
       try {
-        const addr = await API.addAddress({
-          line1, line2: document.getElementById('a-line2').value.trim() || null, 
-          city, state: document.getElementById('a-state').value.trim() || null, 
-          postal_code: postal, country, is_default: document.getElementById('a-default').checked
-        });
-        addresses.push(addr);
-        selectedAddressId = addr.id;
-        renderAddresses();
+        const rawNew = await API.addAddress({ line1:l1, city:ct, postal_code:pc, country:'IN' });
+        const addr = rawNew.data || rawNew; // 🔥 Enterprise Sync
+        addresses.push(addr); selectedAddressId = addr.id; renderAddresses();
         document.getElementById('new-address-form').style.display = 'none';
-        showToast('Address saved!', 'success');
-      } catch (err) { showToast(err.message, 'error'); } 
-      finally { hideLoader(btn); }
-    });
+      } catch(e) { showToast(e.message, 'error'); } finally { hideLoader(btn); }
+    };
 
-    // ── Stripe ─────────────────────────────────────────────────────────────
-    function initStripe() {
-      const placeholder = document.getElementById('stripe-placeholder');
-      const elementsWrap = document.getElementById('stripe-elements-wrap');
-      if (!CONFIG.STRIPE_PK || CONFIG.STRIPE_PK.includes('REPLACE')) {
-        placeholder.style.cssText = 'height:auto;';
-        placeholder.classList.remove('skeleton');
-        placeholder.innerHTML = '<p style="color:var(--warn);font-size:13px;padding:12px 0;">Stripe not configured. Running in Demo Mode.</p>';
-        checkPayBtnState();
-        return;
-      }
-      try {
-        stripe = Stripe(CONFIG.STRIPE_PK);
-        const elements = stripe.elements({
-          appearance: {
-            theme: 'night',
-            variables: { colorPrimary: '#c9a96e', colorBackground: '#1a1a1a', colorText: '#f0ece4', colorDanger: '#e05252', fontFamily: 'DM Sans', borderRadius: '8px' }
-          }
-        });
-        cardElement = elements.create('card', { hidePostalCode: true });
-        placeholder.style.display = 'none';
-        elementsWrap.style.display = 'block';
-        cardElement.mount('#stripe-card-element');
-        cardElement.on('change', e => {
-          const errDiv = document.getElementById('stripe-errors');
-          if (e.error) { errDiv.textContent = e.error.message; errDiv.style.display = 'block'; } 
-          else { errDiv.style.display = 'none'; }
-        });
-      } catch (err) {
-        placeholder.classList.remove('skeleton'); placeholder.style.height = 'auto';
-        placeholder.innerHTML = `<p class="form-error">Stripe failed: ${escapeHTML(err.message)}</p>`;
-      }
-    }
+    function checkPayBtnState() { document.getElementById('pay-btn').disabled = !selectedAddressId; }
 
-    function checkPayBtnState() {
-      document.getElementById('pay-btn').disabled = !selectedAddressId;
-    }
-
-    // ── Place Order (Supports Normal, Failure-Retry, and URL-Retry) ────────
+    // ── 🔒 STEP 1: CLICK MAIN PAY BUTTON -> OPENS PAYWALL MODAL ───────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn = document.getElementById('pay-btn');
-      const errDiv = document.getElementById('order-error');
-      errDiv.style.display = 'none';
+      const errDiv = document.getElementById('order-error'); errDiv.style.display = 'none';
 
-      if (!selectedAddressId) { showToast('Select a shipping address', 'error'); return; }
-      
-      if (!isRetryMode && !currentOrderId) {
-        if (!cartData?.items?.length) { showToast('Cart is empty', 'warn'); return; }
-        if (cartData?.has_unavailable_items) { showToast('Remove unavailable items first', 'error'); return; }
-      }
+      if (!stripe) return showToast("Stripe Public Key Missing in config.js", "error");
 
-      const idempotencyKey = _getOrCreateIdempotencyKey();
-      showLoader(btn, '🔒 Processing Payment…');
+      showLoader(btn, 'Initializing Secure Gateway…');
 
       try {
-        let clientSecretToUse = null;
-        let paymentIntentId = null;
-
         if (isRetryMode) {
-          // MODE 1: Arrived from orders.html via URL parameters
-          clientSecretToUse = retryClientSecret;
-          paymentIntentId = retryClientSecret.split('_secret_')[0];
+          activeClientSecret = retryClientSecret;
+          activePiId = retryClientSecret.split('_secret_')[0];
         } else if (currentOrderId) {
-          // 🔥 MODE 2: CHECKOUT PAGE RETRY! 
-          // Order was created in this session, but payment failed. We just fetch a fresh intent.
-          const retryData = await API.retryPayment(currentOrderId);
-          if (retryData.status === 'paid') {
-            completeCheckout();
-            return;
-          }
-          clientSecretToUse = retryData.client_secret;
-          paymentIntentId = retryData.payment_intent_id;
+          // RETRY MODE: Fetch fresh intent for the existing order
+          const rawRetry = await API.retryPayment(currentOrderId);
+          const retryData = rawRetry.data || rawRetry; // 🔥 Enterprise Sync
+          if (retryData.status === 'paid') return completeCheckout();
+          activeClientSecret = retryData.client_secret;
+          activePiId = retryData.payment_intent_id;
         } else {
-          // MODE 3: NORMAL FIRST ATTEMPT
-          const intentData = await API.createPaymentIntent(selectedAddressId, idempotencyKey);
-          clientSecretToUse = intentData.client_secret;
-          paymentIntentId = intentData.payment_intent_id;
-          currentOrderId = intentData.order_id; // 🔥 Save the ID. If payment fails, next click triggers Mode 2!
+          // NORMAL FIRST ATTEMPT
+          const rawIntent = await API.createPaymentIntent(selectedAddressId, _getOrCreateIdempotencyKey());
+          const intentData = rawIntent.data || rawIntent; // 🔥 Enterprise Sync
+          activeClientSecret = intentData.client_secret;
+          activePiId = intentData.payment_intent_id;
+          currentOrderId = intentData.order_id; 
         }
 
-        if (stripe && cardElement) {
-          const { error: stripeErr, paymentIntent } = await stripe.confirmCardPayment(
-            clientSecretToUse,
-            { payment_method: { card: cardElement } }
-          );
+        stripeElements = stripe.elements({
+          clientSecret: activeClientSecret,
+          appearance: { theme: 'night', variables: { colorPrimary: '#c9a96e', fontFamily: 'DM Sans' } }
+        });
 
-          if (stripeErr) {
-            // 🔥 Payment failed! User stays on the page. Cart is safe.
-            errDiv.textContent = stripeErr.message;
-            errDiv.style.display = 'block';
-            try { await API.notifyPaymentFailed(paymentIntentId, stripeErr.message); } catch {}
-            hideLoader(btn);
-            return;
-          }
+        const paymentElement = stripeElements.create("payment");
+        document.getElementById("stripe-payment-element").innerHTML = "";
+        paymentElement.mount("#stripe-payment-element");
 
-          if (paymentIntent.status === 'succeeded') {
-            await API.confirmPayment(paymentIntent.id);
-            completeCheckout();
-          }
-        } else {
-          await API.confirmPayment(isRetryMode ? paymentIntentId : "demo_" + idempotencyKey);
-          completeCheckout();
-        }
-      } catch (err) {
-        errDiv.textContent = err.message || 'Checkout failed.';
-        errDiv.style.display = 'block';
         hideLoader(btn);
+        document.getElementById("paywall-modal").style.display = "flex";
+
+      } catch (err) {
+        hideLoader(btn);
+        errDiv.textContent = err.message || 'Could not connect to Bank.';
+        errDiv.style.display = 'block';
       }
     });
 
+    // ── 🔒 STEP 2: USER CLICKS PAY INSIDE MODAL ───────────────────────────
+    async function confirmModalPayment() {
+      const submitBtn = document.getElementById("modal-submit-btn"), cancelBtn = document.getElementById("modal-cancel-btn");
+      const errDiv = document.getElementById("modal-pay-error"), btnText = document.getElementById("modal-btn-text"), spinner = document.getElementById("modal-spinner");
+
+      errDiv.style.display = "none"; btnText.style.display = "none"; spinner.style.display = "inline";
+      submitBtn.disabled = true; cancelBtn.disabled = true;
+
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements: stripeElements,
+        confirmParams: { return_url: window.location.origin + "/orders.html" },
+        redirect: "if_required" // Keeps user on popup if OTP/Card fails!
+      });
+
+      if (error) {
+        // 🔥 PAYMENT FAILED! SHOW RED ERROR IN POPUP. CART REMAINS SAFE!
+        errDiv.innerText = "⚠️ " + error.message; errDiv.style.display = "block";
+        btnText.innerText = "🔄 Try Another Card"; btnText.style.display = "inline"; spinner.style.display = "none";
+        submitBtn.disabled = false; cancelBtn.disabled = false;
+        try { await API.notifyPaymentFailed(activePiId, error.message); } catch {}
+      } 
+      else if (paymentIntent && paymentIntent.status === "succeeded") {
+        spinner.innerText = "⚡ Settling Database...";
+        await API.confirmPayment(paymentIntent.id);
+        closePaywall(); completeCheckout();
+      }
+    }
+
+    function closePaywall() { document.getElementById("paywall-modal").style.display = "none"; }
+
     async function completeCheckout() {
-      _clearIdempotencyKey();
-      updateCartBadgeUI(0);
-      
+      _clearIdempotencyKey(); updateCartBadgeUI(0);
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('success-screen').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        const perm = typeof Notification !== 'undefined' ? Notification.permission : 'denied';
-        if (PUSH.isSupported() && perm === 'default' && !sessionStorage.getItem('push_dismissed')) {
-          document.getElementById('push-prompt-card').style.display = 'flex';
-        }
-      }, 800);
     }
-
-    // ── Push Prompt ────────────────────────────────────────────────────────
-    document.getElementById('push-allow-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('push-allow-btn');
-      btn.textContent = '…'; btn.disabled = true;
-      const ok = await PUSH.subscribe();
-      if (ok) {
-        document.getElementById('push-prompt-card').innerHTML = `
-          <div class="push-card-icon">✅</div>
-          <div class="push-card-text">
-            <div class="push-card-title">Notifications enabled!</div>
-            <div class="push-card-sub">You'll get instant updates on your orders.</div>
-          </div>`;
-      } else { document.getElementById('push-prompt-card').style.display = 'none'; }
-    });
-
-    document.getElementById('push-skip-btn').addEventListener('click', () => {
-      sessionStorage.setItem('push_dismissed', '1');
-      document.getElementById('push-prompt-card').style.display = 'none';
-    });
   </script>
 </body>
 </html>

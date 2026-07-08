@@ -1,5 +1,5 @@
 /* ============================================================
-   LUVIIO — Auth  (v4.1 — Ultra Strict Ghost Request Fix)
+   LUVIIO — Auth  (v4.2 — Ultra Strict Ghost Request + Enterprise API Sync)
    ============================================================
    FIXES:
    1. GHOST REQUEST FIX: Added `SESSION_HINT` in localStorage. 
@@ -7,20 +7,21 @@
       users, keeping the network tab 100% clean.
    2. REDIRECT PROOF: Token in sessionStorage survives navigation.
    3. CONCURRENCY LOCK: Prevents double-firing refresh calls.
+   4. ENTERPRISE SYNC: Safely extracts token from { success: true, data: ... }
    ============================================================ */
 
 const AUTH = (() => {
   let _accessToken = null;
   let _userProfile = null;
-  let _currentRefreshPromise = null; 
+  let _currentRefreshPromise = null;
   
-  const AT_KEY = '__lv_at'; 
+  const AT_KEY = '__lv_at';
   const PROFILE_KEY = '__lv_profile';
-  const PROFILE_TTL = 5 * 60 * 1000; 
+  const PROFILE_TTL = 5 * 60 * 1000;
   const REFRESH_KEY = '__lv_last_refresh';
-  const REFRESH_GAP = 30 * 1000; 
-  const SYNC_LOGOUT_KEY = '__lv_logout_sync'; 
-  const SESSION_HINT = '__lv_has_session'; // 🔥 NAYA: Guest check hint
+  const REFRESH_GAP = 30 * 1000;
+  const SYNC_LOGOUT_KEY = '__lv_logout_sync';
+  const SESSION_HINT = '__lv_has_session'; // 🔥 Guest check hint
   
   // ── Safe storage wrappers ──────────────────────────
   const ss = {
@@ -71,7 +72,7 @@ const AUTH = (() => {
     
     setTokens(access) {
       _accessToken = access;
-      ss.set(AT_KEY, access); 
+      ss.set(AT_KEY, access);
       ss.set(REFRESH_KEY, String(Date.now()));
       ls.set(SESSION_HINT, '1'); // 🔥 Login hote hi hint ON kar diya
     },
@@ -116,18 +117,18 @@ const AUTH = (() => {
         window.dispatchEvent(new CustomEvent('auth:login'));
         return true;
       }
-
+      
       // 🔥 2. ULTRA STRICT GHOST REQUEST FIX: 
       // Agar hint null hai (yani user kabhi login nahi hua ya usne logout daba diya hai)
       // toh network request STRICTLY BAN hai!
       if (!ls.get(SESSION_HINT)) {
         return false;
       }
-
+      
       // 3. Login page bypass
       const path = window.location.pathname;
       if (path.includes('login.html') || path === '/login' || path.endsWith('/login')) {
-        return false; 
+        return false;
       }
       
       // 4. Concurrency Lock
@@ -138,20 +139,23 @@ const AUTH = (() => {
           const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', 
-            signal: AbortSignal.timeout(8000), 
+            credentials: 'include',
+            signal: AbortSignal.timeout(8000),
           }).catch(err => {
             throw new Error("Network unreachable");
           });
           
-          if (!res || !res.ok) { 
-            this.clearTokens(); 
-            return false; 
+          if (!res || !res.ok) {
+            this.clearTokens();
+            return false;
           }
           
-          const data = await res.json();
-          if (data && data.access_token) {
-            this.setTokens(data.access_token);
+          const json = await res.json();
+          // 🔥 ENTERPRISE API SYNC: Extract payload from 'data' wrapper if present
+          const payload = json.data || json;
+          
+          if (payload && payload.access_token) {
+            this.setTokens(payload.access_token);
             window.dispatchEvent(new CustomEvent('auth:login'));
             return true;
           }
@@ -162,7 +166,7 @@ const AUTH = (() => {
           this.clearTokens();
           return false;
         } finally {
-          _currentRefreshPromise = null; 
+          _currentRefreshPromise = null;
         }
       })();
       

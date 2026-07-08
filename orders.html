@@ -136,11 +136,15 @@
       pag.innerHTML = '';
 
       try {
-        const data = await API.getMyOrders(page);
-        totalPages = data.pages || 1;
+        const res = await API.getMyOrders(page);
+        
+        // Unwrapping logic for API response format
+        const items = Array.isArray(res) ? res : (res?.data || res?.items || []);
+        totalPages = res?.meta?.total_pages || res?.pages || 1;
+        
         c.innerHTML = '';
 
-        if (!data.items?.length) {
+        if (!items.length) {
           c.innerHTML = `
             <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-border rounded-2xl">
               <div class="text-[44px] sm:text-[52px] text-border mb-4 leading-none"><i class="ri-inbox-archive-line"></i></div>
@@ -151,7 +155,7 @@
           return;
         }
 
-        data.items.forEach(o => c.appendChild(makeOrderCard(o)));
+        items.forEach(o => c.appendChild(makeOrderCard(o)));
         renderPagination();
 
       } catch (err) {
@@ -196,15 +200,15 @@
       
       header.innerHTML = `
         <div class="flex flex-col gap-1 flex-1 min-w-0 w-[calc(100%-50px)] sm:w-auto">
-          <div class="font-serif text-[13px] sm:text-base font-bold text-text tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Order #${order.id.substring(0, 8).toUpperCase()}</div>
+          <div class="font-serif text-[13px] sm:text-base font-bold text-text tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Order #${(order.id || '').substring(0, 8).toUpperCase()}</div>
           <div class="text-[11px] sm:text-xs text-text-muted flex items-center gap-1.5 flex-wrap">
             <i class="ri-calendar-line"></i> ${formatDate(order.created_at)} &middot; ${itemCount} item${itemCount !== 1 ? 's' : ''}
           </div>
         </div>
         <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 shrink-0 w-full sm:w-auto order-2 sm:order-none mt-1 sm:mt-0">
-          <div class="hidden min-[381px]:block">${getStatusBadgeHTML(order.status)}</div>
-          <div class="block min-[381px]:hidden text-[11px] font-semibold text-gold capitalize">${escapeHTML(order.status)}</div>
-          <div class="text-[13px] sm:text-base font-bold text-gold whitespace-nowrap">${formatPrice(order.total_amount)}</div>
+          <div class="hidden min-[381px]:block">${getStatusBadgeHTML(order.status || 'pending')}</div>
+          <div class="block min-[381px]:hidden text-[11px] font-semibold text-gold capitalize">${escapeHTML(order.status || 'pending')}</div>
+          <div class="text-[13px] sm:text-base font-bold text-gold whitespace-nowrap">${formatPrice(order.total_amount || 0)}</div>
         </div>
         <div class="chevron absolute sm:static top-3.5 right-3.5 sm:m-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] sm:min-w-[32px] rounded-full bg-surface-2 shrink-0 transition-all duration-300 text-text-muted group-hover:bg-gold/10 group-hover:text-gold">
           <i class="ri-arrow-down-s-line text-[17px] sm:text-[20px]"></i>
@@ -230,7 +234,9 @@
             body.dataset.loaded = 'true';
             body.innerHTML = '<div class="p-4 sm:p-5 lg:p-7"><div class="h-20 rounded-xl bg-surface-2 animate-pulse"></div></div>';
             try {
-              renderOrderBody(body, await API.getMyOrder(order.id));
+              const res = await API.getMyOrder(order.id);
+              const detailData = res?.data || res || order;
+              renderOrderBody(body, detailData);
             } catch (err) {
               body.innerHTML = `<div class="p-4 sm:p-5 lg:p-7"><p class="text-error text-sm font-medium"><i class="ri-alert-line"></i> ${escapeHTML(err.message)}</p></div>`;
             }
@@ -333,9 +339,10 @@
         list.className = 'mb-6';
 
         items.forEach(item => {
-          const imageUrl = item.products?.image_url || null;
+          const imageUrl = item.products?.image_url || item.product_image_url || null;
+          const name = item.products?.name || item.product_name || 'Product';
           const imgHTML = imageUrl 
-            ? `<img src="${imageUrl}" alt="${escapeHTML(item.product_name)}" loading="lazy" class="w-full h-full object-cover">`
+            ? `<img src="${imageUrl}" alt="${escapeHTML(name)}" loading="lazy" class="w-full h-full object-cover">`
             : `<i class="ri-image-line"></i>`;
 
           const row = document.createElement('div');
@@ -345,7 +352,7 @@
               ${imgHTML}
             </div>
             <div class="flex-1 min-w-0">
-              <div class="text-[13px] sm:text-sm font-medium text-text whitespace-nowrap overflow-hidden text-ellipsis">${escapeHTML(item.product_name)}</div>
+              <div class="text-[13px] sm:text-sm font-medium text-text whitespace-nowrap overflow-hidden text-ellipsis">${escapeHTML(name)}</div>
               <div class="text-xs text-text-muted mt-1">Qty: ${item.quantity} × ${formatPrice(item.unit_price)}</div>
             </div>
             <div class="text-sm sm:text-[15px] font-bold text-gold whitespace-nowrap shrink-0">${formatPrice(item.subtotal)}</div>
@@ -365,7 +372,6 @@
       
       const btnBaseClass = "w-full sm:w-auto inline-flex items-center justify-center font-bold rounded-lg transition-colors text-[13px] sm:text-sm px-5 py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed";
 
-      // 🔥 PAY NOW BUTTON (FIXED)
       if (order.status === 'pending') {
         const payBtn = document.createElement('button');
         payBtn.className = `${btnBaseClass} bg-gold text-surface hover:bg-[#b59454]`;
@@ -375,8 +381,8 @@
           payBtn.disabled = true;
           payBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-surface/20 border-t-surface rounded-full animate-spin-fast mr-2"></span> Processing...';
           try {
-            // 🔥 The ultimate clean API call
-            const data = await API.retryPayment(order.id);
+            const res = await API.retryPayment(order.id);
+            const data = res?.data || res;
 
             if (data.status === 'paid') {
               showToast('Payment was already successful!', 'success');
@@ -436,13 +442,13 @@
       // Summary (right)
       const summary = document.createElement('div');
       summary.className = 'w-full sm:max-w-[280px]';
-      const shippingHTML = order.shipping_cost === 0 ? '<span class="text-success"><i class="ri-truck-line"></i> Free</span>' : formatPrice(order.shipping_cost);
+      const shippingHTML = order.shipping_cost === 0 ? '<span class="text-success"><i class="ri-truck-line"></i> Free</span>' : formatPrice(order.shipping_cost || 0);
       
       summary.innerHTML = `
-        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal)}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal || 0)}</span></div>
         <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Shipping</span><span>${shippingHTML}</span></div>
-        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount)}</span></div>
-        <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount)}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount || 0)}</span></div>
+        <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount || 0)}</span></div>
       `;
 
       bottom.appendChild(summary);

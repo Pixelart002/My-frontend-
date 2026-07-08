@@ -1,10 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
   <title>Profile — Luviio</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973" crossorigin="anonymous"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/luviio.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#c9a55e',
+            'gold-dim': 'rgba(201,165,94,0.12)',
+            surface: '#0d0c0a',
+            'surface-2': '#141210',
+            border: '#1e1c18',
+            'border-light': '#2a2722',
+            text: '#f0ece4',
+            'text-muted': '#7a7368',
+            'text-dim': '#3a3730',
+            error: '#e05252',
+            success: '#88dc88',
+            warn: '#e0a952',
+          },
+          fontFamily: {
+            display: ['Playfair Display', 'serif'],
+            body: ['DM Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
     .profile-layout { display: grid; grid-template-columns: 220px 1fr; gap: 40px; padding: 40px 0 80px; }
     .profile-nav { display: flex; flex-direction: column; gap: 4px; }
@@ -37,13 +74,20 @@
     @media(max-width:768px){.profile-layout{grid-template-columns:1fr;} .form-2col{grid-template-columns:1fr;}}
   </style>
 </head>
-<body>
+<body class="bg-[#080808] text-[#f0ece4] font-body antialiased overflow-x-hidden selection:bg-gold selection:text-black">
+
+  <div class="fixed inset-0 z-[9996] pointer-events-none opacity-[0.028]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noise%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23noise)%27/%3E%3C/svg%3E');background-size:200px"></div>
+  <div id="lv-transition" class="fixed inset-0 bg-[#080808] z-[99999] pointer-events-none scale-y-0 origin-bottom"></div>
+  <div id="lv-scroll-progress" class="fixed top-0 left-0 w-full h-[2px] z-[9997] origin-left scale-x-0 bg-gradient-to-r from-gold via-white/40 to-gold"></div>
+  <div id="cursor-ring" class="fixed w-11 h-11 border border-gold rounded-full pointer-events-none z-[9998] opacity-0 mix-blend-difference will-change-transform hidden lg:block"></div>
+  <div id="cursor-dot" class="fixed w-[5px] h-[5px] bg-gold rounded-full pointer-events-none z-[9999] opacity-0 will-change-transform hidden lg:block"></div>
+
   <nav id="main-nav"></nav>
 
-  <div class="page-wrapper">
-    <div class="container">
+  <div class="page-wrapper relative z-10">
+    <div class="container mx-auto px-4 lg:px-8">
       <div class="profile-layout">
-        <!-- Sidebar nav -->
+        
         <div>
           <div style="margin-bottom:24px;">
             <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;" id="profile-greeting">My Account</div>
@@ -53,16 +97,11 @@
             <button class="profile-nav-link active" data-section="personal">Personal Info</button>
             <button class="profile-nav-link" data-section="addresses">Addresses</button>
             <hr class="divider" style="margin:8px 0;">
-            <a href="/orders.html" class="profile-nav-link" style="display:block;">My Orders</a>
+            <a href="/orders.html" class="profile-nav-link block">My Orders</a>
           </nav>
         </div>
 
-
-
-
-        <!-- Content -->
         <div>
-          <!-- Personal Info -->
           <div class="profile-section active" id="sec-personal">
             <div class="section-head">
               <h2>Personal Info</h2>
@@ -88,7 +127,6 @@
             </div>
           </div>
 
-          <!-- Addresses -->
           <div class="profile-section" id="sec-addresses">
             <div class="section-head">
               <h2>Saved Addresses</h2>
@@ -97,7 +135,6 @@
 
             <div id="address-list" class="address-list"></div>
 
-            <!-- Add address toggle -->
             <button id="toggle-addr-form" class="btn btn-outline" style="margin-top:20px;">+ Add New Address</button>
 
             <div id="addr-form-wrap" style="display:none;margin-top:20px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
@@ -144,15 +181,13 @@
     <footer class="site-footer">
       <div class="container">
         <div class="footer-bottom" style="border-top:none;margin-top:0;">
-          <span>© 2026 Luviio</span>
+          <span>© 2026 Luviio. All rights reserved.</span>
         </div>
       </div>
     </footer>
   </div>
   
-  
   <script src="/js/keys.js"></script>
-
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -160,13 +195,39 @@
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
   <script>
     let profile = null;
     let addresses = [];
 
+    const _esc = (s) => typeof escapeHTML === 'function' ? escapeHTML(s) : String(s||'').replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
+
     async function init() {
-      const ok = await pageInit({ requireAuth: true });
-      if (!ok) return;
+      if (typeof pageInit === 'function') {
+        const ok = await pageInit({ requireAuth: true });
+        if (!ok) return;
+      }
+
+      // GSAP & Hardware Cursor Init
+      if (typeof gsap !== 'undefined') {
+        const curtain = document.getElementById('lv-transition');
+        if (curtain) gsap.to(curtain, { scaleY: 0, duration: 0.7, ease: 'power3.out' });
+      }
+      if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 1024) {
+        const ring = document.getElementById('cursor-ring'), dot = document.getElementById('cursor-dot');
+        if (ring && dot) {
+          let mx=0, my=0, rx=0, ry=0;
+          window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+          const renderCursor = () => {
+            rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+            ring.style.transform = `translate3d(${rx-22}px, ${ry-22}px, 0)`; ring.style.opacity = '1';
+            dot.style.transform = `translate3d(${mx-2.5}px, ${my-2.5}px, 0)`; dot.style.opacity = '1';
+            requestAnimationFrame(renderCursor);
+          };
+          requestAnimationFrame(renderCursor);
+        }
+      }
 
       await loadProfile();
       await loadAddresses();
@@ -187,7 +248,9 @@
     /* ── Load profile ────────────────────────────────────── */
     async function loadProfile() {
       try {
-        profile = await API.getMe();
+        const rawData = await API.getMe();
+        profile = rawData.data || rawData; // 🔥 Enterprise Sync
+
         AUTH.setProfile(profile);
         document.getElementById('p-name').value  = profile.full_name || '';
         document.getElementById('p-phone').value = profile.phone || '';
@@ -211,7 +274,9 @@
 
       showLoader(btn, 'Saving…');
       try {
-        profile = await API.updateMe({ full_name: name || null, phone: phone || null });
+        const rawData = await API.updateMe({ full_name: name || null, phone: phone || null });
+        profile = rawData.data || rawData; // 🔥 Enterprise Sync
+
         AUTH.setProfile(profile);
         AUTH.updateNavUI();
         showToast('Profile updated!', 'success');
@@ -225,11 +290,12 @@
     /* ── Load addresses ──────────────────────────────────── */
     async function loadAddresses() {
       try {
-        addresses = await API.getAddresses();
+        const rawData = await API.getAddresses();
+        addresses = rawData.data || rawData || []; // 🔥 Enterprise Sync
         renderAddresses();
       } catch (err) {
         document.getElementById('address-list').innerHTML =
-          `<p class="form-error">${escapeHTML(err.message)}</p>`;
+          `<p class="form-error">${_esc(err.message)}</p>`;
       }
     }
 
@@ -318,13 +384,17 @@
 
       showLoader(btn, 'Saving…');
       try {
-        const addr = await API.addAddress({
+        const rawData = await API.addAddress({
           line1, line2: line2 || null, city,
           state: state || null, postal_code: postal, country, is_default: isDefault
         });
+        
+        const addr = rawData.data || rawData; // 🔥 Enterprise Sync
+        
         addresses.push(addr);
         renderAddresses();
         document.getElementById('addr-form-wrap').style.display = 'none';
+        
         // Clear form
         ['na-line1','na-line2','na-city','na-state','na-postal'].forEach(id => {
           const el = document.getElementById(id);

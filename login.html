@@ -314,6 +314,108 @@
       </form>
     </div>
   </div>
+  
+  
+  <script>
+  (() => {
+    const KEY = "__NETWORK_LOGS__";
+    
+    function addLog(log) {
+      try {
+        const logs = JSON.parse(localStorage.getItem(KEY) || "[]");
+        logs.push({
+          time: new Date().toISOString(),
+          ...log
+        });
+        
+        // Last 500 requests hi rakho
+        if (logs.length > 500)
+          logs.splice(0, logs.length - 500);
+        
+        localStorage.setItem(KEY, JSON.stringify(logs));
+      } catch (e) {}
+    }
+    
+    // -------- FETCH --------
+    
+    const oldFetch = window.fetch;
+    
+    window.fetch = async function(resource, options = {}) {
+      
+      const url = typeof resource === "string" ? resource : resource.url;
+      
+      const method = options.method || "GET";
+      
+      const body = options.body || "";
+      
+      try {
+        
+        const res = await oldFetch.apply(this, arguments);
+        
+        let text = "";
+        
+        try {
+          text = await res.clone().text();
+        } catch {}
+        
+        addLog({
+          type: "fetch",
+          url,
+          method,
+          status: res.status,
+          request: body,
+          response: text
+        });
+        
+        return res;
+        
+      } catch (err) {
+        
+        addLog({
+          type: "fetch",
+          url,
+          method,
+          error: String(err)
+        });
+        
+        throw err;
+      }
+    };
+    
+    // -------- XHR --------
+    
+    const open = XMLHttpRequest.prototype.open;
+    const send = XMLHttpRequest.prototype.send;
+    
+    XMLHttpRequest.prototype.open = function(method, url) {
+      this.__url = url;
+      this.__method = method;
+      return open.apply(this, arguments);
+    };
+    
+    XMLHttpRequest.prototype.send = function(body) {
+      
+      this.addEventListener("load", () => {
+        
+        addLog({
+          type: "xhr",
+          url: this.__url,
+          method: this.__method,
+          status: this.status,
+          request: body || "",
+          response: this.responseText
+        });
+        
+      });
+      
+      return send.apply(this, arguments);
+    };
+    
+  })();
+</script>
+  
+  
+  
   <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
@@ -589,5 +691,6 @@
       }
     });
   </script>
+  
 </body>
 </html>

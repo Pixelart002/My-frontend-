@@ -1,11 +1,11 @@
 /* ============================================================
-   LUVIIO — Nav  (v11 — Push Banner Removed)
+   LUVIIO — Nav  (v12 — Enterprise API Sync + Push Banner Removed)
    ============================================================
-   CHANGE: Push notification banner completely removed.
-   - enableNotifications() function removed
-   - bannerHTML variable removed (home + cart dono)
-   - _bindEvents() se banner show logic removed
-   - ADDED: Safe checks for CART and AUTH to prevent "is not defined" errors.
+   FIXES & CHANGES:
+   1. Push notification banner completely removed.
+   2. ENTERPRISE SYNC: Safely extracts profile from { success: true, data: ... }
+   3. SAFE CHECKS: Guards for CART and AUTH to prevent runtime errors.
+   4. UX UPGRADE: Improved outside click handling for dropdowns & mobile menu.
    ============================================================ */
 
 const NAV = {
@@ -13,7 +13,6 @@ const NAV = {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
     
-    // ── FIX: String concatenation, no bannerHTML ──
     nav.innerHTML =
       `<div class="nav-inner">
         <a href="/index.html" class="nav-logo">LUVIIO</a>
@@ -63,12 +62,12 @@ const NAV = {
     this._bindEvents();
     
     // SAFE CHECK: Agar CART exist karta hai tabhi init call hoga
-    if (typeof CART !== 'undefined') {
+    if (typeof CART !== 'undefined' && typeof CART.init === 'function') {
       CART.init();
     }
     
     // SAFE CHECK: Agar AUTH exist karta hai tabhi UI update hogi
-    if (typeof AUTH !== 'undefined') {
+    if (typeof AUTH !== 'undefined' && typeof AUTH.updateNavUI === 'function') {
       AUTH.updateNavUI();
     }
   },
@@ -77,36 +76,47 @@ const NAV = {
     // ── Mobile menu toggle ────────────────────────────────
     const toggle = document.querySelector('.mobile-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');
-    toggle?.addEventListener('click', () => {
+    
+    toggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
       mobileMenu?.classList.toggle('open');
       toggle.classList.toggle('open');
     });
+    
     document.querySelectorAll('.mobile-menu a').forEach(a => {
-      a.addEventListener('click', () => mobileMenu?.classList.remove('open'));
+      a.addEventListener('click', () => {
+        mobileMenu?.classList.remove('open');
+        toggle?.classList.remove('open');
+      });
     });
     
     // ── User dropdown ─────────────────────────────────────
     const uToggle = document.querySelector('.user-menu-toggle');
     const uDrop = document.querySelector('.user-dropdown');
+    
     uToggle?.addEventListener('click', (e) => {
       e.stopPropagation();
       uDrop?.classList.toggle('open');
     });
-    document.addEventListener('click', () => uDrop?.classList.remove('open'));
+    
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      if (!uDrop?.contains(e.target) && !uToggle?.contains(e.target)) {
+        uDrop?.classList.remove('open');
+      }
+      if (!mobileMenu?.contains(e.target) && !toggle?.contains(e.target)) {
+        mobileMenu?.classList.remove('open');
+        toggle?.classList.remove('open');
+      }
+    });
     
     // ── Logout ────────────────────────────────────────────
-    async function doLogout() {
+    async function doLogout(e) {
+      if (e) e.preventDefault();
       try { await API.logout(); } catch {}
       
-      // SAFE CHECK
-      if (typeof AUTH !== 'undefined') {
-        AUTH.clearTokens();
-      }
-      
-      // SAFE CHECK
-      if (typeof CART !== 'undefined') {
-        CART.clear();
-      }
+      if (typeof AUTH !== 'undefined') AUTH.clearTokens();
+      if (typeof CART !== 'undefined' && typeof CART.clear === 'function') CART.clear();
       
       window.location.href = '/index.html';
     }
@@ -121,8 +131,6 @@ const NAV = {
     window.addEventListener('auth:logout', () => {
       if (typeof AUTH !== 'undefined') AUTH.updateNavUI();
     });
-    
-    // NOTE: Push notification banner logic removed entirely.
   },
 };
 
@@ -130,7 +138,6 @@ const NAV = {
 async function pageInit(opts = {}) {
   NAV.inject();
   
-  // SAFE CHECK: Agar AUTH file load nahi hui hai toh error na de
   if (typeof AUTH === 'undefined') return true;
   
   const cachedProfile = AUTH.getProfile();
@@ -145,7 +152,9 @@ async function pageInit(opts = {}) {
     if (loggedIn) {
       if (!cachedProfile) {
         try {
-          const profile = await API.getMe();
+          const rawProfile = await API.getMe();
+          // 🔥 ENTERPRISE SYNC: Safely unpack wrapper { success: true, data: {...} }
+          const profile = rawProfile.data || rawProfile;
           AUTH.setProfile(profile);
           AUTH.updateNavUI();
         } catch (e) {
@@ -155,8 +164,10 @@ async function pageInit(opts = {}) {
         // Background refresh (non-blocking)
         setTimeout(async () => {
           try {
-            const profile = await API.getMe();
+            const rawProfile = await API.getMe();
+            const profile = rawProfile.data || rawProfile;
             AUTH.setProfile(profile);
+            AUTH.updateNavUI();
           } catch {}
         }, 2000);
       }

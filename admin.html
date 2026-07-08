@@ -50,7 +50,7 @@
       /* Layout & Shell */
       .admin-wrap { @apply grid grid-cols-[230px_1fr] min-h-[calc(100vh-var(--nav-h))] max-md:grid-cols-1; }
       .admin-sidebar { @apply bg-surface border-r border-border py-5 sticky top-[var(--nav-h)] h-[calc(100vh-var(--nav-h))] overflow-y-auto flex flex-col max-md:hidden; }
-      .admin-main { @apply p-6 lg:p-10 bg-bg min-w-0; } /* Added min-w-0 to prevent horizontal grid blowout */
+      .admin-main { @apply p-6 lg:p-10 bg-bg min-w-0; }
       
       /* Sidebar */
       .sidebar-label { @apply text-[10px] font-bold tracking-[2px] uppercase text-text-dim px-2.5 mb-1.5; }
@@ -115,7 +115,7 @@
   </style>
 </head>
 
-<body class="bg-bg text-text text-[13px] antialiased overflow-x-hidden">
+<body class="bg-bg text-text text-[13px] antialiased overflow-x-hidden selection:bg-gold selection:text-black">
   <nav id="main-nav"></nav>
   
   <div class="page-wrapper">
@@ -578,7 +578,7 @@
     const PS = 20;
     
     /* ══════════════════════════════════════
-       ADMIN API
+       ADMIN API (Enterprise Wrapper Ready)
     ══════════════════════════════════════ */
     const ADMIN = {
       async req(method, path, body = null) {
@@ -591,6 +591,10 @@
         if (res.status === 204) return null;
         const d = await res.json();
         if (!res.ok) throw new Error(d?.detail || `Error ${res.status}`);
+        // 🔥 FIX: Enterprise API unwrapper (.data / .meta)
+        if (d && d.success !== undefined) {
+          return { items: d.data || [], total: d.meta?.total_items || 0, pages: d.meta?.total_pages || 1, raw: d };
+        }
         return d;
       },
       async uploadImages(id, files) {
@@ -603,13 +607,16 @@
         });
         const d = await res.json();
         if (!res.ok) throw new Error(d?.detail || 'Upload failed');
-        return d;
+        return d.data || d;
       },
       getProducts: (p = 1) => ADMIN.req('GET', `/products?page=${p}&page_size=${PS}`),
       createProduct: d => ADMIN.req('POST', '/products', d),
       updateProduct: (id, d) => ADMIN.req('PATCH', `/products/${id}`, d),
       deleteProduct: id => ADMIN.req('DELETE', `/products/${id}`),
-      getCategories: () => ADMIN.req('GET', '/categories'),
+      getCategories: async () => {
+        const res = await ADMIN.req('GET', '/categories');
+        return res.items || (Array.isArray(res.raw?.data) ? res.raw.data : (Array.isArray(res) ? res : []));
+      },
       createCategory: d => ADMIN.req('POST', '/categories', d),
       deleteCategory: id => ADMIN.req('DELETE', `/categories/${id}`),
       getOrders: (p = 1, s = '') => ADMIN.req('GET', `/orders/?page=${p}&page_size=${PS}${s?'&status_filter='+s:''}`),
@@ -622,10 +629,10 @@
        INIT & DASHBOARD
     ══════════════════════════════════════ */
     async function init() {
-      const ok = typeof pageInit === 'function' ? await pageInit({ requireAuth: true }) : true; // Fallback if no pageInit
+      const ok = typeof pageInit === 'function' ? await pageInit({ requireAuth: true }) : true;
       if (!ok) return;
       const profile = AUTH.getProfile();
-      if (!profile || profile.role !== 'admin') {
+      if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin')) {
         if (typeof showToast === 'function') showToast('Admin access required', 'error');
         setTimeout(() => location.href = '/index.html', 1400);
         return;
@@ -717,8 +724,7 @@
               <div><div class="td-primary">${escapeHTML(p.name)}</div><div class="td-dim">${escapeHTML(p.slug)}</div></div></div></td>
           <td class="td-dim">${escapeHTML(p.sku||'—')}</td><td class="td-gold">${typeof formatPrice==='function'?formatPrice(p.price):p.price}</td><td><span class="sbadge ${sc}">${sl}</span></td><td class="td-dim">${escapeHTML(catName)}</td>
           <td><span class="status-dot ${p.is_active?'active':'inactive'}">${p.is_active?'Active':'Hidden'}</span></td>
-          <td><div class="flex gap-1.5"><button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button><button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')"><i class="ri-delete-bin-line"></i></button></div></td>
-        `;
+          <td><div class="flex gap-1.5"><button class="btn-xs bxp" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'><i class="ri-pencil-line"></i> Edit</button><button class="btn-xs bxd" onclick="deleteProduct('${p.id}','${escapeHTML(p.name).replace(/'/g,"\\'")}')"><i class="ri-delete-bin-line"></i></button></div></td>`;
         tbody.appendChild(tr);
       });
       renderPaging('prod-pages', pProdPage, pages, loadProducts);
@@ -1120,7 +1126,6 @@
       if (cur < pages) wrap.appendChild(mk('›', cur + 1));
     }
     
-    // Safefallbacks if external utils are missing:
     if (typeof escapeHTML !== 'function') { window.escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' } [tag])); }
   </script>
 </body>
