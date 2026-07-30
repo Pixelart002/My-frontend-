@@ -150,7 +150,6 @@
     let serverCartItems = [];
     let isUpdating = false;
 
-    // ── Entry Point ────────────────────────────────────────────────────────
     async function initCartPage() {
       await pageInit();
       
@@ -164,13 +163,12 @@
 
     initCartPage();
 
-    // ── Fetch Cart from Server (SINGLE API CALL — pricing included!) ──────
     async function fetchServerCart() {
       const wrap = document.getElementById('cart-items');
       
       try {
-        // SINGLE API call — cart endpoint now returns pricing built-in
-        const data = await API.get('/cart');
+        const raw = await API.getCart();
+        const data = raw?.data || raw || {};
         
         serverCartData = data;
         serverCartItems = (data.items || []).map(item => ({
@@ -194,7 +192,6 @@
       }
     }
 
-    // ── Render Cart UI ────────────────────────────────────────────────────
     function renderCartUI() {
       const items = serverCartItems;
       const wrap = document.getElementById('cart-items');
@@ -207,7 +204,6 @@
       const totalCount = items.reduce((sum, item) => sum + item.qty, 0);
       sub.textContent = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
 
-      // Stock warnings
       const bannerEl = document.getElementById('stock-warnings');
       bannerEl.innerHTML = '';
       let hasCheckoutBlocker = false;
@@ -230,7 +226,6 @@
       checkoutBtn.style.opacity = hasCheckoutBlocker ? '0.5' : '1';
       checkoutBtn.title = hasCheckoutBlocker ? 'Remove unavailable items to proceed' : '';
 
-      // Empty cart state
       if (!items.length) {
         layout.style.gridTemplateColumns = '1fr';
         sumCard.style.display = 'none';
@@ -250,11 +245,9 @@
       }
       sumCard.style.display = 'block';
 
-      // Render cart items
       wrap.innerHTML = '';
       items.forEach(item => wrap.appendChild(makeItemRow(item)));
 
-      // ── Pricing from cart response (already calculated server-side) ──
       const subtotal = serverCartData?.subtotal || 0;
       const shipping = serverCartData?.shipping_cost || 0;
       const taxAmount = serverCartData?.tax_amount || 0;
@@ -291,13 +284,11 @@
         sumRows.appendChild(row);
       });
 
-      // Total
       const totalRow = document.createElement('div');
       totalRow.className = 'order-row total';
       totalRow.innerHTML = `<span>Total</span><span style="color:var(--gold);font-weight:700;">${formatPrice(grandTotal)}</span>`;
       sumRows.appendChild(totalRow);
 
-      // Free shipping hint
       if (!isFreeShipping && toFreeShip > 0) {
         const note = document.createElement('p');
         note.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;';
@@ -306,7 +297,6 @@
       }
     }
 
-    // ── Build Cart Item Row ───────────────────────────────────────────────
     function makeItemRow(item) {
       const isUnavailable = !item.in_stock;
       const isLowStock = item.stock > 0 && item.stock <= 5;
@@ -314,7 +304,6 @@
       const row = document.createElement('div');
       row.className = 'cart-item' + (isUnavailable || isLowStock ? ' stock-warn' : '');
 
-      // Image
       const imgWrap = document.createElement('div');
       imgWrap.className = 'cart-item-img';
       if (item.image) {
@@ -326,7 +315,6 @@
         imgWrap.innerHTML = '<i class="ri-image-line"></i>';
       }
 
-      // Info
       const info = document.createElement('div');
       info.className = 'cart-item-info';
 
@@ -342,7 +330,6 @@
       info.appendChild(nameEl);
       info.appendChild(unitP);
 
-      // Stock/Price pills
       if (isUnavailable) {
         const pill = document.createElement('span');
         pill.className = 'stock-pill out';
@@ -360,14 +347,12 @@
         info.appendChild(pill);
       }
 
-      // Controls
       const controls = document.createElement('div');
       controls.className = 'cart-item-controls';
 
       const qtyCtrl = document.createElement('div');
       qtyCtrl.className = 'qty-control';
 
-      // Minus
       const minus = document.createElement('button');
       minus.className = 'qty-btn';
       minus.innerHTML = '<i class="ri-subtract-line"></i>';
@@ -376,10 +361,10 @@
         isUpdating = true;
         try {
           if (item.qty <= 1) {
-            await API.delete(`/cart/items/${item.product_id}`);
+            await API.removeCartItem(item.product_id);
             showToast('Item removed', 'info');
           } else {
-            await API.put(`/cart/items/${item.product_id}`, { quantity: item.qty - 1 });
+            await API.updateCartItem(item.product_id, item.qty - 1);
           }
           await fetchServerCart();
         } catch (e) {
@@ -389,12 +374,10 @@
         }
       });
 
-      // Quantity display
       const disp = document.createElement('div');
       disp.className = 'qty-display';
       disp.textContent = item.qty;
 
-      // Plus
       const plus = document.createElement('button');
       plus.className = 'qty-btn';
       plus.innerHTML = '<i class="ri-add-line"></i>';
@@ -402,7 +385,7 @@
         if (isUpdating) return;
         isUpdating = true;
         try {
-          await API.put(`/cart/items/${item.product_id}`, { quantity: item.qty + 1 });
+          await API.updateCartItem(item.product_id, item.qty + 1);
           await fetchServerCart();
         } catch (e) {
           showToast(e.message, 'error');
@@ -415,7 +398,6 @@
       qtyCtrl.appendChild(disp);
       qtyCtrl.appendChild(plus);
 
-      // Right side
       const right = document.createElement('div');
       right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:6px;';
 
@@ -431,7 +413,7 @@
         if (!confirm(`Remove ${item.name} from cart?`)) return;
         isUpdating = true;
         try {
-          await API.delete(`/cart/items/${item.product_id}`);
+          await API.removeCartItem(item.product_id);
           showToast('Item removed', 'info');
           await fetchServerCart();
         } catch (e) {
@@ -452,7 +434,6 @@
       return row;
     }
 
-    // ── Nav Badge ─────────────────────────────────────────────────────────
     function updateNavBadge() {
       const count = serverCartItems.reduce((sum, item) => sum + item.qty, 0);
       document.querySelectorAll('[data-cart-count]').forEach(el => {
@@ -461,7 +442,6 @@
       });
     }
 
-    // ── Guest State ───────────────────────────────────────────────────────
     function showGuestCartState() {
       document.getElementById('main-cart-layout').style.gridTemplateColumns = '1fr';
       document.getElementById('summary-card').style.display = 'none';
@@ -475,7 +455,6 @@
       `;
     }
 
-    // Responsive
     window.addEventListener('resize', () => {
       const layout = document.getElementById('main-cart-layout');
       if (serverCartItems.length > 0) {

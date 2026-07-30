@@ -1,13 +1,5 @@
 /* ============================================================
-   LUVIIO — Auth  (v4.2 — Ultra Strict Ghost Request + Enterprise API Sync)
-   ============================================================
-   FIXES:
-   1. GHOST REQUEST FIX: Added `SESSION_HINT` in localStorage. 
-      The /auth/refresh API will NEVER fire on page load for guest 
-      users, keeping the network tab 100% clean.
-   2. REDIRECT PROOF: Token in sessionStorage survives navigation.
-   3. CONCURRENCY LOCK: Prevents double-firing refresh calls.
-   4. ENTERPRISE SYNC: Safely extracts token from { success: true, data: ... }
+   LUVIIO — Auth  (v4.3 — Enterprise Strict Sync & Force Refresh)
    ============================================================ */
 
 const AUTH = (() => {
@@ -21,9 +13,8 @@ const AUTH = (() => {
   const REFRESH_KEY = '__lv_last_refresh';
   const REFRESH_GAP = 30 * 1000;
   const SYNC_LOGOUT_KEY = '__lv_logout_sync';
-  const SESSION_HINT = '__lv_has_session'; // 🔥 Guest check hint
+  const SESSION_HINT = '__lv_has_session';
   
-  // ── Safe storage wrappers ──────────────────────────
   const ss = {
     get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { sessionStorage.setItem(k, v); } catch {} },
@@ -54,7 +45,7 @@ const AUTH = (() => {
     } catch { return null; }
   }
   
-  // ── Listen for logout in other tabs (Cross-Tab Sync) ──────
+  // Cross-Tab Logout Sync
   window.addEventListener('storage', (e) => {
     if (e.key === SYNC_LOGOUT_KEY) {
       _accessToken = null;
@@ -74,7 +65,7 @@ const AUTH = (() => {
       _accessToken = access;
       ss.set(AT_KEY, access);
       ss.set(REFRESH_KEY, String(Date.now()));
-      ls.set(SESSION_HINT, '1'); // 🔥 Login hote hi hint ON kar diya
+      ls.set(SESSION_HINT, '1');
     },
     
     clearTokens() {
@@ -83,7 +74,7 @@ const AUTH = (() => {
       ss.del(AT_KEY);
       ss.del(PROFILE_KEY);
       ss.del(REFRESH_KEY);
-      ls.del(SESSION_HINT); // 🔥 Logout hote hi hint OFF kar diya
+      ls.del(SESSION_HINT);
       
       try { localStorage.setItem(SYNC_LOGOUT_KEY, String(Date.now())); } catch {}
       
@@ -111,27 +102,22 @@ const AUTH = (() => {
       return last && (Date.now() - Number(last)) < REFRESH_GAP;
     },
     
-    async init() {
-      // 1. Agar token memory/cache mein hai, toh API mat bulao
-      if (_accessToken) {
+    async init(force = false) {
+      // 🛡️ CHANGE 2: Ignore cached access token if force is true
+      if (!force && _accessToken) {
         window.dispatchEvent(new CustomEvent('auth:login'));
         return true;
       }
       
-      // 🔥 2. ULTRA STRICT GHOST REQUEST FIX: 
-      // Agar hint null hai (yani user kabhi login nahi hua ya usne logout daba diya hai)
-      // toh network request STRICTLY BAN hai!
       if (!ls.get(SESSION_HINT)) {
         return false;
       }
       
-      // 3. Login page bypass
       const path = window.location.pathname;
       if (path.includes('login.html') || path === '/login' || path.endsWith('/login')) {
         return false;
       }
       
-      // 4. Concurrency Lock
       if (_currentRefreshPromise) return _currentRefreshPromise;
       
       _currentRefreshPromise = (async () => {
@@ -151,11 +137,14 @@ const AUTH = (() => {
           }
           
           const json = await res.json();
-          // 🔥 ENTERPRISE API SYNC: Extract payload from 'data' wrapper if present
           const payload = json.data || json;
           
           if (payload && payload.access_token) {
+            // 🛡️ CHANGE 3: Set tokens, update memory immediately, and save refresh timestamp
             this.setTokens(payload.access_token);
+            _accessToken = payload.access_token;
+            ss.set(REFRESH_KEY, String(Date.now()));
+            
             window.dispatchEvent(new CustomEvent('auth:login'));
             return true;
           }

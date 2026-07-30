@@ -1,14 +1,5 @@
 /* ============================================================
-   LUVIIO — API  (v8 — Enterprise Sync & AOT Payments)
-   ============================================================
-   UPGRADES & RETRY RULES:
-   1. AUTO-UNWRAP: Automatically extracts `.data` from Enterprise 
-      responses ({ success: true, data: ... }).
-   2. Sirf NETWORK errors pe retry (status=0) — 4xx/5xx pe KABHI NAHI.
-   3. Sirf IDEMPOTENT methods: GET, PUT, HEAD — POST/DELETE/PATCH never.
-   4. Exponential backoff: 1s → 2s → 4s (max 3 attempts total).
-   5. Timeout pe retry NAHI — user already wait kar raha hai.
-   6. 401 refresh loop fix preserved.
+   LUVIIO — API  (v8.2 — Enterprise Sync, 401 Refresh & B2B Billing)
    ============================================================ */
 
 class APIError extends Error {
@@ -27,10 +18,7 @@ const API = (() => {
     '/health', '/push/vapid-key',
   ];
 
-  // Idempotent methods — safe to retry on network failure
   const IDEMPOTENT = new Set(['GET', 'PUT', 'HEAD']);
-
-  // Max retry attempts for idempotent requests
   const MAX_RETRIES = 3;
 
   function _isPublic(path) {
@@ -38,7 +26,6 @@ const API = (() => {
   }
 
   function _backoff(attempt) {
-    // 1000ms, 2000ms, 4000ms
     return 1000 * Math.pow(2, attempt - 1);
   }
 
@@ -65,7 +52,9 @@ const API = (() => {
 
   async function request(method, path, body = null, isRetry = false) {
     const headers = {};
-    const token   = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
+    
+    // Always call AUTH.getToken() freshly at the beginning of every request
+    const token = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
 
     if (token && !_isPublic(path)) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -81,10 +70,10 @@ const API = (() => {
       try {
         const res = await _fetchOnce(method, path, body, { ...headers });
 
-        // ── 401 auto-refresh (loop-safe) ──────────────────────────────────
+        // ── 401 auto-refresh with forced AUTH.init(true) ───────────────
         if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
           if (typeof AUTH !== 'undefined') {
-            const refreshed = await AUTH.init();
+            const refreshed = await AUTH.init(true); // 🔥 Force refresh on 401
             if (refreshed) return request(method, path, body, true);
             AUTH.clearTokens();
           }
@@ -102,42 +91,32 @@ const API = (() => {
             : (data?.message || data?.detail || `Error ${res.status}`);
           
           const safe = String(rawMessage).substring(0, 300);
-          // 4xx/5xx — server ne respond kiya, retry mat karo
           throw new APIError(safe, res.status, data?.error_code);
         }
 
-        // 🔥 ENTERPRISE SYNC: Auto-unwrap `{ success: true, data: ... }`
         return (data && data.success !== undefined && data.data !== undefined) 
           ? data.data 
           : data;
 
       } catch (err) {
-        // APIError (4xx/5xx) — retry kabhi nahi
         if (err instanceof APIError) throw err;
 
-        // Timeout — retry nahi, user already wait kar raha hai
         if (err.name === 'TimeoutError' || err.name === 'AbortError') {
           throw new APIError('Request timed out — please try again', 0, 'TIMEOUT');
         }
 
-        // Network error (status=0) — sirf idempotent methods pe retry
         lastErr = err;
 
         if (!canRetry || attempt > MAX_RETRIES - 1) break;
 
         const delay = _backoff(attempt);
-        console.warn(
-          `[API] Network error on ${method} ${path} — attempt ${attempt}/${MAX_RETRIES}. Retrying in ${delay}ms...`
-        );
         await new Promise(r => setTimeout(r, delay));
       }
     }
 
-    // Sab retries exhaust — final error
     throw new APIError('Network error — please check your connection', 0, 'NETWORK_ERROR');
   }
 
-  // Binary file download
   async function _downloadBlob(path, defaultFilename) {
     const token   = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
     const headers = {};
@@ -161,11 +140,11 @@ const API = (() => {
   }
 
   return {
-    get:    (path)        => request('GET',    path),
-    post:   (path, body)  => request('POST',   path, body),
-    patch:  (path, body)  => request('PATCH',  path, body),
-    put:    (path, body)  => request('PUT',    path, body),
-    delete: (path)        => request('DELETE', path),
+    get:    (path)       => request('GET',    path),
+    post:   (path, body) => request('POST',   path, body),
+    patch:  (path, body) => request('PATCH',  path, body),
+    put:    (path, body) => request('PUT',    path, body),
+    delete: (path)       => request('DELETE', path),
 
     // --- AUTH ---
     login:      (email, pass)       => request('POST', '/auth/login',    { email, password: pass }),
@@ -173,7 +152,7 @@ const API = (() => {
     logout: async () => {
       if (typeof AUTH === 'undefined') return;
       try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed:', e); }
-      AUTH.clearTokens();
+      AUTH.clearTokens(); // 🔥 Use only clearTokens()
     },
     forgotPw: (email)       => request('POST', '/auth/forgot-password', { email }),
     resetPw:  (newPassword) => request('POST', '/auth/reset-password',  { new_password: newPassword }),
@@ -185,12 +164,12 @@ const API = (() => {
       ).toString();
       return request('GET', `/products${q ? '?' + q : ''}`);
     },
-    getProduct:           (slug)       => request('GET',    `/products/${encodeURIComponent(slug)}`),
-    createProduct:        (data)       => request('POST',   '/products', data),
-    updateProduct:        (id, data)   => request('PATCH',  `/products/${encodeURIComponent(id)}`, data),
-    deleteProduct:        (id)         => request('DELETE', `/products/${encodeURIComponent(id)}`),
-    uploadProductImage:   (id, file)   => { const fd = new FormData(); fd.append('file', file); return request('POST', `/products/${encodeURIComponent(id)}/images`, fd); },
-    deleteProductImage:   (id, index)  => request('DELETE', `/products/${encodeURIComponent(id)}/images/${encodeURIComponent(index)}`),
+    getProduct:             (slug)       => request('GET',    `/products/${encodeURIComponent(slug)}`),
+    createProduct:          (data)       => request('POST',   '/products', data),
+    updateProduct:          (id, data)   => request('PATCH',  `/products/${encodeURIComponent(id)}`, data),
+    deleteProduct:          (id)         => request('DELETE', `/products/${encodeURIComponent(id)}`),
+    uploadProductImage:     (id, file)   => { const fd = new FormData(); fd.append('file', file); return request('POST', `/products/${encodeURIComponent(id)}/images`, fd); },
+    deleteProductImage:     (id, index)  => request('DELETE', `/products/${encodeURIComponent(id)}/images/${encodeURIComponent(index)}`),
     reorderProductImages: (id, urls)   => request('PUT',    `/products/${encodeURIComponent(id)}/images/reorder`, urls),
 
     // --- CATEGORIES ---
@@ -207,19 +186,19 @@ const API = (() => {
       if (data) AUTH.setProfile(data);
       return data;
     },
-    updateMe:        (data)               => request('PATCH',  '/users/me', data),
-    getAddresses:    ()                   => request('GET',    '/users/me/addresses'),
-    addAddress:      (data)               => request('POST',   '/users/me/addresses', data),
-    deleteAddress:   (id)                 => request('DELETE', `/users/me/addresses/${encodeURIComponent(id)}`),
-    getUsersAdmin:   (page=1, size=20)    => request('GET',    `/users/?page=${page}&page_size=${size}`),
-    updateUserAdmin: (id, data)           => request('PATCH',  `/users/${encodeURIComponent(id)}`, data),
+    updateMe:          (data)               => request('PATCH',  '/users/me', data),
+    getAddresses:      ()                   => request('GET',    '/users/me/addresses'),
+    addAddress:        (data)               => request('POST',   '/users/me/addresses', data),
+    deleteAddress:     (id)                 => request('DELETE', `/users/me/addresses/${encodeURIComponent(id)}`),
+    getUsersAdmin:     (page=1, size=20)    => request('GET',    `/users/?page=${page}&page_size=${size}`),
+    updateUserAdmin:   (id, data)           => request('PATCH',  `/users/${encodeURIComponent(id)}`, data),
 
     // --- CART ---
-    getCart:                ()              => request('GET',    '/cart'),
-    clearCart:              ()              => request('DELETE', '/cart'),
-    addCartItem:            (pid, qty)      => request('POST',   '/cart/items', { product_id: pid, quantity: qty }),
-    updateCartItem:         (pid, qty)      => request('PUT',    `/cart/items/${encodeURIComponent(pid)}`, { quantity: qty }),
-    removeCartItem:         (pid)           => request('DELETE', `/cart/items/${encodeURIComponent(pid)}`),
+    getCart:                  ()              => request('GET',    '/cart'),
+    clearCart:                ()              => request('DELETE', '/cart'),
+    addCartItem:              (pid, qty)      => request('POST',   '/cart/items', { product_id: pid, quantity: qty }),
+    updateCartItem:           (pid, qty)      => request('PUT',    `/cart/items/${encodeURIComponent(pid)}`, { quantity: qty }),
+    removeCartItem:           (pid)           => request('DELETE', `/cart/items/${encodeURIComponent(pid)}`),
     getAbandonedCartsAdmin: (h=24, page=1)  => request('GET',    `/cart/admin/abandoned?hours=${h}&page=${page}`),
     sendCartReminderAdmin:  (cartId)        => request('POST',   `/cart/admin/remind/${encodeURIComponent(cartId)}`, {}),
 
@@ -228,27 +207,32 @@ const API = (() => {
     getPricingConfig: ()      => request('GET',  '/pricing/config'),
 
     // --- ORDERS ---
-    createOrder:      (data)               => request('POST',  '/orders/', data),
-    getMyOrders:      (page=1, size=10)    => request('GET',   `/orders/my?page=${page}&page_size=${size}`),
-    getMyOrder:       (id)                 => request('GET',   `/orders/my/${encodeURIComponent(id)}`),
-    cancelOrder:      (id)                 => request('POST',  `/orders/my/${encodeURIComponent(id)}/cancel`, {}),
+    createOrder:        (data)               => request('POST',  '/orders/', data),
+    getMyOrders:        (page=1, size=10)    => request('GET',    `/orders/my?page=${page}&page_size=${size}`),
+    getMyOrder:         (id)                 => request('GET',    `/orders/my/${encodeURIComponent(id)}`),
+    cancelOrder:        (id)                 => request('POST',  `/orders/my/${encodeURIComponent(id)}/cancel`, {}),
     getAllOrdersAdmin: (page=1, size=20, s=null) => {
       let url = `/orders/?page=${page}&page_size=${size}`;
       if (s) url += `&status_filter=${encodeURIComponent(s)}`;
       return request('GET', url);
     },
     updateOrderAdmin: (id, data) => request('PATCH',  `/orders/${encodeURIComponent(id)}`, data),
-    downloadInvoice:  (id)       => _downloadBlob(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
+    downloadInvoice:  (id)         => _downloadBlob(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
 
-    // --- PAYMENTS (AOT Updates) ---
-    createPaymentIntent:  (addressId, idemKey) => request('POST', '/payments/create-intent', { shipping_address_id: addressId, idempotency_key: idemKey }),
-    confirmPayment:       (piId)               => request('POST', '/payments/confirm',       { payment_intent_id: piId }),
+    // --- PAYMENTS ---
+    // 🔥 FIX: Properly routing billing_address_id when present
+    createPaymentIntent: (addressId, idemKey, billingId = null) => {
+      const payload = { shipping_address_id: addressId, idempotency_key: idemKey };
+      if (billingId) payload.billing_address_id = billingId;
+      return request('POST', '/payments/create-intent', payload);
+    },
+    confirmPayment:        (piId)               => request('POST', '/payments/confirm',        { payment_intent_id: piId }),
     notifyPaymentFailed:  (piId, errMsg)       => request('POST', '/payments/notify-failed', { payment_intent_id: piId, error_message: errMsg }),
-    retryPayment:         (orderId)            => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
+    retryPayment:          (orderId)            => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
 
     // --- PUSH ---
     getVapidKey:     ()     => request('GET',    '/push/vapid-key'),
-    subscribePush:   (data) => request('POST',   '/push/subscribe', data),
+    subscribePush:   (data) => request('POST',    '/push/subscribe', data),
     unsubscribePush: (data) => request('DELETE', '/push/unsubscribe', data),
 
     // --- ADMIN / SYSTEM ---

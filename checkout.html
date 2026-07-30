@@ -29,22 +29,9 @@
     .success-screen { text-align:center; padding:60px 24px; }
     .success-icon { font-size:72px; margin-bottom:24px; animation: popIn .5s cubic-bezier(.175,.885,.32,1.275); }
     @keyframes popIn { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
-    .push-card {
-      display: flex; align-items: center; gap: 16px;
-      background: var(--surface); border: 1px solid rgba(0,197,212,.25);
-      border-radius: var(--radius-lg); padding: 20px 24px;
-      margin: 28px auto 0; max-width: 440px;
-      animation: fadeUp .4s ease .6s both;
-    }
-    .push-card-icon { font-size: 32px; flex-shrink: 0; }
-    .push-card-text { flex: 1; text-align: left; }
-    .push-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-    .push-card-sub   { font-size: 12px; color: var(--text-muted); }
-    .push-card-btns  { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     @media(max-width:900px){.checkout-layout{grid-template-columns:1fr;} .summary-sticky{position:static;} .address-grid{grid-template-columns:1fr;}}
     
-    .address-card { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; position: relative; }
+    .address-card { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; position: relative; margin-bottom: 12px; }
     .address-card.selected { border-color: var(--gold); background: rgba(201,165,94,0.05); }
     .badge-default { position: absolute; top: 10px; right: 10px; background: var(--gold); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
@@ -70,8 +57,6 @@
 
   <div id="lv-transition" class="fixed inset-0 bg-[#080808] z-[99999] pointer-events-none scale-y-0 origin-bottom"></div>
   <div id="lv-scroll-progress" class="fixed top-0 left-0 w-full h-[2px] z-[9997] origin-left scale-x-0 bg-gradient-to-r from-gold via-white/40 to-gold"></div>
-  <div id="cursor-ring" class="fixed w-11 h-11 border border-gold rounded-full pointer-events-none z-[9998] opacity-0 mix-blend-difference will-change-transform hidden lg:block"></div>
-  <div id="cursor-dot" class="fixed w-[5px] h-[5px] bg-gold rounded-full pointer-events-none z-[9999] opacity-0 will-change-transform hidden lg:block"></div>
 
   <nav id="main-nav"></nav>
 
@@ -86,25 +71,30 @@
       <div id="main-content">
         <div class="checkout-layout">
           <div>
+            <!-- SHIPPING ADDRESS -->
             <div class="checkout-section">
               <div class="checkout-section-title">Shipping Address</div>
               <div id="address-section"><div style="height:120px;" class="skeleton"></div></div>
-              <button id="add-address-toggle" class="btn btn-outline" style="margin-top:12px;padding:10px 16px;font-size:12px;">+ Add New Address</button>
               
-              <div id="new-address-form" style="display:none;margin-top:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
-                <div class="address-grid" style="margin-bottom:12px;">
-                  <div class="form-group"><label class="form-label">Address Line 1 *</label><input type="text" id="a-line1" class="form-input" maxlength="255" placeholder="123 Main St"></div>
-                  <div class="form-group"><label class="form-label">Line 2 (optional)</label><input type="text" id="a-line2" class="form-input" maxlength="255" placeholder="Apt 4B"></div>
-                  <div class="form-group"><label class="form-label">City *</label><input type="text" id="a-city" class="form-input" maxlength="100"></div>
-                  <div class="form-group"><label class="form-label">State</label><input type="text" id="a-state" class="form-input" maxlength="100"></div>
-                  <div class="form-group"><label class="form-label">Postal Code *</label><input type="text" id="a-postal" class="form-input" maxlength="20"></div>
-                  <div class="form-group"><label class="form-label">Country * (ISO 2-letter)</label><input type="text" id="a-country" class="form-input" maxlength="2" placeholder="IN" value="IN"></div>
-                </div>
-                <label class="filter-option" style="margin-bottom:12px;"><input type="checkbox" id="a-default"> Set as default address</label>
-                <button id="save-address-btn" class="btn btn-primary" style="padding:10px 20px;">Save Address</button>
+              <!-- Redirects to profile so user can add full B2B address with GSTIN -->
+              <button id="add-address-toggle" class="btn btn-outline" style="margin-top:12px;padding:10px 16px;font-size:12px;">+ Add New Address</button>
+            </div>
+
+            <!-- 🔥 BILLING ADDRESS (B2B/GST Support) -->
+            <div class="checkout-section" id="billing-block">
+              <div class="checkout-section-title">Billing Address</div>
+              
+              <label class="filter-option" style="margin-bottom:16px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="billing-same-chk" checked style="accent-color: var(--gold);"> 
+                Billing address is same as shipping
+              </label>
+              
+              <div id="billing-address-section" style="display:none; margin-top:16px;">
+                <div id="billing-list-wrap"></div>
               </div>
             </div>
 
+            <!-- PAYMENT SECURE INITIATOR -->
             <div class="checkout-section">
               <div class="checkout-section-title">Payment Method</div>
               <div style="padding:16px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); font-size:13px; color:var(--text-muted);">
@@ -122,6 +112,7 @@
             </p>
           </div>
 
+          <!-- ORDER SUMMARY -->
           <div class="summary-sticky">
             <div class="card" style="padding:28px;">
               <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:20px;">Order Summary</div>
@@ -141,17 +132,6 @@
             Thank you! Your order is confirmed.<br>
             You'll receive a confirmation email shortly.
           </p>
-          <div id="push-prompt-card" class="push-card" style="display:none;">
-            <div class="push-card-icon">🔔</div>
-            <div class="push-card-text">
-              <div class="push-card-title">Get instant order updates</div>
-              <div class="push-card-sub">Know when your order ships — no app needed</div>
-            </div>
-            <div class="push-card-btns">
-              <button id="push-allow-btn" class="btn btn-primary" style="padding:9px 18px;font-size:12px;">Allow</button>
-              <button id="push-skip-btn" style="background:none;border:none;font-size:12px;color:var(--text-dim);cursor:pointer;">Skip</button>
-            </div>
-          </div>
           <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px;">
             <a href="/orders.html" class="btn btn-primary">View My Orders</a>
             <a href="/shop.html" class="btn btn-outline">Continue Shopping</a>
@@ -189,18 +169,16 @@
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/nav.js"></script>
-  <script src="/js/push.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   
   <script>
-    /* =========================================================================
-       LUVIIO CHECKOUT (Enterprise API Sync + 1-Click Paywall Modal)
-    ========================================================================= */
     const _esc = (s) => typeof escapeHTML === 'function' ? escapeHTML(s) : String(s||'').replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
     const _fmt = (n) => typeof formatPrice === 'function' ? formatPrice(n) : '₹' + Number(n||0).toLocaleString('en-IN');
 
     let selectedAddressId = null;
+    let selectedBillingId = null; // New Billing State
     let addresses = [];
+    
     let stripe = null;
     let stripeElements = null;
     let activeClientSecret = null;
@@ -237,26 +215,6 @@
     async function init() {
       if (typeof pageInit === 'function') await pageInit({ requireAuth: true });
       
-      // Async GSAP & Hardware Cursor
-      if (typeof gsap !== 'undefined') {
-        const curtain = document.getElementById('lv-transition');
-        if (curtain) gsap.to(curtain, { scaleY: 0, duration: 0.7, ease: 'power3.out' });
-      }
-      if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 1024) {
-        const ring = document.getElementById('cursor-ring'), dot = document.getElementById('cursor-dot');
-        if (ring && dot) {
-          let mx=0, my=0, rx=0, ry=0;
-          window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
-          const renderCursor = () => {
-            rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
-            ring.style.transform = `translate3d(${rx-22}px, ${ry-22}px, 0)`; ring.style.opacity = '1';
-            dot.style.transform = `translate3d(${mx-2.5}px, ${my-2.5}px, 0)`; dot.style.opacity = '1';
-            requestAnimationFrame(renderCursor);
-          };
-          requestAnimationFrame(renderCursor);
-        }
-      }
-
       const params = new URLSearchParams(window.location.search);
       retryOrderId = params.get('retry_order');
       retryClientSecret = params.get('client_secret');
@@ -267,13 +225,17 @@
       try {
         if (isRetryMode) {
           const rawOrder = await API.getMyOrder(retryOrderId);
-          orderData = rawOrder.data || rawOrder; // 🔥 Enterprise Sync
+          orderData = rawOrder.data || rawOrder;
 
           if (!orderData || orderData.status !== 'pending') {
             showToast('Order is no longer pending.', 'info');
             setTimeout(() => { window.location.href = '/orders.html'; }, 1500); return;
           }
+          
+          // Lock Address & Hide Billing selection in retry mode
           document.getElementById('add-address-toggle').style.display = 'none';
+          document.getElementById('billing-block').style.display = 'none';
+          
           document.getElementById('address-section').innerHTML = `
             <div class="address-card selected" style="cursor:default; border-color:var(--gold);">
               <div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:bold;">Locked Address</div>
@@ -285,7 +247,7 @@
           renderOrderSummary(); checkPayBtnState();
         } else {
           const rawCart = await API.getCart();
-          cartData = rawCart.data || rawCart; // 🔥 Enterprise Sync
+          cartData = rawCart.data || rawCart; 
           
           if (!cartData?.items?.length) {
             showToast('Your cart is empty', 'warn');
@@ -342,73 +304,113 @@
     async function loadAddresses() {
       try { 
         const rawAddr = await API.getAddresses(); 
-        addresses = rawAddr.data || rawAddr || []; // 🔥 Enterprise Sync
+        addresses = rawAddr.data || rawAddr || []; 
         renderAddresses(); 
       } catch(e) {}
     }
 
+    // Dynamic Rich Address Card Builder
+    function createAddressCardHTML(addr) {
+      const titleText = addr.company_name || addr.full_name || 'Address';
+      const typeBadge = addr.address_type ? `<span style="border:1px solid var(--border-light);padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;margin-left:8px;color:var(--text-muted);">${_esc(addr.address_type)}</span>` : '';
+      
+      let html = `<div style="font-weight:600;font-size:14px;margin-bottom:4px;color:var(--text);">${_esc(titleText)}${typeBadge}</div>`;
+      if (addr.gstin) html += `<div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:500;">GSTIN: ${_esc(addr.gstin)}</div>`;
+      
+      const parts = [addr.line1, addr.line2, addr.city, addr.postal_code, addr.country].filter(Boolean);
+      html += `<div style="font-size:12px;color:var(--text-muted);line-height:1.6;">${_esc(parts.join(', '))}</div>`;
+      return html;
+    }
+
     function renderAddresses() {
       const wrap = document.getElementById('address-section'); wrap.innerHTML = '';
-      if (!addresses.length) { wrap.innerHTML = '<p class="text-sm text-text-muted">No saved addresses.</p>'; return; }
+      const billWrap = document.getElementById('billing-list-wrap'); billWrap.innerHTML = '';
+
+      if (!addresses.length) { 
+        wrap.innerHTML = '<p class="text-sm text-text-muted">No saved addresses. Please add one.</p>'; 
+        return; 
+      }
       
       addresses.forEach(addr => {
+        // --- SHIPPING CARD ---
         const c = document.createElement('div');
         c.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
         if (addr.is_default && !selectedAddressId) { selectedAddressId = addr.id; c.classList.add('selected'); }
-        c.innerHTML = `<p style="margin:0;font-size:13px;">${_esc([addr.line1, addr.city, addr.postal_code].join(', '))}</p>`;
+        
+        c.innerHTML = createAddressCardHTML(addr);
         c.onclick = () => {
           selectedAddressId = addr.id;
-          document.querySelectorAll('.address-card').forEach(x => x.classList.remove('selected'));
+          document.querySelectorAll('#address-section .address-card').forEach(x => x.classList.remove('selected'));
           c.classList.add('selected'); checkPayBtnState();
         };
         wrap.appendChild(c);
+
+        // --- BILLING CARD ---
+        const b = document.createElement('div');
+        b.className = 'address-card' + (addr.id === selectedBillingId ? ' selected' : '');
+        if (addr.is_default && !selectedBillingId) { selectedBillingId = addr.id; b.classList.add('selected'); }
+
+        b.innerHTML = createAddressCardHTML(addr);
+        b.onclick = () => {
+          selectedBillingId = addr.id;
+          document.querySelectorAll('#billing-list-wrap .address-card').forEach(x => x.classList.remove('selected'));
+          b.classList.add('selected');
+        };
+        billWrap.appendChild(b);
       });
       checkPayBtnState();
     }
 
-    document.getElementById('add-address-toggle').onclick = () => {
-      const f = document.getElementById('new-address-form'); f.style.display = f.style.display === 'none' ? 'block' : 'none';
-    };
+    // Toggle Billing Address Section
+    document.getElementById('billing-same-chk').addEventListener('change', (e) => {
+      const section = document.getElementById('billing-address-section');
+      if (e.target.checked) {
+        section.style.display = 'none';
+      } else {
+        section.style.display = 'block';
+      }
+    });
 
-    document.getElementById('save-address-btn').onclick = async () => {
-      const l1 = document.getElementById('a-line1').value.trim(), ct = document.getElementById('a-city').value.trim(), pc = document.getElementById('a-postal').value.trim();
-      if(!l1 || !ct || !pc) return showToast('Fill required fields', 'error');
-      
-      const btn = document.getElementById('save-address-btn'); showLoader(btn, 'Saving...');
-      try {
-        const rawNew = await API.addAddress({ line1:l1, city:ct, postal_code:pc, country:'IN' });
-        const addr = rawNew.data || rawNew; // 🔥 Enterprise Sync
-        addresses.push(addr); selectedAddressId = addr.id; renderAddresses();
-        document.getElementById('new-address-form').style.display = 'none';
-      } catch(e) { showToast(e.message, 'error'); } finally { hideLoader(btn); }
+    document.getElementById('add-address-toggle').onclick = () => {
+      window.location.href = "/profile.html"; // Send to profile to add rich address with GSTIN
     };
 
     function checkPayBtnState() { document.getElementById('pay-btn').disabled = !selectedAddressId; }
 
-    // ── 🔒 STEP 1: CLICK MAIN PAY BUTTON -> OPENS PAYWALL MODAL ───────────
+    // ── 🔒 STEP 1: OPEN PAYWALL MODAL ───────────
     document.getElementById('pay-btn').addEventListener('click', async () => {
       const btn = document.getElementById('pay-btn');
       const errDiv = document.getElementById('order-error'); errDiv.style.display = 'none';
 
-      if (!stripe) return showToast("Stripe Public Key Missing in config.js", "error");
+      if (!stripe) return showToast("Stripe Public Key Missing", "error");
 
       showLoader(btn, 'Initializing Secure Gateway…');
+
+      // 🔥 Figure out final billing address
+      const isBillingSame = document.getElementById('billing-same-chk').checked;
+      const finalBillingId = isBillingSame ? null : selectedBillingId;
+
+      if (!isBillingSame && !finalBillingId) {
+        hideLoader(btn);
+        errDiv.textContent = "Please select a billing address.";
+        errDiv.style.display = 'block';
+        return;
+      }
 
       try {
         if (isRetryMode) {
           activeClientSecret = retryClientSecret;
           activePiId = retryClientSecret.split('_secret_')[0];
         } else if (currentOrderId) {
-          // RETRY MODE: Fetch fresh intent for the existing order
           const rawRetry = await API.retryPayment(currentOrderId);
-          const retryData = rawRetry.data || rawRetry; // 🔥 Enterprise Sync
+          const retryData = rawRetry.data || rawRetry; 
           if (retryData.status === 'paid') return completeCheckout();
           activeClientSecret = retryData.client_secret;
           activePiId = retryData.payment_intent_id;
         } else {
-          // NORMAL FIRST ATTEMPT
-          const rawIntent = await API.createPaymentIntent(selectedAddressId, _getOrCreateIdempotencyKey());
-          const intentData = rawIntent.data || rawIntent; // 🔥 Enterprise Sync
+          // 🚀 SENDING BILLING ID TO API NOW!
+          const rawIntent = await API.createPaymentIntent(selectedAddressId, _getOrCreateIdempotencyKey(), finalBillingId);
+          const intentData = rawIntent.data || rawIntent; 
           activeClientSecret = intentData.client_secret;
           activePiId = intentData.payment_intent_id;
           currentOrderId = intentData.order_id; 
@@ -444,11 +446,10 @@
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements: stripeElements,
         confirmParams: { return_url: window.location.origin + "/orders.html" },
-        redirect: "if_required" // Keeps user on popup if OTP/Card fails!
+        redirect: "if_required" 
       });
 
       if (error) {
-        // 🔥 PAYMENT FAILED! SHOW RED ERROR IN POPUP. CART REMAINS SAFE!
         errDiv.innerText = "⚠️ " + error.message; errDiv.style.display = "block";
         btnText.innerText = "🔄 Try Another Card"; btnText.style.display = "inline"; spinner.style.display = "none";
         submitBtn.disabled = false; cancelBtn.disabled = false;

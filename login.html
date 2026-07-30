@@ -315,107 +315,6 @@
     </div>
   </div>
   
-  
-  <script>
-  (() => {
-    const KEY = "__NETWORK_LOGS__";
-    
-    function addLog(log) {
-      try {
-        const logs = JSON.parse(localStorage.getItem(KEY) || "[]");
-        logs.push({
-          time: new Date().toISOString(),
-          ...log
-        });
-        
-        // Last 500 requests hi rakho
-        if (logs.length > 500)
-          logs.splice(0, logs.length - 500);
-        
-        localStorage.setItem(KEY, JSON.stringify(logs));
-      } catch (e) {}
-    }
-    
-    // -------- FETCH --------
-    
-    const oldFetch = window.fetch;
-    
-    window.fetch = async function(resource, options = {}) {
-      
-      const url = typeof resource === "string" ? resource : resource.url;
-      
-      const method = options.method || "GET";
-      
-      const body = options.body || "";
-      
-      try {
-        
-        const res = await oldFetch.apply(this, arguments);
-        
-        let text = "";
-        
-        try {
-          text = await res.clone().text();
-        } catch {}
-        
-        addLog({
-          type: "fetch",
-          url,
-          method,
-          status: res.status,
-          request: body,
-          response: text
-        });
-        
-        return res;
-        
-      } catch (err) {
-        
-        addLog({
-          type: "fetch",
-          url,
-          method,
-          error: String(err)
-        });
-        
-        throw err;
-      }
-    };
-    
-    // -------- XHR --------
-    
-    const open = XMLHttpRequest.prototype.open;
-    const send = XMLHttpRequest.prototype.send;
-    
-    XMLHttpRequest.prototype.open = function(method, url) {
-      this.__url = url;
-      this.__method = method;
-      return open.apply(this, arguments);
-    };
-    
-    XMLHttpRequest.prototype.send = function(body) {
-      
-      this.addEventListener("load", () => {
-        
-        addLog({
-          type: "xhr",
-          url: this.__url,
-          method: this.__method,
-          status: this.status,
-          request: body || "",
-          response: this.responseText
-        });
-        
-      });
-      
-      return send.apply(this, arguments);
-    };
-    
-  })();
-</script>
-  
-  
-  
   <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
@@ -428,32 +327,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <script>
-    /* ── FIX: Improved Safe Redirect ── */
     function safeRedirect(url) {
       if (!url || url === '/' || url.toLowerCase().includes('login')) return '/index.html';
       if (/^\/[^/\\]/.test(url)) return url;
       return '/index.html';
     }
 
-    /* ── FIX: Core Initialization & Route Check (Race Condition Fixed) ── */
     document.addEventListener('DOMContentLoaded', async () => {
-      
-      // 1. Initialize page + wait for auth check FIRST
       await pageInit();
 
-      // 2. If user is logged in, replace URL so they can't hit "Back" and get stuck
       if (AUTH.isLoggedIn()) {
         const redirect = safeRedirect(getParam('redirect'));
         window.location.replace(redirect);
-        return; // Don't animate in the login form
+        return;
       }
 
-      // 3. Only if guest, animate the auth card in
       gsap.to("#auth-card", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
       gsap.fromTo(".gsap-form-stagger", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.2 });
     });
 
-    /* ── Tabs Crossfade ────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const currentActive = document.querySelector('.tab-btn.active');
@@ -466,7 +358,6 @@
         const newPanel = document.getElementById('tab-' + btn.dataset.tab);
         const staggerClass = btn.dataset.tab === 'login' ? '.gsap-form-stagger' : '.gsap-form-stagger-reg';
 
-        // Clear any lingering error states
         document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
         gsap.to(oldPanel, { opacity: 0, y: -10, duration: 0.2, onComplete: () => {
@@ -482,7 +373,6 @@
       });
     });
 
-    /* ── Show/hide password ──────────────────────────────── */
     function togglePass(inputId, btn) {
       const inp = document.getElementById(inputId);
       const svgOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
@@ -504,7 +394,6 @@
       }});
     }
 
-    /* ── SILENT Password Validation ─── */
     document.getElementById('reg-pass').addEventListener('input', e => {
       const v = e.target.value;
       const wrap = document.getElementById('strength-wrap');
@@ -527,7 +416,6 @@
       fill.style.background = colors[score];
     });
 
-    /* ── UI Error & Notification System (No Layout Shifts) ── */
     function showError(inputId, msg) {
       if (typeof showToast === 'function') {
         showToast(msg, 'error');
@@ -562,7 +450,7 @@
       }
     }
 
-    /* ── Login Submission Flow ───────────────────────── */
+    /* ── Login Submission Flow (Strict Rule 3 compliant) ── */
     document.getElementById('login-form').addEventListener('submit', async e => {
       e.preventDefault(); 
       
@@ -580,29 +468,17 @@
       try {
         const data = await API.login(email, pass);
         
-        // 1. Save access token to storage to persist login
+        // 🔥 Rule 3: Use AUTH.setTokens exclusively
         AUTH.setTokens(data.access_token);
         
-        // 2. Fetch full profile to get "full_name" and "role"
+        // Fetch full profile via API wrapper
         try {
-          const profileRes = await fetch(`${CONFIG.API_BASE}/users/me`, {
-            headers: { 
-              'Authorization': `Bearer ${data.access_token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (profileRes.ok) {
-            const profileData = await profileRes.json();
-            AUTH.setProfile(profileData); 
-          } else if (data.user) {
-            AUTH.setProfile(data.user); 
-          }
-        } catch (profileErr) {
+          const profileData = await API.getMe();
+          if (profileData) AUTH.setProfile(profileData);
+        } catch {
           if (data.user) AUTH.setProfile(data.user);
         }
         
-        // 🔥 FIX: Complete strict redirection using location.replace()
         window.location.replace(safeRedirect(getParam('redirect')));
       } catch (err) {
         showError('login-email', err.message || 'Invalid email or password.');
@@ -612,7 +488,6 @@
       }
     });
 
-    /* ── Register Logic ─────────── */
     document.getElementById('register-form').addEventListener('submit', async e => {
       e.preventDefault();
       
@@ -649,7 +524,6 @@
       }
     });
 
-    /* ── Forgot password (Popup Modal) ────────────────── */
     function openForgotPopup() {
       const modal = document.getElementById('forgot-popup');
       const content = document.getElementById('forgot-content');

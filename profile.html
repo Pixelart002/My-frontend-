@@ -68,7 +68,7 @@
       gap: 16px; padding: 18px; background: var(--surface-2);
       border: 1px solid var(--border); border-radius: var(--radius);
     }
-    .address-item-text { font-size:13px;color:var(--text-muted);line-height:1.8; }
+    .address-item-text { font-size:13px;color:var(--text-muted);line-height:1.6; }
     .address-item-actions { display:flex;gap:8px;flex-shrink:0; }
 
     @media(max-width:768px){.profile-layout{grid-template-columns:1fr;} .form-2col{grid-template-columns:1fr;}}
@@ -102,6 +102,7 @@
         </div>
 
         <div>
+          <!-- Personal Info -->
           <div class="profile-section active" id="sec-personal">
             <div class="section-head">
               <h2>Personal Info</h2>
@@ -127,33 +128,74 @@
             </div>
           </div>
 
+          <!-- Addresses -->
           <div class="profile-section" id="sec-addresses">
             <div class="section-head">
               <h2>Saved Addresses</h2>
-              <p>Manage your shipping addresses.</p>
+              <p>Manage your shipping and billing addresses.</p>
             </div>
 
             <div id="address-list" class="address-list"></div>
 
             <button id="toggle-addr-form" class="btn btn-outline" style="margin-top:20px;">+ Add New Address</button>
 
+            <!-- 🔥 Updated Form with B2B & Detailed Fields -->
             <div id="addr-form-wrap" style="display:none;margin-top:20px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
-              <div style="font-size:14px;font-weight:600;margin-bottom:16px;">New Address</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:16px;">New Address Details</div>
+              
               <div class="form-2col" style="margin-bottom:16px;">
+                <!-- Recipient Info -->
                 <div class="form-group">
-                  <label class="form-label">Line 1 *</label>
-                  <input type="text" id="na-line1" class="form-input" maxlength="255">
+                  <label class="form-label">Recipient Full Name</label>
+                  <input type="text" id="na-fullname" class="form-input" maxlength="255" placeholder="John Doe">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Line 2</label>
-                  <input type="text" id="na-line2" class="form-input" maxlength="255">
+                  <label class="form-label">Contact Phone</label>
+                  <input type="tel" id="na-phone" class="form-input" maxlength="20" placeholder="+91 98765 43210">
+                </div>
+                
+                <!-- B2B / Corporate Info -->
+                <div class="form-group">
+                  <label class="form-label">Company Name (Optional)</label>
+                  <input type="text" id="na-company" class="form-input" maxlength="255" placeholder="For B2B Billing">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">GSTIN (Optional)</label>
+                  <input type="text" id="na-gstin" class="form-input" maxlength="15" placeholder="15-digit GST Number">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Email (Optional)</label>
+                  <input type="email" id="na-email" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Address Type</label>
+                  <select id="na-type" class="form-input" style="background:var(--surface);">
+                    <option value="home">Home</option>
+                    <option value="work">Work / Office</option>
+                    <option value="warehouse">Warehouse</option>
+                  </select>
+                </div>
+
+                <!-- Core Address -->
+                <div class="form-group">
+                  <label class="form-label">Address Line 1 *</label>
+                  <input type="text" id="na-line1" class="form-input" maxlength="255" placeholder="House/Flat No., Street">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Address Line 2</label>
+                  <input type="text" id="na-line2" class="form-input" maxlength="255" placeholder="Locality, Area">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Landmark</label>
+                  <input type="text" id="na-landmark" class="form-input" maxlength="255">
                 </div>
                 <div class="form-group">
                   <label class="form-label">City *</label>
                   <input type="text" id="na-city" class="form-input" maxlength="100">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">State</label>
+                  <label class="form-label">State *</label>
                   <input type="text" id="na-state" class="form-input" maxlength="100">
                 </div>
                 <div class="form-group">
@@ -165,11 +207,13 @@
                   <input type="text" id="na-country" class="form-input" maxlength="2" value="IN">
                 </div>
               </div>
+              
               <label class="filter-option" style="margin-bottom:16px;">
-                <input type="checkbox" id="na-default"> Set as default
+                <input type="checkbox" id="na-default"> Set as default address
               </label>
+              
               <div style="display:flex;gap:10px;">
-                <button id="save-addr-btn" class="btn btn-primary">Save</button>
+                <button id="save-addr-btn" class="btn btn-primary">Save Address</button>
                 <button id="cancel-addr-btn" class="btn btn-outline">Cancel</button>
               </div>
             </div>
@@ -209,7 +253,6 @@
         if (!ok) return;
       }
 
-      // GSAP & Hardware Cursor Init
       if (typeof gsap !== 'undefined') {
         const curtain = document.getElementById('lv-transition');
         if (curtain) gsap.to(curtain, { scaleY: 0, duration: 0.7, ease: 'power3.out' });
@@ -249,7 +292,7 @@
     async function loadProfile() {
       try {
         const rawData = await API.getMe();
-        profile = rawData.data || rawData; // 🔥 Enterprise Sync
+        profile = rawData.data || rawData; 
 
         AUTH.setProfile(profile);
         document.getElementById('p-name').value  = profile.full_name || '';
@@ -275,7 +318,7 @@
       showLoader(btn, 'Saving…');
       try {
         const rawData = await API.updateMe({ full_name: name || null, phone: phone || null });
-        profile = rawData.data || rawData; // 🔥 Enterprise Sync
+        profile = rawData.data || rawData; 
 
         AUTH.setProfile(profile);
         AUTH.updateNavUI();
@@ -291,7 +334,7 @@
     async function loadAddresses() {
       try {
         const rawData = await API.getAddresses();
-        addresses = rawData.data || rawData || []; // 🔥 Enterprise Sync
+        addresses = rawData.data || rawData || []; 
         renderAddresses();
       } catch (err) {
         document.getElementById('address-list').innerHTML =
@@ -299,6 +342,7 @@
       }
     }
 
+    /* 🔥 Enhanced Dynamic Render for B2B/GSTIN */
     function renderAddresses() {
       const list = document.getElementById('address-list');
       list.innerHTML = '';
@@ -318,17 +362,35 @@
         const textWrap = document.createElement('div');
         textWrap.style.flex = '1';
 
+        // Badges
         if (addr.is_default) {
           const badge = document.createElement('span');
-          badge.style.cssText = 'font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:inline-block;';
+          badge.style.cssText = 'font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:inline-block; margin-right:6px;';
           badge.textContent = 'Default';
           textWrap.appendChild(badge);
         }
 
         const text = document.createElement('div');
         text.className = 'address-item-text';
-        const parts = [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
-        text.textContent = parts.join(', ');
+        
+        // Structured Formatting
+        const titleText = addr.company_name || addr.full_name || 'Address';
+        const typeBadge = addr.address_type ? `<span style="border:1px solid var(--border-light);padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;margin-left:8px;color:var(--text-muted);">${_esc(addr.address_type)}</span>` : '';
+        
+        let contentHTML = `<div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text);">${_esc(titleText)}${typeBadge}</div>`;
+        
+        if (addr.gstin) {
+          contentHTML += `<div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:500;">GSTIN: ${_esc(addr.gstin)}</div>`;
+        }
+        
+        const parts = [addr.line1, addr.line2, addr.landmark, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
+        contentHTML += `<div>${_esc(parts.join(', '))}</div>`;
+        
+        if (addr.phone) {
+          contentHTML += `<div style="margin-top:6px;font-size:12px;color:var(--text-dim);"><i class="ri-phone-line"></i> ${_esc(addr.phone)}</div>`;
+        }
+
+        text.innerHTML = contentHTML;
         textWrap.appendChild(text);
 
         const actions = document.createElement('div');
@@ -368,6 +430,9 @@
     });
 
     document.getElementById('save-addr-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('save-addr-btn');
+      
+      // Core Address
       const line1    = document.getElementById('na-line1').value.trim().substring(0, 255);
       const line2    = document.getElementById('na-line2').value.trim().substring(0, 255);
       const city     = document.getElementById('na-city').value.trim().substring(0, 100);
@@ -375,34 +440,62 @@
       const postal   = document.getElementById('na-postal').value.trim().substring(0, 20);
       const country  = document.getElementById('na-country').value.trim().substring(0, 2).toUpperCase();
       const isDefault = document.getElementById('na-default').checked;
-      const btn      = document.getElementById('save-addr-btn');
 
-      if (!line1 || !city || !postal || country.length !== 2) {
-        showToast('Fill all required fields (Line 1, City, Postal, 2-letter Country)', 'error');
+      // New B2B / Extended Fields
+      const full_name    = document.getElementById('na-fullname').value.trim();
+      const phone        = document.getElementById('na-phone').value.trim();
+      const email        = document.getElementById('na-email').value.trim();
+      const company_name = document.getElementById('na-company').value.trim();
+      const gstin        = document.getElementById('na-gstin').value.trim().toUpperCase();
+      const landmark     = document.getElementById('na-landmark').value.trim();
+      const address_type = document.getElementById('na-type').value;
+
+      if (!line1 || !city || !state || !postal || country.length !== 2) {
+        showToast('Fill all required fields (Line 1, City, State, Postal, 2-letter Country)', 'error');
+        return;
+      }
+      
+      if (gstin && gstin.length !== 15) {
+        showToast('GSTIN must be exactly 15 characters long', 'error');
         return;
       }
 
       showLoader(btn, 'Saving…');
       try {
-        const rawData = await API.addAddress({
-          line1, line2: line2 || null, city,
-          state: state || null, postal_code: postal, country, is_default: isDefault
-        });
+        const payload = {
+          line1, 
+          line2: line2 || null, 
+          city,
+          state: state || null, 
+          postal_code: postal, 
+          country, 
+          is_default: isDefault,
+          full_name: full_name || null,
+          phone: phone || null,
+          email: email || null,
+          company_name: company_name || null,
+          gstin: gstin || null,
+          landmark: landmark || null,
+          address_type: address_type
+        };
+
+        const rawData = await API.addAddress(payload);
+        const addr = rawData.data || rawData; 
         
-        const addr = rawData.data || rawData; // 🔥 Enterprise Sync
-        
-        addresses.push(addr);
+        addresses.unshift(addr); // Add to top
         renderAddresses();
         document.getElementById('addr-form-wrap').style.display = 'none';
         
         // Clear form
-        ['na-line1','na-line2','na-city','na-state','na-postal'].forEach(id => {
+        ['na-line1','na-line2','na-city','na-state','na-postal','na-fullname','na-phone','na-email','na-company','na-gstin','na-landmark'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.value = '';
         });
         document.getElementById('na-country').value = 'IN';
+        document.getElementById('na-type').value = 'home';
         document.getElementById('na-default').checked = false;
-        showToast('Address saved!', 'success');
+        
+        showToast('Address saved successfully!', 'success');
       } catch (err) {
         showToast(err.message, 'error');
       } finally {

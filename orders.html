@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-  
   <link rel="stylesheet" href="/css/luviio.css">
 
+  <!-- PRODUCTION: Replace with compiled Tailwind CSS. CDN is dev-only. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,9 +37,7 @@
               '0%': { opacity: '0', transform: 'translateY(-8px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
             },
-            spin: {
-              '100%': { transform: 'rotate(360deg)' }
-            }
+            spin: { '100%': { transform: 'rotate(360deg)' } }
           },
           animation: {
             slideDown: 'slideDown 0.3s ease forwards',
@@ -49,17 +47,39 @@
       }
     }
   </script>
-
   <style type="text/tailwindcss">
     @layer utilities {
       .scrollbar-hide::-webkit-scrollbar { display: none; }
       .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     }
   </style>
+
+  <!-- Confirm modal styles -->
+  <style>
+    #confirm-modal { display: none; }
+    #confirm-modal.active { display: flex; }
+  </style>
 </head>
 <body class="bg-black text-text font-sans antialiased">
 
   <nav id="main-nav"></nav>
+
+  <!-- ── Confirmation Modal (replaces browser confirm()) ─────────────────── -->
+  <div id="confirm-modal" class="active fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm px-4" style="display:none" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="bg-surface border border-border rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-slideDown">
+      <h3 id="confirm-title" class="font-serif text-lg font-bold text-text mb-2">Are you sure?</h3>
+      <p id="confirm-body" class="text-text-muted text-sm mb-6 leading-relaxed"></p>
+      <div class="flex gap-3">
+        <button id="confirm-cancel-btn" class="flex-1 rounded-lg border border-border bg-surface-2 text-text text-sm font-semibold py-2.5 hover:border-gold hover:text-gold transition-colors">Keep Order</button>
+        <button id="confirm-ok-btn" class="flex-1 rounded-lg bg-error/10 text-error border border-error/20 text-sm font-semibold py-2.5 hover:bg-error hover:text-white transition-colors">Cancel Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Offline Banner ──────────────────────────────────────────────────── -->
+  <div id="offline-banner" class="hidden fixed top-0 inset-x-0 z-40 bg-warn text-surface text-center text-xs font-bold py-2 px-4">
+    <i class="ri-wifi-off-line mr-1.5"></i> You're offline — orders may not load until your connection is restored.
+  </div>
 
   <div class="min-h-screen">
     <div class="pt-8 pb-16 sm:pt-10 sm:pb-20 max-w-[900px] mx-auto px-4 sm:px-6">
@@ -77,13 +97,8 @@
         </a>
       </div>
 
-      <div id="orders-container" class="space-y-5">
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
-      </div>
-
-      <div id="orders-pagination" class="flex justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12 flex-wrap"></div>
+      <div id="orders-container" class="space-y-5" role="list" aria-label="Your orders" aria-live="polite" aria-busy="true"></div>
+      <div id="orders-pagination" class="flex justify-center items-center gap-1.5 sm:gap-2 mt-8 sm:mt-12 flex-wrap" role="navigation" aria-label="Order pages"></div>
 
     </div>
 
@@ -104,8 +119,9 @@
   <script src="/js/nav.js"></script>
 
   <script>
-    let currentPage = 1, totalPages = 1;
-
+    /* ═══════════════════════════════════════════════════════════════════════
+       CONSTANTS
+    ═══════════════════════════════════════════════════════════════════════ */
     const STATUS_FLOW  = ['pending', 'paid', 'shipped', 'delivered'];
     const STATUS_ICONS = {
       pending:   'ri-time-line',
@@ -115,133 +131,312 @@
       cancelled: 'ri-close-circle-line',
       refunded:  'ri-refund-2-line',
     };
+    const STATUS_COLORS = {
+      pending:   'bg-warn/10 text-warn border-warn/20',
+      paid:      'bg-sky-400/10 text-sky-400 border-sky-400/20',
+      shipped:   'bg-purple-400/10 text-purple-400 border-purple-400/20',
+      delivered: 'bg-success/10 text-success border-success/20',
+      cancelled: 'bg-error/10 text-error border-error/20',
+      refunded:  'bg-error/10 text-error border-error/20',
+    };
 
+    /* ═══════════════════════════════════════════════════════════════════════
+       STATE
+    ═══════════════════════════════════════════════════════════════════════ */
+    let currentPage = 1;
+    let totalPages  = 1;
+    let isLoading   = false;
+    // Per-order AbortControllers for detail fetches
+    const detailAborts = new Map();
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       OFFLINE DETECTION
+    ═══════════════════════════════════════════════════════════════════════ */
+    const offlineBanner = document.getElementById('offline-banner');
+    function syncOfflineBanner() {
+      if (!navigator.onLine) {
+        offlineBanner.classList.remove('hidden');
+      } else {
+        offlineBanner.classList.add('hidden');
+      }
+    }
+    window.addEventListener('online',  syncOfflineBanner);
+    window.addEventListener('offline', syncOfflineBanner);
+    syncOfflineBanner();
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       CONFIRM MODAL (replaces blocking browser confirm())
+    ═══════════════════════════════════════════════════════════════════════ */
+    function showConfirm(message) {
+      return new Promise(resolve => {
+        const modal   = document.getElementById('confirm-modal');
+        const bodyEl  = document.getElementById('confirm-body');
+        const okBtn   = document.getElementById('confirm-ok-btn');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+        bodyEl.textContent = message;
+        modal.style.display = 'flex';
+
+        function cleanup(result) {
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          modal.removeEventListener('click', onBackdrop);
+          resolve(result);
+        }
+        const onOk      = () => cleanup(true);
+        const onCancel  = () => cleanup(false);
+        const onBackdrop = (e) => { if (e.target === modal) cleanup(false); };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBackdrop);
+
+        // Trap focus on first button
+        cancelBtn.focus();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       URL-SYNCED PAGINATION
+       Keeps page state in ?page= so the back button works.
+    ═══════════════════════════════════════════════════════════════════════ */
+    function getPageFromURL() {
+      const p = parseInt(new URLSearchParams(location.search).get('page'), 10);
+      return (isFinite(p) && p > 0) ? p : 1;
+    }
+    function pushPageToURL(page) {
+      const url = new URL(location.href);
+      page === 1 ? url.searchParams.delete('page') : url.searchParams.set('page', page);
+      history.pushState({ page }, '', url);
+    }
+    window.addEventListener('popstate', (e) => {
+      loadOrders((e.state?.page) || getPageFromURL());
+    });
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       SAFE IMAGE URL
+       Prevents XSS via unsanitised image URLs from the API.
+    ═══════════════════════════════════════════════════════════════════════ */
+    const ALLOWED_IMAGE_ORIGINS = [
+      location.origin,
+      'https://enqcujmzxtrbfkaungpm.supabase.co',
+      // add your CDN origin here
+    ];
+    function safeImageUrl(url) {
+      if (!url) return null;
+      try {
+        const parsed = new URL(url);
+        if (!['https:', 'http:'].includes(parsed.protocol)) return null;
+        if (!ALLOWED_IMAGE_ORIGINS.some(o => parsed.origin === o)) return null;
+        return parsed.href;
+      } catch {
+        return null;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       SKELETON HTML
+    ═══════════════════════════════════════════════════════════════════════ */
+    function skeletonHTML() {
+      return `
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse" role="status" aria-label="Loading orders…"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>
+        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════════════════════════════ */
     async function init() {
       const ok = await pageInit({ requireAuth: true });
       if (!ok) return;
-      loadOrders(1);
+      loadOrders(getPageFromURL());
     }
     init();
 
-    /* ── Load & render orders ──────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       LOAD & RENDER ORDERS
+    ═══════════════════════════════════════════════════════════════════════ */
     async function loadOrders(page) {
+      if (isLoading) return;
+      isLoading = true;
+
       currentPage = page;
       const c   = document.getElementById('orders-container');
       const pag = document.getElementById('orders-pagination');
 
-      c.innerHTML = `
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse mb-5"></div>
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse mb-5"></div>
-        <div class="h-[110px] rounded-2xl bg-surface border border-border animate-pulse"></div>`;
+      c.setAttribute('aria-busy', 'true');
+      c.innerHTML  = skeletonHTML();
       pag.innerHTML = '';
+
+      if (!navigator.onLine) {
+        isLoading = false;
+        c.setAttribute('aria-busy', 'false');
+        c.innerHTML = offlineEmptyHTML();
+        return;
+      }
 
       try {
         const res = await API.getMyOrders(page);
-        
-        // Unwrapping logic for API response format
-        const items = Array.isArray(res) ? res : (res?.data || res?.items || []);
-        totalPages = res?.meta?.total_pages || res?.pages || 1;
-        
+        const items = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
+        totalPages  = res?.meta?.total_pages ?? res?.pages ?? 1;
+
         c.innerHTML = '';
+        c.setAttribute('aria-busy', 'false');
 
         if (!items.length) {
-          c.innerHTML = `
-            <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-border rounded-2xl">
-              <div class="text-[44px] sm:text-[52px] text-border mb-4 leading-none"><i class="ri-inbox-archive-line"></i></div>
-              <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">No orders yet</h3>
-              <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">Looks like you haven't made your first purchase yet.</p>
-              <a href="/shop.html" class="inline-flex items-center justify-center font-bold rounded-lg bg-gold text-surface hover:bg-[#b59454] transition-colors text-[13px] sm:text-sm px-6 py-2.5">Start Shopping</a>
-            </div>`;
+          c.innerHTML = emptyHTML();
           return;
         }
 
-        items.forEach(o => c.appendChild(makeOrderCard(o)));
+        const frag = document.createDocumentFragment();
+        items.forEach(o => frag.appendChild(makeOrderCard(o)));
+        c.appendChild(frag);
         renderPagination();
 
       } catch (err) {
-        c.innerHTML = `
-          <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-error/30 rounded-2xl">
-            <div class="text-[44px] sm:text-[52px] text-error mb-4 leading-none"><i class="ri-error-warning-line"></i></div>
-            <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">Could not load orders</h3>
-            <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">${escapeHTML(err.message)}</p>
-            <button class="inline-flex items-center justify-center font-bold rounded-lg border border-border bg-surface-2 hover:border-gold hover:text-gold transition-colors text-[13px] sm:text-sm px-5 py-2.5 text-text" onclick="loadOrders(${currentPage})">
-              <i class="ri-refresh-line mr-1.5"></i> Retry
-            </button>
-          </div>`;
+        c.setAttribute('aria-busy', 'false');
+        c.innerHTML = errorHTML(err.message, page);
+      } finally {
+        isLoading = false;
       }
     }
 
-    /* ── Status badge HTML (Tailwind Classes) ──────────────────────────── */
-    function getStatusBadgeHTML(status) {
-      const icon  = STATUS_ICONS[status] || 'ri-record-circle-line';
-      const label = status.charAt(0).toUpperCase() + status.slice(1);
-      
-      const colors = {
-        pending:   'bg-warn/10 text-warn border-warn/20',
-        paid:      'bg-sky-400/10 text-sky-400 border-sky-400/20',
-        shipped:   'bg-purple-400/10 text-purple-400 border-purple-400/20',
-        delivered: 'bg-success/10 text-success border-success/20',
-        cancelled: 'bg-error/10 text-error border-error/20',
-        refunded:  'bg-error/10 text-error border-error/20',
-      }[status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
-
-      return `<span class="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider whitespace-nowrap border ${colors}"><i class="${icon}"></i> ${escapeHTML(label)}</span>`;
+    /* ── Empty / Error / Offline states ───────────────────────────────── */
+    function emptyHTML() {
+      return `
+        <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-border rounded-2xl" role="status">
+          <div class="text-[44px] sm:text-[52px] text-border mb-4 leading-none" aria-hidden="true"><i class="ri-inbox-archive-line"></i></div>
+          <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">No orders yet</h3>
+          <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">Looks like you haven't made your first purchase yet.</p>
+          <a href="/shop.html" class="inline-flex items-center justify-center font-bold rounded-lg bg-gold text-surface hover:bg-[#b59454] transition-colors text-[13px] sm:text-sm px-6 py-2.5">Start Shopping</a>
+        </div>`;
+    }
+    function errorHTML(message, page) {
+      return `
+        <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-error/30 rounded-2xl" role="alert">
+          <div class="text-[44px] sm:text-[52px] text-error mb-4 leading-none" aria-hidden="true"><i class="ri-error-warning-line"></i></div>
+          <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">Could not load orders</h3>
+          <p class="text-text-muted text-xs sm:text-sm mb-6 sm:mb-7">${escapeHTML(message)}</p>
+          <button class="inline-flex items-center justify-center font-bold rounded-lg border border-border bg-surface-2 hover:border-gold hover:text-gold transition-colors text-[13px] sm:text-sm px-5 py-2.5 text-text"
+                  onclick="loadOrders(${Number(page)})">
+            <i class="ri-refresh-line mr-1.5" aria-hidden="true"></i> Retry
+          </button>
+        </div>`;
+    }
+    function offlineEmptyHTML() {
+      return `
+        <div class="text-center py-12 sm:py-16 px-4 sm:px-6 bg-surface border border-dashed border-warn/30 rounded-2xl" role="alert">
+          <div class="text-[44px] sm:text-[52px] text-warn mb-4 leading-none" aria-hidden="true"><i class="ri-wifi-off-line"></i></div>
+          <h3 class="font-serif text-lg sm:text-[22px] mb-2 text-text font-bold">You're offline</h3>
+          <p class="text-text-muted text-xs sm:text-sm">Please check your connection and try again.</p>
+        </div>`;
     }
 
-    /* ── Build order card ──────────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       STATUS BADGE
+    ═══════════════════════════════════════════════════════════════════════ */
+    function getStatusBadgeHTML(status) {
+      const icon   = STATUS_ICONS[status]  || 'ri-record-circle-line';
+      const colors = STATUS_COLORS[status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+      const label  = status.charAt(0).toUpperCase() + status.slice(1);
+      return `<span class="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider whitespace-nowrap border ${colors}" aria-label="Status: ${escapeHTML(label)}">
+        <i class="${icon}" aria-hidden="true"></i> ${escapeHTML(label)}
+      </span>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       ORDER CARD
+    ═══════════════════════════════════════════════════════════════════════ */
     function makeOrderCard(order) {
-      const card = document.createElement('div');
+      const card = document.createElement('article');
       card.className = 'group bg-surface border border-border rounded-2xl mb-4 sm:mb-5 overflow-hidden transition-all duration-300 hover:border-gold/30 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5';
+      card.setAttribute('role', 'listitem');
+
+      const itemCount = (order.order_items || []).length;
+      const shortId   = escapeHTML((order.id || '').substring(0, 8).toUpperCase());
 
       const header = document.createElement('div');
       header.className = 'flex flex-wrap sm:flex-nowrap items-center justify-between p-3.5 sm:p-5 lg:px-7 cursor-pointer gap-3 sm:gap-4 select-none relative sm:static pr-[52px] sm:pr-7';
+      header.setAttribute('role', 'button');
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('aria-expanded', 'false');
+      header.setAttribute('aria-controls', `order-body-${shortId}`);
+      header.setAttribute('aria-label', `Order #${shortId}, ${escapeHTML(order.status || 'pending')}`);
 
-      const itemCount = (order.order_items || []).length;
-      
       header.innerHTML = `
         <div class="flex flex-col gap-1 flex-1 min-w-0 w-[calc(100%-50px)] sm:w-auto">
-          <div class="font-serif text-[13px] sm:text-base font-bold text-text tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Order #${(order.id || '').substring(0, 8).toUpperCase()}</div>
+          <div class="font-serif text-[13px] sm:text-base font-bold text-text tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">Order #${shortId}</div>
           <div class="text-[11px] sm:text-xs text-text-muted flex items-center gap-1.5 flex-wrap">
-            <i class="ri-calendar-line"></i> ${formatDate(order.created_at)} &middot; ${itemCount} item${itemCount !== 1 ? 's' : ''}
+            <i class="ri-calendar-line" aria-hidden="true"></i>
+            ${formatDate(order.created_at)} &middot; ${itemCount} item${itemCount !== 1 ? 's' : ''}
           </div>
         </div>
         <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 shrink-0 w-full sm:w-auto order-2 sm:order-none mt-1 sm:mt-0">
           <div class="hidden min-[381px]:block">${getStatusBadgeHTML(order.status || 'pending')}</div>
-          <div class="block min-[381px]:hidden text-[11px] font-semibold text-gold capitalize">${escapeHTML(order.status || 'pending')}</div>
+          <div class="block min-[381px]:hidden text-[11px] font-semibold text-gold capitalize" aria-hidden="true">${escapeHTML(order.status || 'pending')}</div>
           <div class="text-[13px] sm:text-base font-bold text-gold whitespace-nowrap">${formatPrice(order.total_amount || 0)}</div>
         </div>
-        <div class="chevron absolute sm:static top-3.5 right-3.5 sm:m-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] sm:min-w-[32px] rounded-full bg-surface-2 shrink-0 transition-all duration-300 text-text-muted group-hover:bg-gold/10 group-hover:text-gold">
+        <div class="chevron absolute sm:static top-3.5 right-3.5 sm:m-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] sm:min-w-[32px] rounded-full bg-surface-2 shrink-0 transition-all duration-300 text-text-muted group-hover:bg-gold/10 group-hover:text-gold" aria-hidden="true">
           <i class="ri-arrow-down-s-line text-[17px] sm:text-[20px]"></i>
         </div>`;
 
       const body = document.createElement('div');
+      body.id        = `order-body-${shortId}`;
       body.className = 'hidden border-t border-border';
+
       const chevron = header.querySelector('.chevron');
 
-      header.addEventListener('click', async () => {
+      /* ── Toggle handler ─────────────────────────────────────────────── */
+      async function toggleCard() {
         const isOpen = !body.classList.contains('hidden');
-        
+
         if (isOpen) {
           body.classList.add('hidden');
           body.classList.remove('animate-slideDown');
           chevron.classList.remove('rotate-180', 'bg-gold', 'text-black');
+          header.setAttribute('aria-expanded', 'false');
+
+          // Abort any in-flight detail fetch for this order
+          if (detailAborts.has(order.id)) {
+            detailAborts.get(order.id).abort();
+            detailAborts.delete(order.id);
+          }
         } else {
           body.classList.remove('hidden');
           body.classList.add('animate-slideDown');
           chevron.classList.add('rotate-180', 'bg-gold', 'text-black');
+          header.setAttribute('aria-expanded', 'true');
 
           if (!body.dataset.loaded) {
             body.dataset.loaded = 'true';
-            body.innerHTML = '<div class="p-4 sm:p-5 lg:p-7"><div class="h-20 rounded-xl bg-surface-2 animate-pulse"></div></div>';
+            body.innerHTML = '<div class="p-4 sm:p-5 lg:p-7"><div class="h-20 rounded-xl bg-surface-2 animate-pulse" role="status" aria-label="Loading order details…"></div></div>';
+
+            // Abort previous fetch if somehow a stale one exists
+            if (detailAborts.has(order.id)) detailAborts.get(order.id).abort();
+            const ctrl = new AbortController();
+            detailAborts.set(order.id, ctrl);
+
             try {
-              const res = await API.getMyOrder(order.id);
-              const detailData = res?.data || res || order;
+              const res = await API.getMyOrder(order.id, ctrl.signal);
+              if (ctrl.signal.aborted) return;
+              const detailData = res?.data ?? res ?? order;
               renderOrderBody(body, detailData);
             } catch (err) {
-              body.innerHTML = `<div class="p-4 sm:p-5 lg:p-7"><p class="text-error text-sm font-medium"><i class="ri-alert-line"></i> ${escapeHTML(err.message)}</p></div>`;
+              if (err.name === 'AbortError') return;
+              delete body.dataset.loaded; // allow retry on next open
+              body.innerHTML = `<div class="p-4 sm:p-5 lg:p-7" role="alert"><p class="text-error text-sm font-medium"><i class="ri-alert-line" aria-hidden="true"></i> ${escapeHTML(err.message)}</p></div>`;
+            } finally {
+              detailAborts.delete(order.id);
             }
           }
         }
+      }
+
+      header.addEventListener('click', toggleCard);
+      header.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCard(); }
       });
 
       card.appendChild(header);
@@ -249,7 +444,9 @@
       return card;
     }
 
-    /* ── Render expanded order body ────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       RENDER ORDER BODY
+    ═══════════════════════════════════════════════════════════════════════ */
     function renderOrderBody(body, order) {
       const isCancelled = ['cancelled', 'refunded'].includes(order.status);
       const currentIdx  = STATUS_FLOW.indexOf(order.status);
@@ -258,38 +455,34 @@
       const inner = document.createElement('div');
       inner.className = 'p-4 sm:p-5 lg:p-7';
 
-      // ── Timeline ───────────────────────────────────────────────────────────
+      /* ── Timeline ───────────────────────────────────────────────────── */
       const tl = document.createElement('div');
       tl.className = 'flex items-start mb-6 sm:mb-8 overflow-x-auto pb-2 px-0.5 scrollbar-hide';
+      tl.setAttribute('role', 'list');
+      tl.setAttribute('aria-label', 'Order progress');
 
       if (isCancelled) {
         const s = document.createElement('div');
+        s.setAttribute('role', 'listitem');
         s.className = 'flex flex-col items-center flex-1 min-w-[72px] max-w-[120px] relative';
         s.innerHTML = `
-          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-error bg-error/10 flex items-center justify-center text-xs sm:text-sm relative z-10 shrink-0 text-error"><i class="ri-close-line"></i></div>
-          <div class="text-[9px] sm:text-[10px] font-semibold mt-2 text-error text-center whitespace-nowrap tracking-wider">${order.status.toUpperCase()}</div>`;
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-error bg-error/10 flex items-center justify-center text-xs sm:text-sm relative z-10 shrink-0 text-error" aria-hidden="true"><i class="ri-close-line"></i></div>
+          <div class="text-[9px] sm:text-[10px] font-semibold mt-2 text-error text-center whitespace-nowrap tracking-wider">${escapeHTML(order.status.toUpperCase())}</div>`;
         tl.appendChild(s);
       } else {
         STATUS_FLOW.forEach((key, i) => {
           const isDone = i < currentIdx;
           const isCurr = i === currentIdx;
-          
           const s = document.createElement('div');
+          s.setAttribute('role', 'listitem');
           s.className = `flex flex-col items-center flex-1 min-w-[72px] max-w-[120px] relative after:content-[''] after:absolute after:top-[13px] sm:after:top-[15px] after:left-[calc(50%+14px)] sm:after:left-[calc(50%+16px)] after:w-[calc(100%-28px)] sm:after:w-[calc(100%-32px)] after:h-0.5 last:after:hidden ${isDone ? 'after:bg-gold' : 'after:bg-border'}`;
-          
+
           let dotStyle = 'border-border bg-surface-2 text-text-muted';
           let iconHTML = '';
           let lblStyle = 'text-text-muted';
 
-          if (isDone) {
-            dotStyle = 'border-gold bg-gold/10 text-gold';
-            iconHTML = '<i class="ri-check-line"></i>';
-            lblStyle = 'text-text';
-          } else if (isCurr) {
-            dotStyle = 'border-gold bg-gold text-black shadow-[0_0_0_4px_rgba(201,169,110,0.2)]';
-            iconHTML = '<i class="ri-loader-4-line"></i>';
-            lblStyle = 'text-text';
-          }
+          if (isDone)      { dotStyle = 'border-gold bg-gold/10 text-gold';                                               iconHTML = '<i class="ri-check-line" aria-hidden="true"></i>';     lblStyle = 'text-text'; }
+          else if (isCurr) { dotStyle = 'border-gold bg-gold text-black shadow-[0_0_0_4px_rgba(201,169,110,0.2)]';        iconHTML = '<i class="ri-loader-4-line" aria-hidden="true"></i>';   lblStyle = 'text-text'; }
 
           s.innerHTML = `
             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-sm relative z-10 shrink-0 transition-all duration-300 ${dotStyle}">${iconHTML}</div>
@@ -299,7 +492,7 @@
       }
       inner.appendChild(tl);
 
-      // ── Details Grid (Address + Tracking) ──────────────────────────────────
+      /* ── Details Grid ───────────────────────────────────────────────── */
       const grid = document.createElement('div');
       grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6';
       let hasDetails = false;
@@ -309,13 +502,13 @@
           order.shipping_line1, order.shipping_line2,
           order.shipping_city, order.shipping_state,
           order.shipping_postal_code, order.shipping_country,
-        ].filter(Boolean);
+        ].filter(Boolean).map(p => escapeHTML(p));
 
-        const box = document.createElement('div');
-        box.className = 'p-3 sm:p-4 lg:px-5 bg-surface-2 rounded-xl border border-border';
+        const box = document.createElement('address');
+        box.className = 'p-3 sm:p-4 lg:px-5 bg-surface-2 rounded-xl border border-border not-italic';
         box.innerHTML = `
-          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2 flex items-center gap-1.5"><i class="ri-map-pin-line"></i> Shipping Address</div>
-          <div class="text-[13px] text-text-muted leading-relaxed">${escapeHTML(parts.join(', '))}</div>`;
+          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-text-dim mb-2 flex items-center gap-1.5"><i class="ri-map-pin-line" aria-hidden="true"></i> Shipping Address</div>
+          <div class="text-[13px] text-text-muted leading-relaxed">${parts.join(', ')}</div>`;
         grid.appendChild(box);
         hasDetails = true;
       }
@@ -324,28 +517,32 @@
         const box = document.createElement('div');
         box.className = 'p-3 sm:p-4 lg:px-5 bg-gold/10 rounded-xl border border-gold';
         box.innerHTML = `
-          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-gold mb-2 flex items-center gap-1.5"><i class="ri-truck-line"></i> Tracking Info</div>
-          <div class="text-[14px] sm:text-[15px] font-bold text-text mt-1">${escapeHTML(order.tracking_number)}</div>`;
+          <div class="text-[10px] font-bold tracking-[1.5px] uppercase text-gold mb-2 flex items-center gap-1.5"><i class="ri-truck-line" aria-hidden="true"></i> Tracking Info</div>
+          <div class="text-[14px] sm:text-[15px] font-bold text-text mt-1 font-mono">${escapeHTML(order.tracking_number)}</div>`;
         grid.appendChild(box);
         hasDetails = true;
       }
 
       if (hasDetails) inner.appendChild(grid);
 
-      // ── Items List ──────────────────────────────────────────────────────────
+      /* ── Items List ─────────────────────────────────────────────────── */
       const items = order.order_items || [];
       if (items.length) {
-        const list = document.createElement('div');
-        list.className = 'mb-6';
+        const list = document.createElement('ul');
+        list.className = 'mb-6 list-none';
+        list.setAttribute('aria-label', 'Order items');
 
         items.forEach(item => {
-          const imageUrl = item.products?.image_url || item.product_image_url || null;
-          const name = item.products?.name || item.product_name || 'Product';
-          const imgHTML = imageUrl 
-            ? `<img src="${imageUrl}" alt="${escapeHTML(name)}" loading="lazy" class="w-full h-full object-cover">`
-            : `<i class="ri-image-line"></i>`;
+          const validUrl  = safeImageUrl(item.products?.image_url || item.product_image_url || null);
+          const name      = item.products?.name || item.product_name || 'Product';
+          const imgHTML   = validUrl
+            ? `<img src="${validUrl}" alt="${escapeHTML(name)}" loading="lazy" class="w-full h-full object-cover">`
+            : `<i class="ri-image-line" aria-hidden="true"></i>`;
+          const qty       = parseInt(item.quantity,  10) || 0;
+          const unitPrice = parseFloat(item.unit_price) || 0;
+          const subtotal  = parseFloat(item.subtotal)   || 0;
 
-          const row = document.createElement('div');
+          const row = document.createElement('li');
           row.className = 'flex gap-3 sm:gap-3.5 items-center py-3.5 border-b border-dashed border-border last:border-0';
           row.innerHTML = `
             <div class="w-12 h-[60px] sm:w-14 sm:h-[70px] rounded-xl bg-surface-2 overflow-hidden border border-border shrink-0 flex items-center justify-center text-xl text-white/5">
@@ -353,85 +550,97 @@
             </div>
             <div class="flex-1 min-w-0">
               <div class="text-[13px] sm:text-sm font-medium text-text whitespace-nowrap overflow-hidden text-ellipsis">${escapeHTML(name)}</div>
-              <div class="text-xs text-text-muted mt-1">Qty: ${item.quantity} × ${formatPrice(item.unit_price)}</div>
+              <div class="text-xs text-text-muted mt-1">Qty: ${qty} × ${formatPrice(unitPrice)}</div>
             </div>
-            <div class="text-sm sm:text-[15px] font-bold text-gold whitespace-nowrap shrink-0">${formatPrice(item.subtotal)}</div>
-          `;
+            <div class="text-sm sm:text-[15px] font-bold text-gold whitespace-nowrap shrink-0">${formatPrice(subtotal)}</div>`;
           list.appendChild(row);
         });
         inner.appendChild(list);
       }
 
-      // ── Bottom: Actions + Summary ───────────────────────────────────────────
+      /* ── Bottom: Actions + Summary ──────────────────────────────────── */
       const bottom = document.createElement('div');
       bottom.className = 'flex flex-col sm:flex-row justify-between items-stretch sm:items-end mt-6 gap-4';
 
-      // Actions (left)
       const actions = document.createElement('div');
       actions.className = 'flex flex-col sm:flex-row gap-2.5 flex-wrap items-center w-full sm:w-auto';
-      
-      const btnBaseClass = "w-full sm:w-auto inline-flex items-center justify-center font-bold rounded-lg transition-colors text-[13px] sm:text-sm px-5 py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed";
+      const btnBase = 'w-full sm:w-auto inline-flex items-center justify-center font-bold rounded-lg transition-colors text-[13px] sm:text-sm px-5 py-2 sm:py-2.5 disabled:opacity-50 disabled:cursor-not-allowed';
 
+      /* Pay Now */
       if (order.status === 'pending') {
         const payBtn = document.createElement('button');
-        payBtn.className = `${btnBaseClass} bg-gold text-surface hover:bg-[#b59454]`;
-        payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5"></i> Pay Now';
-        
+        payBtn.className = `${btnBase} bg-gold text-surface hover:bg-[#b59454]`;
+        payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5" aria-hidden="true"></i> Pay Now';
+
         payBtn.addEventListener('click', async () => {
           payBtn.disabled = true;
-          payBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-surface/20 border-t-surface rounded-full animate-spin-fast mr-2"></span> Processing...';
+          payBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-surface/20 border-t-surface rounded-full animate-spin-fast mr-2" aria-hidden="true"></span> Processing…';
           try {
-            const res = await API.retryPayment(order.id);
-            const data = res?.data || res;
+            const res  = await API.retryPayment(order.id);
+            const data = res?.data ?? res;
 
-            if (data.status === 'paid') {
+            if (data?.status === 'paid') {
               showToast('Payment was already successful!', 'success');
               loadOrders(currentPage);
               return;
             }
-            window.location.href = `/checkout.html?retry_order=${data.order_id}&client_secret=${data.client_secret}`;
+
+            // Guard: backend returned no client_secret (PaymentIntent ID was NULL in DB)
+            if (!data?.client_secret) {
+              showToast('Payment session could not be created. Please contact support.', 'error');
+              return;
+            }
+
+            window.location.href = `/checkout.html?retry_order=${encodeURIComponent(data.order_id)}&client_secret=${encodeURIComponent(data.client_secret)}`;
           } catch (err) {
-            showToast(err.message, 'error');
+            showToast(err.message || 'Payment failed. Please try again.', 'error');
             payBtn.disabled = false;
-            payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5"></i> Pay Now';
+            payBtn.innerHTML = '<i class="ri-secure-payment-line mr-1.5" aria-hidden="true"></i> Pay Now';
           }
         });
         actions.appendChild(payBtn);
       }
 
-      // INVOICE BUTTON
-      const dlBtn = document.createElement('button');
-      dlBtn.className = `${btnBaseClass} border border-gold text-gold hover:bg-gold hover:text-surface`;
-      dlBtn.innerHTML = '<i class="ri-file-download-line mr-1.5"></i> Invoice';
-      dlBtn.addEventListener('click', async () => {
-        const orig = dlBtn.innerHTML;
-        dlBtn.disabled = true;
-        dlBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-gold/20 border-t-gold rounded-full animate-spin-fast"></span>';
-        try {
-          if (typeof API.downloadInvoice === 'function') { await API.downloadInvoice(order.id); } 
-          else { showToast('Invoice download coming soon', 'info'); }
-        } catch (err) { showToast('Invoice download failed: ' + err.message, 'error'); } 
-        finally { dlBtn.disabled = false; dlBtn.innerHTML = orig; }
-      });
-      actions.appendChild(dlBtn);
+      /* Invoice */
+      if (typeof API.downloadInvoice === 'function') {
+        const dlBtn = document.createElement('button');
+        dlBtn.className = `${btnBase} border border-gold text-gold hover:bg-gold hover:text-surface`;
+        dlBtn.innerHTML = '<i class="ri-file-download-line mr-1.5" aria-hidden="true"></i> Invoice';
+        dlBtn.addEventListener('click', async () => {
+          const orig = dlBtn.innerHTML;
+          dlBtn.disabled = true;
+          dlBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-gold/20 border-t-gold rounded-full animate-spin-fast" aria-hidden="true"></span>';
+          try {
+            await API.downloadInvoice(order.id);
+          } catch (err) {
+            showToast('Invoice download failed: ' + (err.message || 'Unknown error'), 'error');
+          } finally {
+            dlBtn.disabled = false;
+            dlBtn.innerHTML = orig;
+          }
+        });
+        actions.appendChild(dlBtn);
+      }
 
-      // CANCEL BUTTON
+      /* Cancel */
       if (order.status === 'pending') {
         const cancelBtn = document.createElement('button');
-        cancelBtn.className = `${btnBaseClass} bg-error/10 text-error hover:bg-error hover:text-white border border-error/20`;
-        cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5"></i> Cancel';
+        cancelBtn.className = `${btnBase} bg-error/10 text-error hover:bg-error hover:text-white border border-error/20`;
+        cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5" aria-hidden="true"></i> Cancel';
         cancelBtn.addEventListener('click', async () => {
-          if (!confirm('Cancel this order? This cannot be undone.')) return;
+          const confirmed = await showConfirm('Cancel this order? This cannot be undone.');
+          if (!confirmed) return;
+
           cancelBtn.disabled = true;
-          cancelBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-error/20 border-t-error rounded-full animate-spin-fast mr-2"></span> Cancelling...';
+          cancelBtn.innerHTML = '<span class="w-3.5 h-3.5 border-2 border-error/20 border-t-error rounded-full animate-spin-fast mr-2" aria-hidden="true"></span> Cancelling…';
           try {
             await API.cancelOrder(order.id);
             showToast('Order cancelled', 'info');
             loadOrders(currentPage);
           } catch (err) {
-            showToast(err.message, 'error');
+            showToast(err.message || 'Cancellation failed. Please try again.', 'error');
             cancelBtn.disabled = false;
-            cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5"></i> Cancel';
+            cancelBtn.innerHTML = '<i class="ri-close-circle-line mr-1.5" aria-hidden="true"></i> Cancel';
           }
         });
         actions.appendChild(cancelBtn);
@@ -439,24 +648,27 @@
 
       bottom.appendChild(actions);
 
-      // Summary (right)
+      /* Summary */
       const summary = document.createElement('div');
       summary.className = 'w-full sm:max-w-[280px]';
-      const shippingHTML = order.shipping_cost === 0 ? '<span class="text-success"><i class="ri-truck-line"></i> Free</span>' : formatPrice(order.shipping_cost || 0);
-      
+      const shippingHTML = (parseFloat(order.shipping_cost) || 0) === 0
+        ? '<span class="text-success"><i class="ri-truck-line" aria-hidden="true"></i> Free</span>'
+        : formatPrice(order.shipping_cost || 0);
+
       summary.innerHTML = `
-        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal || 0)}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal    || 0)}</span></div>
         <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Shipping</span><span>${shippingHTML}</span></div>
-        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount || 0)}</span></div>
-        <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount || 0)}</span></div>
-      `;
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount  || 0)}</span></div>
+        <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount || 0)}</span></div>`;
 
       bottom.appendChild(summary);
       inner.appendChild(bottom);
       body.appendChild(inner);
     }
 
-    /* ── Pagination ──────────────────────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════════════════════════
+       PAGINATION
+    ═══════════════════════════════════════════════════════════════════════ */
     function renderPagination() {
       const wrap = document.getElementById('orders-pagination');
       wrap.innerHTML = '';
@@ -466,21 +678,19 @@
 
       const mkBtn = (html, targetPage, isActive, isNav, isDisabled = false) => {
         const btn = document.createElement('button');
-        
         let classes = 'flex items-center justify-center min-w-[32px] sm:min-w-[36px] h-8 sm:h-9 px-2 sm:px-2.5 rounded-full text-xs sm:text-[13px] font-semibold transition-all duration-200 ';
-        if (isActive) {
-          classes += 'bg-gold text-black shadow-[0_4px_12px_rgba(201,169,110,0.3)] cursor-default pointer-events-none';
-        } else if (isNav) {
-          classes += 'bg-surface border border-border hover:border-gold hover:text-gold text-text-muted disabled:opacity-40 disabled:cursor-not-allowed';
-        } else {
-          classes += 'bg-transparent text-text-muted hover:bg-surface-2 hover:text-text disabled:opacity-40 disabled:cursor-not-allowed border border-transparent';
-        }
+        if (isActive)  classes += 'bg-gold text-black shadow-[0_4px_12px_rgba(201,169,110,0.3)] cursor-default pointer-events-none';
+        else if (isNav) classes += 'bg-surface border border-border hover:border-gold hover:text-gold text-text-muted disabled:opacity-40 disabled:cursor-not-allowed';
+        else            classes += 'bg-transparent text-text-muted hover:bg-surface-2 hover:text-text disabled:opacity-40 disabled:cursor-not-allowed border border-transparent';
 
         btn.className = classes;
         btn.innerHTML = html;
         btn.disabled  = isDisabled || isActive;
+        btn.setAttribute('aria-label', isNav ? (targetPage < currentPage ? 'Previous page' : 'Next page') : `Page ${targetPage}`);
+        if (isActive) btn.setAttribute('aria-current', 'page');
         if (!btn.disabled) {
           btn.addEventListener('click', () => {
+            pushPageToURL(targetPage);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             loadOrders(targetPage);
           });
@@ -488,26 +698,26 @@
         return btn;
       };
 
-      wrap.appendChild(mkBtn('<i class="ri-arrow-left-s-line text-lg"></i>', currentPage - 1, false, true, currentPage === 1));
+      wrap.appendChild(mkBtn('<i class="ri-arrow-left-s-line text-lg" aria-hidden="true"></i>', currentPage - 1, false, true, currentPage === 1));
 
       const range = [];
       for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) { range.push(i); } 
-        else if (range[range.length - 1] !== '…') { range.push('…'); }
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) { range.push(i); }
+        else if (range[range.length - 1] !== '…')                         { range.push('…'); }
       }
-      
       range.forEach(p => {
         if (p === '…') {
           const el = document.createElement('span');
           el.className = 'px-1 text-text-dim text-[13px]';
           el.textContent = '…';
+          el.setAttribute('aria-hidden', 'true');
           wrap.appendChild(el);
         } else {
           wrap.appendChild(mkBtn(p, p, p === currentPage, false));
         }
       });
 
-      wrap.appendChild(mkBtn('<i class="ri-arrow-right-s-line text-lg"></i>', currentPage + 1, false, true, currentPage === totalPages));
+      wrap.appendChild(mkBtn('<i class="ri-arrow-right-s-line text-lg" aria-hidden="true"></i>', currentPage + 1, false, true, currentPage === totalPages));
     }
   </script>
 </body>

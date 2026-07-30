@@ -16,7 +16,6 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-WHVQRZLFW0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    
     function gtag() { dataLayer.push(arguments) } gtag('js', new Date());
     gtag('config', 'G-WHVQRZLFW0');
   </script>
@@ -253,9 +252,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   
   <script>
-    /* =========================================================================
-     LUVIIO CORE ENGINE (Enterprise API sync, Zero-Lag Skeletons, Async GSAP)
-  ========================================================================= */
     (async function LuviioMasterEngine() {
       
       const _esc = (s) => typeof escapeHTML === 'function' ? escapeHTML(s) : String(s || '').replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' } [t] || t));
@@ -263,7 +259,6 @@
       
       if (typeof pageInit === 'function') pageInit();
       
-      // ── 1. ASYNC GSAP BOOTSTRAP ──
       const initGSAP = () => {
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
           return setTimeout(initGSAP, 100);
@@ -298,7 +293,6 @@
       };
       initGSAP();
       
-      // ── 2. HARDWARE CURSOR CHECK ──
       if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 1024) {
         const ring = document.getElementById('cursor-ring');
         const dot = document.getElementById('cursor-dot');
@@ -318,14 +312,11 @@
         }
       }
       
-      // ── 3. CATALOG FETCHERS (FOOLPROOF EXTRACTION) ──
+      // ── 3. CATALOG FETCHERS (API Auto-Unwrapped Support) ──
       try {
-        const rawRes = await API.get('/categories');
-        // 🔥 FIX: Check if it's already an array, else pull from .data
-        const cats = Array.isArray(rawRes) ? rawRes : (rawRes?.data || []);
-        
+        const cats = await API.getCategories() || [];
         const strip = document.getElementById('cat-strip');
-        cats.forEach(c => {
+        (Array.isArray(cats) ? cats : []).forEach(c => {
           const a = document.createElement('a');
           a.className = 'flex-shrink-0 px-5 py-2.5 border border-border rounded-full text-sm text-text-muted hover:border-gold hover:text-gold transition-all duration-300 relative overflow-hidden group';
           a.href = `/shop.html?category=${encodeURIComponent(c.slug)}`;
@@ -339,9 +330,8 @@
       // ── 4. FEATURED PRODUCTS ──
       const grid = document.getElementById('featured-grid');
       try {
-        const rawRes = await API.get('/products?page_size=8&in_stock=true');
-        // 🔥 FIX: The Double-Unwrap Proof Logic
-        const items = Array.isArray(rawRes) ? rawRes : (rawRes?.data || rawRes?.items || []);
+        const rawItems = await API.getProducts({ page_size: 8, in_stock: true });
+        const items = Array.isArray(rawItems) ? rawItems : (rawItems?.items || []);
         
         grid.innerHTML = '';
         
@@ -386,22 +376,25 @@
               btn.disabled = true;
               btn.innerText = '⏳';
               try {
-                await API.post('/cart/items', { product_id: p.id, quantity: 1 });
+                await API.addCartItem(p.id, 1);
                 btn.innerText = '✓ Added';
                 btn.style.background = '#88dc88';
                 showToast(`${p.name} added!`, 'success');
                 
-                const rawCart = await API.get('/cart');
-                const c = rawCart?.data || rawCart || {};
+                const c = await API.getCart() || {};
                 const cnt = (c.items || []).reduce((a, b) => a + b.quantity, 0);
-                document.querySelectorAll('[data-cart-count]').forEach(el => { el.innerText = cnt;
-                  el.style.display = cnt > 0 ? 'flex' : 'none'; });
+                document.querySelectorAll('[data-cart-count]').forEach(el => { 
+                  el.innerText = cnt;
+                  el.style.display = cnt > 0 ? 'flex' : 'none'; 
+                });
               } catch (err) {
                 showToast(err.message || 'Failed', 'error');
               } finally {
-                setTimeout(() => { btn.innerText = oldText;
+                setTimeout(() => { 
+                  btn.innerText = oldText;
                   btn.style.background = '';
-                  btn.disabled = false; }, 1500);
+                  btn.disabled = false; 
+                }, 1500);
               }
             };
             
@@ -419,11 +412,13 @@
       
       // ── 5. INITIAL CART BADGE SYNC ──
       if (typeof AUTH !== 'undefined' && AUTH.isLoggedIn()) {
-        API.get('/cart').then(rawCart => {
-          const c = rawCart?.data || rawCart || {};
-          const cnt = (c?.items || []).reduce((a, b) => a + b.quantity, 0);
-          document.querySelectorAll('[data-cart-count]').forEach(el => { el.innerText = cnt;
-            el.style.display = cnt > 0 ? 'flex' : 'none'; });
+        API.getCart().then(c => {
+          const items = c?.items || [];
+          const cnt = items.reduce((a, b) => a + b.quantity, 0);
+          document.querySelectorAll('[data-cart-count]').forEach(el => { 
+            el.innerText = cnt;
+            el.style.display = cnt > 0 ? 'flex' : 'none'; 
+          });
         }).catch(() => {});
       }
       
