@@ -1,8 +1,8 @@
 /* ============================================================
-   LUVIIO — Push Notification Manager (v4.1 — Self-Healing & Debug)
+   LUVIIO — Push Notification Manager (v4.2 — Handshake Fix)
    ============================================================
-   CHANGE: Added Self-Healing mechanism for "Ghost Subscriptions" 
-   and proper console error logging instead of silent 'false'.
+   CHANGE: Fixed API JSON parsing (d.data.public_key) and 
+   added SW .ready promise to ensure perfect handshake.
    ============================================================ */
 
 const PUSH = (() => {
@@ -23,16 +23,20 @@ const PUSH = (() => {
   const notifPermission = () =>
     typeof Notification !== 'undefined' ? Notification.permission : 'denied';
   
+  // 🔥 FIX 1: Ensure SW is READY before returning
   const registerSW = async () => {
     if (!isSupported()) return null;
-    try { return await navigator.serviceWorker.register(SW_URL); }
+    try {
+      await navigator.serviceWorker.register(SW_URL);
+      return await navigator.serviceWorker.ready; // Iske bina push manager fail ho jata hai
+    }
     catch (err) {
       console.error('SW Reg failed:', err);
       return null;
     }
   };
   
-  // Added forceRefresh option
+  // 🔥 FIX 2: Handle FastAPI Standard Response { data: { public_key: "..." } }
   const getVapidKey = async (forceRefresh = false) => {
     try {
       if (!forceRefresh) {
@@ -44,8 +48,11 @@ const PUSH = (() => {
         signal: AbortSignal.timeout(5000),
       });
       if (!r.ok) return null;
+      
       const d = await r.json();
-      const key = d.public_key || null;
+      // Supports both raw {public_key} and wrapped {data: {public_key}}
+      const key = d?.data?.public_key || d?.public_key || null;
+      
       if (key) sessionStorage.setItem(VAPID_CACHE_KEY, key);
       return key;
     } catch (err) {
@@ -90,7 +97,6 @@ const PUSH = (() => {
     }
   };
   
-  // 🔥 THE SMART UI BANNER
   const showPrompt = () => {
     if (!isSupported() || !AUTH.isLoggedIn() || notifPermission() !== 'default') return;
     
@@ -132,8 +138,6 @@ const PUSH = (() => {
       const success = await PUSH.subscribe();
       if (success && typeof showToast === 'function') {
         showToast('Notifications Enabled Successfully!', 'success');
-      } else if (!success) {
-        console.error("Subscription failed. Check console for details.");
       }
     };
   };
@@ -154,10 +158,12 @@ const PUSH = (() => {
       }
       
       let [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
-      if (!reg || !vapidKey) {
-        console.error('Missing ServiceWorker Registration or VAPID Key');
-        return false;
-      }
+      
+      // 🔥 FIX 3: Point-blank Debugging
+      if (!reg) console.error('❌ Handshake Failed: ServiceWorker registration is null/not ready.');
+      if (!vapidKey) console.error('❌ Handshake Failed: VAPID Key is null (Check backend response format).');
+      
+      if (!reg || !vapidKey) return false;
       
       try {
         const subscription = await reg.pushManager.subscribe({
@@ -170,12 +176,13 @@ const PUSH = (() => {
         console.warn('First subscribe attempt failed. Attempting self-healing...', err);
         
         try {
-          // 🔥 SELF-HEALING LOGIC: Kill ghost subscription & fetch new key
           const existing = await reg.pushManager.getSubscription();
           if (existing) await existing.unsubscribe();
           
           sessionStorage.removeItem(VAPID_CACHE_KEY);
-          vapidKey = await getVapidKey(true); // Force fresh key
+          vapidKey = await getVapidKey(true);
+          
+          if (!vapidKey) throw new Error("VAPID key still null after refresh");
           
           const newSubscription = await reg.pushManager.subscribe({
             userVisibleOnly: true,
@@ -227,7 +234,7 @@ const PUSH = (() => {
       if (!AUTH.isLoggedIn()) return;
       
       const run = async () => {
-        await PUSH.autoSubscribe(); // Changed 'this' to 'PUSH' to prevent context loss
+        await PUSH.autoSubscribe();
         setTimeout(showPrompt, 2500);
       };
       
@@ -240,11 +247,9 @@ const PUSH = (() => {
   };
 })();
 
-// Auth events
 window.addEventListener('auth:login', () => PUSH.init());
 window.addEventListener('auth:logout', () => PUSH.unsubscribe());
 
-// Init on page load (no-op for guests)
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => PUSH.init());
 } else {
