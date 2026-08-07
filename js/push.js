@@ -1,8 +1,8 @@
 /* ============================================================
-   LUVIIO — Push Notification Manager (v4 — With Smart UI Banner)
+   LUVIIO — Push Notification Manager (v4.1 — Self-Healing & Debug)
    ============================================================
-   CHANGE: Added a non-intrusive HTML banner.
-   Features 24-hour cooldown if the user clicks "Not Now".
+   CHANGE: Added Self-Healing mechanism for "Ghost Subscriptions" 
+   and proper console error logging instead of silent 'false'.
    ============================================================ */
 
 const PUSH = (() => {
@@ -26,13 +26,19 @@ const PUSH = (() => {
   const registerSW = async () => {
     if (!isSupported()) return null;
     try { return await navigator.serviceWorker.register(SW_URL); }
-    catch { return null; }
+    catch (err) {
+      console.error('SW Reg failed:', err);
+      return null;
+    }
   };
   
-  const getVapidKey = async () => {
+  // Added forceRefresh option
+  const getVapidKey = async (forceRefresh = false) => {
     try {
-      const cached = sessionStorage.getItem(VAPID_CACHE_KEY);
-      if (cached) return cached;
+      if (!forceRefresh) {
+        const cached = sessionStorage.getItem(VAPID_CACHE_KEY);
+        if (cached) return cached;
+      }
       
       const r = await fetch(`${CONFIG.API_BASE}/push/vapid-key`, {
         signal: AbortSignal.timeout(5000),
@@ -42,7 +48,10 @@ const PUSH = (() => {
       const key = d.public_key || null;
       if (key) sessionStorage.setItem(VAPID_CACHE_KEY, key);
       return key;
-    } catch { return null; }
+    } catch (err) {
+      console.error('VAPID Fetch failed:', err);
+      return null;
+    }
   };
   
   const saveSubscription = async (subscription) => {
@@ -58,7 +67,9 @@ const PUSH = (() => {
         body: JSON.stringify(subscription.toJSON()),
         signal: AbortSignal.timeout(5000),
       });
-    } catch {}
+    } catch (err) {
+      console.error('Save Sub failed:', err);
+    }
   };
   
   const removeSubscription = async (subscription) => {
@@ -74,23 +85,21 @@ const PUSH = (() => {
         body: JSON.stringify(subscription.toJSON()),
         signal: AbortSignal.timeout(5000),
       });
-    } catch {}
+    } catch (err) {
+      console.error('Remove Sub failed:', err);
+    }
   };
   
-  // 🔥 THE NEW SMART UI BANNER
+  // 🔥 THE SMART UI BANNER
   const showPrompt = () => {
-    // Agar push support nahi karta, user logged in nahi hai, ya permission already granted/denied hai -> Wapas jao
     if (!isSupported() || !AUTH.isLoggedIn() || notifPermission() !== 'default') return;
     
-    // Check 24-hour Cooldown
     const dismissedAt = localStorage.getItem(DISMISS_KEY);
     if (dismissedAt && (Date.now() - parseInt(dismissedAt) < 24 * 60 * 60 * 1000)) return;
     
-    // Remove if already exists
     const existing = document.getElementById('luviio-push-banner');
     if (existing) existing.remove();
     
-    // Create Banner HTML
     const banner = document.createElement('div');
     banner.id = 'luviio-push-banner';
     banner.innerHTML = `
@@ -113,18 +122,18 @@ const PUSH = (() => {
     `;
     document.body.appendChild(banner);
     
-    // "Not Now" Button Logic
     document.getElementById('btn-push-later').onclick = () => {
-      localStorage.setItem(DISMISS_KEY, Date.now().toString()); // Set 24h cooldown
+      localStorage.setItem(DISMISS_KEY, Date.now().toString());
       banner.style.display = 'none';
     };
     
-    // "Allow" Button Logic
     document.getElementById('btn-push-allow').onclick = async () => {
       banner.style.display = 'none';
       const success = await PUSH.subscribe();
       if (success && typeof showToast === 'function') {
         showToast('Notifications Enabled Successfully!', 'success');
+      } else if (!success) {
+        console.error("Subscription failed. Check console for details.");
       }
     };
   };
@@ -133,14 +142,22 @@ const PUSH = (() => {
     isSupported,
     
     async subscribe() {
-      if (!isSupported() || !AUTH.isLoggedIn()) return false;
+      if (!isSupported() || !AUTH.isLoggedIn()) {
+        console.warn('Push not supported or user not logged in');
+        return false;
+      }
       
-      // Real browser prompt trigger
       const permission = typeof Notification !== 'undefined' ? await Notification.requestPermission() : 'denied';
-      if (permission !== 'granted') return false;
+      if (permission !== 'granted') {
+        console.warn('Notification permission denied');
+        return false;
+      }
       
-      const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
-      if (!reg || !vapidKey) return false;
+      let [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
+      if (!reg || !vapidKey) {
+        console.error('Missing ServiceWorker Registration or VAPID Key');
+        return false;
+      }
       
       try {
         const subscription = await reg.pushManager.subscribe({
@@ -149,7 +166,28 @@ const PUSH = (() => {
         });
         await saveSubscription(subscription);
         return true;
-      } catch { return false; }
+      } catch (err) {
+        console.warn('First subscribe attempt failed. Attempting self-healing...', err);
+        
+        try {
+          // 🔥 SELF-HEALING LOGIC: Kill ghost subscription & fetch new key
+          const existing = await reg.pushManager.getSubscription();
+          if (existing) await existing.unsubscribe();
+          
+          sessionStorage.removeItem(VAPID_CACHE_KEY);
+          vapidKey = await getVapidKey(true); // Force fresh key
+          
+          const newSubscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidKey),
+          });
+          await saveSubscription(newSubscription);
+          return true;
+        } catch (retryErr) {
+          console.error('Push Subscribe Failed Completely:', retryErr);
+          return false;
+        }
+      }
     },
     
     async unsubscribe() {
@@ -163,15 +201,14 @@ const PUSH = (() => {
       if (typeof showToast === 'function') showToast('Notifications Disabled', 'info');
     },
     
-    // Runs silently in background to keep DB synced if permission is already granted
     async autoSubscribe() {
       if (!isSupported() || !AUTH.isLoggedIn() || notifPermission() !== 'granted') return;
       
-      const [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
+      let [reg, vapidKey] = await Promise.all([registerSW(), getVapidKey()]);
       if (!reg || !vapidKey) return;
       
-      const existing = await reg.pushManager.getSubscription();
       try {
+        const existing = await reg.pushManager.getSubscription();
         if (!existing) {
           const sub = await reg.pushManager.subscribe({
             userVisibleOnly: true,
@@ -181,17 +218,16 @@ const PUSH = (() => {
         } else {
           await saveSubscription(existing);
         }
-      } catch {}
+      } catch (err) {
+        console.error('AutoSubscribe failed:', err);
+      }
     },
     
-    // Initialization
     async init() {
       if (!AUTH.isLoggedIn()) return;
       
       const run = async () => {
-        await this.autoSubscribe();
-        
-        // Show the banner if permission is still "default", after a slight 2.5 second delay so UX feels smooth
+        await PUSH.autoSubscribe(); // Changed 'this' to 'PUSH' to prevent context loss
         setTimeout(showPrompt, 2500);
       };
       
