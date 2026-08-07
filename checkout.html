@@ -31,8 +31,26 @@
     @keyframes popIn { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
     @media(max-width:900px){.checkout-layout{grid-template-columns:1fr;} .summary-sticky{position:static;} .address-grid{grid-template-columns:1fr;}}
     
-    .address-card { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; position: relative; margin-bottom: 12px; }
+    /* 🔥 ENHANCED ADDRESS CARDS UI */
+    .address-card { 
+      padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); 
+      cursor: pointer; position: relative; margin-bottom: 12px; transition: all 0.2s;
+      display: flex; gap: 14px; align-items: flex-start; background: var(--surface-2);
+    }
+    .address-card:hover { border-color: var(--text-dim); }
     .address-card.selected { border-color: var(--gold); background: rgba(201,165,94,0.05); }
+    
+    .radio-circle { 
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border-light); 
+      flex-shrink: 0; margin-top: 2px; position: relative; transition: all 0.2s;
+    }
+    .address-card.selected .radio-circle { border-color: var(--gold); }
+    .address-card.selected .radio-circle::after { 
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+      width: 8px; height: 8px; border-radius: 50%; background: var(--gold); 
+    }
+    .address-content { flex: 1; min-width: 0; }
+    
     .badge-default { position: absolute; top: 10px; right: 10px; background: var(--gold); color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
     /* 🔥 PAYWALL MODAL STYLES */
@@ -238,10 +256,13 @@
           
           document.getElementById('address-section').innerHTML = `
             <div class="address-card selected" style="cursor:default; border-color:var(--gold);">
-              <div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:bold;">Locked Address</div>
-              <p style="font-size:13px;color:var(--text-muted);line-height:1.8;margin:0;">
-                ${[orderData.shipping_line1, orderData.shipping_city, orderData.shipping_postal_code].filter(Boolean).join(', ')}
-              </p>
+              <div class="radio-circle"></div>
+              <div class="address-content">
+                <div style="font-size:11px; color:var(--gold); margin-bottom:4px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;">Locked Address</div>
+                <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0;">
+                  ${[orderData.shipping_line1, orderData.shipping_city, orderData.shipping_state, orderData.shipping_postal_code].filter(Boolean).join(', ')}
+                </p>
+              </div>
             </div>`;
           selectedAddressId = orderData.shipping_address_id; 
           renderOrderSummary(); checkPayBtnState();
@@ -309,16 +330,27 @@
       } catch(e) {}
     }
 
-    // Dynamic Rich Address Card Builder
+    // 🔥 ENHANCED RICH ADDRESS CARD BUILDER (Radio UI + Metadata)
     function createAddressCardHTML(addr) {
       const titleText = addr.company_name || addr.full_name || 'Address';
       const typeBadge = addr.address_type ? `<span style="border:1px solid var(--border-light);padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;margin-left:8px;color:var(--text-muted);">${_esc(addr.address_type)}</span>` : '';
       
-      let html = `<div style="font-weight:600;font-size:14px;margin-bottom:4px;color:var(--text);">${_esc(titleText)}${typeBadge}</div>`;
-      if (addr.gstin) html += `<div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:500;">GSTIN: ${_esc(addr.gstin)}</div>`;
+      let html = `<div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text);">${_esc(titleText)}${typeBadge}</div>`;
       
-      const parts = [addr.line1, addr.line2, addr.city, addr.postal_code, addr.country].filter(Boolean);
-      html += `<div style="font-size:12px;color:var(--text-muted);line-height:1.6;">${_esc(parts.join(', '))}</div>`;
+      if (addr.gstin) {
+        html += `<div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:500;">GSTIN: ${_esc(addr.gstin)}</div>`;
+      }
+      
+      const parts = [addr.line1, addr.line2, addr.landmark, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
+      html += `<div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:6px;">${_esc(parts.join(', '))}</div>`;
+      
+      if (addr.phone) {
+        html += `<div style="font-size:12px;color:var(--text-dim); margin-bottom:2px;">📞 ${_esc(addr.phone)}</div>`;
+      }
+      if (addr.email) {
+        html += `<div style="font-size:12px;color:var(--text-dim);">✉️ ${_esc(addr.email)}</div>`;
+      }
+      
       return html;
     }
 
@@ -327,7 +359,7 @@
       const billWrap = document.getElementById('billing-list-wrap'); billWrap.innerHTML = '';
 
       if (!addresses.length) { 
-        wrap.innerHTML = '<p class="text-sm text-text-muted">No saved addresses. Please add one.</p>'; 
+        wrap.innerHTML = '<p class="text-sm text-text-muted" style="margin-bottom:12px;">No saved addresses. Please add one.</p>'; 
         return; 
       }
       
@@ -337,7 +369,7 @@
         c.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
         if (addr.is_default && !selectedAddressId) { selectedAddressId = addr.id; c.classList.add('selected'); }
         
-        c.innerHTML = createAddressCardHTML(addr);
+        c.innerHTML = `<div class="radio-circle"></div><div class="address-content">${createAddressCardHTML(addr)}</div>`;
         c.onclick = () => {
           selectedAddressId = addr.id;
           document.querySelectorAll('#address-section .address-card').forEach(x => x.classList.remove('selected'));
@@ -350,7 +382,7 @@
         b.className = 'address-card' + (addr.id === selectedBillingId ? ' selected' : '');
         if (addr.is_default && !selectedBillingId) { selectedBillingId = addr.id; b.classList.add('selected'); }
 
-        b.innerHTML = createAddressCardHTML(addr);
+        b.innerHTML = `<div class="radio-circle"></div><div class="address-content">${createAddressCardHTML(addr)}</div>`;
         b.onclick = () => {
           selectedBillingId = addr.id;
           document.querySelectorAll('#billing-list-wrap .address-card').forEach(x => x.classList.remove('selected'));
@@ -372,7 +404,7 @@
     });
 
     document.getElementById('add-address-toggle').onclick = () => {
-      window.location.href = "/profile.html"; // Send to profile to add rich address with GSTIN
+      window.location.href = "/profile.html"; // Send to profile to add rich address
     };
 
     function checkPayBtnState() { document.getElementById('pay-btn').disabled = !selectedAddressId; }
@@ -408,7 +440,7 @@
           activeClientSecret = retryData.client_secret;
           activePiId = retryData.payment_intent_id;
         } else {
-          // 🚀 SENDING BILLING ID TO API NOW!
+          // 🚀 SENDING BILLING ID TO API
           const rawIntent = await API.createPaymentIntent(selectedAddressId, _getOrCreateIdempotencyKey(), finalBillingId);
           const intentData = rawIntent.data || rawIntent; 
           activeClientSecret = intentData.client_secret;
