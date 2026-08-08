@@ -496,6 +496,10 @@
             <input type="file" id="pm-img-file" accept="image/*" multiple class="hidden" onchange="handleImgs(this)">
           </div>
           <div id="pm-img-previews" class="flex gap-2.5 flex-wrap mt-3.5"></div>
+          <div id="pm-upload-status" class="hidden text-xs text-text-muted mt-2.5 flex items-center gap-2">
+            <i class="ri-loader-4-line animate-spin text-gold"></i>
+            <span id="pm-upload-status-text"></span>
+          </div>
         </div>
         
         <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="pm-active" checked class="accent-gold w-4 h-4">Active — visible in shop</label>
@@ -581,33 +585,65 @@
        ADMIN API (Enterprise Wrapper Ready)
     ══════════════════════════════════════ */
     const ADMIN = {
-      async req(method, path, body = null) {
+      // 🔥 FIX: 401 auto-refresh (same pattern as api.js's AUTH.init(true) retry)
+      async req(method, path, body = null, isRetry = false) {
         const h = { 'Content-Type': 'application/json' };
         const tk = AUTH.getToken();
         if (tk) h['Authorization'] = `Bearer ${tk}`;
         const opts = { method, headers: h };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(`${CONFIG.API_BASE}${path}`, opts);
+
+        if (res.status === 401 && !isRetry) {
+          const refreshed = typeof AUTH !== 'undefined' ? await AUTH.init(true) : false;
+          if (refreshed) return ADMIN.req(method, path, body, true);
+          AUTH.clearTokens();
+          location.href = '/login.html';
+          return null;
+        }
+
         if (res.status === 204) return null;
         const d = await res.json();
         if (!res.ok) throw new Error(d?.detail || `Error ${res.status}`);
-        // 🔥 FIX: Enterprise API unwrapper (.data / .meta)
+
+        // 🔥 FIX: only wrap ARRAY responses as {items,total,pages} — a single
+        // object response (e.g. create/update product) must come back as-is,
+        // otherwise callers checking `saved.id` always get undefined.
         if (d && d.success !== undefined) {
-          return { items: d.data || [], total: d.meta?.total_items || 0, pages: d.meta?.total_pages || 1, raw: d };
+          if (Array.isArray(d.data)) {
+            return { items: d.data, total: d.meta?.total_items ?? d.data.length, pages: d.meta?.total_pages ?? 1, raw: d };
+          }
+          return d.data !== undefined ? d.data : d;
         }
         return d;
       },
-      async uploadImages(id, files) {
-        const fd = new FormData();
-        files.forEach(file => fd.append('files', file));
-        const res = await fetch(`${CONFIG.API_BASE}/products/${id}/images`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${AUTH.getToken()}` },
-          body: fd,
-        });
-        const d = await res.json();
-        if (!res.ok) throw new Error(d?.detail || 'Upload failed');
-        return d.data || d;
+      // 🔥 UPGRADED: tries every file (one failure no longer aborts the rest),
+      // reports live progress via onProgress(index, total, filename, status, error?)
+      async uploadImages(id, files, onProgress) {
+        const tk = AUTH.getToken();
+        const succeeded = [];
+        const failed = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (onProgress) onProgress(i, files.length, file.name, 'uploading');
+          try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch(`${CONFIG.API_BASE}/products/${id}/images`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${tk}` },
+              body: fd,
+            });
+            const d = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(d?.detail || `Upload failed for ${file.name}`);
+            succeeded.push(file);
+            if (onProgress) onProgress(i, files.length, file.name, 'success');
+          } catch (err) {
+            failed.push({ file, error: err.message });
+            if (onProgress) onProgress(i, files.length, file.name, 'error', err.message);
+          }
+        }
+        return { succeeded, failed };
       },
       getProducts: (p = 1) => ADMIN.req('GET', `/products?page=${p}&page_size=${PS}`),
       createProduct: d => ADMIN.req('POST', '/products', d),
@@ -615,7 +651,7 @@
       deleteProduct: id => ADMIN.req('DELETE', `/products/${id}`),
       getCategories: async () => {
         const res = await ADMIN.req('GET', '/categories');
-        return res.items || (Array.isArray(res.raw?.data) ? res.raw.data : (Array.isArray(res) ? res : []));
+        return res.items || [];
       },
       createCategory: d => ADMIN.req('POST', '/categories', d),
       deleteCategory: id => ADMIN.req('DELETE', `/categories/${id}`),
@@ -861,12 +897,43 @@
     async function saveProduct() {
       const id = document.getElementById('pm-id').value;
       const btn = document.getElementById('pm-save');
+      const statusWrap = document.getElementById('pm-upload-status');
+      const statusText = document.getElementById('pm-upload-status-text');
       const payload = { name: document.getElementById('pm-name').value.trim(), slug: document.getElementById('pm-slug').value.trim(), short_description: document.getElementById('pm-sdesc').value.trim() || null, description: document.getElementById('pm-desc').value.trim() || null, price: parseFloat(document.getElementById('pm-price').value), compare_price: parseFloat(document.getElementById('pm-compare').value) || null, stock: parseInt(document.getElementById('pm-stock').value) || 0, sku: document.getElementById('pm-sku').value.trim() || null, weight_grams: parseInt(document.getElementById('pm-weight').value) || null, is_active: document.getElementById('pm-active').checked, category_id: document.getElementById('pm-cat').value || null };
       if (!payload.name || !payload.slug || isNaN(payload.price)) { if (typeof showToast === 'function') showToast('Name, Slug & Price required', 'error'); return; }
       if (typeof showLoader === 'function') showLoader(btn, 'Saving…');
       try {
         const saved = id ? await ADMIN.updateProduct(id, payload) : await ADMIN.createProduct(payload);
-        if (pendingImages.length > 0 && saved?.id) { try { await ADMIN.uploadImages(saved.id, pendingImages); } catch (e) { if (typeof showToast === 'function') showToast('Saved, but some images failed: ' + e.message, 'warn'); } }
+
+        let uploadFailed = 0;
+        if (pendingImages.length > 0 && saved?.id) {
+          statusWrap.classList.remove('hidden');
+          statusWrap.classList.add('flex');
+          const { succeeded, failed } = await ADMIN.uploadImages(saved.id, pendingImages, (i, total, name, status) => {
+            statusText.textContent = status === 'error'
+              ? `Failed: ${name} (${i + 1}/${total})`
+              : `Uploading ${i + 1}/${total} — ${name}`;
+          });
+          // Only drop the ones that succeeded — failed files stay in pendingImages so
+          // hitting "Save Product" again retries just those, no need to re-pick files.
+          pendingImages = pendingImages.filter(f => !succeeded.includes(f));
+          uploadFailed = failed.length;
+          statusWrap.classList.add('hidden');
+          statusWrap.classList.remove('flex');
+          // Existing/uploaded images are now reflected server-side — refresh currentProductData
+          // so a retry doesn't re-render already-uploaded ones as pending.
+          if (!id) { document.getElementById('pm-id').value = saved.id; }
+        }
+
+        if (uploadFailed > 0) {
+          if (typeof showToast === 'function') showToast(`${id ? 'Updated' : 'Created'}, but ${uploadFailed} image(s) failed — click Save again to retry them`, 'warn');
+          // Refresh so already-succeeded uploads show as real thumbnails, not lost.
+          try { currentProductData = await ADMIN.req('GET', `/products/${payload.slug}`); } catch { /* non-fatal, preview just won't show new ones yet */ }
+          renderImagePreviews();
+          // Keep the modal open so the person can retry the failed images immediately.
+          return;
+        }
+
         if (typeof showToast === 'function') showToast(id ? 'Updated!' : 'Created!', 'success');
         closeModal('modal-product');
         loadProducts(pProdPage);
