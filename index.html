@@ -341,26 +341,36 @@
         } else {
           items.slice(0, 8).forEach(p => {
             const safeImg = p.image_url ? encodeURI(p.image_url) : null;
-            const card = document.createElement('div');
-            card.className = 'group bg-surface rounded-xl border border-border overflow-hidden cursor-pointer hover:border-gold/40 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1';
-            
-            card.innerHTML = `
-            <div class="relative overflow-hidden aspect-[4/5] bg-surface-2">
+          // 🔥 FIX: Render ALL Attributes dynamically
+const attrKeys = p.attributes ? Object.keys(p.attributes) : [];
+const attrHtml = attrKeys.length > 0 ?
+  `<div class="flex flex-wrap gap-1.5 mb-3.5">${attrKeys.map(k => `<span class="text-[10px] px-2 py-0.5 bg-surface-2 border border-border-light rounded text-text-muted">${_esc(k)}: ${_esc(p.attributes[k])}</span>`).join('')}</div>` :
+  `<div class="mb-3.5"></div>`;
+
+const card = document.createElement('div');
+card.className = 'group bg-surface rounded-xl border border-border overflow-hidden cursor-pointer hover:border-gold/40 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col';
+
+card.innerHTML = `
+            <div class="relative overflow-hidden aspect-[4/5] bg-surface-2 shrink-0">
               ${safeImg ? `<img src="${safeImg}" alt="${_esc(p.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">` : `<div class="w-full h-full flex items-center justify-center text-3xl text-border">◈</div>`}
-              ${p.stock === 0 ? '<div class="absolute top-3 right-3 bg-error/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Sold Out</div>' : ''}
-              ${p.compare_price > p.price ? `<div class="absolute top-3 left-3 bg-gold text-black text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">${Math.round((1 - p.price/p.compare_price)*100)}% OFF</div>` : ''}
+              ${p.stock === 0 ? '<div class="absolute top-3 right-3 bg-error/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">Sold Out</div>' : ''}
+              ${p.compare_price > p.price ? `<div class="absolute top-3 left-3 bg-gold text-black text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">${Math.round((1 - p.price/p.compare_price)*100)}% OFF</div>` : ''}
             </div>
-            <div class="p-4 lg:p-5">
+            <div class="p-4 lg:p-5 flex flex-col flex-1">
               <h3 class="text-sm lg:text-base font-medium text-text mb-1.5 truncate">${_esc(p.name)}</h3>
-              <div class="flex items-center gap-2 mb-3.5">
+              <div class="flex items-center gap-2 mb-2">
                 <span class="text-gold font-bold text-sm lg:text-base">${_fmt(p.price)}</span>
                 ${p.compare_price > p.price ? `<span class="text-text-dim text-xs line-through">${_fmt(p.compare_price)}</span>` : ''}
               </div>
-              <button class="add-cart-action w-full py-2.5 bg-gold text-black text-xs font-bold rounded-lg hover:bg-gold/90 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed" data-id="${_esc(p.id)}" ${p.stock === 0 ? 'disabled' : ''}>
-                ${p.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-              </button>
+              
+              ${attrHtml}
+              
+              <div class="mt-auto">
+                <button class="add-cart-action w-full py-2.5 bg-gold text-black text-xs font-bold rounded-lg hover:bg-gold/90 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed" data-id="${_esc(p.id)}" ${p.stock === 0 ? 'disabled' : ''}>
+                  ${p.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                </button>
+              </div>
             </div>`;
-            
             card.onclick = (e) => {
               if (e.target.closest('.add-cart-action')) return;
               window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;

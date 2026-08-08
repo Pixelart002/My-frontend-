@@ -545,28 +545,52 @@
 
       addSec.appendChild(addBtn);
       info.appendChild(addSec);
+// ── Collapsible Description ────────────────────────────────────────
+if (p.description || p.short_description) {
+  const accordion = document.createElement('div');
+  accordion.className = 'product-accordion gsap-item';
+  const header = document.createElement('div');
+  header.className = 'accordion-header';
+  header.innerHTML = `<span>Product Details</span><span class="accordion-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`;
+  const contentWrap = document.createElement('div');
+  contentWrap.className = 'accordion-content-wrap';
+  const content = document.createElement('div');
+  content.className = 'accordion-content';
+  const inner = document.createElement('div');
+  inner.className = 'accordion-inner';
+  inner.textContent = p.description || p.short_description;
+  content.appendChild(inner);
+  contentWrap.appendChild(content);
+  accordion.appendChild(header);
+  accordion.appendChild(contentWrap);
+  header.addEventListener('click', () => header.classList.toggle('active'));
+  info.appendChild(accordion);
+}
 
-      // ── Collapsible Description ────────────────────────────────────────
-      if (p.description || p.short_description) {
-        const accordion = document.createElement('div');
-        accordion.className = 'product-accordion gsap-item';
-        const header = document.createElement('div');
-        header.className = 'accordion-header';
-        header.innerHTML = `<span>Product Details</span><span class="accordion-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>`;
-        const contentWrap = document.createElement('div');
-        contentWrap.className = 'accordion-content-wrap';
-        const content = document.createElement('div');
-        content.className = 'accordion-content';
-        const inner = document.createElement('div');
-        inner.className = 'accordion-inner';
-        inner.textContent = p.description || p.short_description;
-        content.appendChild(inner);
-        contentWrap.appendChild(content);
-        accordion.appendChild(header);
-        accordion.appendChild(contentWrap);
-        header.addEventListener('click', () => header.classList.toggle('active'));
-        info.appendChild(accordion);
-      }
+// ── 🔥 JSONB Attributes & Meta Data ─────────────────────────────
+const attrKeys = p.attributes ? Object.keys(p.attributes) : [];
+if (p.sku || p.weight_grams || attrKeys.length > 0) {
+  const meta = document.createElement('div');
+  meta.className = 'product-meta gsap-item';
+  
+  const addMeta = (label, val) => {
+    const row = document.createElement('div');
+    row.className = 'product-meta-row';
+    row.innerHTML = `<span class="product-meta-label">${escapeHTML(label)}</span><span class="product-meta-value">${escapeHTML(val)}</span>`;
+    meta.appendChild(row);
+  };
+  
+  // Custom Attributes from DB
+  attrKeys.forEach(k => {
+    if (p.attributes[k]) addMeta(k, p.attributes[k]);
+  });
+  
+  // Native Meta
+  if (p.sku) addMeta('SKU', p.sku);
+  if (p.weight_grams) addMeta('Weight', `${p.weight_grams}g`);
+  
+  info.appendChild(meta);
+}
 
       // Meta Data
       if (p.sku || p.weight_grams) {
