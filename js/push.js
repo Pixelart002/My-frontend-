@@ -222,6 +222,7 @@ const PUSH = (() => {
    
    const run = async () => {
     await PUSH.autoSubscribe();
+    await PUSH.syncPendingResubscribe();
     setTimeout(showPrompt, 2500);
    };
    
@@ -231,8 +232,34 @@ const PUSH = (() => {
     setTimeout(run, 1000);
    }
   },
+  
+  // 🔥 NEW: picks up any subscription the SW rotated while no tab was open
+  // (see sw.js's pushsubscriptionchange handler) and pushes it to the backend
+  // now that we actually have the auth token available.
+  async syncPendingResubscribe() {
+   if (!isSupported()) return;
+   try {
+    const cache = await caches.open('luviio-push-resync');
+    const match = await cache.match('/__pending-resub__');
+    if (!match) return;
+    const subJson = await match.json();
+    await API.subscribePush(subJson);
+    await cache.delete('/__pending-resub__');
+   } catch (err) {
+    console.warn('[PUSH] Pending resubscribe sync failed:', err);
+   }
+  },
  };
 })();
+
+// Real-time resubscribe sync if a tab is open when the SW rotates the subscription.
+if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
+ navigator.serviceWorker.addEventListener('message', async (event) => {
+  if (event.data?.type === 'PUSH_SUBSCRIPTION_CHANGED' && typeof API !== 'undefined') {
+   try { await API.subscribePush(event.data.subscription); } catch (err) { console.warn('[PUSH] Live resync failed:', err); }
+  }
+ });
+}
 
 // Attach event listeners safely
 if (typeof window !== 'undefined') {
