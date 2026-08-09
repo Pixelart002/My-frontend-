@@ -40,50 +40,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#080808">
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            gold: '#c9a55e',
-            'gold-dim': 'rgba(201,165,94,0.12)',
-            surface: '#0d0c0a',
-            'surface-2': '#141210',
-            border: '#1e1c18',
-            'border-light': '#2a2722',
-            text: '#f0ece4',
-            'text-muted': '#7a7368',
-            'text-dim': '#3a3730',
-            error: '#e05252',
-            'error-dim': 'rgba(224,82,82,0.12)',
-            success: '#88dc88',
-            warn: '#e0a952',
-          },
-          fontFamily: {
-            display: ['Playfair Display', 'serif'],
-            body: ['DM Sans', 'sans-serif'],
-          },
-          animation: {
-            'fade-up': 'fadeUp 0.6s ease forwards',
-            'fade-in': 'fadeIn 0.5s ease forwards',
-            'scale-in': 'scaleIn 0.5s cubic-bezier(.175,.885,.32,1.275) forwards',
-            shimmer: 'shimmer 0.75s ease forwards',
-            marquee: 'marquee 30s linear infinite',
-            'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
-          },
-          keyframes: {
-            fadeUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-            scaleIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
-            shimmer: { '0%': { transform: 'translateX(-130%) skewX(-12deg)' }, '100%': { transform: 'translateX(130%) skewX(-12deg)' } },
-            marquee: { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
-            pulseSoft: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0.5' } },
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="/css/tailwind.css">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

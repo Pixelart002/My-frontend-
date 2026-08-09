@@ -12,47 +12,7 @@
   <link rel="stylesheet" href="/css/luviio.css">
 
   <!-- PRODUCTION: Replace with compiled Tailwind CSS. CDN is dev-only. -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            surface: '#0d0c0a',
-            'surface-2': '#1a1814',
-            border: '#1e1c18',
-            gold: '#c9a55e',
-            text: '#f0ece4',
-            'text-muted': '#7a7368',
-            error: '#f87171',
-            success: '#4ade80',
-            warn: '#e0a952'
-          },
-          fontFamily: {
-            sans: ['DM Sans', 'sans-serif'],
-            serif: ['Playfair Display', 'serif'],
-          },
-          keyframes: {
-            slideDown: {
-              '0%': { opacity: '0', transform: 'translateY(-8px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-            spin: { '100%': { transform: 'rotate(360deg)' } }
-          },
-          animation: {
-            slideDown: 'slideDown 0.3s ease forwards',
-            'spin-fast': 'spin 0.8s linear infinite',
-          }
-        }
-      }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .scrollbar-hide::-webkit-scrollbar { display: none; }
-      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/tailwind.css">
 
   <!-- Confirm modal styles -->
   <style>
