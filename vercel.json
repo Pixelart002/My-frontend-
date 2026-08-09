@@ -1,7 +1,7 @@
 {
   "framework": null,
-  "buildCommand": null,
-  "installCommand": null,
+  "buildCommand": "npm run build:css",
+  "installCommand": "npm install",
   "outputDirectory": ".",
   "cleanUrls": false,
   "trailingSlash": false,
@@ -28,7 +28,7 @@
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://js.stripe.com https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app https://api.stripe.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; frame-src https://js.stripe.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.stripe.com https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app https://api.stripe.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; frame-src https://js.stripe.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     },
