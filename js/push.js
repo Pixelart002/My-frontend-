@@ -69,11 +69,11 @@ const PUSH = (() => {
  };
  
  const saveSubscription = async (subscription) => {
-  try {
-   if (typeof API !== 'undefined') await API.subscribePush(subscription.toJSON());
-  } catch (err) {
-   console.error('[PUSH] Save Sub failed:', err);
-  }
+  if (typeof API === 'undefined') throw new Error('API module not loaded');
+  // 🔥 FIX: previously this caught the error and returned undefined either way,
+  // so subscribe() always returned true even when the backend save failed --
+  // masking the real failure behind a false "Notifications Enabled" toast.
+  await API.subscribePush(subscription.toJSON());
  };
  
  const removeSubscription = async (subscription) => {
@@ -125,6 +125,8 @@ const PUSH = (() => {
    const success = await PUSH.subscribe();
    if (success && typeof showToast === 'function') {
     showToast('Notifications Enabled Successfully!', 'success');
+   } else if (!success && typeof showToast === 'function') {
+    showToast('Could not enable notifications: ' + (PUSH.lastError || 'unknown error'), 'error');
    }
   };
  };
@@ -159,7 +161,7 @@ const PUSH = (() => {
     await saveSubscription(subscription);
     return true;
    } catch (err) {
-    console.warn('[PUSH] First subscribe attempt failed. Attempting self-healing...', err);
+    console.warn('[PUSH] First subscribe/save attempt failed. Attempting self-healing...', err);
     
     try {
      const existing = await reg.pushManager.getSubscription();
@@ -177,7 +179,11 @@ const PUSH = (() => {
      await saveSubscription(newSubscription);
      return true;
     } catch (retryErr) {
+     // 🔥 FIX: this is now the real, final error — surface it instead of
+     // just logging it, so the UI can tell the person what actually happened
+     // (e.g. "Error 500: DB constraint error") instead of a false success.
      console.error('[PUSH] Subscribe Failed Completely:', retryErr);
+     PUSH.lastError = retryErr?.message || String(retryErr);
      return false;
     }
    }
