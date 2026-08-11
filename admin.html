@@ -388,6 +388,19 @@
           </div>
           <div class="form-group mb-0"><label class="form-label">Weight (grams)</label><input type="number" id="pm-weight" class="form-input" min="0"></div>
         </div>
+        <div class="grid grid-cols-2 gap-3.5">
+          <div class="form-group mb-0"><label class="form-label">HSN Code</label><input type="text" id="pm-hsn" class="form-input" maxlength="20" placeholder="e.g. 9988"></div>
+          <div class="form-group mb-0">
+            <label class="form-label">GST %</label>
+            <select id="pm-gst" class="form-input">
+              <option value="0">0%</option>
+              <option value="5">5%</option>
+              <option value="12">12%</option>
+              <option value="18" selected>18%</option>
+              <option value="28">28%</option>
+            </select>
+          </div>
+        </div>
         <!-- 🔥 JSONB Attributes Builder -->
         <div class="form-group mb-0 mt-3.5">
           <label class="form-label flex justify-between items-center">
@@ -789,7 +802,9 @@ loadProducts(pProdPage);
               ['pm-compare', p?.compare_price || ''],
               ['pm-stock', p?.stock ?? 0],
               ['pm-sku', p?.sku || ''],
-              ['pm-weight', p?.weight_grams || '']
+              ['pm-weight', p?.weight_grams || ''],
+              ['pm-hsn', p?.hsn_code || '9988'],
+              ['pm-gst', p?.gst_percentage ?? 18]
             ];
             fields.forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
             document.getElementById('pm-active').checked = p ? p.is_active : true;
@@ -863,6 +878,8 @@ loadProducts(pProdPage);
             const statusWrap = document.getElementById('pm-upload-status');
             const statusText = document.getElementById('pm-upload-status-text');
             const payload = { name: document.getElementById('pm-name').value.trim(), slug: document.getElementById('pm-slug').value.trim(), short_description: document.getElementById('pm-sdesc').value.trim() || null, description: document.getElementById('pm-desc').value.trim() || null, price: parseFloat(document.getElementById('pm-price').value), compare_price: parseFloat(document.getElementById('pm-compare').value) || null, stock: parseInt(document.getElementById('pm-stock').value) || 0, sku: document.getElementById('pm-sku').value.trim() || null, weight_grams: parseInt(document.getElementById('pm-weight').value) || null, is_active: document.getElementById('pm-active').checked, category_id: document.getElementById('pm-cat').value || null,
+            hsn_code: document.getElementById('pm-hsn').value.trim() || '9988',
+            gst_percentage: parseInt(document.getElementById('pm-gst').value),
             attributes: getAttrsObject()
             };
             if (!payload.name || !payload.slug || isNaN(payload.price)) { if (typeof showToast === 'function') showToast('Name, Slug & Price required', 'error'); return; }
