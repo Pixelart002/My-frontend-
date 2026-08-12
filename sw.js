@@ -32,8 +32,8 @@ self.addEventListener('push', (event) => {
   // the real generated icons at the site root.
   const options = {
     body: data.body || '',
-    icon: data.icon || './icon-192.png',
-    badge: data.badge || './badge-72.png',
+    icon: data.icon || '/src/icon-192.png',
+    badge: data.badge || '/src/badge-72.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/',
