@@ -138,7 +138,7 @@
   </div>
 
 
- <script src="../js/theme.js"></script>
+  <script src="/js/theme.js"></script>
   <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
@@ -253,17 +253,17 @@
       const subtotal = serverCartData?.subtotal || 0;
       const shipping = serverCartData?.shipping_cost || 0;
       const taxAmount = serverCartData?.tax_amount || 0;
-      const taxRate = serverCartData?.tax_rate_pct || 18;
       const grandTotal = serverCartData?.total_amount || 0;
       const toFreeShip = serverCartData?.amount_to_free_shipping || 0;
       const isFreeShipping = serverCartData?.free_shipping_eligible || false;
 
       sumRows.innerHTML = '';
       
+      // 🔥 THE FIX: Rearranged the array so Shipping comes before GST, and removed taxRate % from label
       const breakdownItems = [
         ['Subtotal', formatPrice(subtotal)],
-        [`GST (${taxRate}%)`, formatPrice(taxAmount)],
-        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping]
+        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping],
+        ['GST', formatPrice(taxAmount)]
       ];
       
       breakdownItems.forEach(([label, val, isFree]) => {

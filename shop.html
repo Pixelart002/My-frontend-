@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +8,16 @@
   <link rel="stylesheet" href="/css/luviio.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973" crossorigin="anonymous"></script>
   
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  
   <style>
-    /* ── LAYOUT ── */
+    /* ── LAYOUT & BREATHING SPACE ── */
     .shop-layout {
       display: flex;
-      gap: 40px;
+      gap: 48px;
       align-items: flex-start;
     }
 
@@ -25,436 +30,261 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 16px;
     }
 
     .shop-count {
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--text-muted);
     }
 
-    /* ── SEARCH (JS Controlled) ── */
+    /* ── SEARCH ── */
     .search-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 16px;
-      flex: 1;
-      max-width: 340px;
-      transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
-    }
-
-    .search-bar:focus-within {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 1px var(--gold-dim, rgba(201, 165, 94, 0.2));
-    }
-
-    .search-bar svg {
-      transition: transform 0.3s ease, color 0.3s ease;
-    }
-
-    .search-bar:focus-within svg {
-      transform: scale(1.1);
-      color: var(--gold);
-    }
-
-    .search-bar input {
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text);
-      font-size: 14px;
-      width: 100%;
-    }
-
-    /* ── CUSTOM SORT BUTTON (Replaces native select) ── */
-    .custom-sort-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.3s ease, background 0.3s ease;
-    }
-
-    .custom-sort-btn:hover {
-      border-color: var(--gold);
-      background: rgba(201, 165, 94, 0.05);
-    }
-
-    /* ── CUSTOM BOTTOM SHEET / POPUP UI ── */
-    .bottom-sheet-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-    }
-
-    .bottom-sheet-overlay.active {
-      display: block;
-    }
-
-    .bottom-sheet-content {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface, #111);
-      border-radius: 20px 20px 0 0;
-      padding: 24px 24px 40px 24px;
-      border-top: 1px solid var(--border);
-      transform: translateY(100%);
-    }
-
-    .bottom-sheet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .bottom-sheet-header h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0;
-      color: var(--text);
-    }
-
-    .close-sheet-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 24px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .close-sheet-btn:hover {
-      color: var(--text);
-    }
-
-    .popup-option {
-      display: flex;
-      align-items: center;
       gap: 12px;
-      padding: 16px 0;
-      cursor: pointer;
-      font-size: 15px;
-      color: var(--text);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: color 0.2s;
-    }
-
-    .popup-option:last-child {
-      border-bottom: none;
-    }
-
-    .popup-option input[type="radio"] {
-      display: none;
-    }
-
-    .custom-radio-circle {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border-light);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.3s;
-    }
-
-    .custom-radio-circle::after {
-      content: '';
-      width: 10px;
-      height: 10px;
-      background: var(--gold);
-      border-radius: 50%;
-      transform: scale(0);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .popup-option input[type="radio"]:checked + .custom-radio-circle {
-      border-color: var(--gold);
-    }
-
-    .popup-option input[type="radio"]:checked + .custom-radio-circle::after {
-      transform: scale(1);
-    }
-
-    .popup-option input[type="radio"]:checked ~ span.option-label {
-      color: var(--gold);
-      font-weight: 500;
-    }
-
-    /* ── FILTERS ── */
-    .filter-toggle-btn {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 16px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.3s, border-color 0.3s;
-    }
-    
-    .filter-toggle-btn:hover {
-      border-color: var(--gold);
-    }
-
-    .active-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    .filter-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      font-size: 12px;
-      color: var(--text-muted);
-      background: var(--surface-2);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .filter-chip:hover {
-      border-color: var(--error);
-      color: var(--error);
-      background: rgba(224, 77, 54, 0.1);
-      transform: translateY(-2px);
-    }
-
-    .price-range {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .price-range input {
+      border-radius: 12px;
+      padding: 12px 18px;
       flex: 1;
-      transition: border-color 0.3s ease;
+      max-width: 380px;
+      transition: all 0.3s ease;
+    }
+    .search-bar:focus-within { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(201, 165, 94, 0.2); }
+    .search-bar input { background: none; border: none; outline: none; color: var(--text); font-size: 15px; width: 100%; }
+    .search-bar i { font-size: 18px; color: var(--text-muted); transition: color 0.3s; }
+    .search-bar:focus-within i { color: var(--gold); transform: scale(1.1); }
+
+    /* ── CUSTOM ICON BUTTONS (Sort & Filter) ── */
+    .icon-btn {
+      display: flex; align-items: center; justify-content: center; width: 46px; height: 46px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      color: var(--text); font-size: 20px; cursor: pointer; transition: all 0.3s;
+    }
+    .icon-btn:hover { border-color: var(--gold); background: rgba(201, 165, 94, 0.05); color: var(--gold); }
+
+    /* ── RESPONSIVE PRODUCT GRID (No Ghutan) ── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
     }
 
-    .price-range input:focus {
-      border-color: var(--gold);
-    }
-
-    /* ── PRODUCT CARDS ── */
+    /* ── LUXURY PRODUCT CARDS ── */
     .product-card {
       position: relative;
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: var(--surface, #0d0c0a);
-      border: 1px solid transparent;
-      border-radius: var(--radius, 8px);
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
-
     .product-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+      transform: translateY(-8px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
       border-color: var(--border-light);
     }
 
     .product-card-img {
       position: relative;
-      overflow: hidden;
       background: var(--surface-2);
       width: 100%;
       aspect-ratio: 1 / 1;
-      border-radius: var(--radius, 8px) var(--radius, 8px) 0 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: var(--border);
     }
-
     .product-card-img img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .product-card:hover .product-card-img img {
-      transform: scale(1.08);
-    }
-
-    .product-card-img.is-oos::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(8, 8, 8, 0.55);
-      backdrop-filter: grayscale(80%);
-      z-index: 1;
-      transition: background 0.3s ease;
-    }
+    .product-card:hover .product-card-img img { transform: scale(1.06); }
+    .product-card-img.is-oos::after { content: ''; position: absolute; inset: 0; background: rgba(8, 8, 8, 0.55); backdrop-filter: grayscale(80%); z-index: 1; }
 
     .card-stock-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      z-index: 2;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      position: absolute; top: 12px; left: 12px; font-size: 11px; font-weight: 700;
+      padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px; z-index: 2;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-transform: uppercase;
     }
-
     .card-stock-badge.out { background: var(--error); color: #fff; }
-    .card-stock-badge.low { background: rgba(224, 169, 82, 0.95); color: #000; }
-    
+    .card-stock-badge.low { background: #e0a952; color: #000; }
+
     .product-card-body {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding: 16px;
+      display: flex; flex-direction: column; flex: 1;
+      padding: 24px; /* Superior breathing space */
     }
 
     .product-card-name {
-      font-size: 15px;
-      line-height: 1.4;
-      margin-bottom: 8px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-height: 42px; 
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-weight: 600; line-height: 1.4;
+      margin-bottom: 12px; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    .product-card-action {
-      padding: 0 16px 16px 16px;
+    .product-card-price-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .product-card-price { font-size: 18px; font-weight: 700; color: var(--gold); }
+    .product-card-compare { font-size: 13px; color: var(--text-muted); text-decoration: line-through; }
+
+    /* ── CART CONTROLS ── */
+    .card-controls {
+      display: flex;
+      gap: 12px;
       margin-top: auto;
+      flex-wrap: wrap; 
     }
 
-    .btn-pop {
-      animation: btnPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes btnPop {
-      0% { transform: scale(1); }
-      50% { transform: scale(0.92); }
-      100% { transform: scale(1); }
-    }
-
-    .btn-primary {
-      transition: background 0.3s, color 0.3s, transform 0.2s;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: var(--gold);
-      color: #000;
-    }
-
-    /* ── MOBILE SIDEBAR ── */
-    #filter-sidebar-mobile {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1100;
-      background: rgba(0, 0, 0, 0); 
-      transition: background 0.4s ease;
-    }
-
-    #filter-sidebar-mobile.open {
-      display: block;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-    }
-
-    #filter-sidebar-inner {
-      position: absolute;
-      top: 0; 
-      left: 0;
-      bottom: 0;
-      width: 280px;
-      background: var(--surface);
-      padding: 24px;
-      overflow-y: auto;
-      transform: translateX(-100%);
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    .qty-input-group {
+      display: flex; align-items: center; flex: 1; min-width: 100px;
+      border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface-2); height: 44px; overflow: hidden;
+      transition: border-color 0.3s;
     }
     
-    #filter-sidebar-mobile.open #filter-sidebar-inner {
-      transform: translateX(0);
+    .qty-input-btn {
+      width: 36px; height: 100%; background: none; border: none;
+      color: var(--text); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .qty-input-btn:hover { background: rgba(255,255,255,0.05); color: var(--gold); }
+
+    /* 🔥 THE TWEAK: Make it editable but hide the default browser spin buttons */
+    .qty-input-field {
+      flex: 1; height: 100%; width: 100%; min-width: 0; text-align: center;
+      background: none; border: none; color: var(--text); font-size: 15px; font-weight: 600; outline: none;
+      -moz-appearance: textfield; /* Hides Firefox selectors */
+    }
+    .qty-input-field::-webkit-outer-spin-button, 
+    .qty-input-field::-webkit-inner-spin-button { 
+      -webkit-appearance: none; /* Hides Chrome/Safari/Edge selectors */
+      margin: 0; 
     }
 
+    .add-cart-icon-btn {
+      width: 56px; height: 44px; background: var(--gold); color: #080808;
+      border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(201, 169, 110, 0.2); flex-shrink: 0;
+    }
+    .add-cart-icon-btn:hover:not(:disabled) { background: #b59454; transform: scale(1.05); }
+    .add-cart-icon-btn:active:not(:disabled) { transform: scale(0.95); }
+    
+    /* OOS State Button */
+    .add-cart-icon-btn:disabled { 
+      background: var(--surface-2); color: var(--text-dim); box-shadow: none; 
+      cursor: not-allowed; width: 100%; font-size: 14px; font-weight: 600; 
+      letter-spacing: 1px; flex: 1; gap: 8px; border: 1px solid var(--border);
+    }
+
+    /* ── CUSTOM PURE CSS SPINNER LOADER ── */
+    .custom-spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(8, 8, 8, 0.2);
+      border-top-color: #080808;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── POPUPS & SIDEBARS ── */
+    .bottom-sheet-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); }
+    .bottom-sheet-overlay.active { display: block; }
+    .bottom-sheet-content { position: absolute; bottom: 0; left: 0; right: 0; background: var(--surface); border-radius: 24px 24px 0 0; padding: 28px; transform: translateY(100%); }
+    .bottom-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .bottom-sheet-header h3 { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 0; color: var(--text); }
+    .close-sheet-btn { background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer; }
+    .popup-option { display: flex; align-items: center; gap: 14px; padding: 16px 0; cursor: pointer; font-size: 16px; border-bottom: 1px solid var(--border); }
+    .popup-option:last-child { border-bottom: none; }
+    .popup-option input[type="radio"] { display: none; }
+    .custom-radio-circle { width: 22px; height: 22px; border: 2px solid var(--border-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .custom-radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--gold); border-radius: 50%; transform: scale(0); transition: transform 0.3s; }
+    .popup-option input[type="radio"]:checked + .custom-radio-circle { border-color: var(--gold); }
+    .popup-option input[type="radio"]:checked + .custom-radio-circle::after { transform: scale(1); }
+    .popup-option input[type="radio"]:checked ~ span.option-label { color: var(--gold); font-weight: 600; }
+
+    /* Empty states */
+    .empty-state { text-align: center; padding: 80px 20px; background: var(--surface); border-radius: 20px; border: 1px dashed var(--border); grid-column: 1/-1; }
+    .empty-state-icon { font-size: 56px; color: var(--border-light); margin-bottom: 20px; }
+
+    /* SLEEK FILTER SIDEBAR */
+    #filter-sidebar-mobile { display: none; position: fixed; inset: 0; z-index: 1100; background: transparent; transition: background 0.4s; }
+    #filter-sidebar-mobile.open { display: block; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); }
+    #filter-sidebar-inner { position: absolute; top: 0; left: 0; bottom: 0; width: 300px; background: var(--surface); padding: 32px 24px; overflow-y: auto; transform: translateX(-100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    #filter-sidebar-mobile.open #filter-sidebar-inner { transform: translateX(0); }
+    
+    .filter-group-title { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 600; font-size: 15px; color: var(--text); }
+    .filter-option { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; font-size: 14px; color: var(--text-muted); background: var(--surface-2); border: 1px solid transparent; border-radius: 12px; transition: all 0.3s; }
+    .filter-option:hover { background: var(--surface); border-color: var(--border); }
+    .filter-option.active { border-color: var(--gold); color: var(--gold); background: rgba(201, 165, 94, 0.05); font-weight: 500; }
+    .filter-option i { font-size: 18px; opacity: 0; transform: scale(0.8); transition: all 0.3s; }
+    .filter-option.active i { opacity: 1; transform: scale(1); }
+    
+    /* Active Filters */
+    .active-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .filter-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; font-weight: 500; background: var(--surface-2); cursor: pointer; transition: all 0.3s; }
+    .filter-chip:hover { border-color: var(--error); color: var(--error); background: rgba(224, 77, 54, 0.1); }
+
+    /* Responsiveness */
+    .filter-toggle-btn { display: none; }
     @media (max-width: 900px) {
       .filter-sidebar { display: none; }
       .filter-toggle-btn { display: flex; }
-      
-      .bottom-sheet-content {
-        margin: 0 auto;
-        max-width: 100%;
-      }
+      .bottom-sheet-content { margin: 0 auto; max-width: 100%; }
+      .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
     }
-
     @media (min-width: 901px) {
-      .bottom-sheet-content {
-        max-width: 400px;
-        bottom: 50%;
-        left: 50%;
-        right: auto;
-        border-radius: 16px;
-        transform: translate(-50%, 50%) scale(0.9) !important;
-        opacity: 0;
-      }
+      .bottom-sheet-content { max-width: 420px; bottom: 50%; left: 50%; right: auto; border-radius: 24px; transform: translate(-50%, 50%) scale(0.9) !important; opacity: 0; }
     }
-
     @media (max-width: 600px) {
       .shop-header { flex-direction: column; align-items: stretch; }
       .search-bar { max-width: none; }
+      .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+      .product-card-body { padding: 16px; }
+      .product-card-name { font-size: 15px; }
+      .product-card-price { font-size: 16px; }
     }
   </style>
 </head>
-<body>
+<body class="bg-[#080808] text-[#f0ece4] font-body antialiased selection:bg-gold selection:text-black">
+
   <nav id="main-nav"></nav>
 
   <div class="page-wrapper">
     <div class="container" style="padding-top:32px; padding-bottom:80px;">
       
       <nav class="breadcrumb" aria-label="breadcrumb">
-        <a href="/index.html">Home</a><span>›</span>
-        <span id="bc-current">Shop</span>
+        <a href="/index.html"><i class="ri-home-4-line" style="vertical-align: middle;"></i> Home</a><span style="margin: 0 8px;">›</span>
+        <span id="bc-current" class="text-gold font-medium">Shop</span>
       </nav>
 
-      <div class="shop-layout">
+      <div class="shop-layout" style="margin-top: 24px;">
         
-        <aside class="filter-sidebar" id="filter-sidebar-desktop">
+        <!-- Desktop Sidebar -->
+        <aside class="filter-sidebar" id="filter-sidebar-desktop" style="width: 260px; flex-shrink: 0;">
           <div id="filter-content"></div>
         </aside>
 
+        <!-- Mobile Sidebar -->
         <div id="filter-sidebar-mobile">
           <div id="filter-sidebar-inner">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-              <strong style="font-size:16px;">Filters</strong>
-              <button onclick="closeMobileFilter()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+              <strong style="font-family:'Playfair Display', serif; font-size:24px; display:flex; align-items:center; gap:8px;">
+                <i class="ri-equalizer-line"></i> Filters
+              </strong>
+              <button onclick="closeMobileFilter()" style="background:none; border:none; color:var(--text-muted); font-size:28px; cursor:pointer;"><i class="ri-close-line"></i></button>
             </div>
             <div id="filter-content-mobile"></div>
           </div>
@@ -463,32 +293,24 @@
         <main class="shop-main">
           
           <div class="shop-header">
-            <div style="display:flex; align-items:center; gap:12px; flex:1; flex-wrap:wrap;">
-              <button class="filter-toggle-btn" onclick="openMobileFilter()">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <line x1="4" y1="6" x2="20" y2="6"/>
-                  <line x1="8" y1="12" x2="20" y2="12"/>
-                  <line x1="12" y1="18" x2="20" y2="18"/>
-                </svg> Filters
+            <div style="display:flex; align-items:center; gap:16px; flex:1; flex-wrap:wrap;">
+              <!-- Icon only for mobile filters -->
+              <button class="icon-btn filter-toggle-btn" onclick="openMobileFilter()" title="Filters">
+                <i class="ri-equalizer-line"></i>
               </button>
               
               <div class="search-bar">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" id="search-input" placeholder="Search products..." maxlength="100" autocomplete="off">
+                <i class="ri-search-line"></i>
+                <input type="text" id="search-input" placeholder="Search curated luxury..." maxlength="100" autocomplete="off">
               </div>
             </div>
             
-            <div style="display:flex; align-items:center; gap:12px;">
+            <div style="display:flex; align-items:center; gap:16px;">
               <span class="shop-count" id="product-count"></span>
               
-              <button class="custom-sort-btn" id="sort-trigger" onclick="openSortPopup()">
-                <span id="sort-label">Sort by</span>
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
+              <!-- Icon only sort button -->
+              <button class="icon-btn" id="sort-trigger" onclick="openSortPopup()" title="Sort By">
+                <i class="ri-sort-desc"></i>
               </button>
             </div>
           </div>
@@ -496,15 +318,15 @@
           <div class="active-filters" id="active-filters"></div>
 
           <div id="products-grid" class="products-grid">
-            <div style="height:320px;" class="skeleton"></div>
-            <div style="height:320px;" class="skeleton"></div>
-            <div style="height:320px;" class="skeleton"></div>
-            <div style="height:320px;" class="skeleton"></div>
-            <div style="height:320px;" class="skeleton"></div>
-            <div style="height:320px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
+            <div style="height:420px; border-radius:20px;" class="skeleton"></div>
           </div>
 
-          <div id="pagination" class="pagination"></div>
+          <div id="pagination" class="pagination" style="display:flex; gap:8px; justify-content:center; margin-top:40px;"></div>
         </main>
       </div>
     </div>
@@ -512,18 +334,18 @@
     <footer class="site-footer">
       <div class="container">
         <div class="footer-bottom" style="border-top:none; margin-top:0;">
-          <span>© 2026 Luviio</span>
-          <a href="/index.html">Home</a>
+          <span style="font-weight:bold; letter-spacing:1px; color:var(--gold);">© 2026 LUVIIO</span>
         </div>
       </div>
     </footer>
   </div>
 
+  <!-- Sort Bottom Sheet -->
   <div id="sort-popup" class="bottom-sheet-overlay" onclick="handlePopupOverlayClick(event)">
     <div class="bottom-sheet-content" id="sort-popup-content">
       <div class="bottom-sheet-header">
-        <h3>Sort by</h3>
-        <button class="close-sheet-btn" onclick="closeSortPopup()">✕</button>
+        <h3><i class="ri-sort-desc"></i> Sort Collection</h3>
+        <button class="close-sheet-btn" onclick="closeSortPopup()"><i class="ri-close-line"></i></button>
       </div>
       <div class="popup-options">
         <label class="popup-option">
@@ -534,20 +356,19 @@
         <label class="popup-option">
           <input type="radio" name="sort_radio" value="price_asc" onchange="applySort(this)">
           <div class="custom-radio-circle"></div>
-          <span class="option-label">Price: Low → High</span>
+          <span class="option-label">Price: Low to High</span>
         </label>
         <label class="popup-option">
           <input type="radio" name="sort_radio" value="price_desc" onchange="applySort(this)">
           <div class="custom-radio-circle"></div>
-          <span class="option-label">Price: High → Low</span>
+          <span class="option-label">Price: High to Low</span>
         </label>
       </div>
     </div>
   </div>
   
-
- <script src="../js/theme.js"></script>
-
+  <!-- Scripts -->
+  <script src="/js/theme.js"></script>
   <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
@@ -556,7 +377,6 @@
   <script src="/js/cart.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/push.js"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   
   <script>
@@ -619,12 +439,6 @@
 
     function applySort(radioElement) {
       state.sort = radioElement.value;
-      const labels = {
-        '': 'Sort by',
-        'price_asc': 'Price: Low → High',
-        'price_desc': 'Price: High → Low'
-      };
-      document.getElementById('sort-label').textContent = labels[state.sort];
       state.page = 1;
       setTimeout(() => {
         closeSortPopup();
@@ -644,65 +458,64 @@
     function buildFilterHTML() {
       return `
         <div class="filter-group">
-          <div class="filter-group-title" style="margin-bottom: 12px; font-weight: 600;">Category</div>
-          <label class="filter-option" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer;">
-            <input type="radio" name="cat" value="" ${!state.category ? 'checked' : ''} style="accent-color: var(--gold);"> All
-          </label>
+          <div class="filter-group-title"><i class="ri-layout-grid-line text-gold"></i> Categories</div>
+          <div class="filter-option ${!state.category ? 'active' : ''}" data-cat="" onclick="setCategory('')">
+            <span>All Collections</span>
+            <i class="ri-check-line"></i>
+          </div>
           ${categories.map(c => `
-            <label class="filter-option" style="display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer;">
-              <input type="radio" name="cat" value="${escapeHTML(c.slug)}" ${state.category === c.slug ? 'checked' : ''} style="accent-color: var(--gold);">
-              ${escapeHTML(c.name)}
-            </label>
+            <div class="filter-option ${state.category === c.slug ? 'active' : ''}" data-cat="${escapeHTML(c.slug)}" onclick="setCategory('${escapeHTML(c.slug)}')">
+              <span>${escapeHTML(c.name)}</span>
+              <i class="ri-check-line"></i>
+            </div>
           `).join('')}
         </div>
         
-        <div class="filter-group" style="margin-top: 24px;">
-          <div class="filter-group-title" style="margin-bottom: 12px; font-weight: 600;">Price Range</div>
-          <div class="price-range" style="flex-direction:column; gap:10px;">
-            <div class="price-range" style="width: 100%;">
-              <input type="number" class="form-input" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text);" placeholder="Min" id="min-price-inp" value="${escapeHTML(state.min_price)}" min="0">
+        <div class="filter-group" style="margin-top: 32px;">
+          <div class="filter-group-title"><i class="ri-money-dollar-circle-line text-gold"></i> Price Range</div>
+          <div class="price-range" style="flex-direction:column; gap:12px;">
+            <div class="price-range" style="width: 100%; display:flex; gap:10px; align-items:center;">
+              <input type="number" class="form-input" style="padding:10px 14px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); flex:1; width:100%; outline:none;" placeholder="Min" id="min-price-inp" value="${escapeHTML(state.min_price)}" min="0">
               <span style="color:var(--text-muted)">—</span>
-              <input type="number" class="form-input" style="padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text);" placeholder="Max" id="max-price-inp" value="${escapeHTML(state.max_price)}" min="0">
+              <input type="number" class="form-input" style="padding:10px 14px; background:var(--surface-2); border:1px solid var(--border); border-radius:8px; color:var(--text); flex:1; width:100%; outline:none;" placeholder="Max" id="max-price-inp" value="${escapeHTML(state.max_price)}" min="0">
             </div>
-            <button class="btn btn-outline" style="padding:8px; width:100%; font-size:12px; transition: all 0.3s; cursor:pointer;" onclick="applyPrice()">Apply</button>
+            <button class="btn btn-outline" style="padding:10px; width:100%; font-size:13px; font-weight:600; transition: all 0.3s; cursor:pointer; border-radius:8px;" onclick="applyPrice()">Apply Range</button>
           </div>
         </div>
         
-        <div class="filter-group" style="margin-top: 24px;">
-          <div class="filter-group-title" style="margin-bottom: 12px; font-weight: 600;">Availability</div>
-          <label class="filter-option" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="checkbox" id="in-stock-chk" ${state.in_stock ? 'checked' : ''} style="accent-color: var(--gold);"> In Stock Only
-          </label>
+        <div class="filter-group" style="margin-top: 32px;">
+          <div class="filter-group-title"><i class="ri-box-3-line text-gold"></i> Availability</div>
+          <div class="filter-option ${state.in_stock ? 'active' : ''}" onclick="toggleInStock()">
+            <span>In Stock Only</span>
+            <i class="ri-check-line"></i>
+          </div>
         </div>
         
-        <button class="btn btn-outline" style="width:100%; padding:10px; margin-top:16px; transition: all 0.3s; cursor:pointer;" onclick="clearFilters()">Clear Filters</button>
+        <button class="btn btn-outline" style="width:100%; padding:12px; margin-top:32px; transition: all 0.3s; cursor:pointer; border-radius:12px; color:var(--error); border-color:var(--border);" onclick="clearFilters()">
+          <i class="ri-refresh-line" style="vertical-align: middle;"></i> Clear Filters
+        </button>
       `;
     }
+
+    window.setCategory = (slug) => {
+      state.category = slug;
+      state.page = 1;
+      renderFilters();
+      loadProducts();
+      updateBreadcrumb();
+    };
+
+    window.toggleInStock = () => {
+      state.in_stock = !state.in_stock;
+      state.page = 1;
+      renderFilters();
+      loadProducts();
+    };
 
     function renderFilters() {
       const html = buildFilterHTML();
       document.getElementById('filter-content').innerHTML = html;
       document.getElementById('filter-content-mobile').innerHTML = html;
-      bindFilterEvents();
-    }
-
-    function bindFilterEvents() {
-      document.querySelectorAll('input[name="cat"]').forEach(el => {
-        el.addEventListener('change', e => {
-          state.category = e.target.value;
-          state.page = 1;
-          loadProducts();
-          updateBreadcrumb();
-        });
-      });
-      
-      document.querySelectorAll('#in-stock-chk').forEach(el => {
-        el.addEventListener('change', e => {
-          state.in_stock = e.target.checked;
-          state.page = 1;
-          loadProducts();
-        });
-      });
     }
 
     const applyPrice = () => {
@@ -736,7 +549,7 @@
       const addChip = (label, fn) => {
         const chip = document.createElement('span');
         chip.className = 'filter-chip';
-        chip.textContent = label + ' ✕';
+        chip.innerHTML = `${label} <i class="ri-close-line" style="font-size:16px;"></i>`;
         gsap.fromTo(chip, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" });
         chip.addEventListener('click', () => {
           gsap.to(chip, { scale: 0.5, opacity: 0, duration: 0.2, onComplete: fn });
@@ -804,7 +617,7 @@
 
     async function loadProducts() {
       const grid = document.getElementById('products-grid');
-      grid.innerHTML = Array(6).fill('<div style="height:320px;" class="skeleton"></div>').join('');
+      grid.innerHTML = Array(6).fill('<div style="height:420px; border-radius:20px;" class="skeleton"></div>').join('');
       updateActiveFilters();
 
       const params = { page: state.page, page_size: state.search ? 100 : 12 };
@@ -815,7 +628,6 @@
 
       try {
         const res = await API.getProducts(params);
-        // 🔥 Enterprise Unwrap & Meta Handling
         let items = Array.isArray(res) ? res : (res?.items || res?.data || []);
         let meta = res?.meta || {};
 
@@ -831,7 +643,7 @@
         }
         
         const countEl = document.getElementById('product-count');
-        countEl.textContent = `${state.total} product${state.total !== 1 ? 's' : ''}`;
+        countEl.innerHTML = `<i class="ri-stack-line" style="vertical-align:middle; margin-right:4px;"></i> ${state.total} items`;
         gsap.fromTo(countEl, {opacity:0, x: -10}, {opacity:1, x: 0, duration: 0.4});
 
         grid.innerHTML = '';
@@ -841,11 +653,11 @@
 
         if (!items.length) {
           grid.innerHTML = `
-            <div class="empty-state" style="grid-column:1/-1;">
-              <div class="empty-state-icon">◈</div>
-              <h3>No products found</h3>
-              <p>Try adjusting your filters or search term.</p>
-              <button class="btn btn-outline" onclick="clearFilters()">Clear Filters</button>
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="ri-search-eye-line"></i></div>
+              <h3 style="font-family:'Playfair Display',serif; font-size:24px; margin-bottom:8px;">No products found</h3>
+              <p style="color:var(--text-muted); margin-bottom:24px;">Try adjusting your filters or search term to find what you're looking for.</p>
+              <button class="btn btn-outline" style="padding:12px 24px; border-radius:12px;" onclick="clearFilters()">Clear All Filters</button>
             </div>
           `;
           document.getElementById('pagination').innerHTML = '';
@@ -863,11 +675,11 @@
         
       } catch (err) {
         grid.innerHTML = `
-          <div class="empty-state" style="grid-column:1/-1;">
-            <div class="empty-state-icon">⚠</div>
-            <h3>Could not load products</h3>
-            <p>${escapeHTML(err.message)}</p>
-            <button class="btn btn-outline" onclick="loadProducts()">Retry</button>
+          <div class="empty-state">
+            <div class="empty-state-icon" style="color:var(--error);"><i class="ri-error-warning-line"></i></div>
+            <h3 style="font-family:'Playfair Display',serif; font-size:24px; margin-bottom:8px;">Could not load products</h3>
+            <p style="color:var(--text-muted); margin-bottom:24px;">${escapeHTML(err.message)}</p>
+            <button class="btn btn-outline" style="padding:12px 24px; border-radius:12px;" onclick="loadProducts()"><i class="ri-refresh-line"></i> Retry</button>
           </div>
         `;
       }
@@ -880,6 +692,7 @@
       const card = document.createElement('div');
       card.className = 'product-card';
 
+      // ── Image ──
       const imgWrap = document.createElement('div');
       imgWrap.className = 'product-card-img' + (isOOS ? ' is-oos' : '');
 
@@ -890,24 +703,22 @@
         img.loading = 'lazy';
         imgWrap.appendChild(img);
       } else {
-        const ph = document.createElement('div');
-        ph.className = 'img-placeholder';
-        ph.textContent = '◈';
-        imgWrap.appendChild(ph);
+        imgWrap.innerHTML = '<i class="ri-image-line"></i>';
       }
 
       if (isOOS) {
         const badge = document.createElement('span');
         badge.className = 'card-stock-badge out';
-        badge.textContent = 'Sold Out';
+        badge.innerHTML = '<i class="ri-close-circle-line" style="margin-right:2px; vertical-align:middle;"></i> Sold Out';
         imgWrap.appendChild(badge);
       } else if (isLow) {
         const badge = document.createElement('span');
         badge.className = 'card-stock-badge low';
-        badge.textContent = p.stock <= 3 ? `Only ${p.stock} left!` : `Low Stock (${p.stock})`;
+        badge.innerHTML = p.stock <= 3 ? `Only ${p.stock} left!` : `Low Stock`;
         imgWrap.appendChild(badge);
       }
 
+      // ── Body ──
       const body = document.createElement('div');
       body.className = 'product-card-body';
 
@@ -916,7 +727,7 @@
       name.textContent = p.name;
 
       const priceRow = document.createElement('div');
-      priceRow.style.cssText = 'display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom: 16px;';
+      priceRow.className = 'product-card-price-row';
 
       const price = document.createElement('div');
       price.className = 'product-card-price';
@@ -926,25 +737,73 @@
       if (p.compare_price) {
         const cmp = document.createElement('div');
         cmp.className = 'product-card-compare';
-        cmp.style.cssText = 'font-size:12px; color:var(--text-muted); text-decoration:line-through;';
         cmp.textContent = formatPrice(p.compare_price);
         priceRow.appendChild(cmp);
       }
 
-      body.appendChild(name);
-      body.appendChild(priceRow);
+      // ── CART CONTROLS ──
+      const controls = document.createElement('div');
+      controls.className = 'card-controls';
 
-      const action = document.createElement('div');
-      action.className = 'product-card-action';
+      if (isOOS) {
+        const oosBtn = document.createElement('button');
+        oosBtn.className = 'add-cart-icon-btn';
+        oosBtn.disabled = true;
+        oosBtn.innerHTML = '<i class="ri-forbid-2-line" style="font-size:18px;"></i> Sold Out';
+        controls.appendChild(oosBtn);
+      } else {
+        const qtyWrap = document.createElement('div');
+        qtyWrap.className = 'qty-input-group';
+        
+        const minusBtn = document.createElement('button');
+        minusBtn.className = 'qty-input-btn';
+        minusBtn.innerHTML = '<i class="ri-subtract-line"></i>';
+        
+        // 🔥 THE TWEAK: Direct Input Box (Typable)
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.className = 'qty-input-field';
+        qtyInput.value = '1';
+        qtyInput.min = '1';
+        if (p.stock) qtyInput.max = p.stock;
 
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-primary';
-      btn.style.cssText = 'width:100%; padding:12px; font-weight:600; font-size:12px; letter-spacing:1px; cursor:pointer; border:none; outline:none; border-radius:4px;';
-      btn.textContent = isOOS ? 'Sold Out' : 'ADD TO CART';
-      btn.disabled = isOOS;
+        const plusBtn = document.createElement('button');
+        plusBtn.className = 'qty-input-btn';
+        plusBtn.innerHTML = '<i class="ri-add-line"></i>';
 
-      if (!isOOS) {
-        btn.addEventListener('click', async e => {
+        // Listeners for +/- buttons
+        minusBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          let v = parseInt(qtyInput.value) || 1;
+          if (v > 1) qtyInput.value = v - 1;
+        });
+
+        plusBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          let v = parseInt(qtyInput.value) || 1;
+          if (!p.stock || v < p.stock) qtyInput.value = v + 1;
+        });
+
+        // Listeners for manual typing
+        qtyInput.addEventListener('click', e => e.stopPropagation());
+        qtyInput.addEventListener('change', e => {
+          e.stopPropagation();
+          let v = parseInt(qtyInput.value);
+          if (isNaN(v) || v < 1) v = 1;
+          if (p.stock && v > p.stock) v = p.stock;
+          qtyInput.value = v;
+        });
+
+        qtyWrap.appendChild(minusBtn);
+        qtyWrap.appendChild(qtyInput);
+        qtyWrap.appendChild(plusBtn);
+
+        // Add to Cart Icon Button
+        const cartBtn = document.createElement('button');
+        cartBtn.className = 'add-cart-icon-btn';
+        cartBtn.innerHTML = '<i class="ri-shopping-cart-2-line"></i>';
+
+        cartBtn.addEventListener('click', async e => {
           e.stopPropagation();
           
           if (typeof AUTH !== 'undefined' && !AUTH.isLoggedIn()) {
@@ -952,21 +811,18 @@
             return setTimeout(() => window.location.href = '/login.html', 1000);
           }
 
-          btn.classList.remove('btn-pop');
-          void btn.offsetWidth;
-          btn.classList.add('btn-pop');
-
-          const originalText = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = '⏳';
+          const originalContent = '<i class="ri-shopping-cart-2-line"></i>';
+          cartBtn.disabled = true;
+          cartBtn.innerHTML = '<div class="custom-spinner"></div>';
 
           try {
-            await API.addCartItem(p.id, 1);
-            showToast(`${p.name} added to cart`, 'success');
+            const finalQty = parseInt(qtyInput.value) || 1;
+            await API.addCartItem(p.id, finalQty);
+            showToast(`${finalQty}x ${p.name} added`, 'success');
             
-            btn.textContent = '✓ ADDED';
-            btn.style.background = 'var(--gold)';
-            btn.style.color = '#000';
+            cartBtn.innerHTML = '<i class="ri-check-line"></i>';
+            cartBtn.style.background = '#22c55e';
+            cartBtn.style.color = '#fff';
 
             const c = await API.getCart() || {};
             const cnt = (c.items || []).reduce((a, b) => a + b.quantity, 0);
@@ -975,26 +831,32 @@
               el.style.display = cnt > 0 ? 'flex' : 'none'; 
             });
           } catch (err) {
-            showToast(err.message || 'Failed to add item', 'error');
+            showToast(err.message || 'Failed to add', 'error');
+            cartBtn.innerHTML = originalContent;
           } finally {
             setTimeout(() => { 
-              btn.textContent = originalText;
-              btn.style.background = '';
-              btn.style.color = '';
-              btn.disabled = false; 
+              cartBtn.innerHTML = originalContent;
+              cartBtn.style.background = '';
+              cartBtn.style.color = '';
+              cartBtn.disabled = false; 
             }, 1500);
           }
         });
+
+        controls.appendChild(qtyWrap);
+        controls.appendChild(cartBtn);
       }
 
-      action.appendChild(btn);
+      body.appendChild(name);
+      body.appendChild(priceRow);
+      body.appendChild(controls);
       
       card.appendChild(imgWrap);
       card.appendChild(body);
-      card.appendChild(action);
 
+      // Card Click -> Details Page
       card.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON') return;
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'INPUT') return;
         window.location.href = `/product.html?slug=${encodeURIComponent(p.slug)}`;
       });
 
@@ -1004,14 +866,13 @@
     function renderPagination() {
       const wrap = document.getElementById('pagination');
       wrap.innerHTML = '';
-      
       if (state.pages <= 1) return;
       
-      const mk = (label, page, active = false) => {
+      const mk = (label, page, active = false, icon = null) => {
         const btn = document.createElement('button');
         btn.className = 'page-btn' + (active ? ' active' : '');
-        btn.style.cssText = `width:40px; height:40px; border-radius:4px; border:1px solid var(--border); background:${active?'var(--surface-2)':'transparent'}; color:${active?'var(--gold)':'var(--text-muted)'}; cursor:pointer; transition:all 0.3s; font-family:inherit;`;
-        btn.textContent = label;
+        btn.style.cssText = `width:44px; height:44px; border-radius:12px; border:1px solid ${active ? 'var(--gold)' : 'var(--border)'}; background:${active ? 'rgba(201, 165, 94, 0.1)' : 'var(--surface)'}; color:${active ? 'var(--gold)' : 'var(--text)'}; font-weight:${active ? '700' : '500'}; cursor:pointer; transition:all 0.3s; font-family:inherit; display:flex; align-items:center; justify-content:center; font-size:16px;`;
+        btn.innerHTML = icon ? `<i class="${icon}"></i>` : label;
         
         btn.addEventListener('click', () => {
           state.page = page;
@@ -1021,18 +882,12 @@
         return btn;
       };
       
-      if (state.page > 1) {
-        wrap.appendChild(mk('‹', state.page - 1));
-      }
-      
+      if (state.page > 1) wrap.appendChild(mk('', state.page - 1, false, 'ri-arrow-left-s-line'));
       for (let i = 1; i <= state.pages; i++) {
         if (state.pages > 8 && Math.abs(i - state.page) > 2 && i !== 1 && i !== state.pages) continue;
         wrap.appendChild(mk(i, i, i === state.page));
       }
-      
-      if (state.page < state.pages) {
-        wrap.appendChild(mk('›', state.page + 1));
-      }
+      if (state.page < state.pages) wrap.appendChild(mk('', state.page + 1, false, 'ri-arrow-right-s-line'));
     }
   </script>
 </body>
