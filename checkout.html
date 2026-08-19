@@ -334,7 +334,8 @@
   </div>
   
   <script src="https://js.stripe.com/v3/" crossorigin="anonymous"></script>
-  <script src="../js/theme.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/keys.js"></script>
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   <script src="/js/auth.js"></script>
@@ -362,27 +363,29 @@
     let cartData = null;
     let currentOrderId = null;
     
-    const IDEM_KEY_STORAGE = 'lv_checkout_idem_key';
+    // 🔥 STRICT FIX: In-Memory UUID (Standard Stripe Practice)
+    // No sessionStorage caching, No Backend API Call (fixes the 404).
+    let pageIdempotencyKey = null;
     
     function _getOrCreateIdempotencyKey() {
-      let key = sessionStorage.getItem(IDEM_KEY_STORAGE);
-      if (!key) {
-        key = typeof crypto !== 'undefined' && crypto.randomUUID ?
+      if (!pageIdempotencyKey) {
+        pageIdempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ?
           crypto.randomUUID() :
           'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
             const r = Math.random() * 16 | 0;
             return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
           });
-        sessionStorage.setItem(IDEM_KEY_STORAGE, key);
       }
-      return key;
+      return pageIdempotencyKey;
     }
     
-    function _clearIdempotencyKey() { sessionStorage.removeItem(IDEM_KEY_STORAGE); }
+    function _clearIdempotencyKey() { pageIdempotencyKey = null; }
     
     function updateCartBadgeUI(count) {
-      document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = count;
-        b.style.display = count > 0 ? 'flex' : 'none'; });
+      document.querySelectorAll('.cart-badge').forEach(b => { 
+        b.textContent = count;
+        b.style.display = count > 0 ? 'flex' : 'none'; 
+      });
     }
     
     async function init() {
@@ -542,8 +545,10 @@
       addresses.forEach(addr => {
         const c = document.createElement('div');
         c.className = 'address-card' + (addr.id === selectedAddressId ? ' selected' : '');
-        if (addr.is_default && !selectedAddressId) { selectedAddressId = addr.id;
-          c.classList.add('selected'); }
+        if (addr.is_default && !selectedAddressId) { 
+          selectedAddressId = addr.id;
+          c.classList.add('selected'); 
+        }
         
         c.innerHTML = `<div class="radio-circle"></div><div class="address-content">${createAddressCardHTML(addr)}</div>`;
         c.onclick = () => {
@@ -556,8 +561,10 @@
         
         const b = document.createElement('div');
         b.className = 'address-card' + (addr.id === selectedBillingId ? ' selected' : '');
-        if (addr.is_default && !selectedBillingId) { selectedBillingId = addr.id;
-          b.classList.add('selected'); }
+        if (addr.is_default && !selectedBillingId) { 
+          selectedBillingId = addr.id;
+          b.classList.add('selected'); 
+        }
         
         b.innerHTML = `<div class="radio-circle"></div><div class="address-content">${createAddressCardHTML(addr)}</div>`;
         b.onclick = () => {
@@ -615,6 +622,7 @@
           activeClientSecret = retryData.client_secret;
           activePiId = retryData.payment_intent_id;
         } else {
+          // Send the stable memory-based key
           const rawIntent = await API.createPaymentIntent(selectedAddressId, _getOrCreateIdempotencyKey(), finalBillingId);
           const intentData = rawIntent.data || rawIntent;
           activeClientSecret = intentData.client_secret;
