@@ -621,7 +621,7 @@
       summary.innerHTML = `
         <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Subtotal</span><span>${formatPrice(order.subtotal    || 0)}</span></div>
         <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Shipping</span><span>${shippingHTML}</span></div>
-        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>Tax</span><span>${formatPrice(order.tax_amount  || 0)}</span></div>
+        <div class="flex justify-between text-xs sm:text-[13px] text-text-muted py-1.5"><span>GST</span><span>${formatPrice(order.tax_amount  || 0)}</span></div>
         <div class="flex justify-between font-bold text-text text-sm sm:text-[15px] border-t-2 border-border mt-2 pt-3"><span>Total</span><span>${formatPrice(order.total_amount || 0)}</span></div>`;
 
       bottom.appendChild(summary);
