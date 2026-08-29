@@ -8,20 +8,20 @@
 
 /* ── CSS Variables ─────────────────────────────────────── */
 :root {
-  --bg:           #080808;
-  --surface:      #111111;
-  --surface-2:    #1a1a1a;
-  --surface-3:    #222222;
-  --border:       #2a2a2a;
-  --border-light: #333333;
+  --bg:           #101010;
+  --surface:      #181818;
+  --surface-2:    #222222;
+  --surface-3:    #2b2b2b;
+  --border:       #343434;
+  --border-light: #4a4a4a;
 
-  --gold:         #c9a96e;
-  --gold-light:   #e8c98a;
-  --gold-dim:     #c9a96e44;
+  --gold:         #d6a85f;
+  --gold-light:   #f0ca87;
+  --gold-dim:     #d6a85f2b;
 
-  --text:         #f0ece4;
-  --text-muted:   #888888;
-  --text-dim:     #555555;
+  --text:         #f7f1e7;
+  --text-muted:   #a6a098;
+  --text-dim:     #716b64;
 
   --error:        #e05252;
   --error-dim:    #e0525222;
@@ -844,4 +844,37 @@ input, select, textarea { font-family: inherit; }
 @media (max-width: 480px) {
   .products-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .container { padding: 0 16px; }
+}
+
+/* Homepage responsive polish */
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+.footer-container { padding-top: 0; }
+
+@media (max-width: 768px) {
+  #main-nav { height: 64px; }
+  :root { --nav-h: 64px; }
+  .nav-inner { padding: 0 16px; gap: 12px; }
+  .nav-logo { font-size: 19px; letter-spacing: 3px; }
+  .nav-actions { gap: 8px; }
+  .nav-actions .btn-ghost { display: none; }
+  .nav-icon-btn { min-width: 40px; min-height: 40px; justify-content: center; }
+  .mobile-toggle { min-width: 44px; min-height: 44px; align-items: flex-end; justify-content: center; }
+  .mobile-menu { top: var(--nav-h); padding: 10px 20px 18px; box-shadow: 0 18px 36px rgba(0,0,0,.28); }
+  .mobile-menu a, .mobile-menu .logout-btn { min-height: 48px; display: flex; align-items: center; font-size: 15px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; }
+  .footer-brand { grid-column: 1 / -1; }
+  .site-footer { margin-top: 48px; padding: 48px 0 24px; }
+  .footer-bottom { margin-top: 32px; padding-top: 20px; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 14px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-bottom { flex-direction: column; gap: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
