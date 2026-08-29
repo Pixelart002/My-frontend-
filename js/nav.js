@@ -46,11 +46,11 @@ const NAV = {
             </div>
           </div>
         </div>
-        <button class="mobile-toggle" aria-label="Menu">
+        <button class="mobile-toggle" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
-      <div class="mobile-menu">
+      <div id="mobile-menu" class="mobile-menu" aria-label="Mobile navigation">
         <a href="/shop.html">Shop</a>
         <a href="/shop.html?category=new">New Arrivals</a>
         <a href="/orders.html" data-authed style="display:none">My Orders</a>
@@ -79,8 +79,9 @@ const NAV = {
     
     toggle?.addEventListener('click', (e) => {
       e.stopPropagation();
-      mobileMenu?.classList.toggle('open');
-      toggle.classList.toggle('open');
+      const isOpen = mobileMenu?.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', String(Boolean(isOpen)));
     });
     
     document.querySelectorAll('.mobile-menu a').forEach(a => {
