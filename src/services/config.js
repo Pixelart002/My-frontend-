@@ -20,18 +20,17 @@
    DO NOT commit real keys here.
    ============================================================ */
 const CONFIG = {
-  API_BASE: 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1',
+  API_BASE: import.meta.env.VITE_API_BASE || import.meta.env.NEXT_PUBLIC_API_URL || 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1',
 
   // FIX: Read Stripe key from injected global (set in keys.js, not git-tracked)
   // Fallback to empty string — checkout will show warning if not set.
   get STRIPE_PK() {
-    return window.__STRIPE_PK || 'pk_test_51LQQdRSDXqp6jmyTe96SuttCSgDD91Yu90PsGPLuw9liYziNa1TT0Yhi01fRdNuh5k656lM93wRYTjJZK7vzJBzL00FQaIQXYa';
+    return import.meta.env.VITE_STRIPE_PK || import.meta.env.STRIPE_PK || window.__STRIPE_PK || '';
   },
 
 	APP_NAME: 'Luviio',
 };
 
-window.CONFIG = CONFIG;
 export { CONFIG };
 
 /*
