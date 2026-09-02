@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart — Luviio</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/luviio.css">
+  
+  <style>
+    .cart-layout { display: grid; grid-template-columns: 1fr 360px; gap: 40px; padding: 40px 0 80px; align-items: start; }
+    
+    .cart-item {
+      display: flex; gap: 20px; padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .cart-item.stock-warn { background: rgba(224,169,82,.04); border-radius: var(--radius); padding: 16px; border-bottom: none; margin-bottom: 16px; }
+    
+    .cart-item-img {
+      width: 90px; height: 110px; flex-shrink: 0;
+      background: var(--surface-2); border-radius: var(--radius);
+      overflow: hidden; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; color: var(--border-light);
+    }
+    .cart-item-img img { width:100%;height:100%;object-fit:cover; }
+    
+    .cart-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .cart-item-name { font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; }
+    .cart-item-name:hover { color: var(--gold); }
+    .cart-item-price { font-size: 14px; color: var(--text-muted); }
+    
+    .cart-item-controls { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+    .cart-item-subtotal { font-size: 16px; font-weight: 700; color: var(--gold); }
+    
+    .remove-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: none; border: none; color: var(--text-dim); font-size: 12px;
+      cursor: pointer; padding: 4px; transition: color 0.2s;
+    }
+    .remove-btn i { font-size: 14px; }
+    .remove-btn:hover { color: var(--error); }
+
+    .qty-control { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 4px; }
+    .qty-btn {
+      background: none; border: none; color: var(--text); padding: 4px 8px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .qty-btn:hover { color: var(--gold); }
+    .qty-display { min-width: 30px; text-align: center; font-size: 14px; }
+
+    .stock-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; padding: 3px 9px;
+      border-radius: 20px; margin-top: 4px;
+    }
+    .stock-pill.low   { background: rgba(224,169,82,.15); color: var(--warn); }
+    .stock-pill.out   { background: rgba(224,82,82,.15);  color: var(--error); }
+
+    .stock-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius);
+      background: rgba(224,169,82,.08); border: 1px solid rgba(224,169,82,.25);
+      font-size: 13px; color: var(--warn); margin-bottom: 20px;
+    }
+    .stock-banner i { font-size: 16px; }
+    .stock-banner.error { background: rgba(224,82,82,.08); border-color: rgba(224,82,82,.25); color: var(--error); }
+
+    .summary-card {
+      display: none;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px;
+      position: sticky; top: calc(var(--nav-h) + 20px);
+    }
+    .summary-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin-bottom:24px; }
+
+    .order-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: var(--text-muted); }
+    .order-row.total { 
+      border-top: 2px solid var(--border); 
+      margin-top: 8px; padding-top: 16px; 
+      font-size: 16px; font-weight: 600; color: var(--text); 
+    }
+
+    .empty-state { text-align: center; padding: 60px 0; }
+    .empty-state-icon { font-size: 48px; color: var(--border-light); margin-bottom: 16px; }
+
+    @media(max-width:900px){.cart-layout{grid-template-columns:1fr;} .summary-card{position:static;}}
+    @media(max-width:600px){.cart-item-img{width:72px;height:88px;}}
+  </style>
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/index.html"><i class="ri-home-4-line"></i> Home</a><span>›</span><span>Cart</span>
+      </nav>
+
+      <h1 class="section-title" style="margin-bottom:8px;">Your Cart</h1>
+      <p id="cart-subtitle" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;"></p>
+
+      <div id="stock-warnings"></div>
+
+      <div class="cart-layout" id="main-cart-layout">
+        <div id="cart-items">
+          <div class="skeleton" style="height: 120px; border-radius: var(--radius); margin-bottom: 16px;"></div>
+          <div class="skeleton" style="height: 120px; border-radius: var(--radius);"></div>
+        </div>
+
+        <div class="summary-card" id="summary-card">
+          <div class="summary-title">Order Summary</div>
+          <div id="summary-rows"></div>
+          <hr class="divider">
+          <a id="checkout-btn" href="/checkout.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">
+            Proceed to Checkout <i class="ri-arrow-right-line" style="margin-left: 8px;"></i>
+          </a>
+          <a href="/shop.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">
+            Continue Shopping
+          </a>
+          <p style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:16px;line-height:1.6;">
+            <i class="ri-lock-line"></i> Secure checkout via Stripe.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+          <span>© 2026 Luviio</span>
+          <a href="/shop.html">← Continue Shopping</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+
+  <script src="/js/keys.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/push.js"></script>
+  
+  <script>
+    let serverCartData = null;
+    let serverCartItems = [];
+    let isUpdating = false;
+
+    async function initCartPage() {
+      await pageInit();
+      
+      if (!AUTH.isLoggedIn()) {
+        showGuestCartState();
+        return;
+      }
+      
+      await fetchServerCart();
+    }
+
+    initCartPage();
+
+    async function fetchServerCart() {
+      const wrap = document.getElementById('cart-items');
+      
+      try {
+        const raw = await API.getCart();
+        const data = raw?.data || raw || {};
+        
+        serverCartData = data;
+        serverCartItems = (data.items || []).map(item => ({
+          product_id: item.product_id,
+          name: item.name || 'Product',
+          price: item.unit_price,
+          image: item.image_url || null,
+          slug: item.slug || '',
+          qty: item.quantity,
+          in_stock: item.in_stock,
+          price_changed: item.price_changed,
+          stock: item.stock || 0
+        }));
+
+        renderCartUI();
+        updateNavBadge();
+      } catch (err) {
+        console.error("Cart Fetch Error:", err);
+        wrap.innerHTML = `<div class="empty-state"><p class="form-error">Could not load cart: ${escapeHTML(err.message)}</p></div>`;
+        document.getElementById('summary-card').style.display = 'none';
+      }
+    }
+
+    function renderCartUI() {
+      const items = serverCartItems;
+      const wrap = document.getElementById('cart-items');
+      const sub = document.getElementById('cart-subtitle');
+      const sumCard = document.getElementById('summary-card');
+      const sumRows = document.getElementById('summary-rows');
+      const layout = document.getElementById('main-cart-layout');
+      const checkoutBtn = document.getElementById('checkout-btn');
+      
+      const totalCount = items.reduce((sum, item) => sum + item.qty, 0);
+      sub.textContent = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
+
+      const bannerEl = document.getElementById('stock-warnings');
+      bannerEl.innerHTML = '';
+      let hasCheckoutBlocker = false;
+
+      items.forEach(item => {
+        if (!item.in_stock) {
+          bannerEl.innerHTML += `<div class="stock-banner error"><i class="ri-error-warning-line"></i><span><strong>${escapeHTML(item.name)}</strong> is unavailable. Please remove it to continue.</span></div>`;
+          hasCheckoutBlocker = true;
+        }
+        if (item.price_changed) {
+          bannerEl.innerHTML += `<div class="stock-banner"><i class="ri-information-line"></i><span><strong>${escapeHTML(item.name)}</strong> price has been updated from your last visit.</span></div>`;
+        }
+      });
+      
+      if (serverCartData?.has_unavailable_items) {
+        hasCheckoutBlocker = true;
+      }
+      
+      checkoutBtn.style.pointerEvents = hasCheckoutBlocker ? 'none' : 'auto';
+      checkoutBtn.style.opacity = hasCheckoutBlocker ? '0.5' : '1';
+      checkoutBtn.title = hasCheckoutBlocker ? 'Remove unavailable items to proceed' : '';
+
+      if (!items.length) {
+        layout.style.gridTemplateColumns = '1fr';
+        sumCard.style.display = 'none';
+        wrap.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon"><i class="ri-shopping-bag-line"></i></div>
+            <h3>Your cart is empty</h3>
+            <p style="margin-bottom: 24px; color: var(--text-muted);">Add some beautiful items to get started.</p>
+            <a href="/shop.html" class="btn btn-primary">Shop Now</a>
+          </div>
+        `;
+        return;
+      }
+
+      if (window.innerWidth > 900) {
+        layout.style.gridTemplateColumns = '1fr 360px';
+      }
+      sumCard.style.display = 'block';
+
+      wrap.innerHTML = '';
+      items.forEach(item => wrap.appendChild(makeItemRow(item)));
+
+      const subtotal = serverCartData?.subtotal || 0;
+      const shipping = serverCartData?.shipping_cost || 0;
+      const taxAmount = serverCartData?.tax_amount || 0;
+      const grandTotal = serverCartData?.total_amount || 0;
+      const toFreeShip = serverCartData?.amount_to_free_shipping || 0;
+      const isFreeShipping = serverCartData?.free_shipping_eligible || false;
+
+      sumRows.innerHTML = '';
+      
+      // 🔥 THE FIX: Rearranged the array so Shipping comes before GST, and removed taxRate % from label
+      const breakdownItems = [
+        ['Subtotal', formatPrice(subtotal)],
+        ['Shipping', isFreeShipping ? 'FREE' : formatPrice(shipping), isFreeShipping],
+        ['GST', formatPrice(taxAmount)]
+      ];
+      
+      breakdownItems.forEach(([label, val, isFree]) => {
+        const row = document.createElement('div');
+        row.className = 'order-row';
+        
+        const l = document.createElement('span');
+        l.textContent = label;
+        
+        const v = document.createElement('span');
+        if (isFree) {
+          v.innerHTML = '<i class="ri-truck-line"></i> Free';
+          v.style.color = 'var(--success)';
+        } else {
+          v.textContent = val;
+        }
+        
+        row.appendChild(l);
+        row.appendChild(v);
+        sumRows.appendChild(row);
+      });
+
+      const totalRow = document.createElement('div');
+      totalRow.className = 'order-row total';
+      totalRow.innerHTML = `<span>Total</span><span style="color:var(--gold);font-weight:700;">${formatPrice(grandTotal)}</span>`;
+      sumRows.appendChild(totalRow);
+
+      if (!isFreeShipping && toFreeShip > 0) {
+        const note = document.createElement('p');
+        note.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;';
+        note.innerHTML = `<i class="ri-information-line"></i> Add ${formatPrice(toFreeShip)} more for free shipping`;
+        sumRows.appendChild(note);
+      }
+    }
+
+    function makeItemRow(item) {
+      const isUnavailable = !item.in_stock;
+      const isLowStock = item.stock > 0 && item.stock <= 5;
+
+      const row = document.createElement('div');
+      row.className = 'cart-item' + (isUnavailable || isLowStock ? ' stock-warn' : '');
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'cart-item-img';
+      if (item.image) {
+        const img = document.createElement('img');
+        img.src = escapeHTML(item.image);
+        img.alt = escapeHTML(item.name);
+        imgWrap.appendChild(img);
+      } else {
+        imgWrap.innerHTML = '<i class="ri-image-line"></i>';
+      }
+
+      const info = document.createElement('div');
+      info.className = 'cart-item-info';
+
+      const nameEl = document.createElement('a');
+      nameEl.className = 'cart-item-name';
+      nameEl.href = `/product.html?slug=${encodeURIComponent(item.slug || '')}`;
+      nameEl.textContent = item.name;
+
+      const unitP = document.createElement('div');
+      unitP.className = 'cart-item-price';
+      unitP.textContent = formatPrice(item.price) + ' each';
+
+      info.appendChild(nameEl);
+      info.appendChild(unitP);
+
+      if (isUnavailable) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill out';
+        pill.innerHTML = '<i class="ri-close-circle-line"></i> Out of stock';
+        info.appendChild(pill);
+      } else if (item.price_changed) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill low';
+        pill.innerHTML = '<i class="ri-information-line"></i> Price updated';
+        info.appendChild(pill);
+      } else if (isLowStock) {
+        const pill = document.createElement('span');
+        pill.className = 'stock-pill low';
+        pill.innerHTML = `<i class="ri-error-warning-line"></i> Only ${item.stock} left`;
+        info.appendChild(pill);
+      }
+
+      const controls = document.createElement('div');
+      controls.className = 'cart-item-controls';
+
+      const qtyCtrl = document.createElement('div');
+      qtyCtrl.className = 'qty-control';
+
+      const minus = document.createElement('button');
+      minus.className = 'qty-btn';
+      minus.innerHTML = '<i class="ri-subtract-line"></i>';
+      minus.addEventListener('click', async () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        try {
+          if (item.qty <= 1) {
+            await API.removeCartItem(item.product_id);
+            showToast('Item removed', 'info');
+          } else {
+            await API.updateCartItem(item.product_id, item.qty - 1);
+          }
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
+        }
+      });
+
+      const disp = document.createElement('div');
+      disp.className = 'qty-display';
+      disp.textContent = item.qty;
+
+      const plus = document.createElement('button');
+      plus.className = 'qty-btn';
+      plus.innerHTML = '<i class="ri-add-line"></i>';
+      plus.addEventListener('click', async () => {
+        if (isUpdating) return;
+        isUpdating = true;
+        try {
+          await API.updateCartItem(item.product_id, item.qty + 1);
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
+        }
+      });
+
+      qtyCtrl.appendChild(minus);
+      qtyCtrl.appendChild(disp);
+      qtyCtrl.appendChild(plus);
+
+      const right = document.createElement('div');
+      right.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:6px;';
+
+      const subtotalEl = document.createElement('div');
+      subtotalEl.className = 'cart-item-subtotal';
+      subtotalEl.textContent = formatPrice(item.price * item.qty);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.innerHTML = '<i class="ri-delete-bin-line"></i> Remove';
+      removeBtn.addEventListener('click', async () => {
+        if (isUpdating) return;
+        if (!confirm(`Remove ${item.name} from cart?`)) return;
+        isUpdating = true;
+        try {
+          await API.removeCartItem(item.product_id);
+          showToast('Item removed', 'info');
+          await fetchServerCart();
+        } catch (e) {
+          showToast(e.message, 'error');
+        } finally {
+          isUpdating = false;
+        }
+      });
+
+      right.appendChild(subtotalEl);
+      right.appendChild(removeBtn);
+      controls.appendChild(qtyCtrl);
+      controls.appendChild(right);
+      info.appendChild(controls);
+      row.appendChild(imgWrap);
+      row.appendChild(info);
+      
+      return row;
+    }
+
+    function updateNavBadge() {
+      const count = serverCartItems.reduce((sum, item) => sum + item.qty, 0);
+      document.querySelectorAll('[data-cart-count]').forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'flex' : 'none';
+      });
+    }
+
+    function showGuestCartState() {
+      document.getElementById('main-cart-layout').style.gridTemplateColumns = '1fr';
+      document.getElementById('summary-card').style.display = 'none';
+      document.getElementById('cart-items').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="ri-user-shared-line"></i></div>
+          <h3>Sign in to view your cart</h3>
+          <p style="margin-bottom: 24px; color: var(--text-muted);">Access your saved items securely across all devices.</p>
+          <a href="/login.html" class="btn btn-primary">Log In to Account</a>
+        </div>
+      `;
+    }
+
+    window.addEventListener('resize', () => {
+      const layout = document.getElementById('main-cart-layout');
+      if (serverCartItems.length > 0) {
+        layout.style.gridTemplateColumns = window.innerWidth > 900 ? '1fr 360px' : '1fr';
+      }
+    });
+  </script>
+</body>
+</html>

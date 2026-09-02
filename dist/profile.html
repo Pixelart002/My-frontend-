@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <title>Profile — Luviio</title>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8360942174797973" crossorigin="anonymous"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/luviio.css">
+
+  <link rel="stylesheet" href="/css/tailwind.css">
+
+  <style>
+    .profile-layout { display: grid; grid-template-columns: 220px 1fr; gap: 40px; padding: 40px 0 80px; }
+    .profile-nav { display: flex; flex-direction: column; gap: 4px; }
+    .profile-nav-link {
+      padding: 12px 16px; border-radius: var(--radius); font-size: 14px;
+      color: var(--text-muted); transition: all 0.2s; cursor: pointer;
+      border: none; background: none; text-align: left; width: 100%;
+    }
+    .profile-nav-link:hover { background: var(--surface-2); color: var(--text); }
+    .profile-nav-link.active { background: var(--gold-dim); color: var(--gold); font-weight: 600; }
+
+    .profile-section { display: none; }
+    .profile-section.active { display: block; }
+    .section-head { margin-bottom: 28px; }
+    .section-head h2 { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:4px; }
+    .section-head p { font-size:14px;color:var(--text-muted); }
+
+    .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+
+    .address-list { display: flex; flex-direction: column; gap: 12px; }
+    .address-item {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; padding: 18px; background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .address-item-text { font-size:13px;color:var(--text-muted);line-height:1.6; }
+    .address-item-actions { display:flex;gap:8px;flex-shrink:0; }
+
+    @media(max-width:768px){.profile-layout{grid-template-columns:1fr;} .form-2col{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body class="bg-[#080808] text-[#f0ece4] font-body antialiased overflow-x-hidden selection:bg-gold selection:text-black">
+
+  <div class="fixed inset-0 z-[9996] pointer-events-none opacity-[0.028]" style="background-image:url('data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noise%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23noise)%27/%3E%3C/svg%3E');background-size:200px"></div>
+  <div id="lv-transition" class="fixed inset-0 bg-[#080808] z-[99999] pointer-events-none scale-y-0 origin-bottom"></div>
+  <div id="lv-scroll-progress" class="fixed top-0 left-0 w-full h-[2px] z-[9997] origin-left scale-x-0 bg-gradient-to-r from-gold via-white/40 to-gold"></div>
+  <div id="cursor-ring" class="fixed w-11 h-11 border border-gold rounded-full pointer-events-none z-[9998] opacity-0 mix-blend-difference will-change-transform hidden lg:block"></div>
+  <div id="cursor-dot" class="fixed w-[5px] h-[5px] bg-gold rounded-full pointer-events-none z-[9999] opacity-0 will-change-transform hidden lg:block"></div>
+
+  <nav id="main-nav"></nav>
+
+  <div class="page-wrapper relative z-10">
+    <div class="container mx-auto px-4 lg:px-8">
+      <div class="profile-layout">
+        
+        <div>
+          <div style="margin-bottom:24px;">
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;" id="profile-greeting">My Account</div>
+            <div style="font-size:13px;color:var(--text-muted);" id="profile-email-display"></div>
+          </div>
+          <nav class="profile-nav">
+            <button class="profile-nav-link active" data-section="personal">Personal Info</button>
+            <button class="profile-nav-link" data-section="addresses">Addresses</button>
+            <hr class="divider" style="margin:8px 0;">
+            <a href="/orders.html" class="profile-nav-link block">My Orders</a>
+          </nav>
+        </div>
+
+        <div>
+          <!-- Personal Info -->
+          <div class="profile-section active" id="sec-personal">
+            <div class="section-head">
+              <h2>Personal Info</h2>
+              <p>Update your name and phone number.</p>
+            </div>
+            <div class="form-2col">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="p-name" class="form-input" maxlength="255" placeholder="Your Name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="p-phone" class="form-input" maxlength="20" placeholder="+91 98765 43210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="p-email" class="form-input" disabled style="opacity:0.5;cursor:not-allowed;">
+                <p class="form-hint">Email cannot be changed.</p>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button id="save-profile-btn" class="btn btn-primary">Save Changes</button>
+            </div>
+          </div>
+
+          <!-- Addresses -->
+          <div class="profile-section" id="sec-addresses">
+            <div class="section-head">
+              <h2>Saved Addresses</h2>
+              <p>Manage your shipping and billing addresses.</p>
+            </div>
+
+            <div id="address-list" class="address-list"></div>
+
+            <button id="toggle-addr-form" class="btn btn-outline" style="margin-top:20px;">+ Add New Address</button>
+
+            <!-- 🔥 Updated Form with B2B & Detailed Fields -->
+            <div id="addr-form-wrap" style="display:none;margin-top:20px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+              <div style="font-size:14px;font-weight:600;margin-bottom:16px;">New Address Details</div>
+              
+              <div class="form-2col" style="margin-bottom:16px;">
+                <!-- Recipient Info -->
+                <div class="form-group">
+                  <label class="form-label">Recipient Full Name</label>
+                  <input type="text" id="na-fullname" class="form-input" maxlength="255" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contact Phone</label>
+                  <input type="tel" id="na-phone" class="form-input" maxlength="20" placeholder="+91 98765 43210">
+                </div>
+                
+                <!-- B2B / Corporate Info -->
+                <div class="form-group">
+                  <label class="form-label">Company Name (Optional)</label>
+                  <input type="text" id="na-company" class="form-input" maxlength="255" placeholder="For B2B Billing">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">GSTIN (Optional)</label>
+                  <input type="text" id="na-gstin" class="form-input" maxlength="15" placeholder="15-digit GST Number">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Email (Optional)</label>
+                  <input type="email" id="na-email" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Address Type</label>
+                  <select id="na-type" class="form-input" style="background:var(--surface);">
+                    <option value="home">Home</option>
+                    <option value="work">Work / Office</option>
+                    <option value="warehouse">Warehouse</option>
+                  </select>
+                </div>
+
+                <!-- Core Address -->
+                <div class="form-group">
+                  <label class="form-label">Address Line 1 *</label>
+                  <input type="text" id="na-line1" class="form-input" maxlength="255" placeholder="House/Flat No., Street">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Address Line 2</label>
+                  <input type="text" id="na-line2" class="form-input" maxlength="255" placeholder="Locality, Area">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Landmark</label>
+                  <input type="text" id="na-landmark" class="form-input" maxlength="255">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">City *</label>
+                  <input type="text" id="na-city" class="form-input" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">State *</label>
+                  <input type="text" id="na-state" class="form-input" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Postal Code *</label>
+                  <input type="text" id="na-postal" class="form-input" maxlength="20">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Country * (ISO 2)</label>
+                  <input type="text" id="na-country" class="form-input" maxlength="2" value="IN">
+                </div>
+              </div>
+              
+              <label class="filter-option" style="margin-bottom:16px;">
+                <input type="checkbox" id="na-default"> Set as default address
+              </label>
+              
+              <div style="display:flex;gap:10px;">
+                <button id="save-addr-btn" class="btn btn-primary">Save Address</button>
+                <button id="cancel-addr-btn" class="btn btn-outline">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-bottom" style="border-top:none;margin-top:0;">
+          <span>© 2026 Luviio. All rights reserved.</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+
+  
+  <script src="/js/keys.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/push.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script>
+    let profile = null;
+    let addresses = [];
+
+    const _esc = (s) => typeof escapeHTML === 'function' ? escapeHTML(s) : String(s||'').replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t));
+
+    async function init() {
+      if (typeof pageInit === 'function') {
+        const ok = await pageInit({ requireAuth: true });
+        if (!ok) return;
+      }
+
+      if (typeof gsap !== 'undefined') {
+        const curtain = document.getElementById('lv-transition');
+        if (curtain) gsap.to(curtain, { scaleY: 0, duration: 0.7, ease: 'power3.out' });
+      }
+      if (window.matchMedia('(pointer: fine)').matches && window.innerWidth > 1024) {
+        const ring = document.getElementById('cursor-ring'), dot = document.getElementById('cursor-dot');
+        if (ring && dot) {
+          let mx=0, my=0, rx=0, ry=0;
+          window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+          const renderCursor = () => {
+            rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+            ring.style.transform = `translate3d(${rx-22}px, ${ry-22}px, 0)`; ring.style.opacity = '1';
+            dot.style.transform = `translate3d(${mx-2.5}px, ${my-2.5}px, 0)`; dot.style.opacity = '1';
+            requestAnimationFrame(renderCursor);
+          };
+          requestAnimationFrame(renderCursor);
+        }
+      }
+
+      await loadProfile();
+      await loadAddresses();
+    }
+
+    init();
+
+    /* ── Section nav ─────────────────────────────────────── */
+    document.querySelectorAll('.profile-nav-link[data-section]').forEach(link => {
+      link.addEventListener('click', () => {
+        document.querySelectorAll('.profile-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+        link.classList.add('active');
+        document.getElementById('sec-' + link.dataset.section)?.classList.add('active');
+      });
+    });
+
+    /* ── Load profile ────────────────────────────────────── */
+    async function loadProfile() {
+      try {
+        const rawData = await API.getMe();
+        profile = rawData.data || rawData; 
+
+        AUTH.setProfile(profile);
+        document.getElementById('p-name').value  = profile.full_name || '';
+        document.getElementById('p-phone').value = profile.phone || '';
+        document.getElementById('p-email').value = profile.email || '';
+
+        const greet = document.getElementById('profile-greeting');
+        greet.textContent = 'Hi, ' + (profile.full_name?.split(' ')[0] || 'there') + '!';
+
+        const emailDisp = document.getElementById('profile-email-display');
+        emailDisp.textContent = profile.email || '';
+      } catch (err) {
+        showToast('Failed to load profile: ' + err.message, 'error');
+      }
+    }
+
+    /* ── Save profile ────────────────────────────────────── */
+    document.getElementById('save-profile-btn').addEventListener('click', async () => {
+      const btn   = document.getElementById('save-profile-btn');
+      const name  = document.getElementById('p-name').value.trim().substring(0, 255);
+      const phone = document.getElementById('p-phone').value.trim().substring(0, 20);
+
+      showLoader(btn, 'Saving…');
+      try {
+        const rawData = await API.updateMe({ full_name: name || null, phone: phone || null });
+        profile = rawData.data || rawData; 
+
+        AUTH.setProfile(profile);
+        AUTH.updateNavUI();
+        showToast('Profile updated!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
+    });
+
+    /* ── Load addresses ──────────────────────────────────── */
+    async function loadAddresses() {
+      try {
+        const rawData = await API.getAddresses();
+        addresses = rawData.data || rawData || []; 
+        renderAddresses();
+      } catch (err) {
+        document.getElementById('address-list').innerHTML =
+          `<p class="form-error">${_esc(err.message)}</p>`;
+      }
+    }
+
+    /* 🔥 Enhanced Dynamic Render for B2B/GSTIN */
+    function renderAddresses() {
+      const list = document.getElementById('address-list');
+      list.innerHTML = '';
+
+      if (!addresses.length) {
+        const p = document.createElement('p');
+        p.style.cssText = 'font-size:14px;color:var(--text-muted);';
+        p.textContent = 'No saved addresses yet.';
+        list.appendChild(p);
+        return;
+      }
+
+      addresses.forEach(addr => {
+        const item = document.createElement('div');
+        item.className = 'address-item';
+
+        const textWrap = document.createElement('div');
+        textWrap.style.flex = '1';
+
+        // Badges
+        if (addr.is_default) {
+          const badge = document.createElement('span');
+          badge.style.cssText = 'font-size:10px;font-weight:700;color:var(--gold);background:var(--gold-dim);padding:2px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:inline-block; margin-right:6px;';
+          badge.textContent = 'Default';
+          textWrap.appendChild(badge);
+        }
+
+        const text = document.createElement('div');
+        text.className = 'address-item-text';
+        
+        // Structured Formatting
+        const titleText = addr.company_name || addr.full_name || 'Address';
+        const typeBadge = addr.address_type ? `<span style="border:1px solid var(--border-light);padding:2px 6px;border-radius:4px;font-size:10px;text-transform:uppercase;margin-left:8px;color:var(--text-muted);">${_esc(addr.address_type)}</span>` : '';
+        
+        let contentHTML = `<div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text);">${_esc(titleText)}${typeBadge}</div>`;
+        
+        if (addr.gstin) {
+          contentHTML += `<div style="font-size:11px;color:var(--gold);margin-bottom:4px;font-weight:500;">GSTIN: ${_esc(addr.gstin)}</div>`;
+        }
+        
+        const parts = [addr.line1, addr.line2, addr.landmark, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean);
+        contentHTML += `<div>${_esc(parts.join(', '))}</div>`;
+        
+        if (addr.phone) {
+          contentHTML += `<div style="margin-top:6px;font-size:12px;color:var(--text-dim);"><i class="ri-phone-line"></i> ${_esc(addr.phone)}</div>`;
+        }
+
+        text.innerHTML = contentHTML;
+        textWrap.appendChild(text);
+
+        const actions = document.createElement('div');
+        actions.className = 'address-item-actions';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger';
+        delBtn.style.cssText = 'padding:8px 14px;font-size:12px;';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', async () => {
+          if (!confirm('Delete this address?')) return;
+          try {
+            await API.deleteAddress(addr.id);
+            addresses = addresses.filter(a => a.id !== addr.id);
+            renderAddresses();
+            showToast('Address deleted', 'info');
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
+        });
+
+        actions.appendChild(delBtn);
+        item.appendChild(textWrap);
+        item.appendChild(actions);
+        list.appendChild(item);
+      });
+    }
+
+    /* ── Add address form ────────────────────────────────── */
+    document.getElementById('toggle-addr-form').addEventListener('click', () => {
+      const form = document.getElementById('addr-form-wrap');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('cancel-addr-btn').addEventListener('click', () => {
+      document.getElementById('addr-form-wrap').style.display = 'none';
+    });
+
+    document.getElementById('save-addr-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('save-addr-btn');
+      
+      // Core Address
+      const line1    = document.getElementById('na-line1').value.trim().substring(0, 255);
+      const line2    = document.getElementById('na-line2').value.trim().substring(0, 255);
+      const city     = document.getElementById('na-city').value.trim().substring(0, 100);
+      const state    = document.getElementById('na-state').value.trim().substring(0, 100);
+      const postal   = document.getElementById('na-postal').value.trim().substring(0, 20);
+      const country  = document.getElementById('na-country').value.trim().substring(0, 2).toUpperCase();
+      const isDefault = document.getElementById('na-default').checked;
+
+      // New B2B / Extended Fields
+      const full_name    = document.getElementById('na-fullname').value.trim();
+      const phone        = document.getElementById('na-phone').value.trim();
+      const email        = document.getElementById('na-email').value.trim();
+      const company_name = document.getElementById('na-company').value.trim();
+      const gstin        = document.getElementById('na-gstin').value.trim().toUpperCase();
+      const landmark     = document.getElementById('na-landmark').value.trim();
+      const address_type = document.getElementById('na-type').value;
+
+      if (!line1 || !city || !state || !postal || country.length !== 2) {
+        showToast('Fill all required fields (Line 1, City, State, Postal, 2-letter Country)', 'error');
+        return;
+      }
+      
+      if (gstin && gstin.length !== 15) {
+        showToast('GSTIN must be exactly 15 characters long', 'error');
+        return;
+      }
+
+      showLoader(btn, 'Saving…');
+      try {
+        const payload = {
+          line1, 
+          line2: line2 || null, 
+          city,
+          state: state || null, 
+          postal_code: postal, 
+          country, 
+          is_default: isDefault,
+          full_name: full_name || null,
+          phone: phone || null,
+          email: email || null,
+          company_name: company_name || null,
+          gstin: gstin || null,
+          landmark: landmark || null,
+          address_type: address_type
+        };
+
+        const rawData = await API.addAddress(payload);
+        const addr = rawData.data || rawData; 
+        
+        addresses.unshift(addr); // Add to top
+        renderAddresses();
+        document.getElementById('addr-form-wrap').style.display = 'none';
+        
+        // Clear form
+        ['na-line1','na-line2','na-city','na-state','na-postal','na-fullname','na-phone','na-email','na-company','na-gstin','na-landmark'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('na-country').value = 'IN';
+        document.getElementById('na-type').value = 'home';
+        document.getElementById('na-default').checked = false;
+        
+        showToast('Address saved successfully!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        hideLoader(btn);
+      }
+    });
+  </script>
+</body>
+</html>

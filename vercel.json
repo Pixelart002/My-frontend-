@@ -3,7 +3,7 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "outputDirectory": "dist",
-  "cleanUrls": false,
+  "cleanUrls": true,
   "trailingSlash": false,
 
   "rewrites": [
@@ -13,31 +13,31 @@
     },
     {
       "source": "/shop",
-      "destination": "/shop.html"
+      "destination": "/index.html"
     },
     {
       "source": "/cart",
-      "destination": "/cart.html"
+      "destination": "/index.html"
     },
     {
       "source": "/login",
-      "destination": "/login.html"
+      "destination": "/index.html"
     },
     {
       "source": "/checkout",
-      "destination": "/checkout.html"
+      "destination": "/index.html"
     },
     {
       "source": "/orders",
-      "destination": "/orders.html"
+      "destination": "/index.html"
     },
     {
       "source": "/profile",
-      "destination": "/profile.html"
+      "destination": "/index.html"
     },
     {
       "source": "/product",
-      "destination": "/product.html"
+      "destination": "/index.html"
     },
     {
       "source": "/ads.txt",

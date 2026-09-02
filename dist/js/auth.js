@@ -122,7 +122,7 @@ const AUTH = (() => {
       
       _currentRefreshPromise = (async () => {
         try {
-          const res = await fetch(`${window.CONFIG.API_BASE}/auth/refresh`, {
+          const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
