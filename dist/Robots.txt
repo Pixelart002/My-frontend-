@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Block private/user pages from indexing
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /orders.html
+Disallow: /profile.html
+Disallow: /admin.html
+Disallow: /404.html
+
+# Sitemap location
+Sitemap: https://luviio.in/sitemap.xml
