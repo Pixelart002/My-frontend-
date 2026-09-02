@@ -1,8 +1,8 @@
 {
-  "framework": null,
-  "buildCommand": "npm run build:css",
+  "framework": "vite",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": ".",
+  "outputDirectory": "dist",
   "cleanUrls": false,
   "trailingSlash": false,
 
