@@ -3,9 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { ArrowRight, Menu, Search, ShoppingBag, X, LoaderCircle } from 'lucide-react'
 import { gsap } from 'gsap'
 import './styles.css'
-import { API } from './services/backend-api.js'
-
-const getApi = () => API
+import { getApi } from './services/api.js'
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
 

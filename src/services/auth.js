@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js'
+import './config.js'
 
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char])
 
@@ -118,7 +118,7 @@ export const AUTH = (() => {
       }
 
       const path = window.location.pathname;
-      if (path === '/login' || path.endsWith('/login')) {
+      if (path.includes('login.html') || path === '/login' || path.endsWith('/login')) {
         return false;
       }
 
@@ -126,7 +126,7 @@ export const AUTH = (() => {
 
       _currentRefreshPromise = (async () => {
         try {
-          const res = await fetch(`${CONFIG.API_BASE}/auth/refresh`, {
+          const res = await fetch(`${window.CONFIG.API_BASE}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -161,7 +161,7 @@ export const AUTH = (() => {
         } finally {
           _currentRefreshPromise = null;
         }
-})();
+      })();
 
       return _currentRefreshPromise;
     },
@@ -169,11 +169,11 @@ export const AUTH = (() => {
     requireAuth() {
       if (!this.isLoggedIn()) {
         const current = window.location.pathname;
-        if (current === '/login' || current.endsWith('/login')) {
+        if (current === '/login.html' || current === '/login' || current.endsWith('/login.html')) {
           return false;
         }
         window.location.href =
-          '/login?redirect=' + encodeURIComponent(current + window.location.search);
+          '/login.html?redirect=' + encodeURIComponent(current + window.location.search);
         return false;
       }
       return true;
@@ -197,3 +197,6 @@ export const AUTH = (() => {
     },
   };
 })();
+
+// Expose the auth client for React and legacy page integrations.
+window.AUTH = AUTH;

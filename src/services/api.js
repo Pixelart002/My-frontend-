@@ -1,4 +1,5 @@
 import { API } from './backend-api.js'
+
 const unavailableApi = new Proxy({}, {
   get: () => async () => {
     throw new Error('The Luviio API is unavailable. Please refresh and try again.')
@@ -6,7 +7,7 @@ const unavailableApi = new Proxy({}, {
 })
 
 export function getApi() {
-  return API || unavailableApi
+  return API || window.API || unavailableApi
 }
 
 export async function requestApi(method, ...args) {
