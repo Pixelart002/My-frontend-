@@ -3,9 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { ArrowRight, Menu, Search, ShoppingBag, X, LoaderCircle } from 'lucide-react'
 import { gsap } from 'gsap'
 import './styles.css'
+import { getApi } from './services/api.js'
 
-const unavailableApi = new Proxy({}, { get: () => () => Promise.reject(new Error('The Luviio API is unavailable. Please refresh and try again.')) })
-const getApi = () => window.API || unavailableApi
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
 
 function navigate(href) { window.history.pushState({}, '', href); window.dispatchEvent(new PopStateEvent('popstate')) }

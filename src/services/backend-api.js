@@ -1,3 +1,6 @@
+import './config.js'
+import './auth.js'
+
 /* ============================================================
    LUVIIO — API  (v8.2 — Enterprise Sync, 401 Refresh & B2B Billing)
    ============================================================ */
@@ -11,7 +14,7 @@ class APIError extends Error {
   }
 }
 
-const API = (() => {
+export const API = (() => {
 
   const PUBLIC_PREFIXES = [
     '/products', '/categories', '/pricing/config',
@@ -52,9 +55,9 @@ const API = (() => {
 
   async function request(method, path, body = null, isRetry = false) {
     const headers = {};
-    
-    // Always call AUTH.getToken() freshly at the beginning of every request
-    const token = window.AUTH ? AUTH.getToken() : null;
+
+    // Always call window.AUTH.getToken() freshly at the beginning of every request
+    const token = window.AUTH ? window.AUTH.getToken() : null;
 
     if (token && !_isPublic(path)) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -70,12 +73,12 @@ const API = (() => {
       try {
         const res = await _fetchOnce(method, path, body, { ...headers });
 
-        // ── 401 auto-refresh with forced AUTH.init(true) ───────────────
+        // ── 401 auto-refresh with forced window.AUTH.init(true) ───────────────
         if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
           if (window.AUTH) {
-            const refreshed = await AUTH.init(true); // 🔥 Force refresh on 401
+            const refreshed = await window.AUTH.init(true); // 🔥 Force refresh on 401
             if (refreshed) return request(method, path, body, true);
-            AUTH.clearTokens();
+            window.AUTH.clearTokens();
           }
           return null;
         }
@@ -89,13 +92,13 @@ const API = (() => {
           const rawMessage = Array.isArray(data?.detail)
             ? data.detail.map(d => d.msg || d.message || 'Validation error').join('; ')
             : (data?.message || data?.detail || `Error ${res.status}`);
-          
+
           const safe = String(rawMessage).substring(0, 300);
           throw new APIError(safe, res.status, data?.error_code);
         }
 
-        return (data && data.success !== undefined && data.data !== undefined) 
-          ? data.data 
+        return (data && data.success !== undefined && data.data !== undefined)
+          ? data.data
           : data;
 
       } catch (err) {
@@ -118,7 +121,7 @@ const API = (() => {
   }
 
   async function _downloadBlob(path, defaultFilename) {
-    const token   = window.AUTH ? AUTH.getToken() : null;
+    const token   = window.AUTH ? window.AUTH.getToken() : null;
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -152,7 +155,7 @@ const API = (() => {
     logout: async () => {
       if (typeof AUTH === 'undefined') return;
       try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed:', e); }
-      AUTH.clearTokens(); // 🔥 Use only clearTokens()
+      window.AUTH.clearTokens(); // 🔥 Use only clearTokens()
     },
     forgotPw: (email)       => request('POST', '/auth/forgot-password', { email }),
     resetPw:  (newPassword) => request('POST', '/auth/reset-password',  { new_password: newPassword }),
@@ -180,10 +183,10 @@ const API = (() => {
     // --- USERS / PROFILE ---
     getMe: async () => {
       if (typeof AUTH === 'undefined') return null;
-      const cached = AUTH.getProfile();
+      const cached = window.AUTH.getProfile();
       if (cached) return cached;
       const data = await request('GET', '/users/me');
-      if (data) AUTH.setProfile(data);
+      if (data) window.AUTH.setProfile(data);
       return data;
     },
     updateMe:          (data)               => request('PATCH',  '/users/me', data),
