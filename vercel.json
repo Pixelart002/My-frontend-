@@ -8,6 +8,10 @@
 
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/$1"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
     },
