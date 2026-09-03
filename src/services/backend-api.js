@@ -1,5 +1,5 @@
-import './config.js'
-import './auth.js'
+import { CONFIG } from './config.js'
+import { AUTH } from './auth.js'
 
 /* ============================================================
    LUVIIO — API  (v8.2 — Enterprise Sync, 401 Refresh & B2B Billing)
@@ -50,14 +50,14 @@ export const API = (() => {
       opts.body = body;
     }
 
-    return fetch(`${window.CONFIG.API_BASE}${path}`, opts);
+    return fetch(`${CONFIG.API_BASE}${path}`, opts);
   }
 
   async function request(method, path, body = null, isRetry = false) {
     const headers = {};
 
-    // Always call window.AUTH.getToken() freshly at the beginning of every request
-    const token = window.AUTH ? window.AUTH.getToken() : null;
+    // Always call AUTH.getToken() freshly at the beginning of every request
+    const token = AUTH ? AUTH.getToken() : null;
 
     if (token && !_isPublic(path)) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -73,12 +73,12 @@ export const API = (() => {
       try {
         const res = await _fetchOnce(method, path, body, { ...headers });
 
-        // ── 401 auto-refresh with forced window.AUTH.init(true) ───────────────
+        // ── 401 auto-refresh with forced AUTH.init(true) ───────────────
         if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
-          if (window.AUTH) {
-            const refreshed = await window.AUTH.init(true); // 🔥 Force refresh on 401
+          if (AUTH) {
+            const refreshed = await AUTH.init(true); // 🔥 Force refresh on 401
             if (refreshed) return request(method, path, body, true);
-            window.AUTH.clearTokens();
+            AUTH.clearTokens();
           }
           return null;
         }
@@ -121,11 +121,11 @@ export const API = (() => {
   }
 
   async function _downloadBlob(path, defaultFilename) {
-    const token   = window.AUTH ? window.AUTH.getToken() : null;
+    const token   = AUTH ? AUTH.getToken() : null;
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(`${window.CONFIG.API_BASE}${path}`, {
+    const res = await fetch(`${CONFIG.API_BASE}${path}`, {
       method: 'GET',
       headers,
       signal: AbortSignal.timeout(20000),
@@ -153,9 +153,9 @@ export const API = (() => {
     login:      (email, pass)       => request('POST', '/auth/login',    { email, password: pass }),
     register:   (email, pass, name) => request('POST', '/auth/register', { email, password: pass, full_name: name }),
     logout: async () => {
-      if (typeof AUTH === 'undefined') return;
+      if (!AUTH) return;
       try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed:', e); }
-      window.AUTH.clearTokens(); // 🔥 Use only clearTokens()
+      AUTH.clearTokens(); // 🔥 Use only clearTokens()
     },
     forgotPw: (email)       => request('POST', '/auth/forgot-password', { email }),
     resetPw:  (newPassword) => request('POST', '/auth/reset-password',  { new_password: newPassword }),
@@ -182,11 +182,11 @@ export const API = (() => {
 
     // --- USERS / PROFILE ---
     getMe: async () => {
-      if (typeof AUTH === 'undefined') return null;
-      const cached = window.AUTH.getProfile();
+      if (!AUTH) return null;
+      const cached = AUTH.getProfile();
       if (cached) return cached;
       const data = await request('GET', '/users/me');
-      if (data) window.AUTH.setProfile(data);
+      if (data) AUTH.setProfile(data);
       return data;
     },
     updateMe:          (data)               => request('PATCH',  '/users/me', data),
