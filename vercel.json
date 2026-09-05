@@ -21,7 +21,8 @@
     { "source": "/terms.html", "destination": "/terms", "permanent": true },
     { "source": "/shipping-policy.html", "destination": "/shipping", "permanent": true },
     { "source": "/refund-policy.html", "destination": "/refund", "permanent": true },
-    { "source": "/return-cancellation.html", "destination": "/returns", "permanent": true }
+    { "source": "/return-cancellation.html", "destination": "/returns", "permanent": true },
+    { "source": "/product.html", "destination": "/product", "permanent": true }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/$1" },
@@ -44,8 +45,8 @@
     { "source": "/returns", "destination": "/index.html" },
     { "source": "/about", "destination": "/index.html" },
     { "source": "/admin", "destination": "/index.html" },
-    { "source": "/product/(.*)", "destination": "/index.html" },
-    { "source": "/ads.txt", "destination": "/ads.txt" }
+    { "source": "/product", "destination": "/index.html" },
+    { "source": "/product/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -60,9 +61,6 @@
         { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://js.stripe.com https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com https://ep2.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app https://api.stripe.com https://fundingchoicesmessages.google.com https://ep1.adtrafficquality.google https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; frame-src https://js.stripe.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'" }
       ]
     },
-    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
-    { "source": "/js/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
-    { "source": "/css/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
-    { "source": "/(.*)\\.html", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] }
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] }
   ]
 }
