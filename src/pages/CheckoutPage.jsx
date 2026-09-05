@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { ArrowLeft, Lock, Plus, Trash2 } from 'lucide-react';
+import { RiArrowLeftLine, RiLockLine, RiAddLine, RiDeleteBinLine } from '@remixicon/react';
 import { userService } from '../services/users';
 import { paymentService } from '../services/payments';
 import { STRIPE_PK } from '../config/env';
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
   return (
     <div className="page container checkout">
       <div className="page-heading compact">
-        <p className="eyebrow"><Lock size={13} /> Secure checkout</p>
+        <p className="eyebrow"><RiLockLine size={13} /> Secure checkout</p>
         <h1>Complete your order.</h1>
       </div>
 
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
                   </label>
                 ))}
                 <button className="btn btn-quiet btn-sm" onClick={() => setShowForm(true)}>
-                  <Plus size={15} /> Add a new address
+                  <RiAddLine size={15} /> Add a new address
                 </button>
               </div>
             )}
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
               <div>
                 {intentError && <div className="form-error">{intentError}</div>}
                 <button className="btn" onClick={startPayment} disabled={!selected || creating}>
-                  <Lock size={16} /> {creating ? 'Preparing secure payment…' : 'Continue to payment'}
+                  <RiLockLine size={16} /> {creating ? 'Preparing secure payment…' : 'Continue to payment'}
                 </button>
                 {!selected && addresses && addresses.length > 0 && (
                   <p className="hint">Select a delivery address above.</p>

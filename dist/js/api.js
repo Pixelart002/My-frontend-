@@ -47,14 +47,14 @@ const API = (() => {
       opts.body = body;
     }
 
-    return fetch(`${CONFIG.API_BASE}${path}`, opts);
+    return fetch(`${window.CONFIG.API_BASE}${path}`, opts);
   }
 
   async function request(method, path, body = null, isRetry = false) {
     const headers = {};
     
     // Always call AUTH.getToken() freshly at the beginning of every request
-    const token = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
+    const token = window.AUTH ? AUTH.getToken() : null;
 
     if (token && !_isPublic(path)) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -72,7 +72,7 @@ const API = (() => {
 
         // ── 401 auto-refresh with forced AUTH.init(true) ───────────────
         if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
-          if (typeof AUTH !== 'undefined') {
+          if (window.AUTH) {
             const refreshed = await AUTH.init(true); // 🔥 Force refresh on 401
             if (refreshed) return request(method, path, body, true);
             AUTH.clearTokens();
@@ -118,11 +118,11 @@ const API = (() => {
   }
 
   async function _downloadBlob(path, defaultFilename) {
-    const token   = typeof AUTH !== 'undefined' ? AUTH.getToken() : null;
+    const token   = window.AUTH ? AUTH.getToken() : null;
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(`${CONFIG.API_BASE}${path}`, {
+    const res = await fetch(`${window.CONFIG.API_BASE}${path}`, {
       method: 'GET',
       headers,
       signal: AbortSignal.timeout(20000),

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, Search, X } from 'lucide-react';
+import { RiEqualizerLine, RiSearchLine, RiCloseLine } from '@remixicon/react';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import Pagination from '../components/ui/Pagination';
@@ -92,11 +92,11 @@ export default function ShopPage() {
       <div className="shop-toolbar">
         <form className="shop-search" onSubmit={(e) => { e.preventDefault(); setParam('q', e.currentTarget.q.value.trim()); }}>
           <input name="q" defaultValue={q} placeholder="Search products…" aria-label="Search products" />
-          <button type="submit" aria-label="Search"><Search size={18} /></button>
+          <button type="submit" aria-label="Search"><RiSearchLine size={18} /></button>
         </form>
 
         <button className="btn btn-quiet btn-sm filter-toggle" onClick={() => setShowFilters((v) => !v)}>
-          <SlidersHorizontal size={16} /> Filters
+          <RiEqualizerLine size={16} /> Filters
         </button>
       </div>
 
@@ -136,7 +136,7 @@ export default function ShopPage() {
 
       {hasActiveFilters && (
         <button className="clear-filters" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}>
-          <X size={14} /> Clear all filters
+          <RiCloseLine size={14} /> Clear all filters
         </button>
       )}
 

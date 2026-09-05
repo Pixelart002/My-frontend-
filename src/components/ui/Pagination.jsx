@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { RiArrowLeftSLine, RiArrowRightSLine } from '@remixicon/react';
 
 function pageNumbers(current, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -25,7 +25,7 @@ export default function Pagination({ page, totalPages, onChange }) {
         disabled={page <= 1}
         aria-label="Previous page"
       >
-        <ChevronLeft size={16} />
+        <RiArrowLeftSLine size={16} />
       </button>
 
       {pageNumbers(page, totalPages).map((item, i) =>
@@ -49,7 +49,7 @@ export default function Pagination({ page, totalPages, onChange }) {
         disabled={page >= totalPages}
         aria-label="Next page"
       >
-        <ChevronRight size={16} />
+        <RiArrowRightSLine size={16} />
       </button>
     </nav>
   );

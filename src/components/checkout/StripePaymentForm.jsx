@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
 import { useAuth } from '../../context/AuthContext';
-import { Lock } from 'lucide-react';
+import { RiLockLine } from '@remixicon/react';
 
 export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
   const stripe = useStripe();
@@ -67,7 +67,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
           Back
         </button>
         <button className="btn" type="submit" disabled={!stripe || processing}>
-          <Lock size={15} /> {processing ? 'Processing…' : `Pay ${orderNumber ? `· order ${orderNumber}` : ''}`}
+          <RiLockLine size={15} /> {processing ? 'Processing…' : `Pay ${orderNumber ? `· order ${orderNumber}` : ''}`}
         </button>
       </div>
       <p className="hint secure-hint">

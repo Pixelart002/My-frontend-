@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Minus, Plus, Trash2, Truck, X } from 'lucide-react';
+import { RiArrowRightLine, RiSubtractLine, RiAddLine, RiDeleteBinLine, RiTruckLine, RiCloseLine } from '@remixicon/react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatMoney } from '../utils/format';
@@ -37,7 +37,7 @@ export default function CartPage() {
         <EmptyState
           title="Your bag is empty"
           message="Find something good to add."
-          action={<Link className="btn" to="/shop">Continue shopping <ArrowRight size={16} /></Link>}
+          action={<Link className="btn" to="/shop">Continue shopping <RiArrowRightLine size={16} /></Link>}
         />
       </div>
     );
@@ -71,19 +71,19 @@ export default function CartPage() {
                 </div>
 
                 <div className="qty-stepper cart-qty">
-                  <button onClick={() => updateItem(item.product_id, Math.max(1, Number(item.quantity) - 1))} disabled={unavailable} aria-label="Decrease quantity"><Minus size={15} /></button>
+                  <button onClick={() => updateItem(item.product_id, Math.max(1, Number(item.quantity) - 1))} disabled={unavailable} aria-label="Decrease quantity"><RiSubtractLine size={15} /></button>
                   <input readOnly value={item.quantity} aria-label="Quantity" />
-                  <button onClick={() => updateItem(item.product_id, Number(item.quantity) + 1)} disabled={unavailable || Number(item.quantity) >= Number(item.stock)} aria-label="Increase quantity"><Plus size={15} /></button>
+                  <button onClick={() => updateItem(item.product_id, Number(item.quantity) + 1)} disabled={unavailable || Number(item.quantity) >= Number(item.stock)} aria-label="Increase quantity"><RiAddLine size={15} /></button>
                 </div>
 
                 <strong className="cart-line-total">{formatMoney(item.line_total)}</strong>
-                <button className="cart-remove" onClick={() => removeItem(item.product_id)} aria-label="Remove item"><X size={16} /></button>
+                <button className="cart-remove" onClick={() => removeItem(item.product_id)} aria-label="Remove item"><RiCloseLine size={16} /></button>
               </div>
             );
           })}
 
           <div className="cart-utilities">
-            <button className="btn btn-ghost" onClick={clearCart}><Trash2 size={14} /> Clear bag</button>
+            <button className="btn btn-ghost" onClick={clearCart}><RiDeleteBinLine size={14} /> Clear bag</button>
             <Link className="btn btn-ghost" to="/shop">Keep shopping</Link>
           </div>
         </div>
@@ -98,15 +98,15 @@ export default function CartPage() {
           </dl>
 
           {cart.free_shipping_eligible ? (
-            <p className="free-ship-note"><Truck size={14} /> You qualify for free shipping!</p>
+            <p className="free-ship-note"><RiTruckLine size={14} /> You qualify for free shipping!</p>
           ) : (
             cart.amount_to_free_shipping > 0 && (
-              <p className="free-ship-note"><Truck size={14} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>
+              <p className="free-ship-note"><RiTruckLine size={14} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>
             )
           )}
 
           <button className="btn btn-block" onClick={() => navigate('/checkout')} disabled={cart.has_unavailable_items || items.some((i) => !i.in_stock)}>
-            Checkout securely <ArrowRight size={16} />
+            Checkout securely <RiArrowRightLine size={16} />
           </button>
         </aside>
       </div>

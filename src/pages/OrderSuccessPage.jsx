@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CheckCircle2 } from 'lucide-react';
+import { RiCheckboxCircleFill } from '@remixicon/react';
 import { useCart } from '../context/CartContext';
 
 export default function OrderSuccessPage() {
@@ -18,7 +18,7 @@ export default function OrderSuccessPage() {
   return (
     <div className="page container">
       <div className="order-result">
-        <CheckCircle2 size={52} className="order-result-icon" />
+        <RiCheckboxCircleFill size={52} className="order-result-icon" />
         <p className="eyebrow">Payment confirmed</p>
         <h1>Thank you.</h1>
         <p>

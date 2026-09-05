@@ -27,7 +27,17 @@ export default function Footer() {
         </div>
 
         <div>
+          <h4>Company</h4>
+          <Link to="/about">About us</Link>
+          <Link to="/privacy">Privacy policy</Link>
+          <Link to="/terms">Terms & conditions</Link>
+        </div>
+
+        <div>
           <h4>Help</h4>
+          <Link to="/shipping">Shipping</Link>
+          <Link to="/returns">Returns & cancellation</Link>
+          <Link to="/refund">Refund policy</Link>
           <a href="mailto:support@luviio.in">Contact support</a>
         </div>
       </div>

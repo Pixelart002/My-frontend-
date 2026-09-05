@@ -18,6 +18,14 @@ import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import AddressesPage from './pages/AddressesPage';
+import PrivacyPage from './pages/policies/PrivacyPage';
+import TermsPage from './pages/policies/TermsPage';
+import ShippingPage from './pages/policies/ShippingPage';
+import RefundPage from './pages/policies/RefundPage';
+import ReturnCancelPage from './pages/policies/ReturnCancelPage';
+import AboutPage from './pages/policies/AboutPage';
+import NotFoundPage from './pages/NotFoundPage';
+import AdminPage from './pages/admin/AdminPage';
 
 function AppRoutes() {
   return (
@@ -37,7 +45,14 @@ function AppRoutes() {
         <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
         <Route path="/account" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/account/addresses" element={<ProtectedRoute><AddressesPage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/shipping" element={<ShippingPage />} />
+        <Route path="/refund" element={<RefundPage />} />
+        <Route path="/returns" element={<ReturnCancelPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );

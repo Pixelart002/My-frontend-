@@ -85,6 +85,21 @@
   font-size: clamp(30px, 5vw, 44px);
   margin-bottom: 8px;
 }
+.auth-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: clamp(24px, 5vw, 40px);
+}
+.auth-card .eyebrow {
+  margin-bottom: 12px;
+}
+.auth-card h1 {
+  margin-bottom: 8px;
+}
+.auth-card .auth-sub {
+  margin-bottom: 26px;
+}
 .auth-sub {
   color: var(--muted);
   margin-bottom: 30px;

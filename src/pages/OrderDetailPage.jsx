@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, FileText, XCircle } from 'lucide-react';
+import { RiArrowLeftLine, RiFileTextLine, RiCloseCircleLine } from '@remixicon/react';
 import { orderService } from '../services/orders';
 import { orderStatusLabel, orderStatusTone, canCancelOrder, canDownloadInvoice } from '../utils/order';
 import { formatMoney } from '../utils/format';
@@ -57,7 +57,7 @@ export default function OrderDetailPage() {
 
   return (
     <div className="page container">
-      <Link className="back-link" to="/orders"><ArrowLeft size={15} /> Back to orders</Link>
+      <Link className="back-link" to="/orders"><RiArrowLeftLine size={15} /> Back to orders</Link>
 
       <div className="order-head">
         <div>
@@ -71,12 +71,12 @@ export default function OrderDetailPage() {
       <div className="order-actions">
         {canDownloadInvoice(status) && (
           <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}>
-            <FileText size={15} /> Download invoice
+            <RiFileTextLine size={15} /> Download invoice
           </button>
         )}
         {canCancelOrder(status) && (
           <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}>
-            <XCircle size={15} /> Cancel order
+            <RiCloseCircleLine size={15} /> Cancel order
           </button>
         )}
       </div>

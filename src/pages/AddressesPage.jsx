@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { RiArrowLeftLine, RiAddLine, RiDeleteBinLine } from '@remixicon/react';
 import { userService } from '../services/users';
 import { useToast } from '../context/ToastContext';
 import { Spinner, ErrorState, EmptyState } from '../components/ui/States';
@@ -127,7 +127,7 @@ export default function AddressesPage() {
 
   return (
     <div className="page container">
-      <Link className="back-link" to="/account"><ArrowLeft size={15} /> Back to profile</Link>
+      <Link className="back-link" to="/account"><RiArrowLeftLine size={15} /> Back to profile</Link>
       <div className="page-heading compact">
         <p className="eyebrow">Your account</p>
         <h1>Addresses.</h1>
@@ -153,14 +153,14 @@ export default function AddressesPage() {
                 </p>
               </div>
               <button className="btn btn-danger btn-sm" onClick={() => onDelete(addr.id)} aria-label="Delete address">
-                <Trash2 size={15} />
+                <RiDeleteBinLine size={15} />
               </button>
             </div>
           ))}
           {showForm ? (
             <AddressForm onSaved={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} isDefault={addresses.length === 0} />
           ) : (
-            <button className="btn btn-quiet" onClick={() => setShowForm(true)}><Plus size={15} /> Add address</button>
+            <button className="btn btn-quiet" onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add address</button>
           )}
         </div>
       )}

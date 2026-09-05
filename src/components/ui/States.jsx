@@ -1,10 +1,10 @@
-import { LoaderCircle, PackageOpen, AlertTriangle } from 'lucide-react';
+import { RiLoader4Line, RiStore2Line, RiErrorWarningLine } from '@remixicon/react';
 
 export function Spinner({ label = 'Loading…', inline = false }) {
-  if (inline) return <LoaderCircle className="spin" size={18} />;
+  if (inline) return <RiLoader4Line className="spin" size={18} />;
   return (
     <div className="state spinner">
-      <LoaderCircle className="spin" size={20} />
+      <RiLoader4Line className="spin" size={20} />
       <span>{label}</span>
     </div>
   );
@@ -13,7 +13,7 @@ export function Spinner({ label = 'Loading…', inline = false }) {
 export function EmptyState({ title = 'Nothing here yet', message, action }) {
   return (
     <div className="state">
-      <PackageOpen size={34} />
+      <RiStore2Line size={34} />
       <div className="state-title">{title}</div>
       {message && <p style={{ margin: 0 }}>{message}</p>}
       {action}
@@ -24,7 +24,7 @@ export function EmptyState({ title = 'Nothing here yet', message, action }) {
 export function ErrorState({ message = 'Something went wrong.', onRetry }) {
   return (
     <div className="state">
-      <AlertTriangle size={30} />
+      <RiErrorWarningLine size={30} />
       <div className="state-title">We ran into a problem</div>
       <p style={{ margin: 0 }}>{message}</p>
       {onRetry && (

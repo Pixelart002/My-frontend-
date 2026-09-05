@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { RiArrowRightLine, RiArrowRightUpLine } from '@remixicon/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
+import Scene3DWrap from '../components/three/Scene3DWrap';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORY_CARDS = [
   { slug: 'bath', index: '01', title: 'Bath & body', text: 'Soft textures and considered essentials for your daily reset.' },
@@ -14,6 +19,36 @@ export default function HomePage() {
   const [products, setProducts] = useState(null);
   const [error, setError] = useState('');
   const [catLinks, setCatLinks] = useState(CATEGORY_CARDS);
+
+  // Enterprise motion: hero rise on load + scroll reveals for sections.
+  useEffect(() => {
+    const bg = gsap.fromTo(
+      document.querySelectorAll('[data-rise]'),
+      { y: 28, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' }
+    );
+
+    const reveals = gsap.utils.toArray('[data-reveal]');
+    const ct = reveals.map((el) =>
+      gsap.fromTo(
+        el,
+        { y: 32, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%' },
+        }
+      )
+    );
+
+    return () => {
+      bg.kill();
+      ct.forEach((t) => t.kill());
+      ScrollTrigger.getAll().forEach((s) => s.kill());
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -50,26 +85,31 @@ export default function HomePage() {
   return (
     <main>
       <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Thoughtful things, beautifully made</p>
-          <h1>Make room for <em>the good things.</em></h1>
-          <p className="hero-text">
-            Everyday pieces that make your space feel more like yours — from elevated bath
-            essentials to objects worth keeping.
-          </p>
-          <div className="hero-actions">
-            <Link className="btn" to="/shop">
-              Explore the collection <ArrowRight size={16} />
-            </Link>
-            <Link className="btn btn-quiet" to="/shop?new=1">
-              New arrivals
-            </Link>
+        <div className="hero-inner">
+          <div className="hero-copy">
+            <p className="eyebrow" data-rise>Thoughtful things, beautifully made</p>
+            <h1 data-rise>Make room for <em>the good things.</em></h1>
+            <p className="hero-text" data-rise>
+              Everyday pieces that make your space feel more like yours — from elevated bath
+              essentials to objects worth keeping.
+            </p>
+            <div className="hero-actions" data-rise>
+              <Link className="btn" to="/shop">
+                Explore the collection <RiArrowRightLine size={16} />
+              </Link>
+              <Link className="btn btn-quiet" to="/shop?new=1">
+                New arrivals
+              </Link>
+            </div>
+          </div>
+          <div className="hero-stage" data-rise>
+            <Scene3DWrap />
           </div>
         </div>
         <span className="scroll-note">Scroll to discover</span>
       </section>
 
-      <section className="section">
+      <section className="section" data-reveal>
         <div className="section-intro">
           <p className="eyebrow">The Luviio edit</p>
           <h2 className="section-title">Things you use. <em>Things you love.</em></h2>
@@ -85,7 +125,7 @@ export default function HomePage() {
                 <div>
                   <h3>{cat.title}</h3>
                   <p>{cat.text}</p>
-                  <strong>Explore <ArrowUpRight size={15} /></strong>
+                  <strong>Explore <RiArrowRightUpLine size={15} /></strong>
                 </div>
               </Link>
             );
@@ -95,13 +135,13 @@ export default function HomePage() {
             <div>
               <h3>Shop everything</h3>
               <p>Fresh finds, just in — selected for the way you live now.</p>
-              <strong>Browse the full edit <ArrowUpRight size={15} /></strong>
+              <strong>Browse the full edit <RiArrowRightUpLine size={15} /></strong>
             </div>
           </Link>
         </div>
       </section>
 
-      <section className="section statement">
+      <section className="section statement" data-reveal>
         <div>
           <p className="eyebrow">A better everyday</p>
           <h2 className="section-title">Good design, <em>no fuss.</em></h2>
@@ -112,7 +152,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section className="section">
+      <section className="section" data-reveal>
         <div className="section-intro">
           <p className="eyebrow">From the store</p>
           <h2 className="section-title">A few favourites</h2>
@@ -133,7 +173,7 @@ export default function HomePage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: 40 }}>
               <Link className="btn btn-quiet" to="/shop">
-                View all products <ArrowRight size={16} />
+                View all products <RiArrowRightLine size={16} />
               </Link>
             </div>
           </>

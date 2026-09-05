@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Minus, Plus, ShoppingBag, Shuffle, Truck } from 'lucide-react';
+import { RiSubtractLine, RiAddLine, RiShoppingBagLine, RiShuffleLine, RiTruckLine } from '@remixicon/react';
 import { productService } from '../services/products';
 import { formatMoney } from '../utils/format';
 import { useCart } from '../context/CartContext';
@@ -126,7 +126,7 @@ export default function ProductDetailPage() {
           <div className="qty-row">
             <span>Qty</span>
             <div className="qty-stepper">
-              <button onClick={() => setQty(clampQty(qty - 1))} aria-label="Decrease quantity"><Minus size={16} /></button>
+              <button onClick={() => setQty(clampQty(qty - 1))} aria-label="Decrease quantity"><RiSubtractLine size={16} /></button>
               <input
                 type="number"
                 min="1"
@@ -135,20 +135,20 @@ export default function ProductDetailPage() {
                 onChange={(e) => setQty(clampQty(e.target.value))}
                 aria-label="Quantity"
               />
-              <button onClick={() => setQty(clampQty(qty + 1))} aria-label="Increase quantity"><Plus size={16} /></button>
+              <button onClick={() => setQty(clampQty(qty + 1))} aria-label="Increase quantity"><RiAddLine size={16} /></button>
             </div>
           </div>
 
           <div className="product-actions">
             <button className="btn" onClick={() => handleAdd(false)} disabled={outOfStock || adding}>
-              <ShoppingBag size={16} /> {adding ? 'Adding…' : 'Add to bag'}
+              <RiShoppingBagLine size={16} /> {adding ? 'Adding…' : 'Add to bag'}
             </button>
             <button className="btn btn-quiet" onClick={() => handleAdd(true)} disabled={outOfStock || adding}>
-              <Shuffle size={16} /> Buy now
+              <RiShuffleLine size={16} /> Buy now
             </button>
           </div>
 
-          <p className="shipping-note"><Truck size={15} /> Free shipping on orders over the store threshold.</p>
+          <p className="shipping-note"><RiTruckLine size={15} /> Free shipping on orders over the store threshold.</p>
 
           {Object.keys(attributes).length > 0 && (
             <dl className="attributes">

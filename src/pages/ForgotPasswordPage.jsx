@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
+import { RiMailLine } from '@remixicon/react';
 import { authService } from '../services/auth';
 import { useToast } from '../context/ToastContext';
 
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
               />
             </div>
             <button className="btn btn-block" type="submit" disabled={submitting}>
-              <Mail size={16} /> {submitting ? 'Sending…' : 'Send recovery link'}
+              <RiMailLine size={16} /> {submitting ? 'Sending…' : 'Send recovery link'}
             </button>
           </form>
         </>

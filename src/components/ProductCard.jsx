@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Check } from 'lucide-react';
+import { RiArrowRightLine, RiCheckLine } from '@remixicon/react';
 import { useState } from 'react';
 import { formatMoney } from '../utils/format';
 import { useCart } from '../context/CartContext';
@@ -70,7 +70,7 @@ export default function ProductCard({ product }) {
         disabled={outOfStock || adding}
       >
         {outOfStock ? 'Out of stock' : added ? 'Added to bag' : 'Add to bag'}
-        {!outOfStock && (added ? <Check size={15} /> : <ArrowRight size={15} />)}
+        {!outOfStock && (added ? <RiCheckLine size={15} /> : <RiArrowRightLine size={15} />)}
       </button>
     </article>
   );

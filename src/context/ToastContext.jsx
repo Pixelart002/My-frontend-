@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import { RiErrorWarningLine, RiCheckboxCircleFill, RiInformationLine, RiCloseLine } from '@remixicon/react';
 
 const ToastContext = createContext(null);
 
 const ICONS = {
-  success: CheckCircle2,
-  error: AlertCircle,
-  info: Info,
+  success: RiCheckboxCircleFill,
+  error: RiErrorWarningLine,
+  info: RiInformationLine,
 };
 
 export function ToastProvider({ children }) {
@@ -57,7 +57,7 @@ export function ToastProvider({ children }) {
               <Icon size={17} />
               <span>{toast.message}</span>
               <button type="button" onClick={() => dismiss(toast.id)} aria-label="Dismiss notification">
-                <X size={15} />
+                <RiCloseLine size={15} />
               </button>
             </div>
           );
