@@ -1,13 +1,14 @@
 User-agent: *
 Allow: /
 
-# Block private/user pages from indexing
-Disallow: /cart.html
-Disallow: /checkout.html
-Disallow: /orders.html
-Disallow: /profile.html
-Disallow: /admin.html
-Disallow: /404.html
+# Private/account/admin areas are not for search indexing
+Disallow: /cart
+Disallow: /checkout
+Disallow: /orders
+Disallow: /account
+Disallow: /admin
+Disallow: /order/
 
-# Sitemap location
-Sitemap: https://luviio.in/sitemap.xml
+# Legacy URLs are permanently redirected to canonical routes
+
+Sitemap: https://www.luviio.in/sitemap.xml
