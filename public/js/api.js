@@ -1,5 +1,5 @@
 /* ============================================================
-   LUVIIO — API  (v8.2 — Enterprise Sync, 401 Refresh & B2B Billing)
+   LUVIIO — API  (v8.3 — Enterprise Sync, 401 Refresh & B2B Billing)
    ============================================================ */
 
 class APIError extends Error {
@@ -33,12 +33,12 @@ const API = (() => {
     const opts = {
       method,
       headers,
+      // Keep auth cookies available for every API request. This is required
+      // for refresh-token based sessions and keeps legacy pages consistent
+      // with the React API client.
+      credentials: 'include',
       signal: AbortSignal.timeout(12000),
     };
-
-    if (path.startsWith('/auth/')) {
-      opts.credentials = 'include';
-    }
 
     if (body !== null && !(body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
@@ -73,7 +73,7 @@ const API = (() => {
         // ── 401 auto-refresh with forced AUTH.init(true) ───────────────
         if (res.status === 401 && !isRetry && !path.startsWith('/auth/')) {
           if (window.AUTH) {
-            const refreshed = await AUTH.init(true); // 🔥 Force refresh on 401
+            const refreshed = await AUTH.init(true);
             if (refreshed) return request(method, path, body, true);
             AUTH.clearTokens();
           }
@@ -125,6 +125,7 @@ const API = (() => {
     const res = await fetch(`${window.CONFIG.API_BASE}${path}`, {
       method: 'GET',
       headers,
+      credentials: 'include',
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) throw new APIError('Failed to download file', res.status);
@@ -152,7 +153,7 @@ const API = (() => {
     logout: async () => {
       if (typeof AUTH === 'undefined') return;
       try { await request('POST', '/auth/logout', {}); } catch (e) { console.warn('Logout API failed:', e); }
-      AUTH.clearTokens(); // 🔥 Use only clearTokens()
+      AUTH.clearTokens();
     },
     forgotPw: (email)       => request('POST', '/auth/forgot-password', { email }),
     resetPw:  (newPassword) => request('POST', '/auth/reset-password',  { new_password: newPassword }),
@@ -198,7 +199,7 @@ const API = (() => {
     clearCart:                ()              => request('DELETE', '/cart'),
     addCartItem:              (pid, qty)      => request('POST',   '/cart/items', { product_id: pid, quantity: qty }),
     updateCartItem:           (pid, qty)      => request('PUT',    `/cart/items/${encodeURIComponent(pid)}`, { quantity: qty }),
-    removeCartItem:           (pid)           => request('DELETE', `/cart/items/${encodeURIComponent(pid)}`),
+    removeCartItem:            (pid)           => request('DELETE', `/cart/items/${encodeURIComponent(pid)}`),
     getAbandonedCartsAdmin: (h=24, page=1)  => request('GET',    `/cart/admin/abandoned?hours=${h}&page=${page}`),
     sendCartReminderAdmin:  (cartId)        => request('POST',   `/cart/admin/remind/${encodeURIComponent(cartId)}`, {}),
 
@@ -220,7 +221,6 @@ const API = (() => {
     downloadInvoice:  (id)         => _downloadBlob(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
 
     // --- PAYMENTS ---
-    // 🔥 FIX: Properly routing billing_address_id when present
     createPaymentIntent: (addressId, idemKey, billingId = null) => {
       const payload = { shipping_address_id: addressId, idempotency_key: idemKey };
       if (billingId) payload.billing_address_id = billingId;
