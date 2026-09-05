@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Private/account/admin areas are not for search indexing
+Disallow: /cart
+Disallow: /checkout
+Disallow: /orders
+Disallow: /account
+Disallow: /admin
+Disallow: /order/
+
+# Legacy URLs are permanently redirected to canonical routes
+
+Sitemap: https://www.luviio.in/sitemap.xml
