@@ -36,7 +36,7 @@ export class ApiError extends Error {
 let accessToken = null;
 
 export function setAccessToken(token) {
-  accessToken = token;
+  accessToken = token || null;
 }
 
 export function getAccessToken() {
@@ -51,12 +51,35 @@ function backoff(attempt) {
   return 300 * Math.pow(2, attempt - 1);
 }
 
+/**
+ * Resolve the current token from memory first, then the AuthContext bridge,
+ * then sessionStorage. This prevents protected requests from being sent
+ * without Authorization after a hard reload before React effects complete.
+ */
 function readToken() {
+  if (accessToken) return accessToken;
+
   try {
-    return window.__getLuviioToken ? window.__getLuviioToken() : accessToken;
+    const bridged = window.__getLuviioToken ? window.__getLuviioToken() : null;
+    if (bridged) {
+      accessToken = bridged;
+      return bridged;
+    }
   } catch {
-    return accessToken;
+    /* noop */
   }
+
+  try {
+    const stored = sessionStorage.getItem('__lv_at');
+    if (stored) {
+      accessToken = stored;
+      return stored;
+    }
+  } catch {
+    /* storage unavailable */
+  }
+
+  return null;
 }
 
 async function refreshAccessToken() {
@@ -76,12 +99,9 @@ async function fetchOnce(method, path, body, headers) {
   const opts = {
     method,
     headers: { ...headers },
+    credentials: 'include',
     signal: AbortSignal.timeout(15000),
   };
-
-  if (path.startsWith('/auth/')) {
-    opts.credentials = 'include';
-  }
 
   if (body instanceof FormData) {
     opts.body = body;
@@ -108,7 +128,7 @@ async function parseError(res) {
 
 export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
-  const token = getAccessToken();
+  const token = readToken();
 
   if (token && !isPublic(path)) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -174,12 +194,13 @@ export async function request(method, path, body = null, isRetry = false) {
 /** Download a binary file (e.g. PDF invoice) and trigger a browser download. */
 export async function downloadFile(path, defaultFilename) {
   const headers = {};
-  const token = getAccessToken();
+  const token = readToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'GET',
     headers,
+    credentials: 'include',
     signal: AbortSignal.timeout(30000),
   });
   if (!res.ok) throw new ApiError('Failed to download file.', res.status);
