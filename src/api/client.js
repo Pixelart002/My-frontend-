@@ -34,6 +34,7 @@ export class ApiError extends Error {
 }
 
 let accessToken = null;
+let refreshPromise = null;
 
 export function setAccessToken(token) {
   accessToken = token || null;
@@ -82,17 +83,33 @@ function readToken() {
   return null;
 }
 
+/**
+ * Single-flight refresh: concurrent 401s share one refresh request instead
+ * of rotating/overwriting the refresh cookie multiple times.
+ */
 async function refreshAccessToken() {
-  const res = await fetch(`${API_BASE}/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) return null;
-  const json = await res.json();
-  const payload = json.data || json;
-  return payload && payload.access_token ? payload.access_token : null;
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      const payload = json.data || json;
+      return payload && payload.access_token ? payload.access_token : null;
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 async function fetchOnce(method, path, body, headers) {
@@ -129,18 +146,21 @@ async function parseError(res) {
 export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
   const token = readToken();
+  const protectedPath = !isPublic(path) && !path.startsWith('/auth/');
 
-  if (token && !isPublic(path)) {
+  if (token && protectedPath) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
   const canRetry = IDEMPOTENT.has(method.toUpperCase());
   let attempt = 0;
 
-  // 401 auto-refresh for authenticated paths
+  // 401 recovery works even when no access token is currently in memory.
+  // This is critical after a hard reload: the httpOnly refresh cookie may
+  // still be valid while React has not restored __lv_at yet.
   const performForRefresh = async () => {
     const res = await fetchOnce(method, path, body, headers);
-    if (res.status === 401 && !isRetry && token && !path.startsWith('/auth/')) {
+    if (res.status === 401 && !isRetry && protectedPath) {
       const fresh = await refreshAccessToken();
       if (fresh) {
         setAccessToken(fresh);
