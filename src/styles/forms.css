@@ -1,0 +1,239 @@
+/* ============================================================
+   Forms, auth, toast, states
+   ============================================================ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field label {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.2s ease;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.field textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+.field select {
+  appearance: auto;
+}
+.field .err-text {
+  color: var(--danger);
+  font-size: 12px;
+}
+.field.invalid input,
+.field.invalid select,
+.field.invalid textarea {
+  border-color: var(--danger);
+}
+.field .hint {
+  color: var(--dim);
+  font-size: 12px;
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.form-error {
+  padding: 12px 14px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-dim);
+  color: var(--danger);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.form-success {
+  padding: 12px 14px;
+  border: 1px solid var(--success);
+  border-radius: var(--radius-sm);
+  background: var(--success-dim);
+  color: var(--success);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.auth-layout {
+  max-width: 460px;
+  margin: 0 auto;
+}
+.auth-layout h1 {
+  font-size: clamp(30px, 5vw, 44px);
+  margin-bottom: 8px;
+}
+.auth-sub {
+  color: var(--muted);
+  margin-bottom: 30px;
+}
+.auth-footer {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.auth-footer a {
+  color: var(--gold-soft);
+}
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Alerts / toast ---------- */
+.toast-root {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(92vw, 420px);
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  animation: toast-in 0.25s ease;
+  pointer-events: auto;
+}
+.toast.success {
+  border-color: var(--success);
+}
+.toast.error {
+  border-color: var(--danger);
+}
+.toast.warn {
+  border-color: var(--warn);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- States ---------- */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 64px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.state .state-title {
+  color: var(--text);
+  font-size: 20px;
+}
+.state.spinner {
+  flex-direction: row;
+  gap: 12px;
+  min-height: 120px;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton-media {
+  aspect-ratio: 4 / 5;
+}
+.skeleton-line {
+  height: 14px;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 48px;
+}
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+}
+.page-btn:hover:not(:disabled):not(.is-active) {
+  color: var(--gold-soft);
+  border-color: var(--gold);
+}
+.page-btn.is-active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 700;
+}
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

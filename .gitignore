@@ -1,3 +1,19 @@
-cdn_modules/
-/js/keys.js
-/.html
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Env — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
