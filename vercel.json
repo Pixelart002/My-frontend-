@@ -6,6 +6,14 @@
   "cleanUrls": true,
   "trailingSlash": false,
 
+  "redirects": [
+    {
+      "source": "/admin.html",
+      "destination": "/admin",
+      "permanent": true
+    }
+  ],
+
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -33,6 +41,10 @@
     },
     {
       "source": "/orders",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
       "destination": "/index.html"
     },
     {
@@ -83,7 +95,6 @@
         }
       ]
     },
-
     {
       "source": "/sw.js",
       "headers": [
@@ -93,7 +104,6 @@
         }
       ]
     },
-
     {
       "source": "/js/(.*)",
       "headers": [
@@ -103,7 +113,6 @@
         }
       ]
     },
-
     {
       "source": "/css/(.*)",
       "headers": [
@@ -113,7 +122,6 @@
         }
       ]
     },
-
     {
       "source": "/(.*)\\.html",
       "headers": [
