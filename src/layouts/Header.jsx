@@ -112,7 +112,11 @@ export default function Header() {
         </button>
       </div>
 
-      <nav className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen}>
+      <nav
+        className={`mobile-nav${mobileOpen ? ' is-open' : ''}`}
+        aria-hidden={!mobileOpen}
+        hidden={!mobileOpen}
+      >
         <span className="nav-section-label">Shop</span>
         <Link to="/shop" onClick={closeAll}>Shop all</Link>
         <Link to="/shop?new=1" onClick={closeAll}>New in</Link>
