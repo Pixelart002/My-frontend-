@@ -16,6 +16,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 
+const ADMIN_NAV = [
+  ['dashboard', 'Dashboard'],
+  ['products', 'Products'],
+  ['categories', 'Categories'],
+  ['orders', 'Orders'],
+  ['users', 'Users'],
+];
+
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const { itemCount } = useCart();
@@ -89,15 +97,19 @@ export default function Header() {
 
   const renderMobileMenu = () => {
     if (isAdminPage && isAdmin) {
+      const activePanel = new URLSearchParams(location.search).get('panel') || 'dashboard';
       return (
         <>
           <div className="mobile-nav-head">
-            <span className="mobile-nav-kicker">LUVIIO</span>
-            <span className="mobile-nav-title">Store console</span>
+            <span className="mobile-nav-kicker">ADMIN</span>
+            <span className="mobile-nav-title">Store navigation</span>
           </div>
           <div className="mobile-nav-section">
-            <span className="nav-section-label">Admin</span>
-            {menuLink('/admin', 'Dashboard', 'is-active')}
+            <span className="nav-section-label">Console</span>
+            {ADMIN_NAV.map(([key, label]) => menuLink(`/admin?panel=${key}`, label, activePanel === key ? 'is-active' : ''))}
+          </div>
+          <div className="mobile-nav-section">
+            <span className="nav-section-label">Storefront</span>
             {menuLink('/', 'View storefront')}
           </div>
         </>
