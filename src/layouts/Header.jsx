@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
-  RiArrowDownSLine,
   RiArchive2Line,
   RiCloseLine,
   RiLogoutBoxRLine,
@@ -27,6 +26,13 @@ export default function Header() {
 
   const closeAll = () => {
     setMobileOpen(false);
+    setMenuOpen(false);
+  };
+
+  const toggleMobileMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMobileOpen((open) => !open);
     setMenuOpen(false);
   };
 
@@ -67,6 +73,7 @@ export default function Header() {
         {isAuthenticated ? (
           <div className="account-menu-wrap">
             <button
+              type="button"
               className="icon-btn"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Account menu"
@@ -84,7 +91,7 @@ export default function Header() {
                 <Link to="/orders" onClick={closeAll}><RiArchive2Line size={16} /> Orders</Link>
                 <Link to="/account/addresses" onClick={closeAll}><RiMapPin2Line size={16} /> Addresses</Link>
                 <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={16} /> Store console</Link>
-                <button onClick={onLogout}><RiLogoutBoxRLine size={16} /> Sign out</button>
+                <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16} /> Sign out</button>
               </div>
             )}
           </div>
@@ -95,8 +102,9 @@ export default function Header() {
         )}
 
         <button
+          type="button"
           className="menu-button"
-          onClick={() => setMobileOpen((v) => !v)}
+          onClick={toggleMobileMenu}
           aria-expanded={mobileOpen}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
@@ -104,7 +112,7 @@ export default function Header() {
         </button>
       </div>
 
-      <div className={`mobile-nav ${mobileOpen ? 'is-open' : ''}`}>
+      <nav className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen}>
         <span className="nav-section-label">Shop</span>
         <Link to="/shop" onClick={closeAll}>Shop all</Link>
         <Link to="/shop?new=1" onClick={closeAll}>New in</Link>
@@ -117,7 +125,7 @@ export default function Header() {
             <Link to="/orders" onClick={closeAll}>Orders</Link>
             <Link to="/account/addresses" onClick={closeAll}>Addresses</Link>
             <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={15} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} /> Store console</Link>
-            <button onClick={onLogout}>Sign out</button>
+            <button type="button" onClick={onLogout}>Sign out</button>
           </>
         ) : (
           <>
@@ -131,7 +139,7 @@ export default function Header() {
         <Link to="/returns" onClick={closeAll}>Returns &amp; exchanges</Link>
         <Link to="/refund" onClick={closeAll}>Refund policy</Link>
         <Link to="/about" onClick={closeAll}>About Luviio</Link>
-      </div>
+      </nav>
     </header>
   );
 }
