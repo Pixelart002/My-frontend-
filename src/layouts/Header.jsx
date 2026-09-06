@@ -277,7 +277,12 @@ export default function Header() {
         </div>
         <div className="mobile-nav-section">
           <span className="nav-section-label">Account</span>
-          {isAuthenticated ? menuLink('/account', 'My account') : menuLink('/login', 'Sign in')}
+          {isAuthenticated ? menuLink('/account', 'My account') : (
+            <>
+              {menuLink('/login', 'Sign in')}
+              {menuLink('/register', 'Create account')}
+            </>
+          )}
         </div>
       </>
     );
@@ -318,6 +323,8 @@ export default function Header() {
               </div>
             )}
           </div>
+        ) : isHome ? (
+          <Link className="header-login-btn btn btn-quiet" to="/login">Login</Link>
         ) : (
           <Link className="icon-btn" to="/login" aria-label="Sign in"><RiUserLine size={19} /></Link>
         )}
