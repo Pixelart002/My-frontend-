@@ -7,16 +7,19 @@
  * in client-side code.
  */
 
-const DEV_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
-const PROD_API_BASE = '/api/v1';
+const LIVE_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
+const DEV_API_BASE = LIVE_API_BASE;
+const PROD_API_BASE = LIVE_API_BASE;
 
 const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
 
 /**
  * API base URL, resolved in priority order:
  *   1. VITE_API_BASE env var (set at build time)
- *   2. In dev, the live koyeb backend
- *   3. In production, a relative /api/v1 path (reverse-proxied by the host)
+ *   2. The live backend in development and production.
+ *
+ * Production intentionally targets the backend directly. This avoids a
+ * Vercel rewrite masking backend route failures as frontend 404 responses.
  */
 export const API_BASE = stripTrailingSlash(
   import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? DEV_API_BASE : PROD_API_BASE),
