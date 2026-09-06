@@ -24,11 +24,13 @@ const EMPTY_CART = {
 
 const getItemCount = (cart) => {
   if (!cart) return 0;
-  // The badge represents units, not distinct product rows. Prefer the
-  // backend aggregate when it is valid; otherwise derive it from quantities.
-  const backendCount = Number(cart.item_count);
-  if (Number.isFinite(backendCount) && backendCount >= 0) return Math.floor(backendCount);
-  return (cart.items || []).reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0);
+  // The UI badge is a unit count: one product with quantity 3 shows 3.
+  // Deriving it from item quantities also stays correct if an older backend
+  // response omits or misreports the aggregate item_count field.
+  return (cart.items || []).reduce(
+    (total, item) => total + Math.max(0, Number(item.quantity) || 0),
+    0,
+  );
 };
 
 const CartContext = createContext(null);
