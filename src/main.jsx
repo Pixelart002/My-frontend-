@@ -7,5 +7,6 @@ import './styles/products.css';
 import './styles/forms.css';
 import './styles/app.css';
 import './styles/admin.css';
+import './styles/header.css';
 
 createRoot(document.getElementById('root')).render(<App />);
