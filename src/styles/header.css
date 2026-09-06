@@ -22,6 +22,7 @@
   .header-actions { margin-left:auto; }
   .search-form { max-width:180px; }
   .menu-button { display:inline-flex !important; }
+  .header.drawer-active .menu-button { opacity:0; visibility:hidden; pointer-events:none; }
   .mobile-menu-backdrop { position:fixed; inset:0; display:block; background:rgba(0,0,0,.62); opacity:0; visibility:hidden; pointer-events:none; z-index:205; transition:opacity .22s ease,visibility 0s linear .22s; }
   .mobile-menu-backdrop.is-open { opacity:1; visibility:visible; pointer-events:auto; transition:opacity .22s ease,visibility 0s; }
   .mobile-nav { position:fixed !important; top:0 !important; left:0 !important; right:auto !important; bottom:0 !important; width:min(360px,88vw); max-width:360px; height:100dvh !important; max-height:none; display:block !important; overflow:hidden; padding:0; border:0; border-right:1px solid var(--line); border-radius:0 20px 20px 0; background:var(--surface); box-shadow:20px 0 70px rgba(0,0,0,.48); z-index:209; opacity:1; visibility:hidden; pointer-events:none; transform:translate3d(-100%,0,0); transition:transform .24s cubic-bezier(.22,.61,.36,1),visibility 0s linear .24s; }
