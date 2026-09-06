@@ -7,6 +7,7 @@ import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import Scene3DWrap from '../components/three/Scene3DWrap';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
+import { useAuth } from '../context/AuthContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,6 +17,7 @@ const CATEGORY_CARDS = [
 ];
 
 export default function HomePage() {
+  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState(null);
   const [error, setError] = useState('');
   const [catLinks, setCatLinks] = useState(CATEGORY_CARDS);
@@ -100,6 +102,11 @@ export default function HomePage() {
               <Link className="btn btn-quiet" to="/shop?new=1">
                 New arrivals
               </Link>
+              {!isAuthenticated && (
+                <Link className="btn btn-quiet hero-register-btn" to="/register">
+                  Create account <RiArrowRightLine size={16} />
+                </Link>
+              )}
             </div>
           </div>
           <div className="hero-stage" data-rise>
