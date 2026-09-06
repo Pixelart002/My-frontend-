@@ -40,8 +40,10 @@
   pointer-events: none;
 }
 
-/* This file is the single owner of the responsive mobile-nav display state. */
-.mobile-nav { display: none !important; }
+.mobile-nav {
+  display: none !important;
+  inset: auto !important;
+}
 
 .cart-count {
   position: absolute;
@@ -82,7 +84,7 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+  box-shadow: 0 18px 50px rgba(0, .35);
   z-index: 140;
 }
 
@@ -132,12 +134,17 @@
 
   .mobile-nav {
     position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    right: 0;
+    inset: auto !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    width: auto;
     display: flex !important;
     flex-direction: column;
     gap: 2px;
+    height: auto !important;
+    min-height: 0;
     max-height: calc(100vh - 82px);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -160,17 +167,13 @@
     transform: translateY(0);
   }
 
-  /* React's hidden attribute is authoritative when the menu is closed. */
-  .mobile-nav[hidden] {
-    display: none !important;
-  }
-
   .mobile-nav a,
   .mobile-nav button {
     min-height: 44px;
-    display: flex;
+    display: flex !important;
     align-items: center;
     width: 100%;
+    flex: 0 0 auto;
     padding: 10px 12px;
     border: 0;
     border-radius: 10px;
@@ -183,10 +186,9 @@
     touch-action: manipulation;
   }
 
-  .mobile-nav a:hover,
-  .mobile-nav button:hover { background: var(--surface-2); }
-
-  .nav-section-label {
+  .mobile-nav .nav-section-label {
+    display: block !important;
+    flex: 0 0 auto;
     padding: 12px 12px 6px;
     color: var(--dim);
     font-size: 10px;
@@ -195,9 +197,16 @@
     text-transform: uppercase;
   }
 
+  .mobile-nav a:hover,
+  .mobile-nav button:hover { background: var(--surface-2); }
+
   .mobile-nav .nav-section-label:not(:first-child) {
     margin-top: 5px;
     border-top: 1px solid var(--line);
+  }
+
+  .mobile-nav[aria-hidden="true"] {
+    pointer-events: none;
   }
 
   .cart-layout,
@@ -221,8 +230,8 @@
   }
 
   .mobile-nav {
-    left: 8px;
-    right: 8px;
+    left: 8px !important;
+    right: 8px !important;
   }
 
   .cart-count {
