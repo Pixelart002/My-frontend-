@@ -115,7 +115,6 @@ export default function Header() {
       <nav
         className={`mobile-nav${mobileOpen ? ' is-open' : ''}`}
         aria-hidden={!mobileOpen}
-        hidden={!mobileOpen}
       >
         <span className="nav-section-label">Shop</span>
         <Link to="/shop" onClick={closeAll}>Shop all</Link>
