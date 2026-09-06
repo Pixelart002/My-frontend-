@@ -53,6 +53,7 @@ function AppRoutes() {
         <Route path="/returns" element={<ReturnCancelPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+        <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
