@@ -3,7 +3,7 @@
 .header.drawer-active { z-index: 200; }
 .header-actions,.icon-btn,.menu-button,.search-form,.account-menu-wrap { display:flex; align-items:center; }
 .header-actions { gap:8px; }
-.menu-button { display:none; align-items:center; justify-content:center; width:42px; height:42px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--text); cursor:pointer; flex:0 0 auto; -webkit-tap-highlight-color:transparent; touch-action:manipulation; position:relative; z-index:210; }
+.menu-button { display:none; align-items:center; justify-content:center; width:42px; height:42px; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--text); cursor:pointer; flex:0 0 auto; -webkit-tap-highlight-color:transparent; touch-action:manipulation; position:relative; z-index:201; }
 .menu-button svg { display:block; width:22px; height:22px; flex:0 0 22px; pointer-events:none; }
 .mobile-nav { display:none !important; }
 .mobile-menu-backdrop { display:none; }
