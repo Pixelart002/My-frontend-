@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   RiDashboardLine,
   RiPriceTag3Line,
@@ -26,13 +26,29 @@ const NAV = [
   { key: 'users', label: 'Users', icon: RiGroupLine },
 ];
 
+const VALID_PANELS = new Set(NAV.map((item) => item.key));
+
 export default function AdminPage() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedPanel = searchParams.get('panel');
+  const initialPanel = VALID_PANELS.has(requestedPanel) ? requestedPanel : 'dashboard';
   const [status, setStatus] = useState('verifying'); // verifying | verified | denied
   const [profile, setProfile] = useState(null);
-  const [panel, setPanel] = useState('dashboard');
+  const [panel, setPanel] = useState(initialPanel);
+
+  useEffect(() => {
+    const nextPanel = VALID_PANELS.has(requestedPanel) ? requestedPanel : 'dashboard';
+    setPanel(nextPanel);
+  }, [requestedPanel]);
+
+  const selectPanel = (nextPanel) => {
+    if (!VALID_PANELS.has(nextPanel)) return;
+    setPanel(nextPanel);
+    setSearchParams({ panel: nextPanel });
+  };
 
   useEffect(() => {
     let active = true;
@@ -45,7 +61,6 @@ export default function AdminPage() {
       })
       .catch((err) => {
         if (!active) return;
-        // Non-200 (e.g. 403 permission denied) => not an admin.
         setStatus('denied');
         console.warn('Admin gate:', err.message);
       });
@@ -81,24 +96,24 @@ export default function AdminPage() {
     );
   }
 
-  const active = NAV.find((n) => n.key === panel);
+  const active = NAV.find((n) => n.key === panel) || NAV[0];
 
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-sb-label">Overview</div>
         {NAV.slice(0, 1).map((n) => (
-          <SideBtn key={n.key} nav={n} active={panel} onClick={() => setPanel(n.key)} />
+          <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />
         ))}
 
         <div className="admin-sb-label">Catalogue</div>
         {NAV.slice(1, 3).map((n) => (
-          <SideBtn key={n.key} nav={n} active={panel} onClick={() => setPanel(n.key)} />
+          <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />
         ))}
 
         <div className="admin-sb-label">Commerce</div>
         {NAV.slice(3).map((n) => (
-          <SideBtn key={n.key} nav={n} active={panel} onClick={() => setPanel(n.key)} />
+          <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />
         ))}
 
         <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line)', fontSize: 12, color: 'var(--dim)' }}>
@@ -106,6 +121,7 @@ export default function AdminPage() {
           <div style={{ overflowWrap: 'anywhere' }}>{profile?.email || user?.email}</div>
           <div style={{ marginTop: 4, textTransform: 'capitalize' }}>{profile?.role || user?.role}</div>
           <button
+            type="button"
             onClick={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }}
             style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--muted)', padding: 0, fontSize: 13 }}
           >
@@ -121,7 +137,7 @@ export default function AdminPage() {
             <h1>{active.label}</h1>
           </div>
         </div>
-        {panel === 'dashboard' && <DashboardPanel onNavigate={setPanel} />}
+        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}
         {panel === 'products' && <ProductsPanel />}
         {panel === 'categories' && <CategoriesPanel />}
         {panel === 'orders' && <OrdersPanel />}
@@ -134,7 +150,7 @@ export default function AdminPage() {
 function SideBtn({ nav, active, onClick }) {
   const Icon = nav.icon;
   return (
-    <button className={`admin-sb-btn ${active === nav.key ? 'is-active' : ''}`} onClick={onClick}>
+    <button type="button" className={`admin-sb-btn ${active === nav.key ? 'is-active' : ''}`} onClick={onClick}>
       <Icon size={18} /> {nav.label}
     </button>
   );
