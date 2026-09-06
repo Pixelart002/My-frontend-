@@ -88,7 +88,7 @@ export default function Header() {
   );
 
   const renderMobileMenu = () => {
-    if (isAdminPage) {
+    if (isAdminPage && isAdmin) {
       return (
         <>
           <div className="mobile-nav-head">
@@ -150,7 +150,7 @@ export default function Header() {
           </div>
           <div className="mobile-nav-section">
             <span className="nav-section-label">Account</span>
-            {menuLink('/account', 'Profile', isAccount && path === '/account' ? 'is-active' : '')}
+            {menuLink('/account', 'Profile', path === '/account' ? 'is-active' : '')}
             {menuLink('/orders', 'Order history', isOrders ? 'is-active' : '')}
             {menuLink('/account/addresses', 'Addresses', path === '/account/addresses' ? 'is-active' : '')}
             <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16} /> Sign out</button>
@@ -333,9 +333,9 @@ export default function Header() {
         </button>
       </div>
       <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden="true" onClick={closeAll} />
-      <nav id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Mobile navigation" aria-hidden={!mobileOpen}>
-        {renderMobileMenu()}
-      </nav>
+      <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Mobile navigation" aria-hidden={!mobileOpen}>
+        <div className="mobile-nav-inner">{renderMobileMenu()}</div>
+      </aside>
     </header>
   );
 }
