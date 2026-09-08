@@ -8,5 +8,6 @@ import './styles/forms.css';
 import './styles/app.css';
 import './styles/admin.css';
 import './styles/header.css';
+import './styles/polish.css';
 
 createRoot(document.getElementById('root')).render(<App />);
