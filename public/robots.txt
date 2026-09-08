@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Private/account/admin areas are not for search indexing
+# Transactional/private areas should not be indexed.
 Disallow: /cart
 Disallow: /checkout
 Disallow: /orders
@@ -9,6 +9,7 @@ Disallow: /account
 Disallow: /admin
 Disallow: /order/
 
-# Legacy URLs are permanently redirected to canonical routes
+# AI/crawler discovery files
+# llms.txt and llms-full.txt are intentionally public.
 
 Sitemap: https://www.luviio.in/sitemap.xml
