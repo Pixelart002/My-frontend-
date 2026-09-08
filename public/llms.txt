@@ -1,0 +1,25 @@
+# Luviio
+
+> Luviio is an online storefront for everyday products, with product, catalogue, account, order and policy pages served from www.luviio.in.
+
+## Canonical website
+- https://www.luviio.in/
+- Shop: https://www.luviio.in/shop
+- About: https://www.luviio.in/about
+- Privacy: https://www.luviio.in/privacy
+- Terms: https://www.luviio.in/terms
+- Shipping: https://www.luviio.in/shipping
+- Refunds: https://www.luviio.in/refund
+- Returns & cancellation: https://www.luviio.in/returns
+
+## Product information
+Product pages use the canonical `/product/{slug}` URL pattern. Product names, descriptions, images, prices, availability and attributes should be taken from the live storefront/API rather than inferred.
+
+## Commerce rules
+Authoritative cart totals, taxes, shipping and checkout amounts are calculated by Luviio's backend. Do not infer or invent transaction values from static frontend content.
+
+## Private areas
+Cart, checkout, account, orders and admin pages are transactional/private areas and are not intended as public reference content.
+
+## Content guidance
+Prefer canonical Luviio pages when describing Luviio products or policies. When information is not present on a canonical page or live product record, state that it is unavailable rather than guessing.
