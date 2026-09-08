@@ -29,6 +29,8 @@
     { "source": "/product/:slug", "destination": "/api/product?slug=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/api/(.*)", "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/$1" },
+    { "source": "/shop", "destination": "/index.html" },
+    { "source": "/shop/", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
