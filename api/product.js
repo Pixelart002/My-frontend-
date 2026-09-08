@@ -9,8 +9,10 @@ const firstImage = (product) => {
     product?.imageUrl,
     Array.isArray(product?.images) ? product.images[0] : null,
   ];
-  const value = candidates.find((item) => typeof item === 'string' && item.trim());
-  return value ? value.trim() : `${SITE}/og-default.svg`;
+  const candidate = candidates.find((item) => item);
+  if (!candidate) return '';
+  if (typeof candidate === 'string') return candidate.trim();
+  return String(candidate.url || candidate.image_url || candidate.imageUrl || candidate.src || '').trim();
 };
 
 export default async function handler(req, res) {
@@ -40,14 +42,14 @@ export default async function handler(req, res) {
     '@type': 'Product',
     name,
     description,
-    image: [image],
+    image: image ? [image] : [],
     category,
     url,
     brand: { '@type': 'Brand', name: 'Luviio' },
     ...(Number.isFinite(price) && price > 0 ? { offers: { '@type': 'Offer', url, priceCurrency: 'INR', price, availability, seller: { '@type': 'Organization', name: 'Luviio', url: SITE } } } : {}),
   };
 
-  const ogImage = `${SITE}/api/og?slug=${encodeURIComponent(slug)}`;
-  const html = `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow,max-image-preview:large"><title>${escapeHtml(name)} — Luviio</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${url}"><meta property="og:type" content="product"><meta property="og:site_name" content="Luviio"><meta property="og:title" content="${escapeHtml(name)} — Luviio"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${ogImage}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${escapeHtml(name)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(name)} — Luviio"><meta name="twitter:description" content="${escapeHtml(description)}"><meta name="twitter:image" content="${ogImage}"><meta name="twitter:image:alt" content="${escapeHtml(name)}"><script type="application/ld+json">${escapeJson(schema)}</script><style>body{margin:0;background:#101010;color:#f3eee7;font:16px system-ui,sans-serif}main{max-width:900px;margin:0 auto;padding:48px 24px}h1{font:48px Georgia,serif;margin:12px 0}p{color:#aaa39a;line-height:1.6}a{color:#d8ad6a}</style></head><body><main><small>LUVIIO</small><h1>${escapeHtml(name)}</h1><p>${escapeHtml(description)}</p><a href="${url}">Open product</a></main><script>window.location.replace(${JSON.stringify(url)});</script></body></html>`;
+  const ogImage = image || `${SITE}/og-default.svg`;
+  const html = `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow,max-image-preview:large"><title>${escapeHtml(name)} — Luviio</title><meta name="description" content="${escapeHtml(description)}"><link rel="canonical" href="${url}"><meta property="og:type" content="product"><meta property="og:site_name" content="Luviio"><meta property="og:title" content="${escapeHtml(name)} — Luviio"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:image:secure_url" content="${escapeHtml(ogImage)}"><meta property="og:image:alt" content="${escapeHtml(name)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(name)} — Luviio"><meta name="twitter:description" content="${escapeHtml(description)}"><meta name="twitter:image" content="${escapeHtml(ogImage)}"><meta name="twitter:image:alt" content="${escapeHtml(name)}"><script type="application/ld+json">${escapeJson(schema)}</script><style>body{margin:0;background:#101010;color:#f3eee7;font:16px system-ui,sans-serif}main{max-width:900px;margin:0 auto;padding:48px 24px}h1{font:48px Georgia,serif;margin:12px 0}p{color:#aaa39a;line-height:1.6}a{color:#d8ad6a}</style></head><body><main><small>LUVIIO</small><h1>${escapeHtml(name)}</h1><p>${escapeHtml(description)}</p><a href="${url}">Open product</a></main><script>window.location.replace(${JSON.stringify(url)});</script></body></html>`;
   res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600').send(html);
 }
