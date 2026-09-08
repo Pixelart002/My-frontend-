@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { RiSubtractLine, RiAddLine, RiShoppingBagLine, RiShuffleLine, RiTruckLine } from '@remixicon/react';
 import { productService } from '../services/products';
@@ -16,31 +16,45 @@ export default function ProductDetailPage() {
   const { addItem } = useCart();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-
   const [product, setProduct] = useState(null);
   const [error, setError] = useState('');
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  const loadProduct = useCallback(async () => {
     setProduct(null);
     setError('');
     setQty(1);
     setActiveImg(0);
     if (!slug) {
       setError('Product not found.');
-      return () => { active = false; };
+      return;
     }
-    productService
-      .get(slug)
-      .then((data) => active && setProduct(data))
-      .catch((err) => active && setError(err.message || 'Unable to load this product.'));
+    try {
+      setProduct(await productService.get(slug));
+    } catch (err) {
+      setError(err.message || 'Unable to load this product.');
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        setProduct(null);
+        setError('');
+        if (!slug) throw new Error('Product not found.');
+        const data = await productService.get(slug);
+        if (active) setProduct(data);
+      } catch (err) {
+        if (active) setError(err.message || 'Unable to load this product.');
+      }
+    })();
     return () => { active = false; };
   }, [slug]);
 
-  if (error) return <div className="page container"><ErrorState message={error} onRetry={() => window.location.reload()} /></div>;
+  if (error) return <div className="page container"><ErrorState message={error} onRetry={loadProduct} /></div>;
   if (!product) return <div className="page container"><Spinner label="Loading product…" /></div>;
 
   const images = Array.isArray(product.images) && product.images.length ? product.images : [product.image_url].filter(Boolean);
