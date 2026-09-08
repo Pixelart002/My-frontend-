@@ -1,5 +1,10 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { RiErrorWarningLine, RiCheckboxCircleFill, RiInformationLine, RiCloseLine } from '@remixicon/react';
+import {
+  RiErrorWarningLine,
+  RiCheckboxCircleFill,
+  RiInformationLine,
+  RiCloseLine,
+} from '@remixicon/react';
 
 const ToastContext = createContext(null);
 
@@ -35,28 +40,44 @@ export function ToastProvider({ children }) {
     [dismiss],
   );
 
+  // Support both common call styles used throughout the app:
+  // const toast = useToast(); toast.success('...')
+  // const { success } = useToast(); success('...')
+  const toast = useMemo(() => {
+    const notify = (message, tone = 'info', duration = 4200) => push(message, tone, duration);
+    notify.success = (message, duration) => push(message, 'success', duration);
+    notify.error = (message, duration) => push(message, 'error', duration);
+    notify.info = (message, duration) => push(message, 'info', duration);
+    notify.dismiss = dismiss;
+    return notify;
+  }, [push, dismiss]);
+
   const value = useMemo(
     () => ({
-      toast: push,
-      success: (message) => push(message, 'success'),
-      error: (message) => push(message, 'error'),
-      info: (message) => push(message, 'info'),
+      toast,
+      success: toast.success,
+      error: toast.error,
+      info: toast.info,
       dismiss,
     }),
-    [push, dismiss],
+    [toast, dismiss],
   );
 
   return (
     <ToastContext.Provider value={value}>
       {children}
       <div className="toast-stack" role="status" aria-live="polite">
-        {toasts.map((toast) => {
-          const Icon = ICONS[toast.tone] || Info;
+        {toasts.map((item) => {
+          const Icon = ICONS[item.tone] || RiInformationLine;
           return (
-            <div key={toast.id} className={`toast toast-${toast.tone}`}>
+            <div key={item.id} className={`toast toast-${item.tone}`}>
               <Icon size={17} />
-              <span>{toast.message}</span>
-              <button type="button" onClick={() => dismiss(toast.id)} aria-label="Dismiss notification">
+              <span>{item.message}</span>
+              <button
+                type="button"
+                onClick={() => dismiss(item.id)}
+                aria-label="Dismiss notification"
+              >
                 <RiCloseLine size={15} />
               </button>
             </div>
