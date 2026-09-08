@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { RiArrowRightLine, RiSubtractLine, RiAddLine, RiDeleteBinLine, RiTruckLine, RiCloseLine } from '@remixicon/react';
@@ -5,6 +6,23 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatMoney } from '../utils/format';
 import { EmptyState, Spinner } from '../components/ui/States';
+
+function QuantityEditor({ item, disabled, onUpdate }) {
+  const [value, setValue] = useState(String(item.quantity));
+  const max = Math.max(1, Number(item.stock) || 9999);
+  const commit = () => {
+    const next = Math.min(max, Math.max(1, Number.parseInt(value, 10) || 1));
+    setValue(String(next));
+    if (next !== Number(item.quantity)) onUpdate(next);
+  };
+  return (
+    <div className="qty-stepper cart-qty" aria-label={`Quantity for ${item.name}`}>
+      <button type="button" onClick={() => onUpdate(Math.max(1, Number(item.quantity) - 1))} disabled={disabled || Number(item.quantity) <= 1} aria-label="Decrease quantity"><RiSubtractLine size={15} /></button>
+      <input inputMode="numeric" value={value} onChange={(event) => setValue(event.target.value.replace(/[^0-9]/g, ''))} onBlur={commit} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); commit(); } }} aria-label={`Quantity for ${item.name}`} disabled={disabled} />
+      <button type="button" onClick={() => onUpdate(Math.min(max, Number(item.quantity) + 1))} disabled={disabled || Number(item.quantity) >= max} aria-label="Increase quantity"><RiAddLine size={15} /></button>
+    </div>
+  );
+}
 
 export default function CartPage() {
   const { cart, loading, updateItem, removeItem, clearCart } = useCart();
@@ -70,11 +88,7 @@ export default function CartPage() {
                   <p className="cart-unit">{formatMoney(item.unit_price)} each</p>
                 </div>
 
-                <div className="qty-stepper cart-qty">
-                  <button onClick={() => updateItem(item.product_id, Math.max(1, Number(item.quantity) - 1))} disabled={unavailable} aria-label="Decrease quantity"><RiSubtractLine size={15} /></button>
-                  <input readOnly value={item.quantity} aria-label="Quantity" />
-                  <button onClick={() => updateItem(item.product_id, Number(item.quantity) + 1)} disabled={unavailable || Number(item.quantity) >= Number(item.stock)} aria-label="Increase quantity"><RiAddLine size={15} /></button>
-                </div>
+                <QuantityEditor item={item} disabled={unavailable || loading} onUpdate={(quantity) => updateItem(item.product_id, quantity)} />
 
                 <strong className="cart-line-total">{formatMoney(item.line_total)}</strong>
                 <button className="cart-remove" onClick={() => removeItem(item.product_id)} aria-label="Remove item"><RiCloseLine size={16} /></button>

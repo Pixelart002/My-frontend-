@@ -130,12 +130,14 @@ async function fetchOnce(method, path, body, headers) {
   return fetch(`${API_BASE}${path}`, opts);
 }
 
-async function parseError(res) {
-  let data = {};
-  try {
-    data = await res.json();
-  } catch {
-    /* no body */
+async function parseError(res, parsed = null) {
+  let data = parsed || {};
+  if (!parsed) {
+    try {
+      data = await res.json();
+    } catch {
+      /* no body */
+    }
   }
   const raw = Array.isArray(data?.detail)
     ? data.detail.map((d) => d.msg || d.message || 'Validation error').join('; ')
@@ -195,7 +197,7 @@ export async function request(method, path, body = null, isRetry = false) {
         data = {};
       }
 
-      if (!res.ok) throw await parseError(res);
+      if (!res.ok) throw await parseError(res, data);
 
       return data && data.success !== undefined && data.data !== undefined ? data.data : data;
     } catch (err) {

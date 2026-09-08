@@ -12,7 +12,6 @@ export default function OrderSuccessPage() {
   useEffect(() => {
     // Re-sync the cart from the backend (the order flow consumes cart items).
     reload().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
