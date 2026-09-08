@@ -27,7 +27,7 @@
   "@react-three/drei": "^10.7.8",
   "@react-three/fiber": "^9.7.0",
   "@remixicon/react": "^4.2.0",
-  "@stripe/react-stripe-js": "^3.1.4",
+  "@stripe/react-stripe-js": "^6.9.0",
   "@stripe/stripe-js": "^6.1.0",
   "gsap": "^3.15.0",
   "lucide-react": "^1.37.0",
