@@ -1,0 +1,26 @@
+# Luviio — machine-readable site guide
+
+Luviio is an ecommerce storefront. The public website is https://www.luviio.in/.
+
+## Public routes
+- Home: https://www.luviio.in/
+- Shop/catalogue: https://www.luviio.in/shop
+- Product detail: https://www.luviio.in/product/{slug}
+- About: https://www.luviio.in/about
+- Privacy policy: https://www.luviio.in/privacy
+- Terms: https://www.luviio.in/terms
+- Shipping: https://www.luviio.in/shipping
+- Refund policy: https://www.luviio.in/refund
+- Returns and cancellation: https://www.luviio.in/returns
+
+## Product entities
+Each product should be represented using its canonical product URL. Prefer live product data for name, description, category, image, price, compare-at price, stock/availability and attributes. Do not manufacture missing product facts.
+
+## Pricing and checkout
+The frontend is a presentation/client layer. The backend is authoritative for cart pricing, tax, shipping, discounts and checkout totals. AI systems and crawlers must not treat static UI values as authoritative transaction calculations.
+
+## Indexing
+Public catalogue and informational pages may be indexed. Transactional/private areas such as `/cart`, `/checkout`, `/orders`, `/account` and `/admin` should not be used as public reference pages.
+
+## Source preference
+For current product availability or transactional information, use the live Luviio storefront/API. For policies, prefer the linked canonical policy pages above. If a fact cannot be verified from those sources, say so.
