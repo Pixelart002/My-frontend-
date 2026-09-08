@@ -14,29 +14,36 @@ function pageNumbers(current, total) {
   return out;
 }
 
-export default function Pagination({ page, totalPages, onChange }) {
-  if (!totalPages || totalPages <= 1) return null;
+export default function Pagination({ page = 1, totalPages = 0, onChange }) {
+  const total = Math.max(0, Number(totalPages) || 0);
+  const current = Math.min(total || 1, Math.max(1, Number(page) || 1));
+  if (total <= 1 || typeof onChange !== 'function') return null;
+
+  const change = (next) => onChange(Math.min(total, Math.max(1, next)));
 
   return (
     <nav className="pagination" aria-label="Pagination">
       <button
+        type="button"
         className="page-btn"
-        onClick={() => onChange(Math.max(1, page - 1))}
-        disabled={page <= 1}
+        onClick={() => change(current - 1)}
+        disabled={current <= 1}
         aria-label="Previous page"
       >
-        <RiArrowLeftSLine size={16} />
+        <RiArrowLeftSLine size={16} aria-hidden="true" />
       </button>
 
-      {pageNumbers(page, totalPages).map((item, i) =>
+      {pageNumbers(current, total).map((item, i) =>
         item === '…' ? (
-          <span key={`gap-${i}`} className="dim-text">…</span>
+          <span key={`gap-${i}`} className="dim-text" aria-hidden="true">…</span>
         ) : (
           <button
+            type="button"
             key={item}
-            className={`page-btn ${item === page ? 'is-active' : ''}`}
-            onClick={() => onChange(item)}
-            aria-current={item === page ? 'page' : undefined}
+            className={`page-btn ${item === current ? 'is-active' : ''}`}
+            onClick={() => change(item)}
+            aria-current={item === current ? 'page' : undefined}
+            aria-label={`Page ${item}`}
           >
             {item}
           </button>
@@ -44,12 +51,13 @@ export default function Pagination({ page, totalPages, onChange }) {
       )}
 
       <button
+        type="button"
         className="page-btn"
-        onClick={() => onChange(Math.min(totalPages, page + 1))}
-        disabled={page >= totalPages}
+        onClick={() => change(current + 1)}
+        disabled={current >= total}
         aria-label="Next page"
       >
-        <RiArrowRightSLine size={16} />
+        <RiArrowRightSLine size={16} aria-hidden="true" />
       </button>
     </nav>
   );
