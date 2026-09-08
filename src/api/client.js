@@ -52,11 +52,6 @@ function backoff(attempt) {
   return 300 * Math.pow(2, attempt - 1);
 }
 
-/**
- * Resolve the current token from memory first, then the AuthContext bridge,
- * then sessionStorage. This prevents protected requests from being sent
- * without Authorization after a hard reload before React effects complete.
- */
 function readToken() {
   if (accessToken) return accessToken;
 
@@ -83,10 +78,7 @@ function readToken() {
   return null;
 }
 
-/**
- * Single-flight refresh: concurrent 401s share one refresh request instead
- * of rotating/overwriting the refresh cookie multiple times.
- */
+/** Single-flight refresh so concurrent 401s share one refresh request. */
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise;
 
@@ -150,16 +142,11 @@ export async function request(method, path, body = null, isRetry = false) {
   const token = readToken();
   const protectedPath = !isPublic(path) && !path.startsWith('/auth/');
 
-  if (token && protectedPath) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  if (token && protectedPath) headers.Authorization = `Bearer ${token}`;
 
   const canRetry = IDEMPOTENT.has(method.toUpperCase());
   let attempt = 0;
 
-  // 401 recovery works even when no access token is currently in memory.
-  // This is critical after a hard reload: the httpOnly refresh cookie may
-  // still be valid while React has not restored __lv_at yet.
   const performForRefresh = async () => {
     const res = await fetchOnce(method, path, body, headers);
     if (res.status === 401 && !isRetry && protectedPath) {
@@ -178,7 +165,7 @@ export async function request(method, path, body = null, isRetry = false) {
       } catch {
         /* noop */
       }
-      return null;
+      throw new ApiError('Your session has expired. Please sign in again.', 401, 'AUTH_REQUIRED');
     }
     return res;
   };
@@ -217,7 +204,7 @@ export async function request(method, path, body = null, isRetry = false) {
 export async function downloadFile(path, defaultFilename) {
   const headers = {};
   const token = readToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'GET',
