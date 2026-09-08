@@ -9,9 +9,14 @@
 
 const LIVE_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
 const DEV_API_BASE = LIVE_API_BASE;
-const PROD_API_BASE = LIVE_API_BASE;
+const PROD_API_BASE = import.meta.env.NEXT_PUBLIC_API_URL || LIVE_API_BASE;
 
 const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
+const normalizeApiBase = (value) => {
+  const base = stripTrailingSlash(value);
+  if (!base) return '';
+  return /\/api\/v1$/i.test(base) ? base : `${base}/api/v1`;
+};
 
 /**
  * API base URL, resolved in priority order:
@@ -21,14 +26,17 @@ const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
  * Production intentionally targets the backend directly. This avoids a
  * Vercel rewrite masking backend route failures as frontend 404 responses.
  */
-export const API_BASE = stripTrailingSlash(
-  import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? DEV_API_BASE : PROD_API_BASE),
+export const API_BASE = normalizeApiBase(
+  import.meta.env.VITE_API_BASE ||
+  import.meta.env.NEXT_PUBLIC_API_URL ||
+  (import.meta.env.DEV ? DEV_API_BASE : PROD_API_BASE),
 );
 
 /** Stripe publishable key — safe for browsers. */
 export const STRIPE_PK =
   import.meta.env.VITE_STRIPE_PK ||
-  'pk_test_51LQQdRSDXqp6jmyTe96SuttCSgDD91Yu90PsGPLuw9liYziNa1TT0Yhi01fRdNuh5k656lM93wRYTjJZK7vzJBzL00FQaIQXYa';
+  import.meta.env.STRIPE_PK ||
+  '';
 
 export const APP_NAME = 'Luviio';
 

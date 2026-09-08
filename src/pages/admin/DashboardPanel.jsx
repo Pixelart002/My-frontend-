@@ -34,7 +34,6 @@ export default function DashboardPanel({ onNavigate }) {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading && !stats) {

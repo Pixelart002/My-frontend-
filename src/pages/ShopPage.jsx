@@ -50,7 +50,6 @@ export default function ShopPage() {
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, q, category, inStockOnly, isNew, minPrice, maxPrice]);
 
   const setParam = (key, value) => {

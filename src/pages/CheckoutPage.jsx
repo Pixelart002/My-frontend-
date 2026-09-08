@@ -86,6 +86,7 @@ export default function CheckoutPage() {
   const [showForm, setShowForm] = useState(false);
   const [intent, setIntent] = useState(null);
   const [intentError, setIntentError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [creating, setCreating] = useState(false);
 
   const loadAddresses = useCallback(async () => {
@@ -108,14 +109,22 @@ export default function CheckoutPage() {
     setCreating(true);
     setIntentError('');
     try {
-      const data = await paymentService.createIntent(selected, makeIdempotencyKey());
+      const key = makeIdempotencyKey();
+      if (paymentMethod === 'cod') {
+        const order = await paymentService.createCodOrder(selected, key);
+        const orderId = order?.order_id || order?.id;
+        if (!orderId) throw new Error('COD order could not be created. Please try again.');
+        navigate('/order/success', { replace: true, state: { orderId, orderNumber: order?.order_number, paymentMethod: 'cod' } });
+        return;
+      }
+      const data = await paymentService.createIntent(selected, key);
       if (!data?.client_secret || !data?.payment_intent_id || !data?.order_id) {
         throw new Error('Payment session was not created correctly. Please try again.');
       }
       setIntent(data);
       setStep(2);
     } catch (err) {
-      setIntentError(err.message || 'Unable to start payment.');
+      setIntentError(err.message || 'Unable to start checkout. Please try again.');
     } finally {
       setCreating(false);
     }
@@ -160,9 +169,13 @@ export default function CheckoutPage() {
             <h2>2 · Payment</h2>
             {step === 1 ? (
               <div>
-                {intentError && <div className="form-error">{intentError}</div>}
+                {intentError && <div className="form-error" role="alert">{intentError}</div>}
+                <div className="payment-options" role="radiogroup" aria-label="Payment method">
+                  <label className={`payment-option ${paymentMethod === 'stripe' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} /><span><strong>Card payment</strong><small>Secure checkout powered by Stripe</small></span></label>
+                  <label className={`payment-option ${paymentMethod === 'cod' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} /><span><strong>Cash on delivery</strong><small>Pay when your order arrives</small></span></label>
+                </div>
                 <button className="btn" onClick={startPayment} disabled={!selected || creating}>
-                  <RiLockLine size={16} /> {creating ? 'Preparing secure payment…' : 'Continue to payment'}
+                  <RiLockLine size={16} /> {creating ? 'Preparing your order…' : paymentMethod === 'cod' ? 'Place COD order' : 'Continue to payment'}
                 </button>
                 {!selected && addresses && addresses.length > 0 && <p className="hint">Select a delivery address above.</p>}
               </div>

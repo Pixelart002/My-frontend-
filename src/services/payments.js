@@ -25,5 +25,15 @@ export const paymentService = {
       error_message: errorMessage,
     }),
 
+  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
+    const payload = {
+      shipping_address_id: shippingAddressId,
+      payment_method: 'cod',
+      idempotency_key: idempotencyKey,
+    };
+    if (billingAddressId) payload.billing_address_id = billingAddressId;
+    return request('POST', '/orders', payload);
+  },
+
   retry: (orderId) => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
 };
