@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { RiSubtractLine, RiAddLine, RiShoppingBagLine, RiShuffleLine, RiTruckLine } from '@remixicon/react';
 import { productService } from '../services/products';
 import { formatMoney } from '../utils/format';
-import { setPageSeo, siteUrl } from '../utils/seo';
+import { setPageSeo, siteUrl, defaultShareImage } from '../utils/seo';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -61,7 +61,7 @@ export default function ProductDetailPage() {
     const name = product.name || 'Luviio product';
     const description = String(product.short_description || product.description || `Shop ${name} from Luviio.`).replace(/\s+/g, ' ').slice(0, 180);
     const url = `${siteUrl}/product/${encodeURIComponent(slug)}`;
-    const image = `${siteUrl}/api/og?slug=${encodeURIComponent(slug)}`;
+    const image = product.image_url || (Array.isArray(product.images) ? product.images[0] : '') || defaultShareImage;
     const price = Number(product.price);
     const stock = Number(product.stock);
     const availability = product.is_active === false || (Number.isFinite(stock) && stock <= 0) ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock';
@@ -86,7 +86,7 @@ export default function ProductDetailPage() {
             '@type': 'Product',
             name,
             description,
-            image: [product.image_url || `${siteUrl}/og-default.svg`],
+            image: [image],
             category: product.categories?.name || product.category_name || 'Luviio collection',
             url,
             brand: { '@type': 'Brand', name: 'Luviio' },
