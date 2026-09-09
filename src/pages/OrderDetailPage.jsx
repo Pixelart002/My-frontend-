@@ -16,10 +16,7 @@ export default function OrderDetailPage() {
 
   const load = () => {
     setError('');
-    orderService
-      .myOrder(id)
-      .then(setOrder)
-      .catch((err) => setError(err.message || 'Unable to load this order.'));
+    orderService.myOrder(id).then(setOrder).catch((err) => setError(err.message || 'Unable to load this order.'));
   };
 
   useEffect(load, [id]);
@@ -27,26 +24,16 @@ export default function OrderDetailPage() {
   const onCancel = async () => {
     if (!window.confirm('Cancel this order? Your payment will be refunded.')) return;
     setBusy(true);
-    try {
-      await orderService.cancel(order.id);
-      toast.success('Order cancelled.');
-      load();
-    } catch (err) {
-      toast.error(err.message || 'Unable to cancel this order.');
-    } finally {
-      setBusy(false);
-    }
+    try { await orderService.cancel(order.id); toast.success('Order cancelled.'); load(); }
+    catch (err) { toast.error(err.message || 'Unable to cancel this order.'); }
+    finally { setBusy(false); }
   };
 
   const onInvoice = async () => {
     setBusy(true);
-    try {
-      await orderService.invoice(order.id);
-    } catch (err) {
-      toast.error(err.message || 'Unable to download the invoice.');
-    } finally {
-      setBusy(false);
-    }
+    try { await orderService.invoice(order.id); }
+    catch (err) { toast.error(err.message || 'Unable to download the invoice.'); }
+    finally { setBusy(false); }
   };
 
   if (error) return <div className="page container"><ErrorState message={error} onRetry={load} /></div>;
@@ -58,7 +45,6 @@ export default function OrderDetailPage() {
   return (
     <div className="page container">
       <Link className="back-link" to="/orders"><RiArrowLeftLine size={15} /> Back to orders</Link>
-
       <div className="order-head">
         <div>
           <p className="eyebrow">Order details</p>
@@ -69,16 +55,8 @@ export default function OrderDetailPage() {
       </div>
 
       <div className="order-actions">
-        {canDownloadInvoice(status) && (
-          <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}>
-            <RiFileTextLine size={15} /> Download invoice
-          </button>
-        )}
-        {canCancelOrder(status) && (
-          <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}>
-            <RiCloseCircleLine size={15} /> Cancel order
-          </button>
-        )}
+        {canDownloadInvoice(status) && <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}><RiFileTextLine size={15} /> Download invoice</button>}
+        {canCancelOrder(status) && <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}><RiCloseCircleLine size={15} /> Cancel order</button>}
       </div>
 
       <div className="order-items">
@@ -87,29 +65,20 @@ export default function OrderDetailPage() {
           const name = prod.name || item.product_name || 'Product';
           const slug = prod.slug || item.product_slug || item.product_id;
           const imageUrl = prod.image_url || item.image_url || item.product_image_url;
-          const quantity = Number(item.quantity || 0);
-          const storedUnitPrice = Number(item.unit_price ?? item.price ?? 0);
-          const storedSubtotal = Number(item.subtotal ?? item.line_total ?? item.total ?? 0);
-          const productPrice = Number(prod.price ?? 0);
+          const quantity = Math.max(1, Number(item.quantity) || 1);
+          const storedUnitPrice = Number(item.unit_price ?? item.price) || 0;
+          const storedSubtotal = Number(item.subtotal ?? item.line_total ?? item.total) || 0;
+          const productPrice = Number(prod.price) || 0;
+          const unitPrice = storedUnitPrice > 0 ? storedUnitPrice : storedSubtotal > 0 ? storedSubtotal / quantity : productPrice;
 
-          // Prefer immutable order-item pricing. If an old order has missing/zero
-          // item pricing, use the product snapshot and the order subtotal as fallbacks.
-          const unitPrice = storedUnitPrice > 0
-            ? storedUnitPrice
-            : storedSubtotal > 0 && quantity > 0
-              ? storedSubtotal / quantity
-              : productPrice;
-          const lineTotal = storedSubtotal > 0
-            ? storedSubtotal
-            : unitPrice * quantity;
+          // The unit price is the immutable price paid for this order item.
+          // Calculate the displayed line total from it so a missing/zero subtotal
+          // field in an API response can never make a paid item appear as ₹0.
+          const lineTotal = unitPrice * quantity;
 
           return (
             <div className="cart-row" key={item.id}>
-              {imageUrl && slug ? (
-                <Link to={`/product/${slug}`} className="cart-thumb"><img src={imageUrl} alt={name} /></Link>
-              ) : (
-                <div className="cart-thumb"><span>{name.slice(0, 1)}</span></div>
-              )}
+              {imageUrl && slug ? <Link to={`/product/${slug}`} className="cart-thumb"><img src={imageUrl} alt={name} /></Link> : <div className="cart-thumb"><span>{name.slice(0, 1)}</span></div>}
               <div className="cart-info">
                 <h3>{name}</h3>
                 <p className="product-category">{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p>
@@ -125,21 +94,12 @@ export default function OrderDetailPage() {
         <p className="eyebrow">Summary</p>
         <dl className="summary-lines">
           <div><dt>Subtotal</dt><dd>{formatMoney(order.subtotal ?? order.items_subtotal ?? 0)}</dd></div>
-          <div><dt>Shipping</dt><dd>{order.shipping_cost > 0 ? formatMoney(order.shipping_cost) : 'Free'}</dd></div>
+          <div><dt>Shipping</dt><dd>{Number(order.shipping_cost) > 0 ? formatMoney(order.shipping_cost) : 'Free'}</dd></div>
           <div><dt>Taxes</dt><dd>{formatMoney(order.tax_amount)}</dd></div>
-          {order.discount_amount > 0 && <div><dt>Discount</dt><dd>−{formatMoney(order.discount_amount)}</dd></div>}
+          {Number(order.discount_amount) > 0 && <div><dt>Discount</dt><dd>−{formatMoney(order.discount_amount)}</dd></div>}
           <div className="total"><dt>Total</dt><dd>{formatMoney(order.total_amount ?? order.grand_total)}</dd></div>
         </dl>
-
-        {order.shipping_address && (
-          <div className="summary-address">
-            <strong>Deliver to</strong>
-            <p>
-              {order.shipping_address.line1}, {order.shipping_address.city}
-              {order.shipping_address.state ? `, ${order.shipping_address.state}` : ''} — {order.shipping_address.postal_code}
-            </p>
-          </div>
-        )}
+        {order.shipping_address && <div className="summary-address"><strong>Deliver to</strong><p>{order.shipping_address.line1}, {order.shipping_address.city}{order.shipping_address.state ? `, ${order.shipping_address.state}` : ''} — {order.shipping_address.postal_code}</p></div>}
       </aside>
     </div>
   );
