@@ -15,7 +15,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || processing) return;
 
     setProcessing(true);
     setMessage('');
@@ -27,7 +27,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
     });
 
     if (error) {
-      // Client-side reported failure; backend logs it (best-effort).
       const intentId = paymentIntent?.id || paymentIntentId;
       if (intentId) {
         paymentService.notifyFailed(intentId, error.message || '').catch(() => {});
@@ -39,13 +38,11 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
     }
 
     if (paymentIntent && paymentIntent.status === 'succeeded') {
-      // Confirm the order with the backend, then redirect to success.
       try {
         const confirmation = await paymentService.confirm(paymentIntent.id);
         await refreshProfile();
         onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
       } catch (err) {
-        // The payment succeeded on Stripe's side; confirm may need a retry.
         setMessage('Payment was successful, but confirming your order hit a snag. Please retry.');
         setProcessing(false);
       }
@@ -57,21 +54,24 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="stripe-form">
-      <PaymentElement id="payment-element" />
+    <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
+      <div className="payment-element-shell">
+        <PaymentElement id="payment-element" />
+      </div>
 
-      {message && <div className="form-error">{message}</div>}
+      {message && <div className="form-error payment-form-error" role="alert">{message}</div>}
 
-      <div className="btn-row pay-actions">
-        <button className="btn btn-quiet" type="button" onClick={onBack} disabled={processing}>
+      <div className="payment-form-actions">
+        <button className="btn btn-quiet payment-back-btn" type="button" onClick={onBack} disabled={processing}>
           Back
         </button>
-        <button className="btn" type="submit" disabled={!stripe || processing}>
-          <RiLockLine size={15} /> {processing ? 'Processing…' : `Pay ${orderNumber ? `· order ${orderNumber}` : ''}`}
+        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || processing}>
+          <RiLockLine size={15} aria-hidden="true" />
+          <span>{processing ? 'Processing…' : 'Pay securely'}</span>
         </button>
       </div>
       <p className="hint secure-hint">
-        Payments are encrypted and processed securely by Stripe. Order {orderNumber && `#${orderNumber}`} will be created on payment.
+        Payments are encrypted and processed securely by Stripe. Order {orderNumber ? `#${orderNumber}` : ''} will be confirmed after successful payment.
       </p>
     </form>
   );
