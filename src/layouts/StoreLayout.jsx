@@ -1,11 +1,28 @@
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import Footer from './Footer';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+
+const FOOTER_PATHS = new Set([
+  '/',
+  '/shop',
+  '/privacy',
+  '/terms',
+  '/shipping',
+  '/refund',
+  '/returns',
+  '/about',
+]);
+
+function shouldShowFooter(pathname) {
+  if (FOOTER_PATHS.has(pathname)) return true;
+  return pathname.startsWith('/product/');
+}
 
 export default function StoreLayout() {
   const { token, initializing, refreshProfile } = useAuth();
+  const { pathname } = useLocation();
 
   // Refresh profile once a session token becomes available (e.g. after login
   // navigates) so the header reflects the current user.
@@ -28,7 +45,7 @@ export default function StoreLayout() {
       <main>
         <Outlet />
       </main>
-      <Footer />
+      {shouldShowFooter(pathname) && <Footer />}
     </>
   );
 }
