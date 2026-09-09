@@ -26,9 +26,9 @@ export default function SettingsPage() {
           <div><h2 id="security-heading">Security</h2><p>Keep your account credentials secure.</p></div>
         </div>
         <div className="settings-list">
-          <Link className="settings-row" to="/forgot-password">
+          <Link className="settings-row" to="/account/change-password">
             <span className="settings-row-icon"><RiLockPasswordLine size={19} /></span>
-            <span className="settings-row-copy"><strong>Reset password</strong><small>Request a secure password reset link.</small></span>
+            <span className="settings-row-copy"><strong>Reset password</strong><small>Change your password while signed in.</small></span>
             <RiArrowRightSLine size={20} aria-hidden="true" />
           </Link>
         </div>
