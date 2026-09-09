@@ -29,6 +29,7 @@ export const paymentService = {
   createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
     const payload = {
       shipping_address_id: shippingAddressId,
+      payment_method: 'cod',
       idempotency_key: idempotencyKey,
     };
     if (billingAddressId) payload.billing_address_id = billingAddressId;

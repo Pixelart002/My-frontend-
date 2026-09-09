@@ -91,6 +91,7 @@ export default function CheckoutPage() {
   const [intentError, setIntentError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [creating, setCreating] = useState(false);
+  const [checkoutKey, setCheckoutKey] = useState('');
 
   const loadAddresses = useCallback(async () => {
     setAddressError('');
@@ -112,7 +113,8 @@ export default function CheckoutPage() {
     setCreating(true);
     setIntentError('');
     try {
-      const key = makeIdempotencyKey();
+      const key = checkoutKey || makeIdempotencyKey();
+      if (!checkoutKey) setCheckoutKey(key);
       if (paymentMethod === 'cod') {
         const order = await paymentService.createCodOrder(selected, key);
         const orderId = order?.order_id || order?.id;
@@ -127,7 +129,14 @@ export default function CheckoutPage() {
       setIntent(data);
       setStep(2);
     } catch (err) {
-      setIntentError(err.message || 'Unable to start checkout. Please try again.');
+      const message = err?.code === 'NETWORK_ERROR'
+        ? 'We could not reach the order service. Check your connection and try again.'
+        : err?.code === 'TIMEOUT'
+          ? 'The order service took too long to respond. Please retry.'
+          : err?.status === 401
+            ? 'Your session has expired. Please sign in again.'
+            : err?.message || 'Unable to place your order. Please try again.';
+      setIntentError(message);
     } finally {
       setCreating(false);
     }
@@ -173,7 +182,7 @@ export default function CheckoutPage() {
             <h2>2 · Payment</h2>
             {step === 1 ? (
               <div>
-                {intentError && <div className="form-error" role="alert">{intentError}</div>}
+                {intentError && <div className="form-error" role="alert"><span>{intentError}</span><button type="button" className="btn btn-quiet btn-sm" onClick={startPayment} disabled={creating}>{creating ? 'Retrying…' : 'Retry'}</button></div>}
                 <div className="payment-options" role="radiogroup" aria-label="Payment method">
                   <label className={`payment-option ${paymentMethod === 'stripe' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} /><span><strong>Card payment</strong><small>Secure checkout powered by Stripe</small></span></label>
                   <label className={`payment-option ${paymentMethod === 'cod' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} /><span><strong>Cash on delivery</strong><small>Pay when your order arrives</small></span></label>
