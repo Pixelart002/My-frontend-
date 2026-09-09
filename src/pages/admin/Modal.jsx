@@ -4,6 +4,11 @@ import { RiCloseLine } from '@remixicon/react';
 export default function AdminModal({ title, sub, onClose, children }) {
   const closeRef = useRef(null);
   const previousFocus = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     previousFocus.current = document.activeElement;
@@ -11,7 +16,7 @@ export default function AdminModal({ title, sub, onClose, children }) {
     const previousOverflow = document.body.style.overflow;
 
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose?.();
+      if (event.key === 'Escape') onCloseRef.current?.();
     };
 
     document.addEventListener('keydown', onKeyDown);
@@ -22,7 +27,7 @@ export default function AdminModal({ title, sub, onClose, children }) {
       document.body.style.overflow = previousOverflow;
       previousFocus.current?.focus?.();
     };
-  }, [onClose]);
+  }, []);
 
   const titleId = 'admin-modal-title';
   const subId = sub ? 'admin-modal-description' : undefined;
