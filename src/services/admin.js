@@ -31,6 +31,12 @@ export const adminService = {
   // ── Catalogue ──────────────────────────────────────────────────
   listProducts: (params) => request('GET', `/products?${qs(params)}`),
   createProduct: (data) => request('POST', '/products', data),
+  createProductWithImages: (data, files) => {
+    const form = new FormData();
+    form.append('product', JSON.stringify(data));
+    Array.from(files || []).forEach((file) => form.append('files', file, file.name));
+    return request('POST', '/products', form);
+  },
   updateProduct: (id, data) => request('PATCH', `/products/${encodeURIComponent(id)}`, data),
   deleteProduct: (id) => request('DELETE', `/products/${encodeURIComponent(id)}`),
   uploadProductImages: async (id, files) => {
