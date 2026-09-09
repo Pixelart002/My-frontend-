@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom';
 import { userService } from '../services/users';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import PushNotificationsCard from '../components/account/PushNotificationsCard';
 
 export default function ProfilePage() {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
-
   const [fullName, setFullName] = useState(user?.full_name || user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [error, setError] = useState('');
@@ -44,6 +42,7 @@ export default function ProfilePage() {
       <div className="account-links">
         <Link to="/orders">Order history</Link>
         <Link to="/account/addresses">Addresses</Link>
+        <Link to="/account/settings">Settings</Link>
       </div>
 
       {error && <div className="form-error">{error}</div>}
@@ -64,8 +63,6 @@ export default function ProfilePage() {
         </div>
         <button className="btn" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
       </form>
-
-      <PushNotificationsCard />
     </div>
   );
 }
