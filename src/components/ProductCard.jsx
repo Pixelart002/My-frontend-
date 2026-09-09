@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { RiArrowRightLine, RiCheckLine } from '@remixicon/react';
+import { RiArrowLeftSLine, RiArrowRightLine, RiCheckLine } from '@remixicon/react';
 import { useEffect, useRef, useState } from 'react';
 import { formatMoney } from '../utils/format';
 import { useCart } from '../context/CartContext';
@@ -13,6 +13,7 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const addedTimer = useRef(null);
 
@@ -30,6 +31,24 @@ export default function ProductCard({ product }) {
   const outOfStock = product.is_active === false || (Number.isFinite(stock) && stock <= 0);
   const name = product.name || 'Product';
   const category = product.categories?.name || product.category_name || 'Luviio collection';
+  const images = (Array.isArray(product.images) ? product.images : []).filter(Boolean);
+  const gallery = images.length ? images : (product.image_url ? [product.image_url] : []);
+  const safeIndex = Math.min(activeImage, Math.max(0, gallery.length - 1));
+
+  const moveImage = (event, direction) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (gallery.length < 2) return;
+    setImageFailed(false);
+    setActiveImage((current) => (current + direction + gallery.length) % gallery.length);
+  };
+
+  const selectImage = (event, index) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setImageFailed(false);
+    setActiveImage(index);
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -58,11 +77,19 @@ export default function ProductCard({ product }) {
     <article className="product-card">
       {discount > 0 && <span className="badge">Save {Math.round(discount)}%</span>}
       <Link to={`/product/${slug}`} className="product-media" aria-label={`View ${name}`}>
-        {product.image_url && !imageFailed ? (
-          <img src={product.image_url} alt={name} loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
+        {gallery[safeIndex] && !imageFailed ? (
+          <img src={gallery[safeIndex]} alt={`${name} image ${safeIndex + 1}`} loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
         ) : (
           <span className="placeholder" aria-hidden="true">{name.trim().slice(0, 1).toUpperCase() || 'L'}</span>
         )}
+        {gallery.length > 1 && <>
+          <button type="button" className="product-carousel-arrow product-carousel-prev" onClick={(e) => moveImage(e, -1)} aria-label="Previous product image"><RiArrowLeftSLine size={18} /></button>
+          <button type="button" className="product-carousel-arrow product-carousel-next" onClick={(e) => moveImage(e, 1)} aria-label="Next product image"><RiArrowRightLine size={18} /></button>
+          <span className="product-carousel-count" aria-live="polite">{safeIndex + 1}/{gallery.length}</span>
+          <span className="product-carousel-dots" aria-label="Select product image">
+            {gallery.map((_, index) => <button key={index} type="button" className={index === safeIndex ? 'is-active' : ''} onClick={(e) => selectImage(e, index)} aria-label={`View image ${index + 1}`} />)}
+          </span>
+        </>}
       </Link>
 
       <div className="product-meta">
@@ -76,13 +103,7 @@ export default function ProductCard({ product }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        className={`add-button ${added ? 'done' : ''}`}
-        onClick={handleAdd}
-        disabled={outOfStock || adding}
-        aria-busy={adding}
-      >
+      <button type="button" className={`add-button ${added ? 'done' : ''}`} onClick={handleAdd} disabled={outOfStock || adding} aria-busy={adding}>
         <span>{outOfStock ? 'Out of stock' : adding ? 'Adding…' : added ? 'Added to bag' : 'Add to bag'}</span>
         {!outOfStock && (added ? <RiCheckLine size={15} /> : <RiArrowRightLine size={15} />)}
       </button>
