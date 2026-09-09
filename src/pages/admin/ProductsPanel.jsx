@@ -151,25 +151,27 @@ export default function ProductsPanel() {
       let productId = editingId;
       if (editingId) {
         await adminService.updateProduct(editingId, base);
+        if (selectedFiles.length) {
+          const result = await adminService.uploadProductImages(editingId, selectedFiles);
+          const uploadedImages = Array.isArray(result?.images) ? result.images : [];
+          toast.success(`${selectedFiles.length} image${selectedFiles.length === 1 ? '' : 's'} uploaded.`);
+          setForm((current) => ({ ...current, images: uploadedImages, image_url: uploadedImages[0] || current.image_url }));
+        }
         toast.success('Product updated.');
       } else {
-        const created = await adminService.createProduct({
+        const createData = {
           ...base,
           name: form.name.trim(),
           slug: form.slug.trim().toLowerCase(),
           sku: form.sku.trim() || undefined,
-        });
-        productId = created?.id || created?.product?.id;
-        toast.success('Product created.');
-      }
-
-      if (selectedFiles.length && productId) {
-        const result = await adminService.uploadProductImages(productId, selectedFiles);
-        const uploadedImages = Array.isArray(result?.images) ? result.images : [];
-        toast.success(`${selectedFiles.length} image${selectedFiles.length === 1 ? '' : 's'} uploaded.`);
-        setForm((current) => ({ ...current, images: uploadedImages, image_url: uploadedImages[0] || current.image_url }));
-      } else if (selectedFiles.length && !productId) {
-        toast.error('Product saved, but images could not be uploaded because the product ID was not returned.');
+        };
+        if (selectedFiles.length) {
+          await adminService.createProductWithImages(createData, selectedFiles);
+          toast.success(`Product created with ${selectedFiles.length} image${selectedFiles.length === 1 ? '' : 's'}.`);
+        } else {
+          await adminService.createProduct(createData);
+          toast.success('Product created.');
+        }
       }
 
       setEditing(false);
