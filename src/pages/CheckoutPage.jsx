@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { RiLockLine, RiAddLine, RiArrowRightLine } from '@remixicon/react';
+import { RiLockLine, RiAddLine, RiArrowRightLine, RiCoupon3Line, RiCloseLine } from '@remixicon/react';
 import { userService } from '../services/users';
 import { paymentService } from '../services/payments';
+import { couponService } from '../services/coupons';
 import { STRIPE_PK } from '../config/env';
 import { useCart } from '../context/CartContext';
 import { formatMoney } from '../utils/format';
@@ -64,6 +65,10 @@ export default function CheckoutPage() {
   const [paymentReview, setPaymentReview] = useState(false);
   const [creating, setCreating] = useState(false);
   const [checkoutKey, setCheckoutKey] = useState('');
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const loadAddresses = useCallback(async () => {
     setAddressError('');
@@ -75,6 +80,39 @@ export default function CheckoutPage() {
   const items = cart?.items || [];
   const canProceed = items.length > 0 && !cart?.has_unavailable_items;
   const selectedAddress = useMemo(() => addresses?.find((addr) => addr.id === selected) || null, [addresses, selected]);
+  const couponDiscount = Number(coupon?.discount) || 0;
+  const finalTotal = Math.max((Number(cart?.total_amount) || 0) - couponDiscount, 0);
+
+  const applyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code || couponLoading || coupon) return;
+    setCouponError('');
+    setCouponLoading(true);
+    try {
+      const result = await couponService.apply(code, cart?.subtotal);
+      if (!result?.discount || Number(result.discount) <= 0) throw new Error('This coupon does not provide a discount for the current cart.');
+      setCoupon({ ...result, subtotal: Number(cart?.subtotal) || 0 });
+      setCouponInput('');
+      setIntent(null);
+      setIntentError('');
+    } catch (err) {
+      setCouponError(err?.message || 'Unable to apply this coupon.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponError('');
+    setCouponInput('');
+    setIntent(null);
+    setIntentError('');
+  };
+
+  useEffect(() => {
+    if (coupon && Number(coupon.subtotal) !== Number(cart?.subtotal || 0)) removeCoupon();
+  }, [cart?.subtotal]);
 
   const openPaymentChooser = () => {
     if (!selected || creating) return;
@@ -91,13 +129,13 @@ export default function CheckoutPage() {
       const key = checkoutKey || makeIdempotencyKey();
       if (!checkoutKey) setCheckoutKey(key);
       if (paymentMethod === 'cod') {
-        const order = await paymentService.createCodOrder(selected, key);
+        const order = await paymentService.createCodOrder(selected, key, null, coupon?.code || null);
         const orderId = order?.order_id || order?.id;
         if (!orderId) throw new Error('COD order could not be created. Please try again.');
         navigate('/order/success', { replace: true, state: { orderId, orderNumber: order?.order_number, paymentMethod: 'cod' } });
         return;
       }
-      const data = await paymentService.createIntent(selected, key);
+      const data = await paymentService.createIntent(selected, key, null, coupon?.code || null);
       if (!data?.client_secret || !data?.payment_intent_id || !data?.order_id) throw new Error('Payment session was not created correctly. Please try again.');
       setIntent(data);
     } catch (err) {
@@ -157,8 +195,27 @@ export default function CheckoutPage() {
             {showForm && <AddressForm onSaved={() => { setShowForm(false); loadAddresses(); }} onCancel={() => setShowForm(false)} />}
           </section>
 
+          <section className="checkout-section">
+            <h2>2 · Coupon</h2>
+            {coupon ? (
+              <div className="payment-selector">
+                <div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Applied coupon</span><strong>{coupon.code}</strong><small>You saved {formatMoney(couponDiscount)} on this order.</small></div>
+                <button className="btn btn-quiet btn-sm" type="button" onClick={removeCoupon}><RiCloseLine size={15} /> Remove</button>
+              </div>
+            ) : (
+              <div className="payment-selector">
+                <div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Have a coupon?</span><small>Enter a valid promo code to apply the backend-calculated discount.</small></div>
+                <div className="coupon-input-row">
+                  <input value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="PROMO CODE" maxLength={40} autoComplete="off" aria-label="Coupon code" />
+                  <button className="btn" type="button" onClick={applyCoupon} disabled={couponLoading || !couponInput.trim()}>{couponLoading ? 'Applying…' : 'Apply'}</button>
+                </div>
+              </div>
+            )}
+            {couponError && <div className="form-error" role="alert">{couponError}</div>}
+          </section>
+
           <section className="checkout-section checkout-payment-launch">
-            <h2>2 · Payment</h2>
+            <h2>3 · Payment</h2>
             {intentError && <div className="form-error" role="alert">{intentError}</div>}
             <div className="payment-selector">
               <div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose a payment method'}</strong><small>Select your payment method, review the selected address and complete payment in the secure popup.</small></div>
@@ -169,7 +226,7 @@ export default function CheckoutPage() {
         <aside className="summary">
           <p className="eyebrow">Order summary</p>
           <ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul>
-          <dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div><div className="total"><dt>Total</dt><dd>{formatMoney(cart.total_amount)}</dd></div></dl>
+          <dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Total</dt><dd>{formatMoney(finalTotal)}</dd></div></dl>
         </aside>
       </div>
 
@@ -182,7 +239,7 @@ export default function CheckoutPage() {
         loading={creating}
         review={paymentReview}
         address={selectedAddress}
-        total={formatMoney(cart.total_amount)}
+        total={formatMoney(finalTotal)}
         onBack={handleModalBack}
       >
         {paymentContent}
