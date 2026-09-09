@@ -14,6 +14,7 @@ import './styles/payment-modal.css';
 import './styles/settings.css';
 import './styles/profile.css';
 import './styles/change-password.css';
+import './styles/footer-layout.css';
 
 createRoot(document.getElementById('root')).render(<App />);
 
