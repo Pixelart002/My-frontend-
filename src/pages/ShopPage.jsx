@@ -24,7 +24,13 @@ export default function ShopPage() {
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
 
   useEffect(() => {
-    productService.categories().then(setCategories).catch(() => {});
+    let active = true;
+    productService.categories()
+      .then((items) => {
+        if (active) setCategories(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {});
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -32,42 +38,42 @@ export default function ShopPage() {
     setMaxPrice(searchParams.get('max_price') || '');
   }, [searchParams]);
 
+  const buildParams = useCallback(() => {
+    const params = { page, page_size: PAGE_SIZE };
+    if (q) params.search = q;
+    if (category) params.category = category;
+    if (inStockOnly) params.in_stock = true;
+    if (minPrice) params.min_price = Number(minPrice);
+    if (maxPrice) params.max_price = Number(maxPrice);
+    return params;
+  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+
   const loadProducts = useCallback(async () => {
     setData(null);
     setError('');
     try {
-      const params = { page, page_size: PAGE_SIZE };
-      if (q) params.search = q;
-      if (category) params.category = category;
-      if (inStockOnly) params.in_stock = true;
-      if (minPrice) params.min_price = Number(minPrice);
-      if (maxPrice) params.max_price = Number(maxPrice);
-      setData(await productService.list(params));
+      setData(await productService.list(buildParams()));
     } catch (err) {
       setError(err.message || 'Unable to load products.');
     }
-  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+  }, [buildParams]);
 
   useEffect(() => {
     let active = true;
     setData(null);
     setError('');
+
     (async () => {
       try {
-        const params = { page, page_size: PAGE_SIZE };
-        if (q) params.search = q;
-        if (category) params.category = category;
-        if (inStockOnly) params.in_stock = true;
-        if (minPrice) params.min_price = Number(minPrice);
-        if (maxPrice) params.max_price = Number(maxPrice);
-        const res = await productService.list(params);
+        const res = await productService.list(buildParams());
         if (active) setData(res);
       } catch (err) {
         if (active) setError(err.message || 'Unable to load products.');
       }
     })();
+
     return () => { active = false; };
-  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+  }, [buildParams]);
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
