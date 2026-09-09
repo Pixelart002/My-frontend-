@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { userService } from '../services/users';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import PushNotificationsCard from '../components/account/PushNotificationsCard';
 
 export default function ProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -63,6 +64,8 @@ export default function ProfilePage() {
         </div>
         <button className="btn" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</button>
       </form>
+
+      <PushNotificationsCard />
     </div>
   );
 }
