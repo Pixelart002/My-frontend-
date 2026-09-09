@@ -6,9 +6,10 @@
  * Order management:    /orders, /orders/{id}
  * User management:     /users, /users/{id}
  *
- * The API client unwraps the `{ success, data, meta }` envelope and returns
- * `data` directly, which for list endpoints is the items array. We therefore
- * normalize robustly below (arrays OR `{ items }` shapes).
+ * The API client unwraps the `{ success, data, meta }` envelope. List
+ * endpoints normally return the items array directly; the normalizer below
+ * also accepts common paginated/nested shapes so the admin UI remains
+ * compatible with backend response envelopes.
  */
 import { request } from '../api/client';
 
@@ -20,8 +21,10 @@ const qs = (params) => new URLSearchParams(clean(params)).toString();
 /** Normalize a list response into an array of items. */
 export function itemsOfList(res) {
   if (Array.isArray(res)) return res;
-  if (res && Array.isArray(res.items)) return res.items;
-  if (res && Array.isArray(res.data)) return res.data;
+  if (!res || typeof res !== 'object') return [];
+  if (Array.isArray(res.items)) return res.items;
+  if (Array.isArray(res.results)) return res.results;
+  if (res.data && typeof res.data === 'object') return itemsOfList(res.data);
   return [];
 }
 
