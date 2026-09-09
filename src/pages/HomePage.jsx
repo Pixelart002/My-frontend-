@@ -51,26 +51,28 @@ export default function HomePage() {
   }, [loadStore]);
 
   useEffect(() => {
-    const bg = gsap.fromTo(
-      document.querySelectorAll('[data-rise]'),
-      { y: 28, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' },
-    );
-    const reveals = gsap.utils.toArray('[data-reveal]');
-    const ct = reveals.map((el) =>
-      gsap.fromTo(el, { y: 32, opacity: 0 }, {
-        y: 0,
-        opacity: 1,
-        duration: 0.9,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 88%' },
-      }),
-    );
-    return () => {
-      bg.kill();
-      ct.forEach((t) => t.kill());
-      ScrollTrigger.getAll().forEach((s) => s.kill());
-    };
+    const root = document.querySelector('.hero')?.parentElement;
+    if (!root) return undefined;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '[data-rise]',
+        { y: 28, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' },
+      );
+
+      gsap.utils.toArray('[data-reveal]').forEach((el) => {
+        gsap.fromTo(el, { y: 32, opacity: 0 }, {
+          y: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%' },
+        });
+      });
+    }, root);
+
+    return () => ctx.revert();
   }, []);
 
   return (
