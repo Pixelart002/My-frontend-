@@ -69,10 +69,10 @@ export default function OrderDetailPage() {
             const slug = prod.slug || item.product_slug || item.product_id;
             const imageUrl = prod.image_url || item.image_url || item.product_image_url;
             const quantity = Math.max(1, Number(item.quantity) || 1);
-            const storedUnitPrice = Number(item.unit_price ?? item.price) || 0;
-            const storedSubtotal = Number(item.subtotal ?? item.line_total ?? item.total) || 0;
-            const unitPrice = storedUnitPrice > 0 ? storedUnitPrice : storedSubtotal > 0 ? storedSubtotal / quantity : 0;
-            const lineTotal = storedSubtotal > 0 ? storedSubtotal : unitPrice * quantity;
+            const hasStoredUnitPrice = item.unit_price !== undefined && item.unit_price !== null;
+            const hasStoredSubtotal = item.subtotal !== undefined && item.subtotal !== null;
+            const unitPrice = hasStoredUnitPrice ? Number(item.unit_price) : hasStoredSubtotal ? Number(item.subtotal) / quantity : 0;
+            const lineTotal = hasStoredSubtotal ? Number(item.subtotal) : hasStoredUnitPrice ? Number(item.unit_price) * quantity : 0;
 
             return (
               <article className="order-item" key={item.id}>
