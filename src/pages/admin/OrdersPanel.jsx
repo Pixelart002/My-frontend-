@@ -10,6 +10,12 @@ import { StatusPill } from './DashboardPanel';
 const PAGE_SIZE = 100;
 const STATUSES = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 
+const displayOrderNumber = (order) => {
+  const value = String(order?.order_number || '').trim();
+  if (value) return value.startsWith('#') ? value : `#${value}`;
+  return `#${String(order?.id || '').slice(0, 8).toUpperCase()}`;
+};
+
 export default function OrdersPanel() {
   const { toast } = useToast();
   const [items, setItems] = useState(null);
@@ -102,7 +108,7 @@ export default function OrdersPanel() {
             <tbody>
               {filtered.map((o) => (
                 <tr key={o.id}>
-                  <td className="td-dim">{String(o.id).slice(0, 8).toUpperCase()}</td>
+                  <td className="td-dim">{displayOrderNumber(o)}</td>
                   <td className="td-gold">{formatMoney(Number(o.total_amount) || 0)}</td>
                   <td><StatusPill status={o.status} /></td>
                   <td className="td-dim">{o.tracking_number || '—'}</td>
@@ -116,7 +122,7 @@ export default function OrdersPanel() {
       </div>
 
       {editing && (
-        <AdminModal title={`Order #${String(editing.id).slice(0, 8).toUpperCase()}`} sub="Update status, tracking and internal notes." onClose={() => setEditing(null)}>
+        <AdminModal title={`Order ${displayOrderNumber(editing)}`} sub="Update status, tracking and internal notes." onClose={() => setEditing(null)}>
           {Array.isArray(editing.order_items) && editing.order_items.length > 0 && (
             <div className="admin-order-items">
               {editing.order_items.map((i, idx) => (
