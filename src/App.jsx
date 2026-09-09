@@ -11,6 +11,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="/account" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/account/addresses" element={<ProtectedRoute><AddressesPage /></ProtectedRoute>} />
         <Route path="/account/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+        <Route path="/account/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/shipping" element={<ShippingPage />} />
