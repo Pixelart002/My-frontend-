@@ -9,5 +9,6 @@ import './styles/app.css';
 import './styles/admin.css';
 import './styles/header.css';
 import './styles/polish.css';
+import './styles/payment-modal.css';
 
 createRoot(document.getElementById('root')).render(<App />);
