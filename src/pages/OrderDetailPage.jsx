@@ -65,16 +65,11 @@ export default function OrderDetailPage() {
           const name = prod.name || item.product_name || 'Product';
           const slug = prod.slug || item.product_slug || item.product_id;
           const imageUrl = prod.image_url || item.image_url || item.product_image_url;
-          const quantity = Math.max(1, Number(item.quantity) || 1);
-          const storedUnitPrice = Number(item.unit_price ?? item.price) || 0;
-          const storedSubtotal = Number(item.subtotal ?? item.line_total ?? item.total) || 0;
-          const productPrice = Number(prod.price) || 0;
-          const unitPrice = storedUnitPrice > 0 ? storedUnitPrice : storedSubtotal > 0 ? storedSubtotal / quantity : productPrice;
-
-          // The unit price is the immutable price paid for this order item.
-          // Calculate the displayed line total from it so a missing/zero subtotal
-          // field in an API response can never make a paid item appear as ₹0.
-          const lineTotal = unitPrice * quantity;
+          const quantity = Number(item.quantity ?? 0);
+          const unitPrice = Number(item.unit_price ?? 0);
+          const lineTotal = item.subtotal != null
+            ? Number(item.subtotal)
+            : unitPrice * quantity;
 
           return (
             <div className="cart-row" key={item.id}>
