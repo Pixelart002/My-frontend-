@@ -9,6 +9,7 @@
 
 const LIVE_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
 const DEV_API_BASE = LIVE_API_BASE;
+const PROD_API_BASE = import.meta.env.NEXT_PUBLIC_API_URL || LIVE_API_BASE;
 
 const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
 const normalizeApiBase = (value) => {
@@ -18,14 +19,17 @@ const normalizeApiBase = (value) => {
 };
 
 /**
- * Production uses the Vercel same-origin /api proxy so HttpOnly auth cookies
- * stay on the storefront origin. A VITE_API_BASE override is still supported
- * for explicit deployments, while development keeps using the live API unless
- * a VITE_API_BASE value is supplied.
+ * API base URL, resolved in priority order:
+ *   1. VITE_API_BASE env var (set at build time)
+ *   2. The live backend in development and production.
+ *
+ * Production intentionally targets the backend directly. This avoids a
+ * Vercel rewrite masking backend route failures as frontend 404 responses.
  */
 export const API_BASE = normalizeApiBase(
   import.meta.env.VITE_API_BASE ||
-  (import.meta.env.PROD ? '/api/v1' : DEV_API_BASE),
+  import.meta.env.NEXT_PUBLIC_API_URL ||
+  (import.meta.env.DEV ? DEV_API_BASE : PROD_API_BASE),
 );
 
 /** Stripe publishable key — safe for browsers. */
