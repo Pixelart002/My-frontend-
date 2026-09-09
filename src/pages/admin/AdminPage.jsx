@@ -27,6 +27,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedPanel = searchParams.get('panel');
+  const createCoupon = searchParams.get('create') === '1';
   const initialPanel = VALID_PANELS.has(requestedPanel) ? requestedPanel : 'dashboard';
   const [status, setStatus] = useState('verifying');
   const [profile, setProfile] = useState(null);
@@ -56,7 +57,7 @@ export default function AdminPage() {
       <main className="admin-main">
         <div className="admin-head"><div><h1>{active.label}</h1><p className="admin-sub">Luviio store administration</p></div></div>
         <nav className="admin-mobile-nav" aria-label="Admin sections">{NAV.map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}</nav>
-        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}{panel === 'products' && <ProductsPanel />}{panel === 'categories' && <CategoriesPanel />}{panel === 'orders' && <OrdersPanel />}{panel === 'coupons' && <CouponsPanel />}{panel === 'users' && <UsersPanel />}
+        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}{panel === 'products' && <ProductsPanel />}{panel === 'categories' && <CategoriesPanel />}{panel === 'orders' && <OrdersPanel />}{panel === 'coupons' && <CouponsPanel autoOpenCreate={createCoupon} />}{panel === 'users' && <UsersPanel />}
       </main>
     </div>
   );
