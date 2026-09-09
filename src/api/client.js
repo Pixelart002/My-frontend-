@@ -12,7 +12,10 @@
 
 import { API_BASE } from '../config/env';
 
-/** Public endpoints — no auth header attached (backend serves them to guests). */
+/**
+ * Public resource paths. Public access applies to safe read methods only.
+ * Mutating methods such as POST/PUT/DELETE must still carry authentication.
+ */
 const PUBLIC_PREFIXES = [
   '/products',
   '/categories',
@@ -21,6 +24,7 @@ const PUBLIC_PREFIXES = [
   '/push/vapid-key',
 ];
 
+const PUBLIC_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const IDEMPOTENT = new Set(['GET', 'PUT', 'HEAD']);
 const MAX_RETRIES = 2;
 
@@ -46,6 +50,10 @@ export function getAccessToken() {
 
 function isPublic(path) {
   return PUBLIC_PREFIXES.some((p) => path.startsWith(p));
+}
+
+function isPublicRequest(method, path) {
+  return PUBLIC_METHODS.has(method.toUpperCase()) && isPublic(path);
 }
 
 function backoff(attempt) {
@@ -140,11 +148,15 @@ async function parseError(res, parsed = null) {
 export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
   const token = readToken();
-  const protectedPath = !isPublic(path) && !path.startsWith('/auth/');
+  const normalizedMethod = method.toUpperCase();
+  const publicRequest = isPublicRequest(normalizedMethod, path);
+  const protectedPath = !publicRequest && !path.startsWith('/auth/');
 
+  // Only safe read requests to public resources are unauthenticated.
+  // POST /products, POST /categories, etc. remain protected.
   if (token && protectedPath) headers.Authorization = `Bearer ${token}`;
 
-  const canRetry = IDEMPOTENT.has(method.toUpperCase());
+  const canRetry = IDEMPOTENT.has(normalizedMethod);
   let attempt = 0;
 
   const performForRefresh = async () => {
