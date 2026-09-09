@@ -68,16 +68,9 @@ export const pushService = {
     const subscription = await registration.pushManager.getSubscription();
     if (!subscription) return true;
 
-    const endpoint = subscription.endpoint;
+    // Backend expects the same PushSubscription shape used by /push/subscribe.
+    await request('DELETE', '/push/unsubscribe', subscription.toJSON());
     await subscription.unsubscribe();
-
-    try {
-      await request('DELETE', '/push/unsubscribe', { endpoint });
-    } catch (error) {
-      // The browser subscription is already removed; backend cleanup can be retried.
-      throw error;
-    }
-
     return true;
   },
 
