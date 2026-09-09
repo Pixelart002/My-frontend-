@@ -19,6 +19,7 @@ import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import AddressesPage from './pages/AddressesPage';
+import SettingsPage from './pages/SettingsPage';
 import PrivacyPage from './pages/policies/PrivacyPage';
 import TermsPage from './pages/policies/TermsPage';
 import ShippingPage from './pages/policies/ShippingPage';
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
         <Route path="/account" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/account/addresses" element={<ProtectedRoute><AddressesPage /></ProtectedRoute>} />
+        <Route path="/account/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/shipping" element={<ShippingPage />} />
