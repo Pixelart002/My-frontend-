@@ -128,12 +128,6 @@ export default function ProfilePage() {
           </form>
         )}
       </section>
-
-      <div className="profile-nav-list">
-        <Link to="/orders"><span>Order history</span><RiArrowRightSLine size={20} aria-hidden="true" /></Link>
-        <Link to="/account/addresses"><span>Addresses</span><RiArrowRightSLine size={20} aria-hidden="true" /></Link>
-        <Link to="/account/settings"><span>Settings</span><RiArrowRightSLine size={20} aria-hidden="true" /></Link>
-      </div>
     </div>
   );
 }
