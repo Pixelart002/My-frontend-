@@ -76,12 +76,14 @@ export default function ProductCard({ product }) {
   return (
     <article className="product-card">
       {discount > 0 && <span className="badge">Save {Math.round(discount)}%</span>}
-      <Link to={`/product/${slug}`} className="product-media" aria-label={`View ${name}`}>
-        {gallery[safeIndex] && !imageFailed ? (
-          <img src={gallery[safeIndex]} alt={`${name} image ${safeIndex + 1}`} loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
-        ) : (
-          <span className="placeholder" aria-hidden="true">{name.trim().slice(0, 1).toUpperCase() || 'L'}</span>
-        )}
+      <div className="product-media">
+        <Link to={`/product/${slug}`} className="product-media-link" aria-label={`View ${name}`}>
+          {gallery[safeIndex] && !imageFailed ? (
+            <img src={gallery[safeIndex]} alt={`${name} image ${safeIndex + 1}`} loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
+          ) : (
+            <span className="placeholder" aria-hidden="true">{name.trim().slice(0, 1).toUpperCase() || 'L'}</span>
+          )}
+        </Link>
         {gallery.length > 1 && <>
           <button type="button" className="product-carousel-arrow product-carousel-prev" onClick={(e) => moveImage(e, -1)} aria-label="Previous product image"><RiArrowLeftSLine size={18} /></button>
           <button type="button" className="product-carousel-arrow product-carousel-next" onClick={(e) => moveImage(e, 1)} aria-label="Next product image"><RiArrowRightLine size={18} /></button>
@@ -90,13 +92,10 @@ export default function ProductCard({ product }) {
             {gallery.map((_, index) => <button key={index} type="button" className={index === safeIndex ? 'is-active' : ''} onClick={(e) => selectImage(e, index)} aria-label={`View image ${index + 1}`} />)}
           </span>
         </>}
-      </Link>
+      </div>
 
       <div className="product-meta">
-        <div>
-          <p className="product-category">{category}</p>
-          <h3 title={name}>{name}</h3>
-        </div>
+        <div><p className="product-category">{category}</p><h3 title={name}>{name}</h3></div>
         <div className="product-price-row" aria-label={`Price ${formatMoney(price)}`}>
           {compare > price && price > 0 && <span className="was">{formatMoney(compare)}</span>}
           <span>{formatMoney(price)}</span>
