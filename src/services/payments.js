@@ -25,14 +25,14 @@ export const paymentService = {
       error_message: errorMessage,
     }),
 
+  // COD is a first-class order flow. It must not hit the Stripe/payment-intent endpoint.
   createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
     const payload = {
       shipping_address_id: shippingAddressId,
-      payment_method: 'cod',
       idempotency_key: idempotencyKey,
     };
     if (billingAddressId) payload.billing_address_id = billingAddressId;
-    return request('POST', '/orders', payload);
+    return request('POST', '/orders/cod', payload);
   },
 
   retry: (orderId) => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
