@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RiRefreshLine } from '@remixicon/react';
+import { RiRefreshLine, RiCoupon3Line } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { formatMoney } from '../../utils/format';
 import { ErrorState } from '../../components/ui/States';
@@ -75,6 +75,7 @@ export default function DashboardPanel({ onNavigate }) {
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('categories')}>Add category</button>
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('orders')}>View orders</button>
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('users')}>Manage users</button>
+        <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('coupons')}><RiCoupon3Line size={14} /> Create coupon</button>
         <button className="btn btn-quiet btn-sm" onClick={load}><RiRefreshLine size={14} /> Refresh</button>
       </div>
 
