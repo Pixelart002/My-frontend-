@@ -84,19 +84,25 @@ export default function OrderDetailPage() {
       <div className="order-items">
         {items.map((item) => {
           const prod = item.products || {};
+          const name = prod.name || item.product_name || 'Product';
+          const slug = prod.slug || item.product_slug || item.product_id;
+          const imageUrl = prod.image_url || item.image_url || item.product_image_url;
+          const unitPrice = item.unit_price ?? item.price ?? 0;
+          const lineTotal = item.subtotal ?? item.line_total ?? item.total ?? (Number(unitPrice) * Number(item.quantity || 0));
+
           return (
             <div className="cart-row" key={item.id}>
-              {prod.image_url ? (
-                <Link to={`/product/${prod.slug}`} className="cart-thumb"><img src={prod.image_url} alt={prod.name || item.product_name} /></Link>
+              {imageUrl && slug ? (
+                <Link to={`/product/${slug}`} className="cart-thumb"><img src={imageUrl} alt={name} /></Link>
               ) : (
-                <div className="cart-thumb"><span>{(prod.name || 'L').slice(0, 1)}</span></div>
+                <div className="cart-thumb"><span>{name.slice(0, 1)}</span></div>
               )}
               <div className="cart-info">
-                <h3>{prod.name || item.product_name}</h3>
-                <p className="product-category">{prod.hsn_code ? `HSN ${prod.hsn_code}` : 'Product'}</p>
-                <p className="cart-unit">{formatMoney(item.unit_price)} × {item.quantity}</p>
+                <h3>{name}</h3>
+                <p className="product-category">{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p>
+                <p className="cart-unit">{formatMoney(unitPrice)} × {item.quantity}</p>
               </div>
-              <strong className="cart-line-total">{formatMoney(item.line_total ?? item.total)}</strong>
+              <strong className="cart-line-total">{formatMoney(lineTotal)}</strong>
             </div>
           );
         })}
