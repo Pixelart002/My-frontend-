@@ -1,0 +1,46 @@
+/* Footer layout is page-flow based: it stays at the bottom on short pages and
+   follows content naturally on long pages. It never uses fixed/absolute positioning. */
+#root:has(.footer) {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root:has(.footer) > main {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+.footer {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+/* Footer has five content groups, so keep all five on one desktop row. */
+.footer-grid {
+  grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(120px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .footer-grid > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .footer-grid > :first-child {
+    grid-column: auto;
+  }
+  .footer-bottom {
+    margin-top: 32px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
