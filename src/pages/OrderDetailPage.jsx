@@ -87,8 +87,21 @@ export default function OrderDetailPage() {
           const name = prod.name || item.product_name || 'Product';
           const slug = prod.slug || item.product_slug || item.product_id;
           const imageUrl = prod.image_url || item.image_url || item.product_image_url;
-          const unitPrice = item.unit_price ?? item.price ?? 0;
-          const lineTotal = item.subtotal ?? item.line_total ?? item.total ?? (Number(unitPrice) * Number(item.quantity || 0));
+          const quantity = Number(item.quantity || 0);
+          const storedUnitPrice = Number(item.unit_price ?? item.price ?? 0);
+          const storedSubtotal = Number(item.subtotal ?? item.line_total ?? item.total ?? 0);
+          const productPrice = Number(prod.price ?? 0);
+
+          // Prefer immutable order-item pricing. If an old order has missing/zero
+          // item pricing, use the product snapshot and the order subtotal as fallbacks.
+          const unitPrice = storedUnitPrice > 0
+            ? storedUnitPrice
+            : storedSubtotal > 0 && quantity > 0
+              ? storedSubtotal / quantity
+              : productPrice;
+          const lineTotal = storedSubtotal > 0
+            ? storedSubtotal
+            : unitPrice * quantity;
 
           return (
             <div className="cart-row" key={item.id}>
@@ -100,7 +113,7 @@ export default function OrderDetailPage() {
               <div className="cart-info">
                 <h3>{name}</h3>
                 <p className="product-category">{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p>
-                <p className="cart-unit">{formatMoney(unitPrice)} × {item.quantity}</p>
+                <p className="cart-unit">{formatMoney(unitPrice)} × {quantity}</p>
               </div>
               <strong className="cart-line-total">{formatMoney(lineTotal)}</strong>
             </div>
