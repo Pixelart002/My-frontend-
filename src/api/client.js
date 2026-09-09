@@ -12,10 +12,6 @@
 
 import { API_BASE } from '../config/env';
 
-/**
- * Public resource paths. Public access applies to safe read methods only.
- * Mutating methods such as POST/PUT/DELETE must still carry authentication.
- */
 const PUBLIC_PREFIXES = [
   '/products',
   '/categories',
@@ -86,7 +82,6 @@ function readToken() {
   return null;
 }
 
-/** Single-flight refresh so concurrent 401s share one refresh request. */
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise;
 
@@ -112,13 +107,6 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
-/**
- * Defense-in-depth for legacy checkout callers.
- * Older frontend bundles posted COD orders to `/orders` with payment_method=cod.
- * The backend now has a dedicated `/orders/cod` endpoint, so normalize that
- * legacy request before it reaches the network. Current COD callers already
- * use `/orders/cod` and are left untouched.
- */
 function normalizeLegacyOrderPath(method, path, body) {
   if (
     method.toUpperCase() === 'POST' &&
@@ -167,6 +155,27 @@ async function parseError(res, parsed = null) {
   return new ApiError(String(raw).substring(0, 300), res.status, data?.error_code);
 }
 
+/** Preserve pagination metadata without changing existing service return shapes. */
+function unwrapResponse(json) {
+  if (!json || json.success === undefined || json.data === undefined) return json;
+
+  const payload = json.data;
+  if (json.meta === undefined) return payload;
+
+  if (Array.isArray(payload)) {
+    // Arrays remain arrays for existing callers, while metadata is available
+    // to pagination-aware pages as `result.meta`.
+    payload.meta = json.meta;
+    return payload;
+  }
+
+  if (payload && typeof payload === 'object') {
+    return { ...payload, meta: json.meta };
+  }
+
+  return payload;
+}
+
 export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
   const token = readToken();
@@ -174,8 +183,6 @@ export async function request(method, path, body = null, isRetry = false) {
   const publicRequest = isPublicRequest(normalizedMethod, path);
   const protectedPath = !publicRequest && !path.startsWith('/auth/');
 
-  // Only safe read requests to public resources are unauthenticated.
-  // POST /products, POST /categories, etc. remain protected.
   if (token && protectedPath) headers.Authorization = `Bearer ${token}`;
 
   const canRetry = IDEMPOTENT.has(normalizedMethod);
@@ -220,7 +227,7 @@ export async function request(method, path, body = null, isRetry = false) {
 
       if (!res.ok) throw await parseError(res, data);
 
-      return data && data.success !== undefined && data.data !== undefined ? data.data : data;
+      return unwrapResponse(data);
     } catch (err) {
       if (err instanceof ApiError) throw err;
       if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
@@ -234,7 +241,6 @@ export async function request(method, path, body = null, isRetry = false) {
   throw new ApiError('Network error — please check your connection.', 0, 'NETWORK_ERROR');
 }
 
-/** Download a binary file (e.g. PDF invoice) and trigger a browser download. */
 export async function downloadFile(path, defaultFilename) {
   const headers = {};
   const token = readToken();
@@ -258,5 +264,5 @@ export async function downloadFile(path, defaultFilename) {
   setTimeout(() => {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-  }, 100);
+  }, 0);
 }
