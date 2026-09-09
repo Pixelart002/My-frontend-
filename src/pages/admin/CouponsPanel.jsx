@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RiAddLine, RiDeleteBinLine, RiEditLine, RiRefreshLine } from '@remixicon/react';
-import { adminService } from '../../services/admin';
+import { adminService, itemsOfList } from '../../services/admin';
 import { formatMoney } from '../../utils/format';
 
 const emptyForm = { code: '', type: 'percent', value: '', min_order_amount: '0', max_discount: '', valid_from: '', valid_until: '', usage_limit: '', per_user_limit: '1', is_active: true, description: '' };
@@ -26,7 +26,7 @@ export default function CouponsPanel() {
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
-    try { const result = await adminService.listCoupons({ page: 1, page_size: 100 }); setCoupons(Array.isArray(result?.items) ? result.items : []); }
+    try { const result = await adminService.listCoupons({ page: 1, page_size: 100 }); setCoupons(itemsOfList(result)); }
     catch (err) { setError(err?.message || 'Unable to load coupons.'); }
     finally { setLoading(false); }
   }, []);
