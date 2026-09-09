@@ -95,7 +95,8 @@ export default function OrderDetailPage() {
   const items = Array.isArray(order.order_items) ? order.order_items : [];
   const status = String(order.status || '').toLowerCase();
   const paymentMethod = String(order.payment_method || '').toLowerCase();
-  const isRetryable = status === 'pending' && paymentMethod !== 'cod' && paymentMethod !== 'cash_on_delivery';
+  const isCodOrder = paymentMethod === 'cod' || paymentMethod === 'cash_on_delivery' || !order.stripe_payment_intent;
+  const isRetryable = status === 'pending' && !isCodOrder;
   const retryAddress = order.shipping_address || order.billing_address || null;
 
   const paymentContent = retryIntent?.client_secret && stripePromise && retryElementsOptions ? (
