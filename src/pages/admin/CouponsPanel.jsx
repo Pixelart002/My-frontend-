@@ -15,13 +15,13 @@ function toPayload(form, editing) {
   return payload;
 }
 
-export default function CouponsPanel() {
+export default function CouponsPanel({ autoOpenCreate = false }) {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null);
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(autoOpenCreate);
   const [form, setForm] = useState(emptyForm);
 
   const load = useCallback(async () => {
