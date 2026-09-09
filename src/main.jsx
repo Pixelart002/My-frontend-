@@ -11,6 +11,7 @@ import './styles/admin.css';
 import './styles/header.css';
 import './styles/polish.css';
 import './styles/payment-modal.css';
+import './styles/settings.css';
 
 createRoot(document.getElementById('root')).render(<App />);
 
