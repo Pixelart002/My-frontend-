@@ -6,6 +6,7 @@ import { EmptyState, ErrorState, Spinner } from '../../components/ui/States';
 import AdminModal from './Modal';
 
 const blankCat = { name: '', slug: '', description: '' };
+const updateField = (setForm, key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
 export default function CategoriesPanel() {
   const { toast } = useToast();
@@ -30,7 +31,7 @@ export default function CategoriesPanel() {
   }, [load]);
 
   const openAdd = () => {
-    setForm(blankCat);
+    setForm({ ...blankCat });
     setEditing(true);
   };
 
@@ -124,15 +125,15 @@ export default function CategoriesPanel() {
           <form onSubmit={submit}>
             <div className="field">
               <label htmlFor="cat-name">Name</label>
-              <input id="cat-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Bath & body" />
+              <input id="cat-name" value={form.name} onChange={updateField(setForm, 'name')} placeholder="e.g. Bath & body" />
             </div>
             <div className="field">
               <label htmlFor="cat-slug">Slug</label>
-              <input id="cat-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="e.g. bath-body" />
+              <input id="cat-slug" value={form.slug} onChange={updateField(setForm, 'slug')} placeholder="e.g. bath-body" />
             </div>
             <div className="field">
               <label htmlFor="cat-desc">Description</label>
-              <textarea id="cat-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <textarea id="cat-desc" value={form.description} onChange={updateField(setForm, 'description')} />
             </div>
             <button className="btn btn-block" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Create category'}</button>
           </form>

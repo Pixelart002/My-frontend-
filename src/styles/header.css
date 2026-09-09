@@ -1,5 +1,5 @@
 /* Responsive store header / mobile side drawer */
-.header { position:relative; z-index:120; }
+.header { position:sticky; top:0; z-index:120; backdrop-filter:blur(18px); background:color-mix(in srgb, var(--bg) 86%, transparent); box-shadow:0 1px 0 transparent; transition:box-shadow .18s ease, background .18s ease; }
 .header.drawer-active { z-index:120; }
 .header-actions,.icon-btn,.menu-button,.search-form,.account-menu-wrap { display:flex; align-items:center; }
 .header-actions { gap:8px; }

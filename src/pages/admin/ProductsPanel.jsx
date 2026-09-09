@@ -52,6 +52,8 @@ export default function ProductsPanel() {
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [imageMode, setImageMode] = useState('url');
+  const [imageName, setImageName] = useState('');
 
   const load = useCallback(async () => {
     setError('');
@@ -89,12 +91,29 @@ export default function ProductsPanel() {
   const openCreate = () => {
     setEditingId(null);
     setForm(blankForm);
+    setImageMode('url');
+    setImageName('');
     setEditing(true);
+  };
+
+  const handleImageFile = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return toast.error('Please choose an image file.');
+    if (file.size > 2 * 1024 * 1024) return toast.error('Image must be smaller than 2 MB.');
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((current) => ({ ...current, image_url: String(reader.result || '') }));
+      setImageName(file.name);
+    };
+    reader.readAsDataURL(file);
   };
 
   const openEdit = (p) => {
     setEditingId(p.id);
     setForm(toForm(p));
+    setImageMode('url');
+    setImageName('');
     setEditing(true);
   };
 
@@ -240,37 +259,37 @@ export default function ProductsPanel() {
             <div className="field-grid">
               <div className="field">
                 <label htmlFor="p-name">Name *</label>
-                <input id="p-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <input id="p-name" value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} />
               </div>
               <div className="field">
                 <label htmlFor="p-slug">Slug *</label>
-                <input id="p-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} disabled={Boolean(editingId)} />
+                <input id="p-slug" value={form.slug} onChange={(e) => setForm((current) => ({ ...current, slug: e.target.value }))} disabled={Boolean(editingId)} />
               </div>
             </div>
             <div className="field-grid">
               <div className="field">
                 <label htmlFor="p-price">Price (₹) *</label>
-                <input id="p-price" type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+                <input id="p-price" type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} />
               </div>
               <div className="field">
                 <label htmlFor="p-compare">Compare-at price</label>
-                <input id="p-compare" type="number" min="0" step="0.01" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} />
+                <input id="p-compare" type="number" min="0" step="0.01" value={form.compare_price} onChange={(e) => setForm((current) => ({ ...current, compare_price: e.target.value }))} />
               </div>
             </div>
             <div className="field-grid">
               <div className="field">
                 <label htmlFor="p-stock">Stock</label>
-                <input id="p-stock" type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+                <input id="p-stock" type="number" min="0" value={form.stock} onChange={(e) => setForm((current) => ({ ...current, stock: e.target.value }))} />
               </div>
               <div className="field">
                 <label htmlFor="p-threshold">Low stock threshold</label>
-                <input id="p-threshold" type="number" min="0" value={form.low_stock_threshold} onChange={(e) => setForm({ ...form, low_stock_threshold: e.target.value })} />
+                <input id="p-threshold" type="number" min="0" value={form.low_stock_threshold} onChange={(e) => setForm((current) => ({ ...current, low_stock_threshold: e.target.value }))} />
               </div>
             </div>
             <div className="field-grid">
               <div className="field">
                 <label htmlFor="p-cat">Category</label>
-                <select id="p-cat" value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}>
+                <select id="p-cat" value={form.category_id} onChange={(e) => setForm((current) => ({ ...current, category_id: e.target.value }))}>
                   <option value="">None</option>
                   {categories.map((c) => (
                     <option key={c.id || c.slug} value={c.id || c.slug}>{c.name}</option>
@@ -279,23 +298,32 @@ export default function ProductsPanel() {
               </div>
               <div className="field">
                 <label htmlFor="p-sku">SKU</label>
-                <input id="p-sku" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+                <input id="p-sku" value={form.sku} onChange={(e) => setForm((current) => ({ ...current, sku: e.target.value }))} />
               </div>
             </div>
             <div className="field">
-              <label htmlFor="p-image">Image URL</label>
-              <input id="p-image" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" />
+              <label>Product image</label>
+              <div className="segmented-control" role="tablist" aria-label="Product image source">
+                <button type="button" className={imageMode === 'url' ? 'is-active' : ''} onClick={() => setImageMode('url')}>Add image link</button>
+                <button type="button" className={imageMode === 'file' ? 'is-active' : ''} onClick={() => setImageMode('file')}>Upload image</button>
+              </div>
+              {imageMode === 'url' ? (
+                <input id="p-image" value={form.image_url.startsWith('data:') ? '' : form.image_url} onChange={(e) => setForm((current) => ({ ...current, image_url: e.target.value }))} placeholder="https://…" />
+              ) : (
+                <input id="p-image-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleImageFile} />
+              )}
+              {imageName && <small className="field-hint">Selected: {imageName}</small>}
             </div>
             <div className="field">
               <label htmlFor="p-short">Short description</label>
-              <input id="p-short" value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
+              <input id="p-short" value={form.short_description} onChange={(e) => setForm((current) => ({ ...current, short_description: e.target.value }))} />
             </div>
             <div className="field">
               <label htmlFor="p-desc">Full description</label>
-              <textarea id="p-desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <textarea id="p-desc" value={form.description} onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))} />
             </div>
             <label className="check-line" style={{ marginBottom: 16 }}>
-              <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
+              <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((current) => ({ ...current, is_active: e.target.checked }))} />
               Active (visible in the shop)
             </label>
             <button className="btn btn-block" type="submit" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button>
