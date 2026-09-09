@@ -69,8 +69,8 @@ function AddressForm({ onSaved, onCancel }) {
         <div className="field"><label htmlFor="addr-postal">Postal code *</label><input id="addr-postal" value={values.postal_code} onChange={set('postal_code')} /></div>
         <div className="field"><label htmlFor="addr-country">Country</label><input id="addr-country" maxLength="2" value={values.country} onChange={set('country')} /></div>
       </div>
-      <div className="field"><label htmlFor="addr-email">Email *</label><input id="addr-email" type="email" value={values.email} onChange={set('email')} placeholder="you@example.com" autoComplete="email" required /></div>
-      <div className="field"><label htmlFor="addr-phone">Phone (optional)</label><input id="addr-phone" value={values.phone} onChange={set('phone')} placeholder="For delivery updates" /></div>
+      <div className="field"><label htmlFor="addr-email">Email address *</label><input id="addr-email" name="email" type="email" value={values.email} onChange={set('email')} placeholder="you@example.com" autoComplete="email" inputMode="email" required /></div>
+      <div className="field"><label htmlFor="addr-phone">Phone (optional)</label><input id="addr-phone" name="phone" value={values.phone} onChange={set('phone')} placeholder="For delivery updates" autoComplete="tel" inputMode="tel" /></div>
       <div className="btn-row">
         <button className="btn" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save address'}</button>
         <button className="btn btn-quiet" type="button" onClick={onCancel}>Cancel</button>
