@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { RiLockLine, RiAddLine } from '@remixicon/react';
+import { RiLockLine, RiAddLine, RiArrowRightLine } from '@remixicon/react';
 import { userService } from '../services/users';
 import { paymentService } from '../services/payments';
 import { STRIPE_PK } from '../config/env';
@@ -53,7 +53,6 @@ function AddressForm({ onSaved, onCancel }) {
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, loading: cartLoading } = useCart();
-  const [step, setStep] = useState(1);
   const [addresses, setAddresses] = useState(null);
   const [addressError, setAddressError] = useState('');
   const [selected, setSelected] = useState('');
@@ -62,6 +61,7 @@ export default function CheckoutPage() {
   const [intentError, setIntentError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentReview, setPaymentReview] = useState(false);
   const [creating, setCreating] = useState(false);
   const [checkoutKey, setCheckoutKey] = useState('');
 
@@ -74,10 +74,19 @@ export default function CheckoutPage() {
 
   const items = cart?.items || [];
   const canProceed = items.length > 0 && !cart?.has_unavailable_items;
+  const selectedAddress = useMemo(() => addresses?.find((addr) => addr.id === selected) || null, [addresses, selected]);
+
+  const openPaymentChooser = () => {
+    if (!selected || creating) return;
+    setIntentError('');
+    setPaymentReview(false);
+    setIntent(null);
+    setPaymentModalOpen(true);
+  };
 
   const startPayment = async () => {
     if (!selected || creating || !paymentMethod) return;
-    setCreating(true); setIntentError(''); setPaymentModalOpen(false);
+    setCreating(true); setIntentError('');
     try {
       const key = checkoutKey || makeIdempotencyKey();
       if (!checkoutKey) setCheckoutKey(key);
@@ -90,16 +99,44 @@ export default function CheckoutPage() {
       }
       const data = await paymentService.createIntent(selected, key);
       if (!data?.client_secret || !data?.payment_intent_id || !data?.order_id) throw new Error('Payment session was not created correctly. Please try again.');
-      setIntent(data); setStep(2);
+      setIntent(data);
     } catch (err) {
       const message = err?.code === 'NETWORK_ERROR' ? 'We could not reach the order service. Check your connection and try again.' : err?.code === 'TIMEOUT' ? 'The order service took too long to respond. Please retry.' : err?.status === 401 ? 'Your session has expired. Please sign in again.' : err?.message || 'Unable to place your order. Please try again.';
       setIntentError(message);
     } finally { setCreating(false); }
   };
 
+  const handleModalContinue = () => {
+    if (!paymentReview) {
+      setPaymentReview(true);
+      return;
+    }
+    startPayment();
+  };
+
+  const handleModalBack = () => {
+    if (intent) {
+      setIntent(null);
+      setIntentError('');
+      return;
+    }
+    setPaymentReview(false);
+    setIntentError('');
+  };
+
   const intentOptions = useMemo(() => ({ clientSecret: intent?.client_secret }), [intent]);
   if (cartLoading) return <div className="page container"><Spinner label="Preparing checkout…" /></div>;
   if (!canProceed) return <div className="page container"><div className="page-heading compact"><p className="eyebrow">Checkout</p><h1>Your bag is empty.</h1></div><button className="btn" onClick={() => navigate('/shop')}>Continue shopping</button></div>;
+
+  const paymentContent = intent?.client_secret ? (
+    <Elements stripe={stripePromise} options={intentOptions}>
+      <StripePaymentForm
+        orderNumber={intent.order_number}
+        onSuccess={(payload) => navigate('/order/success', { replace: true, state: { orderId: payload.order_id, orderNumber: intent.order_number, paymentMethod: 'stripe' } })}
+        onBack={handleModalBack}
+      />
+    </Elements>
+  ) : null;
 
   return (
     <div className="page container checkout">
@@ -109,18 +146,24 @@ export default function CheckoutPage() {
           <section className="checkout-section">
             <h2>1 · Delivery address</h2>
             {addressError && <ErrorState message={addressError} onRetry={loadAddresses} />}
-            {addresses && addresses.length > 0 && !showForm && <div className="address-list">{addresses.map((addr) => <label key={addr.id} className={`address-card ${selected === addr.id ? 'is-selected' : ''}`}><input type="radio" name="address" checked={selected === addr.id} onChange={() => setSelected(addr.id)} /><div><strong>{addr.full_name || 'Delivery'}</strong><p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>{addr.email && <p>{addr.email}</p>}{addr.is_default && <span className="chip chip-sm">Default</span>}</div></label>)}<button className="btn btn-quiet btn-sm" onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add a new address</button></div>}
+            {addresses && addresses.length > 0 && !showForm && <div className="address-list">
+              {addresses.map((addr) => <label key={addr.id} className={`address-card ${selected === addr.id ? 'is-selected' : ''}`}>
+                <input type="radio" name="address" checked={selected === addr.id} onChange={() => { setSelected(addr.id); setIntent(null); setPaymentModalOpen(false); setPaymentReview(false); }} />
+                <div><strong>{addr.full_name || 'Delivery'}</strong><p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>{addr.email && <p>{addr.email}</p>}{addr.is_default && <span className="chip chip-sm">Default</span>}</div>
+              </label>)}
+              <button className="btn btn-quiet btn-sm" onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add a new address</button>
+            </div>}
             {addresses && addresses.length === 0 && !showForm && <div className="state"><p>You’ll need a delivery address to check out.</p></div>}
             {showForm && <AddressForm onSaved={() => { setShowForm(false); loadAddresses(); }} onCancel={() => setShowForm(false)} />}
           </section>
 
-          <section className="checkout-section">
+          <section className="checkout-section checkout-payment-launch">
             <h2>2 · Payment</h2>
-            {intentError && <div className="form-error" role="alert"><span>{intentError}</span><button type="button" className="btn btn-quiet btn-sm" onClick={() => setPaymentModalOpen(true)} disabled={creating}>Choose payment method</button></div>}
-            {step === 1 ? <div className="payment-selector">
-              <div className="payment-selector-copy"><span className="payment-selector-label">Payment method</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Not selected'}</strong><small>{paymentMethod === 'stripe' ? 'Secure online payment' : paymentMethod === 'cod' ? 'Pay when your order arrives' : 'Select how you want to pay'}</small></div>
-              <button className="btn" type="button" onClick={() => setPaymentModalOpen(true)} disabled={creating || !selected}>{creating ? 'Preparing…' : 'Choose Payment Method'}</button>
-            </div> : intent?.client_secret ? <Elements stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number} onSuccess={(payload) => navigate('/order/success', { replace: true, state: { orderId: payload.order_id, orderNumber: intent.order_number, paymentMethod: 'stripe' } })} onBack={() => setStep(1)} /></Elements> : <ErrorState message="Payment session is unavailable. Please go back and try again." onRetry={() => setStep(1)} />}
+            {intentError && <div className="form-error" role="alert">{intentError}</div>}
+            <div className="payment-selector">
+              <div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose a payment method'}</strong><small>Select your payment method, review the selected address and complete payment in the secure popup.</small></div>
+              <button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button>
+            </div>
           </section>
         </div>
         <aside className="summary">
@@ -129,7 +172,21 @@ export default function CheckoutPage() {
           <dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div><div className="total"><dt>Total</dt><dd>{formatMoney(cart.total_amount)}</dd></div></dl>
         </aside>
       </div>
-      <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={setPaymentMethod} onClose={() => setPaymentModalOpen(false)} onContinue={startPayment} loading={creating} />
+
+      <PaymentMethodModal
+        open={paymentModalOpen}
+        value={paymentMethod}
+        onChange={(method) => { setPaymentMethod(method); setIntent(null); setIntentError(''); }}
+        onClose={() => { if (!creating) { setPaymentModalOpen(false); setPaymentReview(false); setIntent(null); } }}
+        onContinue={handleModalContinue}
+        loading={creating}
+        review={paymentReview}
+        address={selectedAddress}
+        total={formatMoney(cart.total_amount)}
+        onBack={handleModalBack}
+      >
+        {paymentContent}
+      </PaymentMethodModal>
     </div>
   );
 }
