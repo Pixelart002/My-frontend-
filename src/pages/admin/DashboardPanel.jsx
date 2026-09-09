@@ -9,11 +9,13 @@ export default function DashboardPanel({ onNavigate }) {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [error, setError] = useState('');
+  const [ordersError, setOrdersError] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     setError('');
+    setOrdersError('');
     try {
       const [statsRes, ordersRes] = await Promise.allSettled([
         adminService.stats(),
@@ -26,6 +28,9 @@ export default function DashboardPanel({ onNavigate }) {
       }
       if (ordersRes.status === 'fulfilled') {
         setRecent(itemsOfList(ordersRes.value));
+      } else {
+        setRecent([]);
+        setOrdersError(ordersRes.reason?.message || 'Unable to load recent orders.');
       }
     } finally {
       setLoading(false);
@@ -74,7 +79,14 @@ export default function DashboardPanel({ onNavigate }) {
       </div>
 
       <div className="admin-section-label">Recent orders</div>
-      {recent.length === 0 ? (
+      {ordersError ? (
+        <div className="admin-table-wrap">
+          <div className="admin-empty">{ordersError}</div>
+          <div className="btn-row" style={{ justifyContent: 'center', paddingBottom: 16 }}>
+            <button className="btn btn-quiet btn-sm" onClick={load}>Retry orders</button>
+          </div>
+        </div>
+      ) : recent.length === 0 ? (
         <div className="admin-table-wrap">
           <div className="admin-empty">No recent orders.</div>
         </div>
