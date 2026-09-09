@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { RiArrowLeftLine, RiFileTextLine, RiCloseCircleLine } from '@remixicon/react';
 import { orderService } from '../services/orders';
@@ -14,12 +14,18 @@ export default function OrderDetailPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const load = () => {
+  const load = useCallback(() => {
+    if (!id) return Promise.resolve();
     setError('');
-    orderService.myOrder(id).then(setOrder).catch((err) => setError(err.message || 'Unable to load this order.'));
-  };
+    return orderService.myOrder(id)
+      .then(setOrder)
+      .catch((err) => setError(err.message || 'Unable to load this order.'));
+  }, [id]);
 
-  useEffect(load, [id]);
+  useEffect(() => {
+    setOrder(null);
+    load();
+  }, [load]);
 
   const onCancel = async () => {
     if (!window.confirm('Cancel this order? Your payment will be refunded.')) return;
