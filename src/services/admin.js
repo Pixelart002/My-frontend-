@@ -5,6 +5,7 @@
  * Catalogue CRUD:      /products, /products/{id}, /categories
  * Order management:    /orders, /orders/{id}
  * User management:     /users, /users/{id}
+ * Coupon management:   /coupons/manage
  */
 import { request } from '../api/client';
 
@@ -58,4 +59,10 @@ export const adminService = {
   // ── Users ───────────────────────────────────────────────────────
   listUsers: (params) => request('GET', `/users/?${qs(params)}`),
   updateUser: (id, data) => request('PATCH', `/users/${encodeURIComponent(id)}`, data),
+
+  // ── Coupons ────────────────────────────────────────────────────
+  listCoupons: (params) => request('GET', `/coupons/manage?${qs(params)}`),
+  createCoupon: (data) => request('POST', '/coupons/manage', data),
+  updateCoupon: (id, data) => request('PATCH', `/coupons/manage/${encodeURIComponent(id)}`, data),
+  deleteCoupon: (id) => request('DELETE', `/coupons/manage/${encodeURIComponent(id)}`),
 };
