@@ -51,9 +51,13 @@ export default function AdminPage() {
         <div className="admin-sb-label">Catalogue</div>{NAV.slice(1, 3).map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}
         <div className="admin-sb-label">Commerce</div>{NAV.slice(3, 5).map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}
         <div className="admin-sb-label">Customers</div><SideBtn nav={NAV[5]} active={panel} onClick={() => selectPanel('users')} />
-        <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line)', fontSize: 12, color: 'var(--dim)' }}><div style={{ fontWeight: 600, color: 'var(--text)' }}>{profile?.full_name || user?.full_name || 'Admin'}</div><div style={{ overflowWrap: 'anywhere' }}>{profile?.email || user?.email}</div><div style={{ marginTop: 4, textTransform: 'capitalize' }}>{profile?.role || user?.role}</div><button type="button" onClick={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, border: 0, background: 'transparent', color: 'var(--muted)', padding: 0, fontSize: 13 }}><RiLogoutBoxRLine size={15} /> Sign out</button></div>
+        <div className="admin-account"><div className="admin-account-name">{profile?.full_name || user?.full_name || 'Admin'}</div><div className="admin-account-email">{profile?.email || user?.email}</div><div className="admin-account-role">{profile?.role || user?.role}</div><button type="button" onClick={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} className="admin-signout"><RiLogoutBoxRLine size={15} /> Sign out</button></div>
       </aside>
-      <main className="admin-main"><div className="admin-head"><div><h1>{active.label}</h1></div></div>{panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}{panel === 'products' && <ProductsPanel />}{panel === 'categories' && <CategoriesPanel />}{panel === 'orders' && <OrdersPanel />}{panel === 'coupons' && <CouponsPanel />}{panel === 'users' && <UsersPanel />}</main>
+      <main className="admin-main">
+        <div className="admin-head"><div><h1>{active.label}</h1><p className="admin-sub">Luviio store administration</p></div></div>
+        <nav className="admin-mobile-nav" aria-label="Admin sections">{NAV.map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}</nav>
+        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}{panel === 'products' && <ProductsPanel />}{panel === 'categories' && <CategoriesPanel />}{panel === 'orders' && <OrdersPanel />}{panel === 'coupons' && <CouponsPanel />}{panel === 'users' && <UsersPanel />}
+      </main>
     </div>
   );
 }
