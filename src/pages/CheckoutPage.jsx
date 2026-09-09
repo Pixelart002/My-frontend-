@@ -17,7 +17,6 @@ function makeIdempotencyKey() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-  // RFC 4122 v4 fallback for older WebViews/browsers.
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -26,7 +25,7 @@ function makeIdempotencyKey() {
 }
 
 function AddressForm({ onSaved, onCancel }) {
-  const [values, setValues] = useState({ line1: '', line2: '', city: '', state: '', postal_code: '', country: 'IN', phone: '' });
+  const [values, setValues] = useState({ line1: '', line2: '', city: '', state: '', postal_code: '', country: 'IN', phone: '', email: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const set = (k) => (e) => setValues((v) => ({ ...v, [k]: e.target.value }));
@@ -34,7 +33,9 @@ function AddressForm({ onSaved, onCancel }) {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!values.line1 || !values.city || !values.postal_code) return setError('Please fill in street, city and postal code.');
+    if (!values.line1 || !values.city || !values.postal_code || !values.email.trim()) {
+      return setError('Please fill in street, city, postal code and email.');
+    }
     setSaving(true);
     try {
       await userService.addAddress({
@@ -45,6 +46,7 @@ function AddressForm({ onSaved, onCancel }) {
         postal_code: values.postal_code,
         country: values.country.toUpperCase(),
         phone: values.phone || undefined,
+        email: values.email.trim().toLowerCase(),
       });
       onSaved();
     } catch (err) {
@@ -67,6 +69,7 @@ function AddressForm({ onSaved, onCancel }) {
         <div className="field"><label htmlFor="addr-postal">Postal code *</label><input id="addr-postal" value={values.postal_code} onChange={set('postal_code')} /></div>
         <div className="field"><label htmlFor="addr-country">Country</label><input id="addr-country" maxLength="2" value={values.country} onChange={set('country')} /></div>
       </div>
+      <div className="field"><label htmlFor="addr-email">Email *</label><input id="addr-email" type="email" value={values.email} onChange={set('email')} placeholder="you@example.com" autoComplete="email" required /></div>
       <div className="field"><label htmlFor="addr-phone">Phone (optional)</label><input id="addr-phone" value={values.phone} onChange={set('phone')} placeholder="For delivery updates" /></div>
       <div className="btn-row">
         <button className="btn" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save address'}</button>
@@ -154,6 +157,7 @@ export default function CheckoutPage() {
                     <div>
                       <strong>{addr.full_name || 'Delivery'}</strong>
                       <p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>
+                      {addr.email && <p>{addr.email}</p>}
                       {addr.is_default && <span className="chip chip-sm">Default</span>}
                     </div>
                   </label>
