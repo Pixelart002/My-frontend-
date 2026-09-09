@@ -112,7 +112,29 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
+/**
+ * Defense-in-depth for legacy checkout callers.
+ * Older frontend bundles posted COD orders to `/orders` with payment_method=cod.
+ * The backend now has a dedicated `/orders/cod` endpoint, so normalize that
+ * legacy request before it reaches the network. Current COD callers already
+ * use `/orders/cod` and are left untouched.
+ */
+function normalizeLegacyOrderPath(method, path, body) {
+  if (
+    method.toUpperCase() === 'POST' &&
+    path === '/orders' &&
+    body &&
+    typeof body === 'object' &&
+    !(body instanceof FormData) &&
+    String(body.payment_method || '').toLowerCase() === 'cod'
+  ) {
+    return '/orders/cod';
+  }
+  return path;
+}
+
 async function fetchOnce(method, path, body, headers) {
+  const normalizedPath = normalizeLegacyOrderPath(method, path, body);
   const opts = {
     method,
     headers: { ...headers },
@@ -127,7 +149,7 @@ async function fetchOnce(method, path, body, headers) {
     opts.body = JSON.stringify(body);
   }
 
-  return fetch(`${API_BASE}${path}`, opts);
+  return fetch(`${API_BASE}${normalizedPath}`, opts);
 }
 
 async function parseError(res, parsed = null) {
