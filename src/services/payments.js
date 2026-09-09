@@ -10,9 +10,10 @@
 import { request } from '../api/client';
 
 export const paymentService = {
-  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
+  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
     const payload = { shipping_address_id: shippingAddressId, idempotency_key: idempotencyKey };
     if (billingAddressId) payload.billing_address_id = billingAddressId;
+    if (couponCode) payload.coupon_code = couponCode;
     return request('POST', '/payments/create-intent', payload);
   },
 
@@ -26,13 +27,14 @@ export const paymentService = {
     }),
 
   // COD is a first-class order flow. It must not hit the Stripe/payment-intent endpoint.
-  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
+  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
     const payload = {
       shipping_address_id: shippingAddressId,
       payment_method: 'cod',
       idempotency_key: idempotencyKey,
     };
     if (billingAddressId) payload.billing_address_id = billingAddressId;
+    if (couponCode) payload.coupon_code = couponCode;
     return request('POST', '/orders/cod', payload);
   },
 
