@@ -1,28 +1,93 @@
-/* Global viewport containment fix.
-   Keep the React app and full-width shells tied to the browser viewport.
-   This prevents the storefront from rendering as a narrow left-side column. */
+/* Global viewport + overflow containment.
+   Layout containers must never force the document wider than the viewport.
+   Horizontal scrolling is allowed only inside components that explicitly need it. */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
 html,
 body,
 #root {
   width: 100%;
   max-width: none;
+  min-width: 0;
 }
 
 html,
-body {
-  min-width: 100%;
-}
+body { min-height: 100%; }
+body { overflow-x: clip; }
 
 #root {
   min-height: 100dvh;
   overflow-x: clip;
 }
 
-.home-landing,
-.header,
-.footer {
+img,
+svg,
+video,
+canvas { max-width: 100%; }
+
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+.container,
+.page,
+.admin-shell,
+.admin-main,
+.admin-panel,
+.admin-card,
+.admin-toolbar,
+.admin-stats {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-table-wrap {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-table-wrap .admin-table {
+  width: max-content;
+  min-width: 100%;
   max-width: none;
+}
+
+.admin-card,
+.admin-panel { overflow-x: clip; }
+
+.admin-card,
+.admin-panel,
+.admin-head,
+.admin-toolbar,
+.admin-head-title,
+.admin-stat,
+.admin-modal,
+.admin-order-items,
+.admin-drawer,
+.admin-drawer-scroll {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-head-title,
+.admin-toolbar,
+.btn-row { max-width: 100%; }
+
+@media (max-width: 900px) {
+  .admin-shell,
+  .admin-main,
+  .admin-card,
+  .admin-panel { width: 100%; }
 }
 
 @media (max-width: 760px) {
