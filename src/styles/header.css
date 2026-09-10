@@ -125,3 +125,14 @@
   }
   .mobile-nav-close { z-index:121 !important; }
 }
+
+/* Mobile admin menu: grouped hierarchy matching the admin console. */
+@media (max-width:900px) {
+  .mobile-admin-nav { gap:0; }
+  .mobile-admin-group + .mobile-admin-group { margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .mobile-admin-label { padding:0 10px 5px; color:var(--dim); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+  .mobile-admin-group a { gap:10px; }
+  .mobile-admin-group a svg { flex:0 0 18px; color:var(--dim); }
+  .mobile-admin-group a:hover svg,.mobile-admin-group a:focus-visible svg { color:var(--gold); }
+  .mobile-admin-nav + a { margin-top:12px; padding-top:14px; border-top:1px solid var(--line); }
+}
