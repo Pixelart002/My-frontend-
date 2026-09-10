@@ -1,0 +1,75 @@
+/* Luviio reference checkout UI — final responsive overrides. */
+.checkout { width:100%; max-width:1180px; margin-inline:auto; box-sizing:border-box; overflow-x:clip; }
+.checkout-layout-refined { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,380px); align-items:start; }
+.checkout-main { min-width:0; width:100%; display:flex; flex-direction:column; }
+.checkout-section,.checkout-summary { min-width:0; width:100%; max-width:100%; box-sizing:border-box; }
+.checkout-section { overflow:hidden; }
+.address-card,.payment-selector,.coupon-input-row { min-width:0; max-width:100%; box-sizing:border-box; }
+.address-card p,.payment-selector-copy,.payment-selector-copy small { overflow-wrap:anywhere; word-break:break-word; }
+@media (max-width:1080px) {
+  .checkout-layout-refined { display:flex !important; flex-direction:column !important; width:100% !important; max-width:100% !important; gap:20px !important; }
+  .checkout-main { width:100% !important; max-width:100% !important; }
+  .checkout-section { width:100% !important; max-width:100% !important; }
+  .checkout-summary { position:static !important; inset:auto !important; grid-column:auto !important; grid-row:auto !important; width:100% !important; max-width:100% !important; margin:0 !important; transform:none !important; order:2; }
+}
+@media (max-width:700px) {
+  .checkout { padding-inline:12px; }
+  .checkout-heading h1 { font-size:clamp(36px,10vw,54px); letter-spacing:-.035em; }
+  .checkout-subtitle { font-size:15px; line-height:1.55; }
+  .checkout-main { gap:12px; }
+  .checkout-section { padding:18px 16px; }
+  .checkout-section h2 { font-size:12px; margin-bottom:14px; }
+  .address-list { display:flex; flex-direction:column; gap:8px; }
+  .address-card { grid-template-columns:18px minmax(0,1fr); gap:10px; padding:13px; }
+  .address-card input { width:16px; height:16px; }
+  .payment-selector { padding:14px; }
+  .checkout-summary { padding:20px 16px; }
+  .checkout-summary .summary-items li { min-width:0; gap:12px; }
+  .checkout-summary .summary-items li span { overflow-wrap:anywhere; }
+}
+@media (max-width:480px) {
+  .checkout { padding-inline:10px; }
+  .checkout-heading h1 { font-size:35px !important; }
+  .checkout-section { padding:15px 13px; }
+  .checkout-summary { padding:18px 14px; }
+}
+
+/* Payment dialog: keep Stripe secure fields inside the viewport. */
+.payment-modal-backdrop { z-index:2000 !important; }
+.payment-modal { box-sizing:border-box; width:min(640px,calc(100vw - 28px)); max-height:min(860px,calc(100dvh - 28px)); }
+.payment-modal-payment,.payment-element-shell { min-width:0; width:100%; box-sizing:border-box; }
+.payment-modal-review #payment-element { width:100%; max-width:100%; }
+.payment-form-actions { width:100%; }
+@media (max-width:480px) {
+  .payment-modal { width:100%; max-width:100%; max-height:96dvh; border-radius:20px 20px 0 0; }
+}
+
+/* Branded processing state. */
+.payment-processing-screen { min-height:460px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px 10px 20px; box-sizing:border-box; animation:processing-enter .28s ease both; }
+.payment-processing-ring { width:74px; height:74px; border:3px solid rgba(216,173,106,.18); border-top-color:var(--gold); border-right-color:var(--gold-soft); border-radius:50%; animation:processing-spin 1s linear infinite; margin-bottom:26px; }
+.payment-processing-screen h3 { margin:0 0 10px; font-family:var(--font-display); font-size:clamp(24px,6vw,34px); font-weight:500; }
+.payment-processing-screen p { max-width:34ch; margin:0; color:var(--muted); line-height:1.55; }
+.payment-processing-steps { width:min(310px,100%); display:grid; gap:0; margin-top:30px; text-align:left; }
+.payment-processing-step { position:relative; display:grid; grid-template-columns:20px 1fr; gap:12px; min-height:48px; color:var(--dim); font-size:13px; }
+.payment-processing-step:not(:last-child)::before { content:''; position:absolute; left:9px; top:18px; bottom:0; width:1px; background:var(--line); }
+.payment-processing-dot { position:relative; z-index:1; width:18px; height:18px; box-sizing:border-box; border:1px solid var(--line); border-radius:50%; background:var(--surface); }
+.payment-processing-step.is-done,.payment-processing-step.is-active { color:var(--text); }
+.payment-processing-step.is-done .payment-processing-dot { border-color:var(--success); background:var(--success); }
+.payment-processing-step.is-active .payment-processing-dot { border-color:var(--gold); background:var(--gold); box-shadow:0 0 0 4px rgba(216,173,106,.12); animation:processing-pulse 1.4s ease-in-out infinite; }
+.payment-processing-brand { margin-top:34px; color:var(--gold-soft); letter-spacing:.35em; font-size:11px; }
+@keyframes processing-spin { to { transform:rotate(360deg); } }
+@keyframes processing-pulse { 50% { box-shadow:0 0 0 7px rgba(216,173,106,.05); } }
+@keyframes processing-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+@media (max-width:480px) { .payment-processing-screen { min-height:440px; } }
+@media (prefers-reduced-motion:reduce) { .payment-processing-ring,.payment-processing-step.is-active .payment-processing-dot,.payment-processing-screen { animation:none; } }
+
+/* Reference confirmation details. */
+.order-result { width:min(620px,100%); box-sizing:border-box; text-align:center; }
+.order-result-order-id { margin:20px auto 0; padding:14px 16px; border:1px solid var(--line-soft); border-radius:var(--radius); background:rgba(255,255,255,.018); }
+.order-result-order-id span { display:block; color:var(--dim); font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:5px; }
+.order-result-order-id strong { font-size:14px; }
+.order-result-actions { display:grid; gap:10px; width:100%; margin-top:22px; }
+.order-result-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px; padding-top:20px; border-top:1px solid var(--line-soft); }
+.order-result-meta div { display:grid; gap:5px; justify-items:center; min-width:0; color:var(--muted); font-size:11px; }
+.order-result-meta svg { color:var(--gold-soft); }
+@media (max-width:480px) { .order-result-meta { grid-template-columns:1fr; gap:16px; } }
