@@ -102,7 +102,26 @@
 
 /* Mobile drawer must escape the sticky/backdrop-filter header containing block. */
 @media (max-width:900px) {
-  .header { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
-  .mobile-menu-backdrop { position:fixed !important; inset:0 !important; }
-  .mobile-nav { position:fixed !important; inset:0 auto 0 0 !important; top:0 !important; left:0 !important; bottom:0 !important; height:100dvh !important; max-height:100dvh !important; }
+  .header {
+    z-index:100 !important;
+    isolation:isolate;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+  .mobile-menu-backdrop {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:110 !important;
+  }
+  .mobile-nav {
+    position:fixed !important;
+    inset:0 auto 0 0 !important;
+    top:0 !important;
+    left:0 !important;
+    bottom:0 !important;
+    height:100dvh !important;
+    max-height:100dvh !important;
+    z-index:120 !important;
+  }
+  .mobile-nav-close { z-index:121 !important; }
 }
