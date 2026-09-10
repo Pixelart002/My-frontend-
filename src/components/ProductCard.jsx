@@ -7,105 +7,16 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function ProductCard({ product }) {
-  const { addItem } = useCart();
-  const { isAuthenticated } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [adding, setAdding] = useState(false);
-  const [added, setAdded] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
-  const [imageFailed, setImageFailed] = useState(false);
-  const addedTimer = useRef(null);
-
-  useEffect(() => () => {
-    if (addedTimer.current) window.clearTimeout(addedTimer.current);
-  }, []);
-
-  if (!product) return null;
-
-  const slug = product.slug || product.id;
-  const price = Number(product.price) || 0;
-  const compare = Number(product.compare_price) || 0;
-  const discount = Number(product.discount_percentage) || 0;
-  const stock = Number(product.stock);
-  const outOfStock = product.is_active === false || (Number.isFinite(stock) && stock <= 0);
-  const name = product.name || 'Product';
-  const category = product.categories?.name || product.category_name || 'Luviio collection';
-  const images = (Array.isArray(product.images) ? product.images : []).filter(Boolean);
-  const gallery = images.length ? images : (product.image_url ? [product.image_url] : []);
-  const safeIndex = Math.min(activeImage, Math.max(0, gallery.length - 1));
-
-  const moveImage = (event, direction) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (gallery.length < 2) return;
-    setImageFailed(false);
-    setActiveImage((current) => (current + direction + gallery.length) % gallery.length);
-  };
-
-  const selectImage = (event, index) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setImageFailed(false);
-    setActiveImage(index);
-  };
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      toast.info('Please sign in to add items to your bag.');
-      navigate('/login', { state: { from: `/product/${slug}` } });
-      return;
-    }
-    if (outOfStock || adding) return;
-    setAdding(true);
-    try {
-      await addItem(product.id, 1);
-      setAdded(true);
-      toast.success('Added to your bag.');
-      if (addedTimer.current) window.clearTimeout(addedTimer.current);
-      addedTimer.current = window.setTimeout(() => setAdded(false), 1600);
-    } catch (err) {
-      toast.error(err?.message || 'Unable to add this item.');
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  return (
-    <article className="product-card">
-      {discount > 0 && <span className="badge">Save {Math.round(discount)}%</span>}
-      <div className="product-media">
-        <Link to={`/product/${slug}`} className="product-media-link" aria-label={`View ${name}`}>
-          {gallery[safeIndex] && !imageFailed ? (
-            <img src={gallery[safeIndex]} alt={`${name} image ${safeIndex + 1}`} loading="lazy" decoding="async" onError={() => setImageFailed(true)} />
-          ) : (
-            <span className="placeholder" aria-hidden="true">{name.trim().slice(0, 1).toUpperCase() || 'L'}</span>
-          )}
-        </Link>
-        {gallery.length > 1 && <>
-          <button type="button" className="product-carousel-arrow product-carousel-prev" onClick={(e) => moveImage(e, -1)} aria-label="Previous product image"><RiArrowLeftSLine size={18} /></button>
-          <button type="button" className="product-carousel-arrow product-carousel-next" onClick={(e) => moveImage(e, 1)} aria-label="Next product image"><RiArrowRightLine size={18} /></button>
-          <span className="product-carousel-count" aria-live="polite">{safeIndex + 1}/{gallery.length}</span>
-          <span className="product-carousel-dots" aria-label="Select product image">
-            {gallery.map((_, index) => <button key={index} type="button" className={index === safeIndex ? 'is-active' : ''} onClick={(e) => selectImage(e, index)} aria-label={`View image ${index + 1}`} />)}
-          </span>
-        </>}
-      </div>
-
-      <div className="product-meta">
-        <div><p className="product-category">{category}</p><h3 title={name}>{name}</h3></div>
-        <div className="product-price-row" aria-label={`Price ${formatMoney(price)}`}>
-          {compare > price && price > 0 && <span className="was">{formatMoney(compare)}</span>}
-          <span>{formatMoney(price)}</span>
-        </div>
-      </div>
-
-      <button type="button" className={`add-button ${added ? 'done' : ''}`} onClick={handleAdd} disabled={outOfStock || adding} aria-busy={adding}>
-        <span>{outOfStock ? 'Out of stock' : adding ? 'Adding…' : added ? 'Added to bag' : 'Add to bag'}</span>
-        {!outOfStock && (added ? <RiCheckLine size={15} /> : <RiArrowRightLine size={15} />)}
-      </button>
-    </article>
-  );
+  const { addItem } = useCart(); const { isAuthenticated } = useAuth(); const { toast } = useToast(); const navigate = useNavigate();
+  const [adding,setAdding]=useState(false); const [added,setAdded]=useState(false); const [activeImage,setActiveImage]=useState(0); const [imageFailed,setImageFailed]=useState(false); const addedTimer=useRef(null); const touchStart=useRef(null);
+  useEffect(()=>()=>{if(addedTimer.current)window.clearTimeout(addedTimer.current)},[]);
+  useEffect(()=>{setActiveImage(0);setImageFailed(false)},[product?.id]);
+  if(!product)return null;
+  const slug=product.slug||product.id; const price=Number(product.price)||0; const compare=Number(product.compare_price)||0; const discount=Number(product.discount_percentage)||0; const stock=Number(product.stock); const outOfStock=product.is_active===false||(Number.isFinite(stock)&&stock<=0); const name=product.name||'Product'; const category=product.categories?.name||product.category_name||'Luviio collection'; const images=(Array.isArray(product.images)?product.images:[]).filter(Boolean); const gallery=images.length?images:(product.image_url?[product.image_url]:[]); const safeIndex=Math.min(activeImage,Math.max(0,gallery.length-1));
+  const moveImage=(event,direction)=>{event?.preventDefault();event?.stopPropagation();if(gallery.length<2)return;setImageFailed(false);setActiveImage(current=>(current+direction+gallery.length)%gallery.length)};
+  const selectImage=(event,index)=>{event.preventDefault();event.stopPropagation();setImageFailed(false);setActiveImage(index)};
+  const onTouchStart=(event)=>{if(gallery.length<2)return;touchStart.current=event.changedTouches?.[0]?.clientX??null};
+  const onTouchEnd=(event)=>{if(touchStart.current===null)return;const end=event.changedTouches?.[0]?.clientX??touchStart.current;const delta=end-touchStart.current;touchStart.current=null;if(Math.abs(delta)>36)moveImage(event,delta<0?1:-1)};
+  const handleAdd=async(e)=>{e.preventDefault();e.stopPropagation();if(!isAuthenticated){toast.info('Please sign in to add items to your bag.');navigate('/login',{state:{from:`/product/${slug}`}});return}if(outOfStock||adding)return;setAdding(true);try{await addItem(product.id,1);setAdded(true);toast.success('Added to your bag.');if(addedTimer.current)window.clearTimeout(addedTimer.current);addedTimer.current=window.setTimeout(()=>setAdded(false),1600)}catch(err){toast.error(err?.message||'Unable to add this item.')}finally{setAdding(false)}};
+  return <article className="product-card">{discount>0&&<span className="badge">Save {Math.round(discount)}%</span>}<div className="product-media" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}><Link to={`/product/${slug}`} className="product-media-link" aria-label={`View ${name}`} onKeyDown={e=>{if(e.key==='ArrowLeft')moveImage(e,-1);if(e.key==='ArrowRight')moveImage(e,1)}}>{gallery[safeIndex]&&!imageFailed?<img src={gallery[safeIndex]} alt={`${name} image ${safeIndex+1}`} loading="lazy" decoding="async" draggable="false" onError={()=>setImageFailed(true)}/>:<span className="placeholder" aria-hidden="true">{name.trim().slice(0,1).toUpperCase()||'L'}</span>}</Link>{gallery.length>1&&<><button type="button" className="product-carousel-arrow product-carousel-prev" onClick={e=>moveImage(e,-1)} aria-label="Previous product image"><RiArrowLeftSLine size={18}/></button><button type="button" className="product-carousel-arrow product-carousel-next" onClick={e=>moveImage(e,1)} aria-label="Next product image"><RiArrowRightLine size={18}/></button><span className="product-carousel-count" aria-live="polite">{safeIndex+1}/{gallery.length}</span><span className="product-carousel-dots" aria-label="Select product image">{gallery.map((_,index)=><button key={index} type="button" className={index===safeIndex?'is-active':''} onClick={e=>selectImage(e,index)} aria-label={`View image ${index+1}`} />)}</span></>}</div><div className="product-meta"><div><p className="product-category">{category}</p><h3 title={name}>{name}</h3></div><div className="product-price-row" aria-label={`Price ${formatMoney(price)}`}>{compare>price&&price>0&&<span className="was">{formatMoney(compare)}</span>}<span>{formatMoney(price)}</span></div></div><button type="button" className={`add-button ${added?'done':''}`} onClick={handleAdd} disabled={outOfStock||adding} aria-busy={adding}><span>{outOfStock?'Out of stock':adding?'Adding…':added?'Added to bag':'Add to bag'}</span>{!outOfStock&&(added?<RiCheckLine size={15}/>:<RiArrowRightLine size={15}/>)}</button></article>;
 }
