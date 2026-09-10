@@ -7,6 +7,8 @@ export default function OrderSuccessPage() {
   const location = useLocation();
   const { reload } = useCart();
   const orderNumber = String(location.state?.orderNumber || '').trim();
+  const paymentMethod = String(location.state?.paymentMethod || '').toLowerCase();
+  const isCod = paymentMethod === 'cod';
 
   useEffect(() => { reload().catch(() => {}); }, []);
 
@@ -14,12 +16,12 @@ export default function OrderSuccessPage() {
     <div className="page container">
       <div className="order-result">
         <RiCheckboxCircleFill size={58} className="order-result-icon" />
-        <p className="eyebrow">Payment confirmed</p>
-        <h1>Thank you.</h1>
-        <p>Your order{orderNumber ? ` #${orderNumber}` : ''} has been placed and is being prepared.</p>
+        <p className="eyebrow">{isCod ? 'Order confirmed' : 'Payment confirmed'}</p>
+        <h1>{isCod ? 'Your order is placed.' : 'Thank you.'}</h1>
+        <p>{isCod ? `Your COD order${orderNumber ? ` #${orderNumber}` : ''} has been confirmed. You’ll pay when it arrives.` : `Your order${orderNumber ? ` #${orderNumber}` : ''} has been placed and is being prepared.`}</p>
         {orderNumber && (
           <div className="order-result-order-id">
-            <span>Order ID</span>
+            <span>Order number</span>
             <strong>#{orderNumber}</strong>
           </div>
         )}
