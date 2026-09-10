@@ -27,6 +27,7 @@ import ShippingPage from './pages/policies/ShippingPage';
 import RefundPage from './pages/policies/RefundPage';
 import ReturnCancelPage from './pages/policies/ReturnCancelPage';
 import AboutPage from './pages/policies/AboutPage';
+import ReviewsPage from './pages/ReviewsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminPage from './pages/admin/AdminPage';
 
@@ -37,6 +38,7 @@ function StoreRoutes() {
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/product" element={<ProductDetailPage />} />
       <Route path="/product/:slug" element={<ProductDetailPage />} />
+      <Route path="/reviews" element={<ReviewsPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
