@@ -9,6 +9,7 @@ import './styles/forms.css';
 import './styles/app.css';
 import './styles/admin.css';
 import './styles/admin-desktop-drawer.css';
+import './styles/admin-layout-fix.css';
 import './styles/header.css';
 import './styles/polish.css';
 import './styles/payment-modal.css';
