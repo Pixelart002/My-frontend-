@@ -63,4 +63,10 @@ export const paymentService = {
     if (!number) throw new TypeError('A valid public order number is required.');
     return request('POST', `/payments/retry/${encodeURIComponent(number)}`, {});
   },
+
+  cancelCheckout: (orderNumber) => {
+    const number = asTrimmedString(orderNumber);
+    if (!number) throw new TypeError('A valid public order number is required.');
+    return request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
+  },
 };
