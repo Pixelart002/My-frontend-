@@ -4,7 +4,6 @@ import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, R
 import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Link as RouterLink } from 'react-router-dom';
 import DashboardPanel from './DashboardPanel';
 import ProductsPanel from './ProductsPanel';
 import CategoriesPanel from './CategoriesPanel';
