@@ -56,6 +56,7 @@ function StoreRoutes() {
       <Route path="/refund" element={<RefundPage />} />
       <Route path="/returns" element={<ReturnCancelPage />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Route>
   );
 }
@@ -66,7 +67,6 @@ function AppRoutes() {
       {StoreRoutes()}
       <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
       <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
