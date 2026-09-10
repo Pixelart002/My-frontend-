@@ -8,6 +8,7 @@ import './styles/products.css';
 import './styles/forms.css';
 import './styles/app.css';
 import './styles/admin.css';
+import './styles/admin-desktop-drawer.css';
 import './styles/header.css';
 import './styles/polish.css';
 import './styles/payment-modal.css';
