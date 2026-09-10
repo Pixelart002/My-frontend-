@@ -6,12 +6,9 @@ import { useCart } from '../context/CartContext';
 export default function OrderSuccessPage() {
   const location = useLocation();
   const { reload } = useCart();
-  const orderId = location.state?.orderId;
-  const orderNumber = location.state?.orderNumber;
+  const orderNumber = String(location.state?.orderNumber || '').trim();
 
-  useEffect(() => {
-    reload().catch(() => {});
-  }, []);
+  useEffect(() => { reload().catch(() => {}); }, []);
 
   return (
     <div className="page container">
@@ -26,9 +23,9 @@ export default function OrderSuccessPage() {
             <strong>#{orderNumber}</strong>
           </div>
         )}
-        {orderId && (
+        {orderNumber && (
           <div className="order-result-actions">
-            <Link className="btn" to={`/orders/${orderId}`}>View order <RiArrowRightLine size={17} /></Link>
+            <Link className="btn" to={`/orders/${encodeURIComponent(orderNumber)}`}>View order <RiArrowRightLine size={17} /></Link>
             <Link className="btn btn-quiet" to="/orders">All orders</Link>
           </div>
         )}
