@@ -1,5 +1,6 @@
 /**
- * Orders service — real backend endpoints.
+ * Orders service — public customer-facing identifiers only.
+ * Internal database UUIDs are never used to construct public URLs.
  */
 import { downloadFile, request } from '../api/client';
 
@@ -10,9 +11,9 @@ export const orderService = {
     return request('GET', url);
   },
 
-  myOrder: (id) => request('GET', `/orders/my/${encodeURIComponent(id)}`),
+  myOrder: (orderNumber) => request('GET', `/orders/my/${encodeURIComponent(orderNumber)}`),
 
-  cancel: (id) => request('POST', `/orders/my/${encodeURIComponent(id)}/cancel`, {}),
+  cancel: (orderNumber) => request('POST', `/orders/my/${encodeURIComponent(orderNumber)}/cancel`, {}),
 
   // Alternative checkout flow: create an order directly from cart without Stripe
   checkout: (shippingAddressId, notes = '', idempotencyKey = null) =>
@@ -22,5 +23,13 @@ export const orderService = {
       idempotency_key: idempotencyKey || undefined,
     }),
 
-  invoice: (id) => downloadFile(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
+  invoice: (orderNumber, invoiceNumber = null) => {
+    const publicOrderNumber = String(orderNumber || '').trim();
+    if (!publicOrderNumber) throw new Error('A valid order number is required for invoice download.');
+    const publicInvoiceNumber = String(invoiceNumber || '').trim();
+    return downloadFile(
+      `/orders/${encodeURIComponent(publicOrderNumber)}/invoice`,
+      `${publicInvoiceNumber || publicOrderNumber}.pdf`
+    );
+  },
 };
