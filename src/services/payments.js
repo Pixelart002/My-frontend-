@@ -1,11 +1,11 @@
 /**
  * Payments service — real Stripe-backed backend flow.
  *
- * Flow:
- *   1. POST /payments/create-intent -> { client_secret, payment_intent_id, order_id, order_number }
- *   2. Complete payment in the browser with Stripe Elements using the client_secret.
- *   3. POST /payments/confirm { payment_intent_id } -> { status, order_id, message }
- *   4. On failure, POST /payments/notify-failed (best-effort) so the backend logs it.
+ * Public contract:
+ *   create-intent -> { client_secret, payment_intent_id, order_number }
+ *   confirm      -> { status, order_number, message }
+ *   retry        -> uses the customer-facing order_number in its URL.
+ * Internal database order UUIDs never enter browser URLs or public references.
  */
 import { request } from '../api/client';
 
@@ -38,5 +38,5 @@ export const paymentService = {
     return request('POST', '/orders/cod', payload);
   },
 
-  retry: (orderId) => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
+  retry: (orderNumber) => request('POST', `/payments/retry/${encodeURIComponent(orderNumber)}`, {}),
 };
