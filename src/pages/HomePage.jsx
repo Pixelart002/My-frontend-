@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RiArrowRightLine, RiGridLine, RiShowerLine, RiToolsLine, RiWaterFlashLine, RiDropLine, RiHomeGearLine } from '@remixicon/react';
+import { RiArrowRightLine, RiGridLine, RiToolsLine, RiWaterFlashLine, RiDropLine, RiHomeGearLine } from '@remixicon/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
@@ -15,7 +15,7 @@ const CATEGORY_CARDS = [
   { slug: 'pipes-fittings', title: 'Pipes & Fittings', icon: RiWaterFlashLine },
   { slug: 'bathroom-accessories', title: 'Bathroom Accessories', icon: RiHomeGearLine },
   { slug: 'hardware', title: 'Hardware', icon: RiToolsLine },
-  { slug: 'showers', title: 'Showers', icon: RiShowerLine },
+  { slug: 'showers', title: 'Showers', icon: RiDropLine },
 ];
 
 export default function HomePage() {
