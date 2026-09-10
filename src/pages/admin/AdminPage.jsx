@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiGroupLine, RiCoupon3Line, RiLogoutBoxRLine, RiShieldStarLine } from '@remixicon/react';
+import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiGroupLine, RiCoupon3Line, RiLogoutBoxRLine, RiShieldStarLine, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiSettings3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line } from '@remixicon/react';
 import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -10,6 +10,7 @@ import CategoriesPanel from './CategoriesPanel';
 import OrdersPanel from './OrdersPanel';
 import UsersPanel from './UsersPanel';
 import CouponsPanel from './CouponsPanel';
+import OperationsPanel from './OperationsPanel';
 
 const NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: RiDashboardLine },
@@ -17,7 +18,17 @@ const NAV = [
   { key: 'categories', label: 'Categories', icon: RiFolder2Line },
   { key: 'orders', label: 'Orders', icon: RiShoppingCart2Line },
   { key: 'coupons', label: 'Coupons', icon: RiCoupon3Line },
+  { key: 'inventory', label: 'Inventory', icon: RiStackLine },
+  { key: 'shipping', label: 'Shipping', icon: RiTruckLine },
+  { key: 'subscriptions', label: 'Subscriptions', icon: RiVipCrownLine },
   { key: 'users', label: 'Users', icon: RiGroupLine },
+  { key: 'user-actions', label: 'User Actions', icon: RiUserSettingsLine },
+  { key: 'rbac', label: 'Roles & Permissions', icon: RiShieldKeyholeLine },
+  { key: 'notifications', label: 'Notifications', icon: RiNotification3Line },
+  { key: 'settings', label: 'Settings', icon: RiSettings3Line },
+  { key: 'payments', label: 'Payments', icon: RiBankCardLine },
+  { key: 'reports', label: 'Reports', icon: RiBarChart2Line },
+  { key: 'audit', label: 'Audit Logs', icon: RiFileList3Line },
 ];
 const VALID_PANELS = new Set(NAV.map((item) => item.key));
 
@@ -49,15 +60,22 @@ export default function AdminPage() {
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="admin-sb-label">Overview</div><SideBtn nav={NAV[0]} active={panel} onClick={() => selectPanel('dashboard')} />
-        <div className="admin-sb-label">Catalogue</div>{NAV.slice(1, 3).map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}
-        <div className="admin-sb-label">Commerce</div>{NAV.slice(3, 5).map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}
-        <div className="admin-sb-label">Customers</div><SideBtn nav={NAV[5]} active={panel} onClick={() => selectPanel('users')} />
+        <div className="admin-sb-label">Catalogue</div>{['products','categories'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
+        <div className="admin-sb-label">Commerce</div>{['orders','coupons','inventory','shipping','subscriptions','payments'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
+        <div className="admin-sb-label">Customers</div>{['users','user-actions'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
+        <div className="admin-sb-label">Operations</div>{['rbac','notifications','reports','audit','settings'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
         <div className="admin-account"><div className="admin-account-name">{profile?.full_name || user?.full_name || 'Admin'}</div><div className="admin-account-email">{profile?.email || user?.email}</div><div className="admin-account-role">{profile?.role || user?.role}</div><button type="button" onClick={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} className="admin-signout"><RiLogoutBoxRLine size={15} /> Sign out</button></div>
       </aside>
       <main className="admin-main">
         <div className="admin-head"><div><h1>{active.label}</h1><p className="admin-sub">Luviio store administration</p></div></div>
         <nav className="admin-mobile-nav" aria-label="Admin sections">{NAV.map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}</nav>
-        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}{panel === 'products' && <ProductsPanel />}{panel === 'categories' && <CategoriesPanel />}{panel === 'orders' && <OrdersPanel />}{panel === 'coupons' && <CouponsPanel autoOpenCreate={createCoupon} />}{panel === 'users' && <UsersPanel />}
+        {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}
+        {panel === 'products' && <ProductsPanel />}
+        {panel === 'categories' && <CategoriesPanel />}
+        {panel === 'orders' && <OrdersPanel />}
+        {panel === 'coupons' && <CouponsPanel autoOpenCreate={createCoupon} />}
+        {panel === 'users' && <UsersPanel />}
+        {['inventory','shipping','subscriptions','user-actions','rbac','notifications','settings','payments','reports','audit'].includes(panel) && <OperationsPanel section={panel} />}
       </main>
     </div>
   );
