@@ -46,7 +46,7 @@
 /* ---------- Reference landing page ---------- */
 .home-landing { background:#080807; color:#f4efe7; overflow:clip; }
 .hero-reference { min-height:510px; height:calc(100svh - var(--header-h)); max-height:590px; padding:0 var(--pad); display:flex; align-items:center; border-bottom:1px solid rgba(255,255,255,.12); position:relative; isolation:isolate; }
-.hero-reference-image { position:absolute; inset:0 0 0 48%; z-index:-2; background-image:linear-gradient(90deg,#080807 0%,rgba(8,8,7,.93) 7%,rgba(8,8,7,.42) 31%,rgba(8,8,7,0) 58%),url('/luviio-hero-scene.svg'); background-size:auto 100%,cover; background-position:center,center; background-repeat:no-repeat; }
+.hero-reference-image { position:absolute; inset:0 0 0 48%; z-index:-2; background-image:linear-gradient(90deg,#080807 0%,rgba(8,8,7,.93) 7%,rgba(8,8,7,.42) 31%,rgba(8,8,7,0) 58%),url('/luviio-hero-background.webp'); background-size:auto 100%,cover; background-position:center,center; background-repeat:no-repeat; }
 .hero-reference::after { content:''; position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(90deg,rgba(0,0,0,.18),transparent 60%); }
 .hero-reference-inner { width:min(1400px,100%); margin:0 auto; }
 .hero-reference-copy { max-width:650px; padding:50px 0; }
@@ -79,7 +79,7 @@
 @media (max-width:1100px) { .hero-reference{min-height:500px}.hero-reference-image{inset:0 0 0 42%}.home-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:760px) {
   .hero-reference{min-height:650px;height:auto;max-height:none;align-items:flex-end;padding:0 18px}
-  .hero-reference-image{inset:0;background-image:linear-gradient(180deg,rgba(8,8,7,.5) 0%,rgba(8,8,7,.72) 42%,#080807 72%),url('/luviio-hero-scene.svg');background-position:center,center top;background-size:cover,cover;opacity:.9}
+  .hero-reference-image{inset:0;background-image:linear-gradient(180deg,rgba(8,8,7,.5) 0%,rgba(8,8,7,.72) 42%,#080807 72%),url('/luviio-hero-background.webp');background-position:center,center top;background-size:cover,cover;opacity:.9}
   .hero-reference-copy{padding:150px 0 38px}.hero-reference-copy h1{font-size:clamp(50px,15vw,76px)}.hero-reference-copy .hero-text{font-size:15px;max-width:35ch}.hero-benefits{gap:0;margin-top:30px;overflow:hidden}.hero-benefits>div{padding:0 13px;min-width:0;flex:1}.hero-benefits>div:first-child{padding-left:0}.hero-benefits svg{width:21px;height:21px}.hero-benefits strong{font-size:10px}.hero-benefits small{font-size:8px}.home-category-section{padding-top:38px}.home-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.home-category-card{min-height:126px;padding:18px}.section-heading-row{align-items:center}
 }
 @media (max-width:480px) { .hero-reference-copy{padding-top:135px}.hero-benefits>div{gap:7px}.hero-benefits span{min-width:0}.hero-benefits small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-view-all{font-size:10px} }
