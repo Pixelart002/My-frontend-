@@ -1,14 +1,12 @@
 import { RiLoader4Line, RiStore2Line, RiErrorWarningLine } from '@remixicon/react';
 
 export function Spinner({ label = 'Loading…', inline = false }) {
-  if (inline) {
-    return <RiLoader4Line className="spin" size={18} aria-hidden="true" />;
-  }
+  if (inline) return <RiLoader4Line className="spin" size={18} aria-hidden="true" />;
 
   return (
     <div className="state spinner" role="status" aria-live="polite">
-      <RiLoader4Line className="spin" size={20} aria-hidden="true" />
-      <span>{label}</span>
+      <div className="spinner-orbit" aria-hidden="true"><RiLoader4Line className="spin" size={20} /></div>
+      <div className="spinner-copy"><strong>LUVIIO</strong><span>{label}</span></div>
     </div>
   );
 }
@@ -30,25 +28,18 @@ export function ErrorState({ message = 'Something went wrong.', onRetry }) {
       <RiErrorWarningLine size={30} aria-hidden="true" />
       <div className="state-title">We ran into a problem</div>
       <p className="state-message">{message}</p>
-      {onRetry && (
-        <button type="button" className="btn btn-quiet btn-sm" onClick={onRetry}>
-          Try again
-        </button>
-      )}
+      {onRetry && <button type="button" className="btn btn-quiet btn-sm" onClick={onRetry}>Try again</button>}
     </div>
   );
 }
 
 export function ProductSkeletons({ count = 8 }) {
   const safeCount = Math.min(24, Math.max(1, Number(count) || 8));
-
   return (
     <div className="products-grid" aria-busy="true" aria-label="Loading products">
       {Array.from({ length: safeCount }, (_, i) => (
         <div key={i} className="product-card" aria-hidden="true">
-          <div className="skeleton skeleton-media" />
-          <div className="skeleton skeleton-line" />
-          <div className="skeleton skeleton-line skeleton-line-short" />
+          <div className="skeleton skeleton-media" /><div className="skeleton skeleton-line" /><div className="skeleton skeleton-line skeleton-line-short" />
         </div>
       ))}
     </div>
