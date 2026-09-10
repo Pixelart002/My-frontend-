@@ -1,11 +1,11 @@
 import { RiLoader4Line, RiStore2Line, RiErrorWarningLine } from '@remixicon/react';
 
-export function Spinner({ label = 'Loading…', inline = false }) {
+export function Spinner({ label = 'Getting things ready…', inline = false }) {
   if (inline) return <RiLoader4Line className="spin" size={18} aria-hidden="true" />;
 
   return (
     <div className="state spinner" role="status" aria-live="polite">
-      <div className="spinner-orbit" aria-hidden="true"><RiLoader4Line className="spin" size={20} /></div>
+      <div className="spinner-orbit" aria-hidden="true"><RiLoader4Line className="spin spinner-core" size={18} /></div>
       <div className="spinner-copy"><strong>LUVIIO</strong><span>{label}</span></div>
     </div>
   );
