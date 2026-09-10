@@ -1,0 +1,35 @@
+/* Global viewport containment fix.
+   Keep the React app and full-width shells tied to the browser viewport.
+   This prevents the storefront from rendering as a narrow left-side column. */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: none;
+}
+
+html,
+body {
+  min-width: 100%;
+}
+
+#root {
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
+.home-landing,
+.header,
+.footer {
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+  }
+}
