@@ -4,6 +4,7 @@ import { RiArchive2Line, RiCloseLine, RiGridLine, RiHeartLine, RiHomeLine, RiInf
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import '../styles/desktop-menu.css';
 
 const ADMIN_NAV = [
   ['dashboard', 'Dashboard', RiDashboardLine],
