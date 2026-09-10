@@ -12,8 +12,8 @@ const STATUSES = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'canc
 
 const displayOrderNumber = (order) => {
   const value = String(order?.order_number || '').trim();
-  if (value) return value.startsWith('#') ? value : `#${value}`;
-  return `#${String(order?.id || '').slice(0, 8).toUpperCase()}`;
+  if (!value) return '—';
+  return value.startsWith('#') ? value : `#${value}`;
 };
 
 export default function OrdersPanel() {
