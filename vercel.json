@@ -20,7 +20,7 @@
       "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
     },
     {
-      "source": "/((?!api|assets|favicon\\.ico|.*\\.(?:js|css|map|png|jpg|jpeg|gif|svg|webp|woff2?|ttf|json)$).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
