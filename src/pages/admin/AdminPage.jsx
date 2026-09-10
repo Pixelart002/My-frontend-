@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiGroupLine, RiCoupon3Line, RiLogoutBoxRLine, RiShieldStarLine, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiSettings3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line } from '@remixicon/react';
+import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiGroupLine, RiCoupon3Line, RiLogoutBoxRLine, RiShieldStarLine, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiSettings3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiMenuLine, RiCloseLine } from '@remixicon/react';
 import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -31,6 +31,13 @@ const NAV = [
   { key: 'audit', label: 'Audit Logs', icon: RiFileList3Line },
 ];
 const VALID_PANELS = new Set(NAV.map((item) => item.key));
+const NAV_GROUPS = [
+  ['Overview', ['dashboard']],
+  ['Catalogue', ['products', 'categories']],
+  ['Commerce', ['orders', 'coupons', 'inventory', 'shipping', 'subscriptions', 'payments']],
+  ['Customers', ['users', 'user-actions']],
+  ['Operations', ['rbac', 'notifications', 'reports', 'audit', 'settings']],
+];
 
 export default function AdminPage() {
   const { user, logout } = useAuth();
@@ -43,9 +50,28 @@ export default function AdminPage() {
   const [status, setStatus] = useState('verifying');
   const [profile, setProfile] = useState(null);
   const [panel, setPanel] = useState(initialPanel);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => { setPanel(VALID_PANELS.has(requestedPanel) ? requestedPanel : 'dashboard'); }, [requestedPanel]);
-  const selectPanel = (nextPanel) => { if (!VALID_PANELS.has(nextPanel)) return; setPanel(nextPanel); setSearchParams({ panel: nextPanel }); };
+  useEffect(() => {
+    if (!drawerOpen) return undefined;
+    const onKeyDown = (event) => { if (event.key === 'Escape') setDrawerOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [drawerOpen]);
+  useEffect(() => {
+    if (!drawerOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [drawerOpen]);
+
+  const selectPanel = (nextPanel) => {
+    if (!VALID_PANELS.has(nextPanel)) return;
+    setPanel(nextPanel);
+    setSearchParams({ panel: nextPanel });
+    setDrawerOpen(false);
+  };
   useEffect(() => {
     let active = true;
     adminService.verify().then((res) => { if (!active) return; setProfile(res?.profile || null); setStatus('verified'); }).catch((err) => { if (!active) return; setStatus('denied'); console.warn('Admin gate:', err.message); });
@@ -59,16 +85,27 @@ export default function AdminPage() {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <div className="admin-sb-label">Overview</div><SideBtn nav={NAV[0]} active={panel} onClick={() => selectPanel('dashboard')} />
-        <div className="admin-sb-label">Catalogue</div>{['products','categories'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
-        <div className="admin-sb-label">Commerce</div>{['orders','coupons','inventory','shipping','subscriptions','payments'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
-        <div className="admin-sb-label">Customers</div>{['users','user-actions'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
-        <div className="admin-sb-label">Operations</div>{['rbac','notifications','reports','audit','settings'].map((key) => { const n = NAV.find(x => x.key === key); return <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />; })}
-        <div className="admin-account"><div className="admin-account-name">{profile?.full_name || user?.full_name || 'Admin'}</div><div className="admin-account-email">{profile?.email || user?.email}</div><div className="admin-account-role">{profile?.role || user?.role}</div><button type="button" onClick={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} className="admin-signout"><RiLogoutBoxRLine size={15} /> Sign out</button></div>
+        <AdminNavigation panel={panel} onSelect={selectPanel} profile={profile} user={user} onLogout={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} />
       </aside>
+
+      {drawerOpen && <button type="button" className="admin-drawer-backdrop" aria-label="Close admin menu" onClick={() => setDrawerOpen(false)} />}
+      <aside className={`admin-drawer ${drawerOpen ? 'is-open' : ''}`} aria-label="Admin menu" aria-hidden={!drawerOpen}>
+        <div className="admin-drawer-head">
+          <div><strong>Luviio</strong><span>Admin console</span></div>
+          <button type="button" className="icon-btn" aria-label="Close menu" onClick={() => setDrawerOpen(false)}><RiCloseLine size={20} /></button>
+        </div>
+        <div className="admin-drawer-scroll">
+          <AdminNavigation panel={panel} onSelect={selectPanel} profile={profile} user={user} onLogout={async () => { await logout(); toast.success('Signed out.'); navigate('/'); }} />
+        </div>
+      </aside>
+
       <main className="admin-main">
-        <div className="admin-head"><div><h1>{active.label}</h1><p className="admin-sub">Luviio store administration</p></div></div>
-        <nav className="admin-mobile-nav" aria-label="Admin sections">{NAV.map((n) => <SideBtn key={n.key} nav={n} active={panel} onClick={() => selectPanel(n.key)} />)}</nav>
+        <div className="admin-head">
+          <div className="admin-head-title">
+            <button type="button" className="admin-menu-trigger" aria-label="Open admin menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}><RiMenuLine size={20} /></button>
+            <div><h1>{active.label}</h1><p className="admin-sub">Luviio store administration</p></div>
+          </div>
+        </div>
         {panel === 'dashboard' && <DashboardPanel onNavigate={selectPanel} />}
         {panel === 'products' && <ProductsPanel />}
         {panel === 'categories' && <CategoriesPanel />}
@@ -80,4 +117,12 @@ export default function AdminPage() {
     </div>
   );
 }
-function SideBtn({ nav, active, onClick }) { const Icon = nav.icon; return <button type="button" className={`admin-sb-btn ${active === nav.key ? 'is-active' : ''}`} onClick={onClick}><Icon size={18} /> {nav.label}</button>; }
+
+function AdminNavigation({ panel, onSelect, profile, user, onLogout }) {
+  return <>
+    {NAV_GROUPS.map(([label, keys]) => <div key={label} className="admin-nav-group"><div className="admin-sb-label">{label}</div>{keys.map((key) => { const nav = NAV.find((item) => item.key === key); return <SideBtn key={nav.key} nav={nav} active={panel} onClick={() => onSelect(nav.key)} />; })}</div>)}
+    <div className="admin-account"><div className="admin-account-name">{profile?.full_name || user?.full_name || 'Admin'}</div><div className="admin-account-email">{profile?.email || user?.email}</div><div className="admin-account-role">{profile?.role || user?.role}</div><button type="button" onClick={onLogout} className="admin-signout"><RiLogoutBoxRLine size={15} /> Sign out</button></div>
+  </>;
+}
+
+function SideBtn({ nav, active, onClick }) { const Icon = nav.icon; return <button type="button" className={`admin-sb-btn ${active === nav.key ? 'is-active' : ''}`} onClick={onClick}><Icon size={18} /> <span>{nav.label}</span></button>; }
