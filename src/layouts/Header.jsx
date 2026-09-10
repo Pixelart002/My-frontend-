@@ -95,7 +95,6 @@ export default function Header() {
       <nav className="nav-links" aria-label="Primary navigation">
         <NavLink end to="/">Home</NavLink>
         <NavLink end to="/shop">Shop</NavLink>
-        <Link to="/shop">Categories</Link>
         <NavLink end to="/about">About</NavLink>
         <a href="mailto:support@luviio.in">Contact</a>
       </nav>
@@ -109,6 +108,6 @@ export default function Header() {
       </div>
     </div>
     <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen} onClick={closeAll}/>
-    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Mobile navigation" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
+    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
   </header>;
 }
