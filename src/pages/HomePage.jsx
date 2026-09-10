@@ -1,23 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RiArrowRightLine, RiArrowRightUpLine } from '@remixicon/react';
+import { RiArrowRightLine, RiGridLine, RiShowerLine, RiToolsLine, RiWaterFlashLine, RiDropLine, RiHomeGearLine } from '@remixicon/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
-import Scene3DWrap from '../components/three/Scene3DWrap';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
-import { useAuth } from '../context/AuthContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORY_CARDS = [
-  { slug: 'bath', index: '01', title: 'Bath & body', text: 'Soft textures and considered essentials for your daily reset.' },
-  { slug: 'home', index: '02', title: 'Home comforts', text: 'Small details that bring warmth, order, and character home.' },
+  { slug: 'drainage-systems', title: 'Drainage Systems', icon: RiGridLine },
+  { slug: 'sanitary', title: 'Sanitary', icon: RiDropLine },
+  { slug: 'pipes-fittings', title: 'Pipes & Fittings', icon: RiWaterFlashLine },
+  { slug: 'bathroom-accessories', title: 'Bathroom Accessories', icon: RiHomeGearLine },
+  { slug: 'hardware', title: 'Hardware', icon: RiToolsLine },
+  { slug: 'showers', title: 'Showers', icon: RiShowerLine },
 ];
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState(null);
   const [error, setError] = useState('');
   const [catLinks, setCatLinks] = useState(CATEGORY_CARDS);
@@ -29,110 +30,57 @@ export default function HomePage() {
         productService.list({ page: 1, page_size: 8 }),
         productService.categories(),
       ]);
-      const items = Array.isArray(data) ? data : data?.items || [];
-      setProducts(items);
-      if (Array.isArray(categories) && categories.length > 0) {
-        setCatLinks(
-          categories.slice(0, 4).map((c, i) => ({
-            slug: c.slug,
-            index: String(i + 1).padStart(2, '0'),
-            title: c.name,
-            text: `Explore the store’s ${c.name.toLowerCase()} edit.`,
-          })),
-        );
+      setProducts(Array.isArray(data) ? data : data?.items || []);
+      if (Array.isArray(categories) && categories.length) {
+        const known = new Map(CATEGORY_CARDS.map((c) => [c.title.toLowerCase(), c]));
+        setCatLinks(categories.slice(0, 6).map((c, i) => ({ ...(known.get(String(c.name || '').toLowerCase()) || CATEGORY_CARDS[i] || CATEGORY_CARDS[0]), slug: c.slug, title: c.name })));
       }
     } catch (err) {
       setError(err.message || 'Unable to load the store.');
     }
   }, []);
 
-  useEffect(() => {
-    loadStore();
-  }, [loadStore]);
+  useEffect(() => { loadStore(); }, [loadStore]);
 
   useEffect(() => {
-    const root = document.querySelector('.hero')?.parentElement;
+    const root = document.querySelector('.home-landing');
     if (!root) return undefined;
-
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '[data-rise]',
-        { y: 28, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out' },
-      );
-
-      gsap.utils.toArray('[data-reveal]').forEach((el) => {
-        gsap.fromTo(el, { y: 32, opacity: 0 }, {
-          y: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: el, start: 'top 88%' },
-        });
-      });
+      gsap.fromTo('[data-rise]', { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.75, stagger: 0.08, ease: 'power3.out' });
+      gsap.utils.toArray('[data-reveal]').forEach((el) => gsap.fromTo(el, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
     }, root);
-
     return () => ctx.revert();
   }, []);
 
   return (
-    <main>
-      <section className="hero">
-        <div className="hero-inner">
-          <div className="hero-copy">
-            <p className="eyebrow" data-rise>Thoughtful things, beautifully made</p>
-            <h1 data-rise>Make room for <em>the good things.</em></h1>
-            <p className="hero-text" data-rise>Everyday pieces that make your space feel more like yours — from elevated bath essentials to objects worth keeping.</p>
-            <div className="hero-actions" data-rise>
-              <Link className="btn" to="/shop">Explore the collection <RiArrowRightLine size={16} /></Link>
-              <Link className="btn btn-quiet" to="/shop?new=1">New arrivals</Link>
-              {!isAuthenticated && <Link className="btn btn-quiet hero-register-btn" to="/register">Create account <RiArrowRightLine size={16} /></Link>}
+    <main className="home-landing">
+      <section className="hero hero-reference">
+        <div className="hero-reference-image" aria-hidden="true" />
+        <div className="hero-reference-inner">
+          <div className="hero-reference-copy">
+            <p className="eyebrow" data-rise>Hardware&nbsp;&nbsp;/&nbsp;&nbsp; Sanitary&nbsp;&nbsp;/&nbsp;&nbsp; Drainage</p>
+            <h1 data-rise>Welcome to<br /><em>Luviio</em></h1>
+            <p className="hero-text" data-rise>Modern hardware and sanitary solutions for a cleaner, safer and better tomorrow.</p>
+            <div className="hero-actions" data-rise><Link className="btn hero-reference-btn" to="/shop">Shop Now <RiArrowRightLine size={17} /></Link></div>
+            <div className="hero-benefits" data-rise>
+              <div><RiDropLine size={27} /><span><strong>Free Shipping</strong><small>On orders above ₹1,499</small></span></div>
+              <div><RiHomeGearLine size={27} /><span><strong>Secure Payments</strong><small>Stripe Checkout</small></span></div>
+              <div><RiToolsLine size={27} /><span><strong>Quality Products</strong><small>Built to last</small></span></div>
             </div>
           </div>
-          <div className="hero-stage" data-rise><Scene3DWrap /></div>
-        </div>
-        <span className="scroll-note">Scroll to discover</span>
-      </section>
-
-      <section className="section" data-reveal>
-        <div className="section-intro">
-          <p className="eyebrow">The Luviio edit</p>
-          <h2 className="section-title">Things you use. <em>Things you love.</em></h2>
-          <p>A small, considered collection for slow mornings, clean spaces, and everyday rituals.</p>
-        </div>
-        <div className="category-grid">
-          {catLinks.slice(0, 2).map((cat, i) => (
-            <Link key={cat.slug} className={`category-card ${i === 1 ? 'gold' : ''}`} to={`/shop?category=${encodeURIComponent(cat.slug)}`}>
-              <span>{cat.index} / Category</span>
-              <div><h3>{cat.title}</h3><p>{cat.text}</p><strong>Explore <RiArrowRightUpLine size={15} /></strong></div>
-            </Link>
-          ))}
-          <Link className="category-card" to="/shop">
-            <span>00 / All</span>
-            <div><h3>Shop everything</h3><p>Fresh finds, just in — selected for the way you live now.</p><strong>Browse the full edit <RiArrowRightUpLine size={15} /></strong></div>
-          </Link>
         </div>
       </section>
 
-      <section className="section statement" data-reveal>
-        <div><p className="eyebrow">A better everyday</p><h2 className="section-title">Good design, <em>no fuss.</em></h2></div>
-        <p>We look for useful, beautiful products made to last. No clutter. No throwaway trends. Just things that earn their place.</p>
+      <section className="section home-category-section" data-reveal>
+        <div className="section-heading-row"><h2 className="section-title">Shop by Category</h2><Link className="section-view-all" to="/categories">View All Categories <RiArrowRightLine size={17} /></Link></div>
+        <div className="home-category-grid">
+          {catLinks.map((cat) => { const Icon = cat.icon || RiGridLine; return <Link key={cat.slug} className="home-category-card" to={`/shop?category=${encodeURIComponent(cat.slug)}`}><Icon className="home-category-icon" size={38} strokeWidth={1.25} /><span>{cat.title}</span><RiArrowRightLine className="home-category-arrow" size={17} /></Link>; })}
+        </div>
       </section>
 
-      <section className="section" data-reveal>
-        <div className="section-intro"><p className="eyebrow">From the store</p><h2 className="section-title">A few favourites</h2></div>
-        {error ? (
-          <ErrorState message={error} onRetry={loadStore} />
-        ) : products === null ? (
-          <ProductSkeletons count={4} />
-        ) : products.length === 0 ? (
-          <div className="state"><p>The catalogue is currently empty. Check back soon for new products.</p><Link className="btn btn-quiet btn-sm" to="/shop">Browse shop</Link></div>
-        ) : (
-          <>
-            <div className="products-grid products-grid-3">{products.slice(0, 3).map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div>
-            <div style={{ textAlign: 'center', marginTop: 40 }}><Link className="btn btn-quiet" to="/shop">View all products <RiArrowRightLine size={16} /></Link></div>
-          </>
-        )}
+      <section className="section home-products-section" data-reveal>
+        <div className="section-heading-row"><div><p className="eyebrow">From the store</p><h2 className="section-title">Featured products</h2></div><Link className="section-view-all" to="/shop">View All Products <RiArrowRightLine size={17} /></Link></div>
+        {error ? <ErrorState message={error} onRetry={loadStore} /> : products === null ? <ProductSkeletons count={4} /> : products.length === 0 ? <div className="state"><p>The catalogue is currently empty. Check back soon for new products.</p><Link className="btn btn-quiet btn-sm" to="/shop">Browse shop</Link></div> : <div className="products-grid products-grid-4">{products.slice(0, 4).map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div>}
       </section>
     </main>
   );
