@@ -69,19 +69,23 @@ export default function Header() {
       </>
     : <>
         <form className="mobile-search" onSubmit={onSearch} role="search"><RiSearchLine size={19}/><input name="query" placeholder="Search for products..." aria-label="Search for products" autoComplete="off"/></form>
-        <div className="mobile-nav-section">
+        <div className="mobile-nav-section mobile-primary-nav">
           {menuLink('/', 'Home', RiHomeLine)}
           {menuLink('/shop', 'Shop', RiStore2Line)}
           {menuLink('/shop', 'Categories', RiGridLine)}
+        </div>
+        <div className="mobile-nav-section mobile-shopping-nav">
+          {menuLink('/cart', `Shopping bag${itemCount ? ` (${itemCount})` : ''}`, RiShoppingBagLine)}
+          {menuLink('/orders', 'Orders', RiArchive2Line)}
+          {menuLink('/account', 'Account', RiUser3Line)}
+        </div>
+        <div className="mobile-nav-section mobile-info-nav">
           {menuLink('/about', 'About', RiInformationLine)}
           <a href="mailto:support@luviio.in" onClick={closeAll}><RiMailLine size={18} aria-hidden="true"/><span>Contact</span></a>
         </div>
-        <div className="mobile-nav-section">
-          {menuLink('/account', 'Account', RiUser3Line)}
-          {menuLink('/orders', 'Orders', RiArchive2Line)}
-          {menuLink('/cart', `Shopping bag${itemCount ? ` (${itemCount})` : ''}`, RiShoppingBagLine)}
-          {isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={18}/><span>Sign out</span></button>}
+        <div className="mobile-nav-section mobile-account-actions">
           {isAdmin && menuLink('/admin', 'Admin dashboard', RiShieldStarLine)}
+          {isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={18}/><span>Sign out</span></button>}
         </div>
       </>;
 
