@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
+import '../styles/marketing.css';
 
 gsap.registerPlugin(ScrollTrigger);
 function ShowerReferenceIcon({ className = '', size = 38 }) { return <svg className={className} width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M9 21V16.5C9 12.91 11.91 10 15.5 10H28C31.31 10 34 12.69 34 16V19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M9 21H26C28.76 21 31 23.24 31 26V29" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M31 29H40" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M35 34V34.1M38 36V36.1M41 34V34.1M35 39V39.1M38 41V41.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>; }
