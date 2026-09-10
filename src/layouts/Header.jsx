@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { RiArchive2Line, RiCloseLine, RiHeartLine, RiLogoutBoxRLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiUser3Line, RiUserLine } from '@remixicon/react';
+import { RiArchive2Line, RiCloseLine, RiGridLine, RiHeartLine, RiHomeLine, RiInformationLine, RiLogoutBoxRLine, RiMailLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiStore2Line, RiUser3Line, RiUserLine } from '@remixicon/react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -32,11 +32,11 @@ export default function Header() {
   const closeAll = () => { setMobileOpen(false); setMenuOpen(false); };
   const onSearch = (e) => { e.preventDefault(); const q = e.currentTarget.query.value.trim(); navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop'); closeAll(); };
   const onLogout = async () => { closeAll(); await logout(); toast.success('You have been signed out.'); navigate('/'); };
-  const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={17} aria-hidden="true" />}<span>{label}</span></Link>;
+  const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
 
   const mobileContent = isAdminPage && isAdmin
-    ? <><div className="mobile-nav-section">{ADMIN_NAV.map(([key,label]) => menuLink(`/admin?panel=${key}`, label))}</div>{menuLink('/', 'View storefront')}</>
-    : <><form className="mobile-search" onSubmit={onSearch} role="search"><RiSearchLine size={18}/><input name="query" placeholder="Search for products..." aria-label="Search for products" autoComplete="off"/></form><div className="mobile-nav-section">{menuLink('/','Home')}{menuLink('/shop','Shop')}{menuLink('/shop','Categories')}{menuLink('/about','About')}{menuLink('/about','Contact')}</div><div className="mobile-nav-section">{menuLink('/account','Account',RiUser3Line)}{menuLink('/orders','Orders',RiArchive2Line)}{menuLink('/cart',`Shopping bag${itemCount ? ` (${itemCount})` : ''}`,RiShoppingBagLine)}{isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={17}/><span>Sign out</span></button>}</div></>;
+    ? <><div className="mobile-nav-section">{ADMIN_NAV.map(([key,label], index) => { const icons = [RiHomeLine, RiStore2Line, RiGridLine, RiArchive2Line, RiUser3Line]; return menuLink(`/admin?panel=${key}`, label, icons[index]); })}</div>{menuLink('/', 'View storefront', RiHomeLine)}</>
+    : <><form className="mobile-search" onSubmit={onSearch} role="search"><RiSearchLine size={19}/><input name="query" placeholder="Search for products..." aria-label="Search for products" autoComplete="off"/></form><div className="mobile-nav-section">{menuLink('/','Home',RiHomeLine)}{menuLink('/shop','Shop',RiStore2Line)}{menuLink('/shop','Categories',RiGridLine)}{menuLink('/about','About',RiInformationLine)}{menuLink('/about','Contact',RiMailLine)}</div><div className="mobile-nav-section">{menuLink('/account','Account',RiUser3Line)}{menuLink('/orders','Orders',RiArchive2Line)}{menuLink('/cart',`Shopping bag${itemCount ? ` (${itemCount})` : ''}`,RiShoppingBagLine)}{isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={18}/><span>Sign out</span></button>}</div></>;
 
   return <header className="header">
     <div className="header-reference-inner">
@@ -58,6 +58,6 @@ export default function Header() {
       </div>
     </div>
     <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen} onClick={closeAll}/>
-    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Mobile navigation" aria-hidden={!mobileOpen}><button type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button><div className="mobile-nav-inner">{mobileContent}</div></aside>
+    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Mobile navigation" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
   </header>;
 }
