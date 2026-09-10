@@ -7,6 +7,11 @@ import { ProductSkeletons, ErrorState, EmptyState } from '../components/ui/State
 
 const PAGE_SIZE = 20;
 
+const normalizeResponse = (response) => ({
+  items: Array.isArray(response) ? response : response?.items || [],
+  meta: response?.meta || {},
+});
+
 export default function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
@@ -54,7 +59,7 @@ export default function ShopPage() {
     setError('');
     loadingMoreRef.current = false;
     try {
-      setData(await productService.list(buildParams(1)));
+      setData(normalizeResponse(await productService.list(buildParams(1))));
     } catch (err) {
       setError(err.message || 'Unable to load products.');
     }
@@ -68,7 +73,7 @@ export default function ShopPage() {
 
     (async () => {
       try {
-        const res = await productService.list(buildParams(1));
+        const res = normalizeResponse(await productService.list(buildParams(1)));
         if (active) setData(res);
       } catch (err) {
         if (active) setError(err.message || 'Unable to load products.');
@@ -90,16 +95,15 @@ export default function ShopPage() {
     setLoadingMore(true);
     setError('');
     try {
-      const next = await productService.list(buildParams(currentPage + 1));
+      const next = normalizeResponse(await productService.list(buildParams(currentPage + 1)));
       setData((previous) => {
         if (!previous) return next;
-        const previousItems = Array.isArray(previous) ? previous : previous.items || [];
-        const nextItems = Array.isArray(next) ? next : next.items || [];
-        const seen = new Set(previousItems.map((item) => item.id || item.slug));
-        const appended = nextItems.filter((item) => !seen.has(item.id || item.slug));
-        return Array.isArray(previous)
-          ? [...previousItems, ...appended]
-          : { ...next, items: [...previousItems, ...appended] };
+        const seen = new Set(previous.items.map((item) => item.id || item.slug));
+        const appended = next.items.filter((item) => !seen.has(item.id || item.slug));
+        return {
+          ...next,
+          items: [...previous.items, ...appended],
+        };
       });
     } catch (err) {
       setError(err.message || 'Unable to load more products.');
@@ -141,7 +145,7 @@ export default function ShopPage() {
   };
 
   const items = useMemo(() => {
-    const list = Array.isArray(data) ? data : data?.items || [];
+    const list = data?.items || [];
     if (!isNew) return list;
     return [...list].sort((a, b) => {
       const ad = Date.parse(a.created_at || a.createdAt || '') || 0;
