@@ -15,6 +15,7 @@ import './styles/payment-modal.css';
 import './styles/checkout-polish.css';
 import './styles/checkout-reference.css';
 import './styles/loading-polish.css';
+import './styles/menu-loading-polish.css';
 import './styles/settings.css';
 import './styles/profile.css';
 import './styles/change-password.css';
