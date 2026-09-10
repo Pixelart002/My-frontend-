@@ -1,0 +1,164 @@
+/* Desktop menu drawer. Categories and secondary navigation live here instead of the top nav. */
+@media (min-width:901px) {
+  .header .menu-button {
+    display:inline-flex !important;
+  }
+
+  .header .mobile-menu-backdrop {
+    position:fixed;
+    inset:0;
+    display:block;
+    background:rgba(0,0,0,.62);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    z-index:205;
+    transition:opacity .22s ease, visibility 0s linear .22s;
+  }
+
+  .header .mobile-menu-backdrop.is-open {
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transition:opacity .22s ease, visibility 0s;
+  }
+
+  .header .mobile-nav {
+    position:fixed !important;
+    top:72px !important;
+    right:0 !important;
+    bottom:0 !important;
+    left:auto !important;
+    width:min(380px,92vw);
+    height:calc(100dvh - 72px) !important;
+    max-height:none !important;
+    display:block !important;
+    overflow:hidden;
+    padding:0;
+    border:0;
+    border-left:1px solid var(--line);
+    border-radius:18px 0 0 0;
+    background:var(--surface);
+    box-shadow:-20px 0 70px rgba(0,0,0,.48);
+    z-index:209;
+    opacity:1;
+    visibility:hidden;
+    pointer-events:none;
+    transform:translate3d(100%,0,0);
+    transition:transform .24s cubic-bezier(.22,.61,.36,1),visibility 0s linear .24s;
+  }
+
+  .header .mobile-nav.is-open {
+    visibility:visible;
+    pointer-events:auto;
+    transform:translate3d(0,0,0);
+    transition:transform .24s cubic-bezier(.22,.61,.36,1),visibility 0s;
+  }
+
+  .header .mobile-nav-head {
+    height:58px;
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .header .mobile-nav-brand {
+    color:#d9a65c;
+    font-family:var(--font-display,'Playfair Display',serif);
+    font-size:28px;
+    text-decoration:none;
+  }
+
+  .header .mobile-nav-close {
+    width:38px !important;
+    min-width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    padding:0 !important;
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--line) !important;
+    border-radius:10px !important;
+    background:var(--bg) !important;
+    color:var(--text) !important;
+  }
+
+  .header .mobile-nav-inner {
+    height:calc(100% - 58px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:18px;
+  }
+
+  .header .mobile-nav-section {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:0;
+  }
+
+  .header .mobile-nav-section + .mobile-nav-section {
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+  }
+
+  .header .mobile-nav a,
+  .header .mobile-nav button {
+    min-height:46px;
+    display:flex !important;
+    align-items:center;
+    width:100%;
+    flex:0 0 auto;
+    gap:10px;
+    padding:11px 12px;
+    border:0;
+    border-radius:10px;
+    background:transparent;
+    color:var(--text);
+    text-align:left;
+    font:inherit;
+    text-decoration:none;
+    cursor:pointer;
+  }
+
+  .header .mobile-nav a:hover,
+  .header .mobile-nav button:hover,
+  .header .mobile-nav a:focus-visible,
+  .header .mobile-nav button:focus-visible {
+    background:var(--surface-2);
+    outline:none;
+  }
+
+  .header .mobile-search {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin:0 0 12px;
+    padding:0 12px;
+    min-height:46px;
+    border:1px solid var(--line);
+    border-radius:11px;
+    background:var(--bg);
+    color:var(--dim);
+  }
+
+  .header .mobile-search input {
+    width:100%;
+    min-width:0;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--text);
+    font:inherit;
+  }
+
+  .header .mobile-search input::placeholder { color:var(--dim); }
+  .header .mobile-admin-group + .mobile-admin-group { margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .header .mobile-admin-label { padding:0 10px 5px; color:var(--dim); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+  .header .mobile-admin-group a { gap:10px; }
+  .header .mobile-admin-group a svg { flex:0 0 18px; color:var(--dim); }
+}
