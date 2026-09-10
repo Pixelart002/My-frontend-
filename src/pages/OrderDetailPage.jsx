@@ -44,9 +44,7 @@ export default function OrderDetailPage() {
     setRetryLoading(true); setRetryError(''); setRetryOpen(true);
     try {
       const result = await paymentService.retry(orderNumber);
-      if (result?.status === 'paid') {
-        toast.success('This order is already paid.'); setRetryOpen(false); await load(); return;
-      }
+      if (result?.status === 'paid') { toast.success('This order is already paid.'); setRetryOpen(false); await load(); return; }
       if (!result?.client_secret) throw new Error(result?.message || 'Unable to prepare payment retry.');
       setRetryIntent(result);
     } catch (err) { setRetryError(err.message || 'Unable to retry payment.'); }
@@ -80,17 +78,14 @@ export default function OrderDetailPage() {
   const isRetryable = status === 'pending' && !isCodOrder;
   const retryAddress = order.shipping_address || order.billing_address || null;
   const publicOrderNumber = String(order.order_number || orderNumber).trim();
+  const publicInvoiceNumber = String(order.invoice_number || '').trim();
 
   const paymentContent = retryIntent?.client_secret && stripePromise && retryElementsOptions ? (
     <Elements stripe={stripePromise} options={retryElementsOptions}>
-      <StripePaymentForm
-        orderNumber={publicOrderNumber}
-        onSuccess={async () => {
-          setRetryOpen(false); setRetryIntent(null); toast.success('Payment successful.'); await load();
-          navigate(`/orders/${encodeURIComponent(publicOrderNumber)}`, { replace: true });
-        }}
-        onBack={closeRetry}
-      />
+      <StripePaymentForm orderNumber={publicOrderNumber} onSuccess={async () => {
+        setRetryOpen(false); setRetryIntent(null); toast.success('Payment successful.'); await load();
+        navigate(`/orders/${encodeURIComponent(publicOrderNumber)}`, { replace: true });
+      }} onBack={closeRetry} />
     </Elements>
   ) : null;
 
@@ -103,6 +98,7 @@ export default function OrderDetailPage() {
             <p className="eyebrow">Order details</p>
             <h1>Order #{publicOrderNumber}</h1>
             <p className="auth-sub">Placed {new Date(order.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>
+            {publicInvoiceNumber && <p className="auth-sub">Invoice #{publicInvoiceNumber}</p>}
           </div>
           <span className={`status-pill tone-${orderStatusTone(status)}`}>{orderStatusLabel(status)}</span>
         </header>
@@ -124,13 +120,11 @@ export default function OrderDetailPage() {
             const hasStoredSubtotal = item.subtotal !== undefined && item.subtotal !== null;
             const unitPrice = hasStoredUnitPrice ? Number(item.unit_price) : hasStoredSubtotal ? Number(item.subtotal) / quantity : 0;
             const lineTotal = hasStoredSubtotal ? Number(item.subtotal) : hasStoredUnitPrice ? Number(item.unit_price) * quantity : 0;
-            return (
-              <article className="order-item" key={`${name}-${index}`}>
-                {imageUrl && slug ? <Link to={`/product/${slug}`} className="order-item-thumb"><img src={imageUrl} alt={name} /></Link> : <div className="order-item-thumb"><span>{name.slice(0, 1)}</span></div>}
-                <div className="order-item-info"><h3>{name}</h3><p>{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p><span>{formatMoney(unitPrice)} × {quantity}</span></div>
-                <strong className="order-item-total">{formatMoney(lineTotal)}</strong>
-              </article>
-            );
+            return <article className="order-item" key={`${name}-${index}`}>
+              {imageUrl && slug ? <Link to={`/product/${slug}`} className="order-item-thumb"><img src={imageUrl} alt={name} /></Link> : <div className="order-item-thumb"><span>{name.slice(0, 1)}</span></div>}
+              <div className="order-item-info"><h3>{name}</h3><p>{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p><span>{formatMoney(unitPrice)} × {quantity}</span></div>
+              <strong className="order-item-total">{formatMoney(lineTotal)}</strong>
+            </article>;
           })}
         </div>
         <aside className="summary order-summary">
