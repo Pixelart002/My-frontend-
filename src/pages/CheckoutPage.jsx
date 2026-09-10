@@ -90,8 +90,8 @@ export default function CheckoutPage() {
     if (!selected || creating || !paymentMethod) return; setCreating(true); setIntentError('');
     try {
       const key = checkoutKey || makeIdempotencyKey(); if (!checkoutKey) setCheckoutKey(key);
-      if (paymentMethod === 'cod') { const order = await paymentService.createCodOrder(selected, key, null, coupon?.code || null); const orderId = order?.order_id || order?.id; if (!orderId) throw new Error('COD order could not be created. Please try again.'); navigate('/order/success', { replace: true, state: { orderId, orderNumber: order?.order_number, paymentMethod: 'cod' } }); return; }
-      const data = await paymentService.createIntent(selected, key, null, coupon?.code || null); if (!data?.client_secret || !data?.payment_intent_id || !data?.order_id) throw new Error('Payment session was not created correctly. Please try again.'); setIntent(data);
+      if (paymentMethod === 'cod') { const order = await paymentService.createCodOrder(selected, key, null, coupon?.code || null); const orderNumber = order?.order_number; if (!orderNumber) throw new Error('COD order could not be created. Please try again.'); navigate('/order/success', { replace: true, state: { orderNumber, paymentMethod: 'cod' } }); return; }
+      const data = await paymentService.createIntent(selected, key, null, coupon?.code || null); if (!data?.client_secret || !data?.payment_intent_id || !data?.order_number) throw new Error('Payment session was not created correctly. Please try again.'); setIntent(data);
     } catch (err) { const message = err?.code === 'NETWORK_ERROR' ? 'We could not reach the order service. Check your connection and try again.' : err?.code === 'TIMEOUT' ? 'The order service took too long to respond. Please retry.' : err?.status === 401 ? 'Your session has expired. Please sign in again.' : err?.message || 'Unable to place your order. Please try again.'; setIntentError(message); }
     finally { setCreating(false); }
   };
@@ -102,7 +102,7 @@ export default function CheckoutPage() {
   if (cartLoading) return <div className="page container checkout-loading-page"><Spinner label="Preparing your checkout…" /></div>;
   if (!canProceed) return <div className="page container"><div className="page-heading compact"><p className="eyebrow">Checkout</p><h1>Your bag is empty.</h1></div><button className="btn" onClick={() => navigate('/shop')}>Continue shopping</button></div>;
 
-  const paymentContent = intent?.client_secret ? <Elements stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number} onSuccess={(payload) => navigate('/order/success', { replace: true, state: { orderId: payload.order_id, orderNumber: intent.order_number, paymentMethod: 'stripe' } })} onBack={handleModalBack} /></Elements> : null;
+  const paymentContent = intent?.client_secret ? <Elements stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number, paymentMethod: 'stripe' } })} onBack={handleModalBack} /></Elements> : null;
 
   return <div className="page container checkout">
     <button type="button" className="checkout-back" onClick={() => navigate('/cart')}><RiArrowLeftLine size={16} /> Back to cart</button>
