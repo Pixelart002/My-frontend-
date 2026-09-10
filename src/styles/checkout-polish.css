@@ -40,6 +40,8 @@
 .checkout-loading-page { min-height:60vh; display:grid; place-items:center; }
 
 .payment-modal-backdrop { background:rgba(0,0,0,.72) !important; backdrop-filter:blur(10px) saturate(.8) !important; animation:modal-fade .18s ease; }
+/* If the cancel-confirmation dialog is rendered above the payment dialog, show only the top dialog. */
+.payment-modal-backdrop:has(~ .payment-modal-backdrop) { display:none !important; }
 .payment-modal { width:min(600px,100%); max-height:min(820px,calc(100dvh - 32px)); padding:24px; border-color:var(--line) !important; border-radius:var(--radius-lg) !important; background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 50%),var(--surface) !important; color:var(--text); box-shadow:0 28px 100px rgba(0,0,0,.62) !important; animation:modal-rise .22s ease; box-sizing:border-box; }
 .payment-modal-header { padding-bottom:16px; border-bottom:1px solid var(--line-soft); }
 .payment-modal-header h3 { font-family:var(--font-display); font-size:clamp(26px,5vw,34px); font-weight:500; }
@@ -56,7 +58,7 @@
 .payment-modal-primary { min-height:48px; }
 .payment-modal-review .stripe-form { gap:14px; }
 .payment-modal-payment { padding:2px 0; }
-.payment-modal-payment #payment-element { padding:0 !important; border:0 !important; background:transparent !important; }
+.payment-modal-payment #payment-element { width:100%; max-width:100%; padding:0 !important; border:0 !important; background:transparent !important; }
 .payment-form-actions .payment-submit-btn { background:var(--gold); color:var(--gold-ink); }
 .payment-form-actions .payment-back-btn { border-color:var(--line); }
 .secure-hint { color:var(--dim) !important; }
