@@ -23,6 +23,24 @@ export function itemsOfList(res) {
   return [];
 }
 
+// The RBAC backend exposes effective permissions as role -> string[].
+// The admin matrix component expects role -> { permission: boolean }.
+// Normalize that boundary here so the UI never renders array indexes as permissions.
+const normalizePermissionMatrix = (res) => {
+  if (!res || typeof res !== 'object' || !res.effective || typeof res.effective !== 'object') return res;
+
+  const effective = Object.fromEntries(
+    Object.entries(res.effective).map(([role, permissions]) => [
+      role,
+      Array.isArray(permissions)
+        ? Object.fromEntries(permissions.map((permission) => [permission, true]))
+        : permissions,
+    ])
+  );
+
+  return { ...res, effective };
+};
+
 export const adminService = {
   verify: () => request('GET', '/admin/verify'),
   stats: () => request('GET', '/admin/stats'),
@@ -74,7 +92,7 @@ export const adminService = {
 
   // RBAC / user action controls
   permissionCatalogue: () => request('GET', '/rbac/permissions/catalogue'),
-  permissions: () => request('GET', '/rbac/permissions'),
+  permissions: async () => normalizePermissionMatrix(await request('GET', '/rbac/permissions')),
   togglePermission: (role, permission, enabled) => request('POST', '/rbac/permissions/toggle', { role, permission, enabled }),
   userActions: (userId) => request('GET', `/rbac/users/${encodeURIComponent(userId)}/actions`),
   setUserAction: (userId, action, enabled, reason) => request('POST', `/rbac/users/${encodeURIComponent(userId)}/actions`, { action, enabled, reason }),
