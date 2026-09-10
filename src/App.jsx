@@ -30,37 +30,43 @@ import AboutPage from './pages/policies/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminPage from './pages/admin/AdminPage';
 
+function StoreRoutes() {
+  return (
+    <Route element={<StoreLayout />}>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/shop" element={<ShopPage />} />
+      <Route path="/product" element={<ProductDetailPage />} />
+      <Route path="/product/:slug" element={<ProductDetailPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/cart" element={<CartPage />} />
+      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+      <Route path="/order/success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
+      <Route path="/order/failed" element={<ProtectedRoute><OrderFailedPage /></ProtectedRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+      <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
+      <Route path="/account" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/account/addresses" element={<ProtectedRoute><AddressesPage /></ProtectedRoute>} />
+      <Route path="/account/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/account/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/shipping" element={<ShippingPage />} />
+      <Route path="/refund" element={<RefundPage />} />
+      <Route path="/returns" element={<ReturnCancelPage />} />
+      <Route path="/about" element={<AboutPage />} />
+    </Route>
+  );
+}
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route element={<StoreLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/shop" element={<ShopPage />} />
-        <Route path="/product" element={<ProductDetailPage />} />
-        <Route path="/product/:slug" element={<ProductDetailPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-        <Route path="/order/success" element={<ProtectedRoute><OrderSuccessPage /></ProtectedRoute>} />
-        <Route path="/order/failed" element={<ProtectedRoute><OrderFailedPage /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-        <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
-        <Route path="/account" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/account/addresses" element={<ProtectedRoute><AddressesPage /></ProtectedRoute>} />
-        <Route path="/account/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-        <Route path="/account/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/shipping" element={<ShippingPage />} />
-        <Route path="/refund" element={<RefundPage />} />
-        <Route path="/returns" element={<ReturnCancelPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-        <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
+      {StoreRoutes()}
+      <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+      <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
