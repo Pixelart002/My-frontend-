@@ -160,7 +160,39 @@ textarea { overflow-wrap: anywhere; }
   .order-item-info h3 { font-size: 13px; }
 }
 
+/* Loader polish: the gold outer ring itself rotates; the icon stays visually secondary. */
+.spinner-orbit {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(216, 173, 106, .16);
+  border-top-color: var(--gold);
+  border-right-color: rgba(216, 173, 106, .62);
+  border-radius: 50%;
+  animation: luviio-orbit-spin .85s linear infinite;
+  box-shadow: 0 0 0 1px rgba(216, 173, 106, .035), 0 0 26px rgba(216, 173, 106, .08);
+}
+.spinner-orbit::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(216, 173, 106, .16);
+  border-radius: 50%;
+}
+.spinner-core {
+  color: var(--gold);
+  opacity: .72;
+  animation: none;
+}
+.spinner-copy { margin-top: 14px; }
+.spinner-copy strong { letter-spacing: .22em; }
+.spinner-copy span { display: block; margin-top: 5px; }
+@keyframes luviio-orbit-spin { to { transform: rotate(360deg); } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .product-card:hover, .btn:hover:not(:disabled), .page-btn:hover:not(:disabled), .chip:hover { transform: none; }
+  .spinner-orbit { animation: none; }
 }
