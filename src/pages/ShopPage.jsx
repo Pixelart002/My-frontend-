@@ -1,27 +1,28 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RiEqualizerLine, RiSearchLine, RiCloseLine } from '@remixicon/react';
+import { RiEqualizerLine, RiSearchLine, RiCloseLine, RiLoader4Line } from '@remixicon/react';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
-import Pagination from '../components/ui/Pagination';
 import { ProductSkeletons, ErrorState, EmptyState } from '../components/ui/States';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 
 export default function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [loadingMore, setLoadingMore] = useState(false);
   const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
   const [showFilters, setShowFilters] = useState(false);
+  const loadMoreRef = useRef(null);
+  const loadingMoreRef = useRef(false);
 
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
   const inStockOnly = searchParams.get('in_stock') === '1';
   const isNew = searchParams.get('new') === '1';
-  const page = Math.max(1, Number(searchParams.get('page')) || 1);
 
   useEffect(() => {
     let active = true;
@@ -38,7 +39,7 @@ export default function ShopPage() {
     setMaxPrice(searchParams.get('max_price') || '');
   }, [searchParams]);
 
-  const buildParams = useCallback(() => {
+  const buildParams = useCallback((page) => {
     const params = { page, page_size: PAGE_SIZE };
     if (q) params.search = q;
     if (category) params.category = category;
@@ -46,13 +47,14 @@ export default function ShopPage() {
     if (minPrice) params.min_price = Number(minPrice);
     if (maxPrice) params.max_price = Number(maxPrice);
     return params;
-  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+  }, [q, category, inStockOnly, minPrice, maxPrice]);
 
   const loadProducts = useCallback(async () => {
     setData(null);
     setError('');
+    loadingMoreRef.current = false;
     try {
-      setData(await productService.list(buildParams()));
+      setData(await productService.list(buildParams(1)));
     } catch (err) {
       setError(err.message || 'Unable to load products.');
     }
@@ -62,10 +64,11 @@ export default function ShopPage() {
     let active = true;
     setData(null);
     setError('');
+    loadingMoreRef.current = false;
 
     (async () => {
       try {
-        const res = await productService.list(buildParams());
+        const res = await productService.list(buildParams(1));
         if (active) setData(res);
       } catch (err) {
         if (active) setError(err.message || 'Unable to load products.');
@@ -74,6 +77,51 @@ export default function ShopPage() {
 
     return () => { active = false; };
   }, [buildParams]);
+
+  const meta = data?.meta || {};
+  const currentPage = Number(meta.page) || 1;
+  const totalPages = Math.max(1, Number(meta.total_pages) || 1);
+  const hasMore = currentPage < totalPages;
+
+  const loadMore = useCallback(async () => {
+    if (!data || !hasMore || loadingMoreRef.current) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    setError('');
+    try {
+      const next = await productService.list(buildParams(currentPage + 1));
+      setData((previous) => {
+        if (!previous) return next;
+        const previousItems = Array.isArray(previous) ? previous : previous.items || [];
+        const nextItems = Array.isArray(next) ? next : next.items || [];
+        const seen = new Set(previousItems.map((item) => item.id || item.slug));
+        const appended = nextItems.filter((item) => !seen.has(item.id || item.slug));
+        return Array.isArray(previous)
+          ? [...previousItems, ...appended]
+          : { ...next, items: [...previousItems, ...appended] };
+      });
+    } catch (err) {
+      setError(err.message || 'Unable to load more products.');
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [data, hasMore, buildParams, currentPage]);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasMore) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '320px 0px' },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
@@ -101,8 +149,6 @@ export default function ShopPage() {
       return bd - ad;
     });
   }, [data, isNew]);
-  const meta = data?.meta || {};
-  const totalPages = meta.total_pages || 1;
   const hasActiveFilters = Boolean(q || category || inStockOnly || minPrice || maxPrice || isNew);
 
   return (
@@ -128,10 +174,19 @@ export default function ShopPage() {
       )}
 
       {hasActiveFilters && <button type="button" className="clear-filters" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}><RiCloseLine size={14} /> Clear all filters</button>}
-      {error ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
+      {error && data !== null ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
         <EmptyState title="No products found" message="Try adjusting your filters or search terms." action={<button type="button" className="btn btn-quiet btn-sm" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}>Clear filters</button>} />
       ) : (
-        <><div className="products-grid">{items.map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div><Pagination page={page} totalPages={totalPages} onChange={(p) => setParam('page', String(p))} /></>
+        <>
+          <div className="products-grid">{items.map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div>
+          {hasMore && (
+            <div className="shop-load-more" ref={loadMoreRef}>
+              <button type="button" className="btn btn-quiet" onClick={loadMore} disabled={loadingMore} aria-label="Load more products">
+                {loadingMore ? <><RiLoader4Line size={17} className="spin" /> Loading products…</> : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
