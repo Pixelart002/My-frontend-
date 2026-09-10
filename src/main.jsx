@@ -12,6 +12,7 @@ import './styles/admin-desktop-drawer.css';
 import './styles/admin-layout-fix.css';
 import './styles/header.css';
 import './styles/polish.css';
+import './styles/cart-page.css';
 import './styles/payment-modal.css';
 import './styles/settings.css';
 import './styles/profile.css';
