@@ -9,8 +9,16 @@ const PAGE_SIZE = 10;
 const text = (value) => value === null || value === undefined || value === '' ? '—' : String(value);
 const money = (value) => formatMoney(Number(value || 0));
 
-function paymentState(value) {
+function paymentState(value, paymentMethod, orderStatus) {
   const status = String(value || 'unknown').toLowerCase();
+  const method = String(paymentMethod || '').toLowerCase();
+  const order = String(orderStatus || '').toLowerCase();
+
+  // COD is settled by the store, not by Stripe. A completed COD order is paid
+  // even if an old/stale payment row still contains a Stripe-style status.
+  if (method === 'cod' && ['paid', 'processing', 'shipped', 'delivered'].includes(order)) {
+    return { key: 'succeeded', label: 'paid' };
+  }
   if (status === 'succeeded' || status === 'paid') return { key: 'succeeded', label: status };
   if (status === 'requires_payment_method' || status === 'failed' || status === 'canceled' || status === 'cancelled') return { key: 'failed', label: status };
   return { key: 'pending', label: status };
@@ -72,7 +80,7 @@ export default function PaymentsPanel() {
   }, [hasMore, loading, offset, loadPage]);
 
   const summary = useMemo(() => rows.reduce((acc, row) => {
-    const state = paymentState(row.status);
+    const state = paymentState(row.status, row.payment_method, row.order_status);
     acc.count += 1;
     acc.amount += Number(row.amount || 0);
     acc[state.key] += 1;
@@ -89,7 +97,7 @@ export default function PaymentsPanel() {
         <div className="admin-stat"><div className="stat-label">Failed</div><div className="stat-value">{loading?'…':summary.failed}</div></div>
       </div>
     </div>
-    <div className="admin-table-wrap"><table className="admin-table admin-telemetry-table"><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Attempt</th><th>Created</th></tr></thead><tbody>{rows.length?rows.map((row)=>{const state=paymentState(row.status);return <tr key={`${row.payment_method||'payment'}:${row.id}`}><td className="td-strong">{text(row.id).slice(0,12)}</td><td>{text(row.order_number||row.order_id).slice(0,18)}</td><td><span className="admin-pill pill-muted">{text(row.payment_method).toUpperCase()}</span></td><td className="td-gold">{money(row.amount)} {text(row.currency).toUpperCase()}</td><td><span className={`admin-pill ${state.key==='succeeded'?'pill-success':state.key==='failed'?'pill-danger':'pill-muted'}`}>{state.label}</span></td><td>{text(row.attempt_number)} / {text(row.total_attempts)}</td><td>{row.created_at?new Date(row.created_at).toLocaleString():'—'}</td></tr>}) : <tr><td colSpan="7"><div className="admin-empty">{loading?'Loading payment telemetry…':'No payment records found.'}</div></td></tr>}</tbody></table></div>
+    <div className="admin-table-wrap"><table className="admin-table admin-telemetry-table"><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Attempt</th><th>Created</th></tr></thead><tbody>{rows.length?rows.map((row)=>{const state=paymentState(row.status, row.payment_method, row.order_status);return <tr key={`${row.payment_method||'payment'}:${row.id}`}><td className="td-strong">{text(row.id).slice(0,12)}</td><td>{text(row.order_number||row.order_id).slice(0,18)}</td><td><span className="admin-pill pill-muted">{text(row.payment_method).toUpperCase()}</span></td><td className="td-gold">{money(row.amount)} {text(row.currency).toUpperCase()}</td><td><span className={`admin-pill ${state.key==='succeeded'?'pill-success':state.key==='failed'?'pill-danger':'pill-muted'}`}>{state.label}</span></td><td>{text(row.attempt_number)} / {text(row.total_attempts)}</td><td>{row.created_at?new Date(row.created_at).toLocaleString():'—'}</td></tr>}) : <tr><td colSpan="7"><div className="admin-empty">{loading?'Loading payment telemetry…':'No payment records found.'}</div></td></tr>}</tbody></table></div>
     <div ref={sentinelRef} aria-hidden="true" style={{ minHeight: 1 }} />
     {loadingMore && <div className="admin-empty" role="status">Loading more payment records…</div>}
     {!hasMore && rows.length > 0 && <div className="admin-empty">All payment records loaded.</div>}
