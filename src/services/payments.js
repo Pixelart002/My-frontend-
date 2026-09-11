@@ -64,9 +64,23 @@ export const paymentService = {
     return request('POST', `/payments/retry/${encodeURIComponent(number)}`, {});
   },
 
-  cancelCheckout: (orderNumber) => {
+  cancelCheckout: async (orderNumber) => {
     const number = asTrimmedString(orderNumber);
     if (!number) throw new TypeError('A valid public order number is required.');
-    return request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
+
+    // Cancellation is authoritative on the order backend first. Once the
+    // order is successfully cancelled, the abandoned checkout cart must not
+    // remain in the customer's active cart. Cart cleanup is best-effort so a
+    // transient cart request cannot make a successfully cancelled order look
+    // like a failed cancellation to the customer.
+    const result = await request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
+    try {
+      await request('DELETE', '/cart');
+    } catch (cartError) {
+      // The order is already cancelled; preserve that authoritative result.
+      // The next cart load will reconcile with the backend if cleanup failed.
+      console.warn('Checkout cancellation succeeded but cart cleanup failed.', cartError);
+    }
+    return result;
   },
 };
