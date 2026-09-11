@@ -49,10 +49,12 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   const [paymentPending, setPaymentPending] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState('');
+  const [paymentElementMounted, setPaymentElementMounted] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements || processing || retrying || paymentPending) return;
+    if (!stripe || !elements || !paymentElementMounted || !paymentReady || processing || retrying || paymentPending) return;
     setProcessing(true);
     setPaymentPending(false);
     setMessage('');
@@ -119,12 +121,18 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
-      <div className="payment-element-shell"><PaymentElement id="payment-element" /></div>
+      <div className="payment-element-shell">
+        <PaymentElement
+          id="payment-element"
+          onReady={() => setPaymentElementMounted(true)}
+          onChange={(event) => setPaymentReady(event.complete)}
+        />
+      </div>
       {message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
         {message && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing || !onRetry || paymentPending}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry payment'}</button>}
-        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || processing || retrying || paymentPending}>
+        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || processing || retrying || paymentPending}>
           <RiLockLine size={15} aria-hidden="true" /><span>Pay securely</span>
         </button>
       </div>
