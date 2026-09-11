@@ -9,7 +9,10 @@
 
 const LIVE_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
 const DEV_API_BASE = LIVE_API_BASE;
-const PROD_API_BASE = import.meta.env.NEXT_PUBLIC_API_URL || LIVE_API_BASE;
+// Production uses Vercel's same-origin /api proxy. This avoids browser-level
+// DNS/CORS failures against the Koyeb hostname while keeping the backend URL
+// configurable for local development and explicit deployments.
+const PROD_API_BASE = '/api/v1';
 
 const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
 const normalizeApiBase = (value) => {
@@ -21,10 +24,8 @@ const normalizeApiBase = (value) => {
 /**
  * API base URL, resolved in priority order:
  *   1. VITE_API_BASE env var (set at build time)
- *   2. The live backend in development and production.
- *
- * Production intentionally targets the backend directly. This avoids a
- * Vercel rewrite masking backend route failures as frontend 404 responses.
+ *   2. The same-origin Vercel /api proxy in production.
+ *   3. The live backend in development.
  */
 export const API_BASE = normalizeApiBase(
   import.meta.env.VITE_API_BASE ||
