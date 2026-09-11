@@ -55,6 +55,15 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements || !paymentElementMounted || !paymentReady || processing || retrying || paymentPending) return;
+
+    const paymentElement = elements.getElement(PaymentElement);
+    if (!paymentElement) {
+      setPaymentElementMounted(false);
+      setPaymentReady(false);
+      setMessage('Payment form is still loading. Please wait a moment and try again.');
+      return;
+    }
+
     setProcessing(true);
     setPaymentPending(false);
     setMessage('');
