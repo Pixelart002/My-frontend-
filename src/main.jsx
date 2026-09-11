@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import registerServiceWorker from './registerServiceWorker';
 import './styles/tokens.css';
 import './styles/viewport-fix.css';
 import './styles/pages.css';
@@ -22,5 +23,7 @@ import './styles/settings.css';
 import './styles/profile.css';
 import './styles/change-password.css';
 import './styles/footer-layout.css';
+
+registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(<App />);
