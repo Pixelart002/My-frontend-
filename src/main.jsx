@@ -23,6 +23,7 @@ import './styles/settings.css';
 import './styles/profile.css';
 import './styles/change-password.css';
 import './styles/footer-layout.css';
+import './styles/mockup-ui.css';
 
 registerServiceWorker();
 
