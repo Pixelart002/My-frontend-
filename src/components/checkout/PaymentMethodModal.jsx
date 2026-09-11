@@ -10,7 +10,7 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
   const title = isCodSuccess ? 'Order placed successfully' : hasPaymentContent ? 'Complete payment' : review ? 'Review your order' : 'Choose payment method';
   const goToOrderSuccess = () => {
     const orderNumber = String(activeOrder?.orderNumber || '').trim();
-    if (!orderNumber) { onClose?.(); return; }
+    if (!orderNumber) { navigate('/orders', { replace: true }); return; }
     navigate('/order/success', { replace: true, state: { orderNumber, paymentMethod: 'cod' } });
   };
   const handleClose = () => {
