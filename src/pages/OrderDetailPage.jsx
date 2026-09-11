@@ -76,7 +76,28 @@ export default function OrderDetailPage() {
   const paymentMethod = String(order.payment_method || '').toLowerCase();
   const isCodOrder = paymentMethod === 'cod' || paymentMethod === 'cash_on_delivery' || !order.stripe_payment_intent;
   const isRetryable = status === 'pending' && !isCodOrder;
-  const retryAddress = order.shipping_address || order.billing_address || null;
+
+  // Orders persist a shipping snapshot in flat columns. Retry must use that
+  // historical snapshot instead of the customer's current/default address.
+  const shippingSnapshot = {
+    full_name: order.shipping_name,
+    phone: order.shipping_phone,
+    email: order.shipping_email,
+    line1: order.shipping_line1,
+    line2: order.shipping_line2,
+    landmark: order.shipping_landmark,
+    city: order.shipping_city,
+    state: order.shipping_state,
+    postal_code: order.shipping_postal_code,
+    country: order.shipping_country,
+    company_name: order.shipping_company_name,
+    gstin: order.shipping_gstin,
+  };
+  const hasShippingSnapshot = Object.values(shippingSnapshot).some((value) => value !== null && value !== undefined && String(value).trim() !== '');
+  const nestedShippingAddress = order.shipping_address && typeof order.shipping_address === 'object' ? order.shipping_address : null;
+  const nestedBillingAddress = order.billing_address && typeof order.billing_address === 'object' ? order.billing_address : null;
+  const retryAddress = hasShippingSnapshot ? shippingSnapshot : nestedShippingAddress || nestedBillingAddress || null;
+
   const publicOrderNumber = String(order.order_number || orderNumber).trim();
   const publicInvoiceNumber = String(order.invoice_number || '').trim();
 
