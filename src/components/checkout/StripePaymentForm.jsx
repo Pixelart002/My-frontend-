@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
@@ -51,10 +51,17 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   const [paymentIntentId, setPaymentIntentId] = useState('');
   const [paymentElementMounted, setPaymentElementMounted] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
+  const [paymentElementError, setPaymentElementError] = useState('');
+
+  useEffect(() => {
+    setPaymentElementMounted(false);
+    setPaymentReady(false);
+    setPaymentElementError('');
+  }, [stripe, elements]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements || !paymentElementMounted || !paymentReady || processing || retrying || paymentPending) return;
+    if (!stripe || !elements || !paymentElementMounted || !paymentReady || paymentElementError || processing || retrying || paymentPending) return;
 
     const paymentElement = elements.getElement(PaymentElement);
     if (!paymentElement) {
@@ -117,6 +124,9 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
     try {
       await onRetry(orderNumber);
       setPaymentPending(false);
+      setPaymentElementMounted(false);
+      setPaymentReady(false);
+      setPaymentElementError('');
       setMessage('');
     } catch (err) {
       setMessage(err?.message || 'Unable to start a new payment attempt.');
@@ -133,15 +143,28 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       <div className="payment-element-shell">
         <PaymentElement
           id="payment-element"
-          onReady={() => setPaymentElementMounted(true)}
-          onChange={(event) => setPaymentReady(event.complete)}
+          onReady={() => {
+            setPaymentElementMounted(true);
+            setPaymentElementError('');
+          }}
+          onChange={(event) => {
+            setPaymentReady(Boolean(event.complete));
+            if (event.error) setMessage(event.error.message || 'Please check your payment details.');
+            else setMessage('');
+          }}
+          onLoadError={(event) => {
+            setPaymentElementMounted(false);
+            setPaymentReady(false);
+            setPaymentElementError(event?.error?.message || 'Unable to load the secure payment form.');
+            setMessage(event?.error?.message || 'Unable to load the secure payment form. Please try again.');
+          }}
         />
       </div>
       {message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
         {message && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing || !onRetry || paymentPending}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry payment'}</button>}
-        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || processing || retrying || paymentPending}>
+        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying || paymentPending}>
           <RiLockLine size={15} aria-hidden="true" /><span>Pay securely</span>
         </button>
       </div>
