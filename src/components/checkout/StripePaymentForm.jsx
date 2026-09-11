@@ -1,15 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
 import { useAuth } from '../../context/AuthContext';
-import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine } from '@remixicon/react';
+import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine } from '@remixicon/react';
 
 function ProcessingPayment({ onCancelOrder }) {
   return (
     <div className="payment-processing-screen" role="status" aria-live="polite">
       <div className="payment-processing-ring" aria-hidden="true" />
       <h3>Confirming payment...</h3>
-      <p>Please don’t close this page. Your order has already been created and is waiting for payment confirmation.</p>
+      <p>Please don’t close this page. Your order is already created and is waiting for payment confirmation.</p>
       <div className="payment-processing-steps" aria-label="Payment progress">
         <div className="payment-processing-step is-done"><span className="payment-processing-dot"><RiCheckboxCircleLine size={18} /></span><span>Payment details validated</span></div>
         <div className="payment-processing-step is-active"><span className="payment-processing-dot" /><span>Confirming with bank</span></div>
@@ -22,19 +23,38 @@ function ProcessingPayment({ onCancelOrder }) {
   );
 }
 
+function PaymentPendingState({ orderNumber, onCancelOrder, onViewOrder }) {
+  return (
+    <div className="payment-processing-screen payment-pending-screen" role="status" aria-live="polite">
+      <div className="payment-processing-ring" aria-hidden="true" />
+      <h3>Payment is processing</h3>
+      <p>Your payment provider is still processing this payment. We won’t create another payment attempt while this one is active.</p>
+      <p className="hint secure-hint">Order {orderNumber ? `#${orderNumber}` : ''} is already created and will be updated when payment confirmation arrives.</p>
+      <div className="payment-form-actions">
+        <button className="btn btn-quiet" type="button" onClick={onCancelOrder}>Cancel order</button>
+        <button className="btn payment-submit-btn" type="button" onClick={onViewOrder}>View order status <RiArrowRightLine size={17} /></button>
+      </div>
+      <span className="payment-processing-brand">LUVIIO</span>
+    </div>
+  );
+}
+
 export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRetry, onCancelOrder }) {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
   const { refreshProfile } = useAuth();
   const [message, setMessage] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [paymentPending, setPaymentPending] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [paymentIntentId, setPaymentIntentId] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements || processing || retrying) return;
+    if (!stripe || !elements || processing || retrying || paymentPending) return;
     setProcessing(true);
+    setPaymentPending(false);
     setMessage('');
 
     try {
@@ -66,7 +86,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
 
       if (paymentIntent?.status === 'processing') {
-        setMessage('Payment is still being processed by the payment provider. Please wait or cancel the order safely.');
+        setPaymentPending(true);
         setProcessing(false);
         return;
       }
@@ -80,11 +100,12 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   };
 
   const handleRetry = async () => {
-    if (!onRetry || retrying || !orderNumber) return;
+    if (!onRetry || retrying || !orderNumber || paymentPending) return;
     setRetrying(true);
     setMessage('Preparing a fresh payment attempt…');
     try {
       await onRetry(orderNumber);
+      setPaymentPending(false);
       setMessage('');
     } catch (err) {
       setMessage(err?.message || 'Unable to start a new payment attempt.');
@@ -94,6 +115,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   };
 
   if (processing) return <ProcessingPayment onCancelOrder={onCancelOrder} />;
+  if (paymentPending) return <PaymentPendingState orderNumber={orderNumber} onCancelOrder={onCancelOrder} onViewOrder={() => navigate(`/orders/${encodeURIComponent(orderNumber)}`)} />;
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
@@ -101,8 +123,8 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       {message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
-        {message && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing || !onRetry}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry payment'}</button>}
-        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || processing || retrying}>
+        {message && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing || !onRetry || paymentPending}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry payment'}</button>}
+        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || processing || retrying || paymentPending}>
           <RiLockLine size={15} aria-hidden="true" /><span>Pay securely</span>
         </button>
       </div>
