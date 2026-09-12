@@ -193,9 +193,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       setRetryAllowed(true);
       setProcessing(false);
     } catch (err) {
-      // A rejected Stripe.js confirmation may still carry the PaymentIntent.
-      // A requires_payment_method intent is a failed attempt, never an unknown
-      // or pending state, so it must be shown as failed instead of "not verified".
       const intent = err?.payment_intent || err?.paymentIntent;
       const intentStatus = String(intent?.status || '').toLowerCase();
 
@@ -231,30 +228,38 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   };
 
   const handleRetry = async () => {
-    if (retrying || paymentPending || paymentConfirmationPending) return;
+    if (retrying || processing || paymentPending || paymentConfirmationPending) return;
 
-    if (retryAllowed) {
-      setMessage('');
+    // Checkout supplies onRetry so a failed first PaymentIntent gets a fresh
+    // PaymentElement/payment session. This is the real retry path. Previously
+    // retryAllowed only cleared the error and never invoked onRetry.
+    if (onRetry && orderNumber) {
+      setRetrying(true);
+      setMessage('Preparing a fresh card payment attempt…');
       setRetryAllowed(false);
+      try {
+        await onRetry(orderNumber);
+        setPaymentPending(false);
+        setPaymentConfirmationPending(false);
+        setPaymentElementMounted(false);
+        setPaymentReady(false);
+        setPaymentElementError('');
+        setMessage('');
+      } catch (err) {
+        setRetryAllowed(true);
+        setMessage(err?.message || 'Unable to start a new card payment attempt.');
+      } finally {
+        setRetrying(false);
+      }
       return;
     }
 
-    if (!onRetry || !orderNumber) return;
-    setRetrying(true);
-    setMessage('Preparing a fresh card payment attempt…');
-    try {
-      await onRetry(orderNumber);
-      setPaymentPending(false);
-      setPaymentConfirmationPending(false);
-      setPaymentElementMounted(false);
-      setPaymentReady(false);
-      setPaymentElementError('');
-      setRetryAllowed(false);
+    // Order-detail retry can safely reuse the same PaymentIntent when Stripe
+    // has returned requires_payment_method. It lets the customer change/fix
+    // the payment method without silently creating another intent.
+    if (retryAllowed) {
       setMessage('');
-    } catch (err) {
-      setMessage(err?.message || 'Unable to start a new card payment attempt.');
-    } finally {
-      setRetrying(false);
+      setRetryAllowed(false);
     }
   };
 
