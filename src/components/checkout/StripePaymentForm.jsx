@@ -323,8 +323,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
             setPaymentReady(Boolean(event.complete));
             if (event.error) {
               setMessage(event.error.message || 'Please check your card details.');
-              setRetryAllowed(false);
-            } else if (!processing && !retrying) {
+            } else if (!processing && !retrying && !retryAllowed) {
               setMessage('');
               setRetryAllowed(false);
             }
