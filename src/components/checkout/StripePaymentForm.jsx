@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
+import { orderService } from '../../services/orders';
 import { useAuth } from '../../context/AuthContext';
 import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine, RiShieldCheckLine } from '@remixicon/react';
 
@@ -52,6 +53,8 @@ function PaymentConfirmationPending({ orderNumber, onViewOrder }) {
   );
 }
 
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRetry, onCancelOrder }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -78,6 +81,46 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   const viewOrder = () => {
     if (orderNumber) navigate(`/orders/${encodeURIComponent(orderNumber)}`);
     else navigate('/orders');
+  };
+
+  // Stripe can report success before the backend webhook/settlement transaction
+  // becomes visible. Reconcile only against the authenticated user's public
+  // order endpoint; never infer payment success from the client alone.
+  const reconcileOrder = async () => {
+    if (!orderNumber) return null;
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      try {
+        const order = await orderService.myOrder(orderNumber);
+        const status = String(order?.status || '').toLowerCase();
+        if (status === 'paid') return order;
+        if (status === 'cancelled' || status === 'failed') return order;
+      } catch {
+        // Keep the payment in an unresolved state if the authenticated order
+        // lookup is temporarily unavailable. Never turn lookup failure into success.
+      }
+      if (attempt < 7) await wait(750);
+    }
+    return null;
+  };
+
+  const finishConfirmedPayment = async (paymentIntent) => {
+    try {
+      const confirmation = await paymentService.confirm(paymentIntent.id);
+      await refreshProfile();
+      onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
+      return true;
+    } catch {
+      // The Stripe payment is already succeeded. A delayed webhook or an
+      // idempotent backend settlement can finish after the direct confirm call.
+      // Only the authenticated order status can close this UI state safely.
+      const reconciled = await reconcileOrder();
+      if (String(reconciled?.status || '').toLowerCase() === 'paid') {
+        await refreshProfile();
+        onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: paymentIntent.id });
+        return true;
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -116,11 +159,8 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
 
       if (paymentIntent?.status === 'succeeded') {
-        try {
-          const confirmation = await paymentService.confirm(paymentIntent.id);
-          await refreshProfile();
-          onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
-        } catch (err) {
+        const finished = await finishConfirmedPayment(paymentIntent);
+        if (!finished) {
           setPaymentConfirmationPending(true);
           setProcessing(false);
           setRetryAllowed(false);
@@ -157,6 +197,12 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       setRetryAllowed(true);
       setProcessing(false);
     } catch (err) {
+      const reconciled = await reconcileOrder();
+      if (String(reconciled?.status || '').toLowerCase() === 'paid') {
+        await refreshProfile();
+        onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: paymentIntentId || undefined });
+        return;
+      }
       setPaymentPending(true);
       setProcessing(false);
       setRetryAllowed(false);
