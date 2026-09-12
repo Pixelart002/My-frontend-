@@ -108,9 +108,35 @@ export function CartProvider({ children }) {
 
   const clearCart = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      await cartService.clear();
-      setCart(EMPTY_CART);
+      // DELETE /cart is intentionally followed by a fresh GET. This prevents
+      // the UI from claiming the cart is empty when a transient request or
+      // backend write leaves stale line items behind.
+      let verifiedCart = null;
+      let lastError = null;
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          await cartService.clear();
+          verifiedCart = await cartService.get();
+          if (!verifiedCart?.items?.length) {
+            setCart(EMPTY_CART);
+            return EMPTY_CART;
+          }
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      if (verifiedCart?.items?.length) {
+        setCart(verifiedCart);
+        throw new Error('Unable to clear the cart completely. Please try again.');
+      }
+      throw lastError || new Error('Unable to clear the cart. Please try again.');
+    } catch (err) {
+      setError(err.message || 'Unable to clear the cart.');
+      throw err;
     } finally {
       setLoading(false);
     }
