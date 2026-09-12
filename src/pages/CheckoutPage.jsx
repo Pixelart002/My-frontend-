@@ -16,10 +16,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 const stripePromise = loadStripe(STRIPE_PK);
 const stripeAppearance = { theme: 'night', variables: { colorPrimary: '#d8ad6a', colorBackground: '#11100f', colorText: '#f5efe7', colorTextSecondary: '#a59b91', colorTextPlaceholder: '#6d655c', colorDanger: '#e0735f', borderRadius: '8px', fontFamily: 'DM Sans, system-ui, sans-serif' }, rules: { '.Input': { border: '1px solid #3a3530', boxShadow: 'none', backgroundColor: '#1b1917' }, '.Input:focus': { border: '1px solid #d8ad6a', boxShadow: '0 0 0 1px #d8ad6a' }, '.Label': { color: '#a59b91' }, '.Tab': { border: '1px solid #3a3530', backgroundColor: '#1b1917', color: '#f5efe7' }, '.Tab--selected': { borderColor: '#d8ad6a', backgroundColor: '#24211e' } } };
 
-function makeIdempotencyKey() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; const v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); });
-}
+function makeIdempotencyKey() { if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID(); return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; const v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
 
 function AddressForm({ onSaved, onCancel }) {
   const [values, setValues] = useState({ line1: '', line2: '', city: '', state: '', postal_code: '', country: 'IN', phone: '', email: '' });
@@ -35,7 +32,7 @@ export default function CheckoutPage() {
   const [showForm, setShowForm] = useState(false); const [intent, setIntent] = useState(null); const [intentError, setIntentError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(null); const [paymentModalOpen, setPaymentModalOpen] = useState(false); const [paymentReview, setPaymentReview] = useState(false);
   const [creating, setCreating] = useState(false); const [cancellingOrder, setCancellingOrder] = useState(false); const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
-  const [activeOrder, setActiveOrder] = useState(null); const [checkoutKey, setCheckoutKey] = useState('');
+  const [activeOrder, setActiveOrder] = useState(null); const [checkoutKey, setCheckoutKey] = useState(''); const [paymentSessionKey, setPaymentSessionKey] = useState('');
   const [couponInput, setCouponInput] = useState(''); const [coupon, setCoupon] = useState(null); const [couponError, setCouponError] = useState(''); const [couponLoading, setCouponLoading] = useState(false);
 
   const loadAddresses = useCallback(async () => { setAddressError(''); try { const list = await userService.getAddresses(); setAddresses(Array.isArray(list) ? list : []); } catch (err) { setAddressError(err.message || 'Unable to load your addresses.'); } }, []);
@@ -69,12 +66,13 @@ export default function CheckoutPage() {
   const requestCancelOrder = () => { if (activeOrder && !cancellingOrder) setCancelConfirmOpen(true); };
   const cancelActiveOrder = async () => {
     if (!activeOrder?.orderNumber || cancellingOrder) return; setCancellingOrder(true); setIntentError('');
-    try { await paymentService.cancelCheckout(activeOrder.orderNumber); setCancelConfirmOpen(false); setPaymentModalOpen(false); setPaymentReview(false); setIntent(null); setActiveOrder(null); setCheckoutKey(''); navigate('/cart', { replace: true }); }
+    try { await paymentService.cancelCheckout(activeOrder.orderNumber); setCancelConfirmOpen(false); setPaymentModalOpen(false); setPaymentReview(false); setIntent(null); setActiveOrder(null); setCheckoutKey(''); setPaymentSessionKey(''); navigate('/cart', { replace: true }); }
     catch (err) { setIntentError(err?.message || 'We could not cancel this order safely. Please try again.'); setCancelConfirmOpen(false); }
     finally { setCancellingOrder(false); }
   };
   const retryPayment = async (orderNumber) => {
     const data = await paymentService.retry(orderNumber); if (!data?.client_secret || !data?.payment_intent_id) throw new Error('A fresh payment session could not be created.');
+    setPaymentSessionKey(`${data.payment_intent_id}:${Date.now()}`);
     setIntent(data); setActiveOrder((current) => ({ ...(current || {}), orderNumber: data.order_number || orderNumber, orderId: data.order_id, paymentMethod: 'stripe', paymentIntentId: data.payment_intent_id }));
   };
   const intentOptions = useMemo(() => ({ clientSecret: intent?.client_secret, appearance: stripeAppearance, loader: 'auto' }), [intent]);
@@ -82,7 +80,7 @@ export default function CheckoutPage() {
   if (cartLoading) return <div className="page container checkout-loading-page"><Spinner label="Preparing your checkout…" /></div>;
   if (!canProceed && !activeOrder) return <div className="page container"><div className="page-heading compact"><p className="eyebrow">Checkout</p><h1>Your bag is empty.</h1></div><button className="btn" onClick={() => navigate('/shop')}>Continue shopping</button></div>;
 
-  const paymentContent = intent?.client_secret ? <Elements key={intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number || activeOrder?.orderNumber, paymentMethod: 'stripe' } })} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
+  const paymentContent = intent?.client_secret ? <Elements key={paymentSessionKey || intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} clientSecret={intent.client_secret} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number || activeOrder?.orderNumber, paymentMethod: 'stripe' } })} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
 
   return <div className="page container checkout">
     <button type="button" className="checkout-back" onClick={() => { if (!activeOrder) navigate('/cart'); }} disabled={Boolean(activeOrder)}><RiArrowLeftLine size={16} /> Back to cart</button>
@@ -97,6 +95,5 @@ export default function CheckoutPage() {
       <aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Total</dt><dd>{formatMoney(finalTotal)}</dd></div></dl>{cart.amount_to_free_shipping > 0 && !cart.free_shipping_eligible && <p className="free-ship-note"><RiArrowRightLine size={15} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>}</aside>
     </div>
     <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) { setPaymentModalOpen(false); setPaymentReview(false); setIntent(null); } }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={formatMoney(finalTotal)} onBack={handleModalBack} activeOrder={Boolean(activeOrder)} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you. You can cancel it here before processing.</p></div></div> : null)}</PaymentMethodModal>
-    {cancelConfirmOpen && <div className="payment-modal-backdrop" role="presentation"><div className="payment-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title"><header className="payment-modal-header"><div className="payment-modal-title-wrap"><p className="eyebrow">Order control</p><h3 id="cancel-order-title">Cancel this order?</h3></div><button type="button" className="btn btn-quiet btn-icon payment-modal-close" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}><RiCloseLine size={20} /></button></header><div className="payment-modal-body"><p>This will cancel the active checkout, release the reserved stock and close the Stripe payment session if one exists.</p><p>Your coupon reservation will also be released.</p></div><footer className="payment-modal-actions"><button type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn payment-modal-primary" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Cancel order'}</button></footer></div></div>}
   </div>;
 }
