@@ -83,9 +83,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
     else navigate('/orders');
   };
 
-  // Stripe can report success before the backend webhook/settlement transaction
-  // becomes visible. Reconcile only against the authenticated user's public
-  // order endpoint; never infer payment success from the client alone.
   const reconcileOrder = async () => {
     if (!orderNumber) return null;
     for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -95,8 +92,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
         if (status === 'paid') return order;
         if (status === 'cancelled' || status === 'failed') return order;
       } catch {
-        // Keep the payment in an unresolved state if the authenticated order
-        // lookup is temporarily unavailable. Never turn lookup failure into success.
+        // Never convert an unavailable status lookup into payment success.
       }
       if (attempt < 7) await wait(750);
     }
@@ -110,9 +106,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
       return true;
     } catch {
-      // The Stripe payment is already succeeded. A delayed webhook or an
-      // idempotent backend settlement can finish after the direct confirm call.
-      // Only the authenticated order status can close this UI state safely.
       const reconciled = await reconcileOrder();
       if (String(reconciled?.status || '').toLowerCase() === 'paid') {
         await refreshProfile();
@@ -121,6 +114,18 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
       return false;
     }
+  };
+
+  const handleFailedIntent = (intent, fallbackMessage = 'Card payment was not completed. Please check your card details and try again.') => {
+    const intentId = intent?.id || paymentIntentId;
+    const status = String(intent?.status || '').toLowerCase();
+    if (intentId) paymentService.notifyFailed(intentId, fallbackMessage).catch(() => {});
+    setPaymentIntentId(intentId);
+    setMessage(status === 'requires_payment_method' ? fallbackMessage : 'Card payment could not be completed. Please try again.');
+    setRetryAllowed(true);
+    setPaymentPending(false);
+    setPaymentConfirmationPending(false);
+    setProcessing(false);
   };
 
   const handleSubmit = async (e) => {
@@ -149,12 +154,8 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       });
 
       if (error) {
-        const intentId = paymentIntent?.id || paymentIntentId;
-        if (intentId) paymentService.notifyFailed(intentId, error.message || '').catch(() => {});
-        setPaymentIntentId(intentId);
-        setMessage(error.message || 'Card payment failed. Check your card details and try again.');
-        setRetryAllowed(Boolean(intentId) || error.type === 'card_error' || error.type === 'validation_error');
-        setProcessing(false);
+        const intent = paymentIntent || error.payment_intent || error.paymentIntent;
+        handleFailedIntent(intent, error.message || 'Card payment failed. Check your card details and try again.');
         return;
       }
 
@@ -177,12 +178,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
 
       if (paymentIntent?.status === 'requires_payment_method') {
-        const intentId = paymentIntent.id || paymentIntentId;
-        if (intentId) paymentService.notifyFailed(intentId, 'Card payment requires a new payment method.').catch(() => {});
-        setPaymentIntentId(intentId);
-        setMessage('Card payment was not completed. Please check your card details and try again.');
-        setRetryAllowed(true);
-        setProcessing(false);
+        handleFailedIntent(paymentIntent, 'Card payment was not completed. Please check your card details and try again.');
         return;
       }
 
@@ -197,16 +193,40 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       setRetryAllowed(true);
       setProcessing(false);
     } catch (err) {
+      // A rejected Stripe.js confirmation may still carry the PaymentIntent.
+      // A requires_payment_method intent is a failed attempt, never an unknown
+      // or pending state, so it must be shown as failed instead of "not verified".
+      const intent = err?.payment_intent || err?.paymentIntent;
+      const intentStatus = String(intent?.status || '').toLowerCase();
+
+      if (intentStatus === 'requires_payment_method') {
+        handleFailedIntent(intent, err?.message || 'Card payment was not completed. Please check your card details and try again.');
+        return;
+      }
+
+      if (intentStatus === 'requires_action') {
+        setMessage('Additional card verification is required. Please complete the verification and try again.');
+        setRetryAllowed(true);
+        setProcessing(false);
+        return;
+      }
+
+      if (intentStatus === 'processing') {
+        setPaymentPending(true);
+        setProcessing(false);
+        setRetryAllowed(false);
+        return;
+      }
+
       const reconciled = await reconcileOrder();
       if (String(reconciled?.status || '').toLowerCase() === 'paid') {
         await refreshProfile();
-        onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: paymentIntentId || undefined });
+        onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: intent?.id || paymentIntentId || undefined });
         return;
       }
-      setPaymentPending(true);
       setProcessing(false);
       setRetryAllowed(false);
-      setMessage('Card payment status could not be confirmed safely. Check your order status before starting another payment attempt.');
+      setMessage(err?.message || 'Card payment status could not be confirmed. Please check your order status before trying again.');
     }
   };
 
