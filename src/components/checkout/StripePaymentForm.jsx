@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
@@ -8,7 +9,7 @@ import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine, RiSh
 
 function ProcessingPayment() {
   return (
-    <div className="payment-processing-screen" role="status" aria-live="polite">
+    <div className="payment-processing-screen" role="status" aria-live="polite" style={{ width: 'min(620px, calc(100vw - 28px))', maxHeight: 'min(820px, calc(100dvh - 28px))', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)', boxShadow: '0 28px 100px rgba(0,0,0,.62)' }}>
       <div className="payment-processing-ring" aria-hidden="true" />
       <h3>Confirming card payment...</h3>
       <p>Please don’t close this page. We’re waiting for your card payment to finish confirmation.</p>
@@ -50,6 +51,16 @@ function PaymentConfirmationPending({ orderNumber, onViewOrder }) {
       </div>
       <span className="payment-processing-brand">LUVIIO</span>
     </div>
+  );
+}
+
+function PaymentStatusPopup({ children, className = '' }) {
+  if (typeof document === 'undefined') return null;
+  return createPortal(
+    <div className={`payment-modal-backdrop payment-status-popup-backdrop ${className}`} role="presentation">
+      {children}
+    </div>,
+    document.body,
   );
 }
 
@@ -267,7 +278,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     if (onRetry && orderNumber) {
       setRetrying(true);
       if (typeof window !== 'undefined') window.sessionStorage.setItem(`luviio:payment-retrying:${orderNumber}`, '1');
-      setMessage('Preparing a fresh card payment attempt…');
+      setMessage('');
       setRetryAllowed(false);
       try {
         await onRetry(orderNumber);
@@ -328,9 +339,9 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
             setMessage(event?.error?.message || 'Unable to load the secure card payment form. Please try again.');
           }}
         />
-        {showProcessingOverlay && <div className="payment-processing-overlay"><ProcessingPayment /></div>}
-        {retrying && !showProcessingOverlay && <div className="payment-retry-overlay" role="status" aria-live="polite"><div className="payment-retry-state"><span className="payment-processing-ring" aria-hidden="true" /><strong>Retrying payment…</strong><span>Preparing a new secure card session.</span></div></div>}
       </div>
+      {showProcessingOverlay && <PaymentStatusPopup className="payment-processing-popup"><ProcessingPayment /></PaymentStatusPopup>}
+      {retrying && !showProcessingOverlay && <PaymentStatusPopup className="payment-retry-popup"><div className="payment-retry-state" role="status" aria-live="polite" style={{ width: 'min(520px, calc(100vw - 28px))', boxSizing: 'border-box', padding: '40px 28px', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)', boxShadow: '0 28px 100px rgba(0,0,0,.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}><span className="payment-processing-ring" aria-hidden="true" /><strong>Retrying payment…</strong><span>Preparing a new secure card session.</span></div></PaymentStatusPopup>}
       {paymentPending ? <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} /> : paymentConfirmationPending ? <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} /> : null}
       {!paymentPending && !paymentConfirmationPending && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       {!paymentPending && !paymentConfirmationPending && <div className="payment-form-actions">
