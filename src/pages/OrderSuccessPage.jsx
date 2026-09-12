@@ -5,12 +5,15 @@ import { useCart } from '../context/CartContext';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
-  const { reload } = useCart();
+  const { clearCart } = useCart();
   const orderNumber = String(location.state?.orderNumber || '').trim();
   const paymentMethod = String(location.state?.paymentMethod || '').toLowerCase();
   const isCod = paymentMethod === 'cod';
 
-  useEffect(() => { reload().catch(() => {}); }, []);
+  useEffect(() => {
+    if (!orderNumber) return;
+    clearCart().catch(() => {});
+  }, [orderNumber, clearCart]);
 
   return (
     <div className="page container">
