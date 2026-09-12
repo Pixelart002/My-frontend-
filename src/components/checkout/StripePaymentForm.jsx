@@ -64,7 +64,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
   const [processing, setProcessing] = useState(false);
   const [paymentPending, setPaymentPending] = useState(false);
   const [paymentConfirmationPending, setPaymentConfirmationPending] = useState(false);
-  const [retrying, setRetrying] = useState(false);
+  const [retrying, setRetrying] = useState(() => typeof window !== 'undefined' && Boolean(orderNumber) && window.sessionStorage.getItem(`luviio:payment-retrying:${orderNumber}`) === '1');
   const [paymentIntentId, setPaymentIntentId] = useState('');
   const [paymentElementMounted, setPaymentElementMounted] = useState(false);
   const [paymentReady, setPaymentReady] = useState(false);
@@ -266,6 +266,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
 
     if (onRetry && orderNumber) {
       setRetrying(true);
+      if (typeof window !== 'undefined') window.sessionStorage.setItem(`luviio:payment-retrying:${orderNumber}`, '1');
       setMessage('Preparing a fresh card payment attempt…');
       setRetryAllowed(false);
       try {
@@ -275,11 +276,10 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
         setPaymentElementMounted(false);
         setPaymentReady(false);
         setPaymentElementError('');
-        setMessage('');
       } catch (err) {
+        if (typeof window !== 'undefined') window.sessionStorage.removeItem(`luviio:payment-retrying:${orderNumber}`);
         setRetryAllowed(true);
         setMessage(err?.message || 'Unable to start a new card payment attempt.');
-      } finally {
         setRetrying(false);
       }
       return;
@@ -295,41 +295,47 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
-      <div className="payment-element-shell" aria-busy={showProcessingOverlay}>
+      <div className="payment-element-shell" aria-busy={showProcessingOverlay || retrying}>
         <PaymentElement
           id="payment-element"
           onReady={() => {
             setPaymentElementMounted(true);
             setPaymentElementError('');
+            if (retrying) {
+              if (typeof window !== 'undefined') window.sessionStorage.removeItem(`luviio:payment-retrying:${orderNumber}`);
+              setRetrying(false);
+              setRetryAllowed(false);
+              setMessage('');
+            }
           }}
           onChange={(event) => {
             setPaymentReady(Boolean(event.complete));
             if (event.error) {
               setMessage(event.error.message || 'Please check your card details.');
               setRetryAllowed(false);
-            } else if (!processing) {
+            } else if (!processing && !retrying) {
               setMessage('');
               setRetryAllowed(false);
             }
           }}
           onLoadError={(event) => {
+            if (typeof window !== 'undefined') window.sessionStorage.removeItem(`luviio:payment-retrying:${orderNumber}`);
             setPaymentElementMounted(false);
             setPaymentReady(false);
             setPaymentElementError(event?.error?.message || 'Unable to load the secure card payment form.');
             setRetryAllowed(false);
+            setRetrying(false);
             setMessage(event?.error?.message || 'Unable to load the secure card payment form. Please try again.');
           }}
         />
         {showProcessingOverlay && <div className="payment-processing-overlay"><ProcessingPayment /></div>}
+        {retrying && !showProcessingOverlay && <div className="payment-retry-overlay" role="status" aria-live="polite"><div className="payment-retry-state"><span className="payment-processing-ring" aria-hidden="true" /><strong>Retrying payment…</strong><span>Preparing a new secure card session.</span></div></div>}
       </div>
       {paymentPending ? <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} /> : paymentConfirmationPending ? <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} /> : null}
       {!paymentPending && !paymentConfirmationPending && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       {!paymentPending && !paymentConfirmationPending && <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
-        {message && retryAllowed && <button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={retrying || processing}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry card payment'}</button>}
-        {!retryAllowed && <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}>
-          <RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span>
-        </button>}
+        {retrying ? <button className="btn payment-submit-btn" type="button" disabled><RiRefreshLine size={15} /> Retrying…</button> : message && retryAllowed ? <button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={processing}><RiRefreshLine size={15} /> Retry card payment</button> : <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}><RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span></button>}
       </div>}
       {!paymentPending && !paymentConfirmationPending && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
     </form>
