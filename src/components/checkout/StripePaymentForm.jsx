@@ -55,7 +55,7 @@ function PaymentConfirmationPending({ orderNumber, onViewOrder }) {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRetry, onCancelOrder }) {
+export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess, onBack, onRetry, onCancelOrder }) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -128,6 +128,40 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
     setProcessing(false);
   };
 
+  const handleRequiredAction = async (intent) => {
+    if (!stripe || !clientSecret) {
+      handleFailedIntent(intent, 'Additional card verification could not be started. Please try again.');
+      return;
+    }
+
+    setProcessing(true);
+    setMessage('');
+    setRetryAllowed(false);
+    try {
+      const result = await stripe.handleNextAction({ clientSecret });
+      if (result?.error) {
+        handleFailedIntent(result.paymentIntent || result.error?.payment_intent || intent, result.error.message || 'Card verification was not completed. Please try again.');
+        return;
+      }
+      if (result?.paymentIntent?.status === 'succeeded') {
+        const finished = await finishConfirmedPayment(result.paymentIntent);
+        if (!finished) {
+          setPaymentConfirmationPending(true);
+          setProcessing(false);
+        }
+        return;
+      }
+      if (result?.paymentIntent?.status === 'processing') {
+        setPaymentPending(true);
+        setProcessing(false);
+        return;
+      }
+      handleFailedIntent(result?.paymentIntent || intent, 'Card verification was not completed. Please try again.');
+    } catch (err) {
+      handleFailedIntent(err?.payment_intent || err?.paymentIntent || intent, err?.message || 'Card verification was not completed. Please try again.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements || !paymentElementMounted || !paymentReady || paymentElementError || processing || retrying || paymentPending || paymentConfirmationPending) return;
@@ -155,6 +189,10 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
 
       if (error) {
         const intent = paymentIntent || error.payment_intent || error.paymentIntent;
+        if (String(intent?.status || '').toLowerCase() === 'requires_action') {
+          await handleRequiredAction(intent);
+          return;
+        }
         handleFailedIntent(intent, error.message || 'Card payment failed. Check your card details and try again.');
         return;
       }
@@ -183,9 +221,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
 
       if (paymentIntent?.status === 'requires_action') {
-        setMessage('Additional card verification is required. Please complete the verification and try again.');
-        setRetryAllowed(true);
-        setProcessing(false);
+        await handleRequiredAction(paymentIntent);
         return;
       }
 
@@ -202,9 +238,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       }
 
       if (intentStatus === 'requires_action') {
-        setMessage('Additional card verification is required. Please complete the verification and try again.');
-        setRetryAllowed(true);
-        setProcessing(false);
+        await handleRequiredAction(intent);
         return;
       }
 
@@ -230,9 +264,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
   const handleRetry = async () => {
     if (retrying || processing || paymentPending || paymentConfirmationPending) return;
 
-    // Checkout supplies onRetry so a failed first PaymentIntent gets a fresh
-    // PaymentElement/payment session. This is the real retry path. Previously
-    // retryAllowed only cleared the error and never invoked onRetry.
     if (onRetry && orderNumber) {
       setRetrying(true);
       setMessage('Preparing a fresh card payment attempt…');
@@ -254,9 +285,6 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       return;
     }
 
-    // Order-detail retry can safely reuse the same PaymentIntent when Stripe
-    // has returned requires_payment_method. It lets the customer change/fix
-    // the payment method without silently creating another intent.
     if (retryAllowed) {
       setMessage('');
       setRetryAllowed(false);
@@ -298,10 +326,10 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       {!paymentPending && !paymentConfirmationPending && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
       {!paymentPending && !paymentConfirmationPending && <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
-        {message && (retryAllowed || onRetry) && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry card payment'}</button>}
-        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}>
+        {message && retryAllowed && <button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={retrying || processing}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry card payment'}</button>}
+        {!retryAllowed && <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}>
           <RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span>
-        </button>
+        </button>}
       </div>}
       {!paymentPending && !paymentConfirmationPending && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
     </form>

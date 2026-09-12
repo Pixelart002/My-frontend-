@@ -82,7 +82,7 @@ export default function CheckoutPage() {
   if (cartLoading) return <div className="page container checkout-loading-page"><Spinner label="Preparing your checkout…" /></div>;
   if (!canProceed && !activeOrder) return <div className="page container"><div className="page-heading compact"><p className="eyebrow">Checkout</p><h1>Your bag is empty.</h1></div><button className="btn" onClick={() => navigate('/shop')}>Continue shopping</button></div>;
 
-  const paymentContent = intent?.client_secret ? <Elements key={intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number || activeOrder?.orderNumber, paymentMethod: 'stripe' } })} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
+  const paymentContent = intent?.client_secret ? <Elements key={intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} clientSecret={intent.client_secret} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number || activeOrder?.orderNumber, paymentMethod: 'stripe' } })} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
 
   return <div className="page container checkout">
     <button type="button" className="checkout-back" onClick={() => { if (!activeOrder) navigate('/cart'); }} disabled={Boolean(activeOrder)}><RiArrowLeftLine size={16} /> Back to cart</button>
