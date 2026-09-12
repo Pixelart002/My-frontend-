@@ -9,12 +9,12 @@ function ProcessingPayment() {
   return (
     <div className="payment-processing-screen" role="status" aria-live="polite">
       <div className="payment-processing-ring" aria-hidden="true" />
-      <h3>Confirming payment...</h3>
-      <p>Please don’t close this page. We’re waiting for the payment provider to finish confirmation.</p>
+      <h3>Confirming card payment...</h3>
+      <p>Please don’t close this page. We’re waiting for your card payment to finish confirmation.</p>
       <div className="payment-processing-steps" aria-label="Payment progress">
-        <div className="payment-processing-step is-done"><span className="payment-processing-dot"><RiCheckboxCircleLine size={18} /></span><span>Payment details validated</span></div>
+        <div className="payment-processing-step is-done"><span className="payment-processing-dot"><RiCheckboxCircleLine size={18} /></span><span>Card details validated</span></div>
         <div className="payment-processing-step is-active"><span className="payment-processing-dot" /><span>Confirming with bank</span></div>
-        <div className="payment-processing-step"><span className="payment-processing-dot" /><span>Verifying payment</span></div>
+        <div className="payment-processing-step"><span className="payment-processing-dot" /><span>Verifying card payment</span></div>
         <div className="payment-processing-step"><span className="payment-processing-dot" /><span>Finalizing order</span></div>
       </div>
       <span className="payment-processing-brand">LUVIIO</span>
@@ -26,9 +26,9 @@ function PaymentPendingState({ orderNumber, onViewOrder }) {
   return (
     <div className="payment-processing-screen payment-pending-screen" role="status" aria-live="polite">
       <div className="payment-processing-ring" aria-hidden="true" />
-      <h3>Payment status is being verified</h3>
-      <p>We received the payment result but the final status is not yet available. We won’t start another payment attempt automatically.</p>
-      <p className="hint secure-hint">Order {orderNumber ? `#${orderNumber}` : ''} remains open while the payment provider finishes processing.</p>
+      <h3>Card payment status is being verified</h3>
+      <p>We received the card payment result but the final status is not yet available. We won’t start another payment attempt automatically.</p>
+      <p className="hint secure-hint">Order {orderNumber ? `#${orderNumber}` : ''} remains open while the payment is being verified.</p>
       <div className="payment-form-actions">
         <button className="btn payment-submit-btn" type="button" onClick={onViewOrder}>View order status <RiArrowRightLine size={17} /></button>
       </div>
@@ -41,8 +41,8 @@ function PaymentConfirmationPending({ orderNumber, onViewOrder }) {
   return (
     <div className="payment-processing-screen payment-pending-screen" role="status" aria-live="polite">
       <RiShieldCheckLine size={42} aria-hidden="true" />
-      <h3>Payment received</h3>
-      <p>Your payment was successful. We’re still confirming the order with Luviio, so no new payment attempt will be created.</p>
+      <h3>Card payment received</h3>
+      <p>Your card payment was successful. We’re still confirming the order with Luviio, so no new payment attempt will be created.</p>
       <p className="hint secure-hint">Order {orderNumber ? `#${orderNumber}` : ''} will reflect the confirmed payment after backend reconciliation.</p>
       <div className="payment-form-actions">
         <button className="btn payment-submit-btn" type="button" onClick={onViewOrder}>View order status <RiArrowRightLine size={17} /></button>
@@ -88,7 +88,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
     if (!paymentElement) {
       setPaymentElementMounted(false);
       setPaymentReady(false);
-      setMessage('Payment form is still loading. Please wait a moment and try again.');
+      setMessage('Card payment form is still loading. Please wait a moment and try again.');
       return;
     }
 
@@ -109,8 +109,8 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
         const intentId = paymentIntent?.id || paymentIntentId;
         if (intentId) paymentService.notifyFailed(intentId, error.message || '').catch(() => {});
         setPaymentIntentId(intentId);
-        setMessage(error.message || 'Payment failed. Check your payment details and try again.');
-        setRetryAllowed(error.type === 'card_error' || error.type === 'validation_error');
+        setMessage(error.message || 'Card payment failed. Check your card details and try again.');
+        setRetryAllowed(Boolean(intentId) || error.type === 'card_error' || error.type === 'validation_error');
         setProcessing(false);
         return;
       }
@@ -136,14 +136,31 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
         return;
       }
 
-      setMessage('Payment requires further action. Please complete the required step and try again.');
+      if (paymentIntent?.status === 'requires_payment_method') {
+        const intentId = paymentIntent.id || paymentIntentId;
+        if (intentId) paymentService.notifyFailed(intentId, 'Card payment requires a new payment method.').catch(() => {});
+        setPaymentIntentId(intentId);
+        setMessage('Card payment was not completed. Please check your card details and try again.');
+        setRetryAllowed(true);
+        setProcessing(false);
+        return;
+      }
+
+      if (paymentIntent?.status === 'requires_action') {
+        setMessage('Additional card verification is required. Please complete the verification and try again.');
+        setRetryAllowed(true);
+        setProcessing(false);
+        return;
+      }
+
+      setMessage('Card payment could not be completed. Please try again.');
       setRetryAllowed(true);
       setProcessing(false);
     } catch (err) {
       setPaymentPending(true);
       setProcessing(false);
       setRetryAllowed(false);
-      setMessage('Payment status could not be confirmed safely. Check your order status before starting another payment attempt.');
+      setMessage('Card payment status could not be confirmed safely. Check your order status before starting another payment attempt.');
     }
   };
 
@@ -158,7 +175,7 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
 
     if (!onRetry || !orderNumber) return;
     setRetrying(true);
-    setMessage('Preparing a fresh payment attempt…');
+    setMessage('Preparing a fresh card payment attempt…');
     try {
       await onRetry(orderNumber);
       setPaymentPending(false);
@@ -169,19 +186,17 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
       setRetryAllowed(false);
       setMessage('');
     } catch (err) {
-      setMessage(err?.message || 'Unable to start a new payment attempt.');
+      setMessage(err?.message || 'Unable to start a new card payment attempt.');
     } finally {
       setRetrying(false);
     }
   };
 
-  if (processing) return <ProcessingPayment />;
-  if (paymentPending) return <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} />;
-  if (paymentConfirmationPending) return <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} />;
+  const showProcessingOverlay = processing;
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
-      <div className="payment-element-shell">
+      <div className="payment-element-shell" aria-busy={showProcessingOverlay}>
         <PaymentElement
           id="payment-element"
           onReady={() => {
@@ -191,9 +206,9 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
           onChange={(event) => {
             setPaymentReady(Boolean(event.complete));
             if (event.error) {
-              setMessage(event.error.message || 'Please check your payment details.');
+              setMessage(event.error.message || 'Please check your card details.');
               setRetryAllowed(false);
-            } else {
+            } else if (!processing) {
               setMessage('');
               setRetryAllowed(false);
             }
@@ -201,21 +216,23 @@ export default function StripePaymentForm({ orderNumber, onSuccess, onBack, onRe
           onLoadError={(event) => {
             setPaymentElementMounted(false);
             setPaymentReady(false);
-            setPaymentElementError(event?.error?.message || 'Unable to load the secure payment form.');
+            setPaymentElementError(event?.error?.message || 'Unable to load the secure card payment form.');
             setRetryAllowed(false);
-            setMessage(event?.error?.message || 'Unable to load the secure payment form. Please try again.');
+            setMessage(event?.error?.message || 'Unable to load the secure card payment form. Please try again.');
           }}
         />
+        {showProcessingOverlay && <div className="payment-processing-overlay"><ProcessingPayment /></div>}
       </div>
-      {message && <div className="form-error payment-form-error" role="alert">{message}</div>}
-      <div className="payment-form-actions">
-        <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing || paymentPending || paymentConfirmationPending}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
-        {message && (retryAllowed || onRetry) && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing || paymentPending || paymentConfirmationPending}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry payment'}</button>}
-        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying || paymentPending || paymentConfirmationPending}>
-          <RiLockLine size={15} aria-hidden="true" /><span>Pay securely</span>
+      {paymentPending ? <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} /> : paymentConfirmationPending ? <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} /> : null}
+      {!paymentPending && !paymentConfirmationPending && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
+      {!paymentPending && !paymentConfirmationPending && <div className="payment-form-actions">
+        <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
+        {message && (retryAllowed || onRetry) && <button className="btn btn-quiet" type="button" onClick={handleRetry} disabled={retrying || processing}><RiRefreshLine size={15} /> {retrying ? 'Retrying…' : 'Retry card payment'}</button>}
+        <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}>
+          <RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span>
         </button>
-      </div>
-      <p className="hint secure-hint">Payments are encrypted and processed securely by Stripe. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>
+      </div>}
+      {!paymentPending && !paymentConfirmationPending && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
     </form>
   );
 }
