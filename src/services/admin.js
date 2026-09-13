@@ -25,7 +25,10 @@ export const adminService = {
   verify: () => request('GET', '/admin/verify'),
   stats: () => request('GET', '/admin/stats'),
   reports: () => request('GET', '/admin/reports/summary'),
-  paymentsReport: (params = {}) => request('GET', `/admin/payments?${qs({ limit: 10, offset: 0, ...params })}`),
+  // Payment history is operational telemetry and must always reflect the latest
+  // backend/Supabase state. A per-request cache buster prevents a stale browser,
+  // service-worker, proxy, or CDN response from hiding a newly-created order.
+  paymentsReport: (params = {}) => request('GET', `/admin/payments?${qs({ limit: 10, offset: 0, ...params, _ts: Date.now() })}`),
   auditLogs: (limit = 200) => request('GET', `/admin/audit?limit=${limit}`),
 
   listProducts: (params) => request('GET', `/products?${qs(params)}`),
@@ -67,7 +70,7 @@ export const adminService = {
   permissions: async () => normalizePermissionMatrix(await request('GET', '/rbac/permissions')),
   togglePermission: (role, permission, enabled) => request('POST', '/rbac/permissions/toggle', { role, permission, enabled }),
   userActions: (userId) => request('GET', `/rbac/users/${encodeURIComponent(userId)}/actions`),
-  setUserAction: (userId, action, enabled, reason) => request('POST', `/rbac/users/${encodeURIComponent(userId)}/actions`, { action, enabled, reason }),
+  setUserAction: (userId, action, enabled, reason) => request('POST', '/rbac/users/actions', { action, enabled, reason }),
   removeUserAction: (userId, action) => request('DELETE', `/rbac/users/${encodeURIComponent(userId)}/actions/${encodeURIComponent(action)}`),
 
   pushStats: () => request('GET', '/push/admin/stats'),
