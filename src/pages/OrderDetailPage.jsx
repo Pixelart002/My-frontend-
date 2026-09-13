@@ -25,6 +25,7 @@ export default function OrderDetailPage() {
   const [retryOpen, setRetryOpen] = useState(false);
   const [retryLoading, setRetryLoading] = useState(false);
   const [retryIntent, setRetryIntent] = useState(null);
+  const [retrySessionKey, setRetrySessionKey] = useState(0);
   const [retryError, setRetryError] = useState('');
 
   const load = useCallback(() => {
@@ -40,18 +41,37 @@ export default function OrderDetailPage() {
     setRetryOpen(false); setRetryIntent(null); setRetryError('');
   }, [retryLoading]);
 
-  const startRetry = async () => {
-    setRetryLoading(true); setRetryError(''); setRetryOpen(true);
-    try {
-      const result = await paymentService.retry(orderNumber);
-      if (result?.status === 'paid') { toast.success('This order is already paid.'); setRetryOpen(false); await load(); return; }
-      if (!result?.client_secret) throw new Error(result?.message || 'Unable to prepare payment retry.');
-      setRetryIntent(result);
-    } catch (err) { setRetryError(err.message || 'Unable to retry payment.'); }
-    finally { setRetryLoading(false); }
+  const openRetry = () => {
+    if (retryLoading) return;
+    setRetryError('');
+    setRetryIntent(null);
+    setRetryOpen(true);
   };
 
-  const retryElementsOptions = useMemo(() => retryIntent?.client_secret ? { clientSecret: retryIntent.client_secret } : undefined, [retryIntent]);
+  const prepareRetry = async () => {
+    if (retryLoading) return;
+    setRetryLoading(true);
+    setRetryError('');
+    try {
+      const result = await paymentService.retry(orderNumber);
+      if (result?.status === 'paid') {
+        toast.success('This order is already paid.');
+        setRetryOpen(false);
+        setRetryIntent(null);
+        await load();
+        return;
+      }
+      if (!result?.client_secret || !result?.payment_intent_id) {
+        throw new Error(result?.message || 'Unable to prepare payment retry.');
+      }
+      setRetrySessionKey((value) => value + 1);
+      setRetryIntent(result);
+    } catch (err) {
+      setRetryError(err?.message || 'Unable to prepare payment retry.');
+    } finally {
+      setRetryLoading(false);
+    }
+  };
 
   const onCancel = async () => {
     if (!window.confirm('Cancel this order? Your payment will be refunded.')) return;
@@ -101,12 +121,22 @@ export default function OrderDetailPage() {
   const publicOrderNumber = String(order.order_number || orderNumber).trim();
   const publicInvoiceNumber = String(order.invoice_number || '').trim();
 
+  const retryElementsOptions = useMemo(() => retryIntent?.client_secret ? { clientSecret: retryIntent.client_secret } : undefined, [retryIntent]);
   const paymentContent = retryIntent?.client_secret && stripePromise && retryElementsOptions ? (
-    <Elements stripe={stripePromise} options={retryElementsOptions}>
-      <StripePaymentForm orderNumber={publicOrderNumber} onSuccess={async () => {
-        setRetryOpen(false); setRetryIntent(null); toast.success('Payment successful.'); await load();
-        navigate(`/orders/${encodeURIComponent(publicOrderNumber)}`, { replace: true });
-      }} onBack={closeRetry} />
+    <Elements key={retrySessionKey} stripe={stripePromise} options={retryElementsOptions}>
+      <StripePaymentForm
+        orderNumber={publicOrderNumber}
+        clientSecret={retryIntent.client_secret}
+        onSuccess={async () => {
+          setRetryOpen(false);
+          setRetryIntent(null);
+          toast.success('Payment successful.');
+          await load();
+          navigate(`/orders/${encodeURIComponent(publicOrderNumber)}`, { replace: true });
+        }}
+        onBack={closeRetry}
+        onRetry={prepareRetry}
+      />
     </Elements>
   ) : null;
 
@@ -124,7 +154,7 @@ export default function OrderDetailPage() {
           <span className={`status-pill tone-${orderStatusTone(status)}`}>{orderStatusLabel(status)}</span>
         </header>
         <div className="order-detail-actions">
-          {isRetryable && <button className="btn btn-sm" onClick={startRetry} disabled={busy || retryLoading}>Retry payment</button>}
+          {isRetryable && <button className="btn btn-sm" onClick={openRetry} disabled={busy || retryLoading}>Retry payment</button>}
           {canDownloadInvoice(status) && <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}><RiFileTextLine size={15} /> Download invoice</button>}
           {canCancelOrder(status) && <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}><RiCloseCircleLine size={15} /> Cancel order</button>}
         </div>
@@ -160,7 +190,7 @@ export default function OrderDetailPage() {
           {order.shipping_address && <div className="summary-address"><strong>Deliver to</strong><p>{order.shipping_address.line1}, {order.shipping_address.city}{order.shipping_address.state ? `, ${order.shipping_address.state}` : ''} — {order.shipping_address.postal_code}</p></div>}
         </aside>
       </section>
-      <PaymentMethodModal open={retryOpen} value="stripe" onChange={() => {}} onClose={closeRetry} onContinue={() => {}} loading={retryLoading} review address={retryAddress} total={formatMoney(order.total_amount ?? order.grand_total)} onBack={closeRetry}>
+      <PaymentMethodModal open={retryOpen} value="stripe" onChange={() => {}} onClose={closeRetry} onContinue={prepareRetry} loading={retryLoading} review address={retryAddress} total={formatMoney(order.total_amount ?? order.grand_total)} onBack={closeRetry}>
         {retryLoading && !retryIntent ? <Spinner label="Preparing secure payment…" /> : paymentContent}
       </PaymentMethodModal>
     </div>
