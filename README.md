@@ -41,3 +41,5 @@ Never add Stripe secret keys, database credentials, or service-role keys to clie
 - `src/styles/`: design tokens and responsive layout styles.
 
 Checkout supports Stripe card payments and COD when the backend exposes the corresponding order endpoint. Prices and totals always come from the backend response.
+
+Payment retries use the existing order-level global attempt policy; the frontend does not provide a mid-order payment-method-change flow.
