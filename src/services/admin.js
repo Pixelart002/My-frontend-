@@ -70,7 +70,7 @@ export const adminService = {
   permissions: async () => normalizePermissionMatrix(await request('GET', '/rbac/permissions')),
   togglePermission: (role, permission, enabled) => request('POST', '/rbac/permissions/toggle', { role, permission, enabled }),
   userActions: (userId) => request('GET', `/rbac/users/${encodeURIComponent(userId)}/actions`),
-  setUserAction: (userId, action, enabled, reason) => request('POST', '/rbac/users/${encodeURIComponent(userId)}/actions', { action, enabled, reason }),
+  setUserAction: (userId, action, enabled, reason) => request('POST', `/rbac/users/${encodeURIComponent(userId)}/actions`, { action, enabled, reason }),
   removeUserAction: (userId, action) => request('DELETE', `/rbac/users/${encodeURIComponent(userId)}/actions/${encodeURIComponent(action)}`),
 
   pushStats: () => request('GET', '/push/admin/stats'),
