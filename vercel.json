@@ -6,7 +6,6 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/index.html", "destination": "/", "permanent": true },
     { "source": "/shop.html", "destination": "/shop", "permanent": true },
     { "source": "/cart.html", "destination": "/cart", "permanent": true },
     { "source": "/checkout.html", "destination": "/checkout", "permanent": true },
