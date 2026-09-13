@@ -127,10 +127,18 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     }
   };
 
-  const handleFailedIntent = (intent, fallbackMessage = 'Card payment was not completed. Please check your card details and try again.') => {
+  const handleFailedIntent = async (intent, fallbackMessage = 'Card payment was not completed. Please check your card details and try again.') => {
     const intentId = intent?.id || paymentIntentId;
     const status = String(intent?.status || '').toLowerCase();
-    if (intentId) paymentService.notifyFailed(intentId, fallbackMessage).catch(() => {});
+    setProcessing(true);
+    setRetryAllowed(false);
+    if (intentId) {
+      try {
+        await paymentService.notifyFailed(intentId, fallbackMessage);
+      } catch {
+        // Keep the payment UI recoverable even if the telemetry request fails.
+      }
+    }
     setPaymentIntentId(intentId);
     setMessage(status === 'requires_payment_method' ? fallbackMessage : 'Card payment could not be completed. Please try again.');
     setRetryAllowed(true);
@@ -141,7 +149,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
 
   const handleRequiredAction = async (intent) => {
     if (!stripe || !clientSecret) {
-      handleFailedIntent(intent, 'Additional card verification could not be started. Please try again.');
+      await handleFailedIntent(intent, 'Additional card verification could not be started. Please try again.');
       return;
     }
 
@@ -151,7 +159,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     try {
       const result = await stripe.handleNextAction({ clientSecret });
       if (result?.error) {
-        handleFailedIntent(result.paymentIntent || result.error?.payment_intent || intent, result.error.message || 'Card verification was not completed. Please try again.');
+        await handleFailedIntent(result.paymentIntent || result.error?.payment_intent || intent, result.error.message || 'Card verification was not completed. Please try again.');
         return;
       }
       if (result?.paymentIntent?.status === 'succeeded') {
@@ -167,9 +175,9 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
         setProcessing(false);
         return;
       }
-      handleFailedIntent(result?.paymentIntent || intent, 'Card verification was not completed. Please try again.');
+      await handleFailedIntent(result?.paymentIntent || intent, 'Card verification was not completed. Please try again.');
     } catch (err) {
-      handleFailedIntent(err?.payment_intent || err?.paymentIntent || intent, err?.message || 'Card verification was not completed. Please try again.');
+      await handleFailedIntent(err?.payment_intent || err?.paymentIntent || intent, err?.message || 'Card verification was not completed. Please try again.');
     }
   };
 
@@ -204,7 +212,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
           await handleRequiredAction(intent);
           return;
         }
-        handleFailedIntent(intent, error.message || 'Card payment failed. Check your card details and try again.');
+        await handleFailedIntent(intent, error.message || 'Card payment failed. Check your card details and try again.');
         return;
       }
 
@@ -227,7 +235,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       }
 
       if (paymentIntent?.status === 'requires_payment_method') {
-        handleFailedIntent(paymentIntent, 'Card payment was not completed. Please check your card details and try again.');
+        await handleFailedIntent(paymentIntent, 'Card payment was not completed. Please check your card details and try again.');
         return;
       }
 
@@ -244,7 +252,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       const intentStatus = String(intent?.status || '').toLowerCase();
 
       if (intentStatus === 'requires_payment_method') {
-        handleFailedIntent(intent, err?.message || 'Card payment was not completed. Please check your card details and try again.');
+        await handleFailedIntent(intent, err?.message || 'Card payment was not completed. Please check your card details and try again.');
         return;
       }
 
