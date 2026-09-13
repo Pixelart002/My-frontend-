@@ -20,7 +20,8 @@ function paymentState(value, paymentMethod, orderStatus) {
   }
   if (status === 'succeeded' || status === 'paid') return { key: 'succeeded', label: status };
   if (status === 'expired') return { key: 'expired', label: 'expired' };
-  if (status === 'requires_payment_method' || status === 'failed' || status === 'canceled' || status === 'cancelled') {
+  if (status === 'requires_payment_method') return { key: 'pending', label: 'requires payment method' };
+  if (status === 'failed' || status === 'canceled' || status === 'cancelled') {
     return { key: 'failed', label: status };
   }
   return { key: 'pending', label: status };
@@ -31,9 +32,9 @@ function attemptNumber(row) {
   return Number.isInteger(number) && number >= 1 ? number : null;
 }
 
-function attemptLabel(row) {
-  const made = attemptNumber(row);
-  return made === null ? `— / ${MAX_ALLOWED_PAYMENT_ATTEMPTS}` : `${made} / ${MAX_ALLOWED_PAYMENT_ATTEMPTS}`;
+function maxAttempts(row) {
+  const number = Number(row?.max_attempts);
+  return Number.isInteger(number) && number > 0 ? number : MAX_ALLOWED_PAYMENT_ATTEMPTS;
 }
 
 function pageData(response) {
@@ -53,9 +54,9 @@ function groupByOrder(rows) {
     groups.get(key).push(row);
   });
 
-  return [...groups.entries()].map(([key, attempts]) => ({
+  return [...groups.entries()].map(([key, events]) => ({
     key,
-    attempts: [...attempts].sort((a, b) => {
+    events: [...events].sort((a, b) => {
       const aAttempt = attemptNumber(a) ?? 0;
       const bAttempt = attemptNumber(b) ?? 0;
       if (aAttempt !== bAttempt) return aAttempt - bAttempt;
@@ -64,11 +65,13 @@ function groupByOrder(rows) {
   }));
 }
 
-function AttemptRow({ row, firstInOrder, attemptCount }) {
+function AttemptRow({ row, firstInOrder, historyIndex, historyLength }) {
   const state = paymentState(row.status, row.payment_method, row.order_status);
   const order = text(row.order_number || row.order_id);
   const method = text(row.payment_method).toUpperCase();
   const created = row.created_at ? new Date(row.created_at).toLocaleString() : '—';
+  const attempt = attemptNumber(row);
+  const max = maxAttempts(row);
   const statusClass = state.key === 'succeeded'
     ? 'pill-success'
     : state.key === 'failed'
@@ -81,14 +84,15 @@ function AttemptRow({ row, firstInOrder, attemptCount }) {
     <tr className={firstInOrder ? 'payment-order-start' : ''}>
       <td className="payment-order-cell" data-label="Order">
         {firstInOrder ? <span className="td-strong">{order}</span> : <span className="payment-attempt-connector" aria-hidden="true">↳</span>}
-        {firstInOrder && attemptCount > 1 && <span className="attempt-caption">{attemptCount} recorded attempts</span>}
+        {firstInOrder && historyLength > 1 && <span className="attempt-caption">{historyLength} attempt events</span>}
       </td>
       <td data-label="Status"><span className={`admin-pill ${statusClass}`}>{state.label}</span></td>
       <td className="td-gold" data-label="Amount">{money(row.amount)}</td>
-      <td data-label="Payment attempt">
-        <span className="attempt-value">{attemptLabel(row)}</span>
-        <span className="attempt-caption">Done / Max attempts</span>
+      <td data-label="Attempt">
+        <span className="attempt-value">{attempt === null ? '—' : `#${attempt}`}</span>
+        <span className="attempt-caption">{historyIndex + 1} of {historyLength}</span>
       </td>
+      <td data-label="Max attempts"><span className="attempt-value">{max}</span></td>
       <td data-label="Method"><span className="admin-pill pill-muted">{method}</span></td>
       <td data-label="Created">{created}</td>
     </tr>
@@ -160,14 +164,14 @@ export default function PaymentsPanel() {
     <section className="admin-panel">
       <div className="admin-card admin-telemetry-card">
         <div className="admin-toolbar ops-toolbar">
-          <div><h2>Payments</h2><p>Payment attempts grouped by order.</p></div>
+          <div><h2>Payments</h2><p>Full payment-attempt history grouped by order.</p></div>
           <button type="button" className="btn btn-quiet btn-sm" onClick={refresh} disabled={loading || loadingMore}>
             <RiRefreshLine size={16}/>{loading ? 'Loading…' : loadingMore ? 'Loading more…' : 'Refresh'}
           </button>
         </div>
         <div className="admin-stats">
-          <div className="admin-stat"><div className="stat-label">Attempts loaded</div><div className="stat-value">{loading ? '…' : summary.count}</div></div>
-          <div className="admin-stat"><div className="stat-label">Attempt value</div><div className="stat-value">{loading ? '…' : money(summary.amount)}</div></div>
+          <div className="admin-stat"><div className="stat-label">Events loaded</div><div className="stat-value">{loading ? '…' : summary.count}</div></div>
+          <div className="admin-stat"><div className="stat-label">Event value</div><div className="stat-value">{loading ? '…' : money(summary.amount)}</div></div>
           <div className="admin-stat"><div className="stat-label">Succeeded</div><div className="stat-value">{loading ? '…' : summary.succeeded}</div></div>
           <div className="admin-stat"><div className="stat-label">Failed</div><div className="stat-value">{loading ? '…' : summary.failed}</div></div>
         </div>
@@ -180,21 +184,23 @@ export default function PaymentsPanel() {
               <th>Order</th>
               <th>Status</th>
               <th>Amount</th>
-              <th>Payment attempt<br/><span className="attempt-caption">Done / Max attempts</span></th>
+              <th>Attempt</th>
+              <th>Max attempts</th>
               <th>Method</th>
               <th>Created</th>
             </tr>
           </thead>
           <tbody>
-            {orderGroups.length ? orderGroups.flatMap((group) => group.attempts.map((row, index) => (
+            {orderGroups.length ? orderGroups.flatMap((group) => group.events.map((row, index) => (
               <AttemptRow
                 key={`${group.key}:${row.id}`}
                 row={row}
                 firstInOrder={index === 0}
-                attemptCount={group.attempts.length}
+                historyIndex={index}
+                historyLength={group.events.length}
               />
             ))) : (
-              <tr><td colSpan="6"><div className="admin-empty">{loading ? 'Loading payment activity…' : 'No payment records found.'}</div></td></tr>
+              <tr><td colSpan="7"><div className="admin-empty">{loading ? 'Loading payment activity…' : 'No payment records found.'}</div></td></tr>
             )}
           </tbody>
         </table>
