@@ -147,38 +147,19 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     setProcessing(false);
   };
 
-  const handleRequiredAction = async (intent) => {
-    if (!stripe || !clientSecret) {
-      await handleFailedIntent(intent, 'Additional card verification could not be started. Please try again.');
-      return;
-    }
-
-    setProcessing(true);
-    setMessage('');
-    setRetryAllowed(false);
-    try {
-      const result = await stripe.handleNextAction({ clientSecret });
-      if (result?.error) {
-        await handleFailedIntent(result.paymentIntent || result.error?.payment_intent || intent, result.error.message || 'Card verification was not completed. Please try again.');
-        return;
-      }
-      if (result?.paymentIntent?.status === 'succeeded') {
-        const finished = await finishConfirmedPayment(result.paymentIntent);
-        if (!finished) {
-          setPaymentConfirmationPending(true);
-          setProcessing(false);
-        }
-        return;
-      }
-      if (result?.paymentIntent?.status === 'processing') {
-        setPaymentPending(true);
-        setProcessing(false);
-        return;
-      }
-      await handleFailedIntent(result?.paymentIntent || intent, 'Card verification was not completed. Please try again.');
-    } catch (err) {
-      await handleFailedIntent(err?.payment_intent || err?.paymentIntent || intent, err?.message || 'Card verification was not completed. Please try again.');
-    }
+  // confirmPayment() is the only client-side confirmation authority. With an
+  // automatic-confirmation PaymentIntent, Stripe handles required customer
+  // authentication as part of confirmPayment(). Never call handleNextAction()
+  // here: doing so can double-confirm the same PaymentIntent and contribute to
+  // Stripe's confirmation-attempt limit.
+  const handleUnresolvedConfirmation = (intent, fallbackMessage) => {
+    const intentId = intent?.id || paymentIntentId;
+    setPaymentIntentId(intentId);
+    setPaymentPending(false);
+    setPaymentConfirmationPending(false);
+    setProcessing(false);
+    setRetryAllowed(true);
+    setMessage(fallbackMessage || 'Card verification could not be completed. Please try the payment again.');
   };
 
   const handleSubmit = async (e) => {
@@ -209,7 +190,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       if (error) {
         const intent = paymentIntent || error.payment_intent || error.paymentIntent;
         if (String(intent?.status || '').toLowerCase() === 'requires_action') {
-          await handleRequiredAction(intent);
+          handleUnresolvedConfirmation(intent, error.message || 'Card verification could not be completed. Please try the payment again.');
           return;
         }
         await handleFailedIntent(intent, error.message || 'Card payment failed. Check your card details and try again.');
@@ -240,7 +221,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       }
 
       if (paymentIntent?.status === 'requires_action') {
-        await handleRequiredAction(paymentIntent);
+        handleUnresolvedConfirmation(paymentIntent, 'Card verification could not be completed. Please try the payment again.');
         return;
       }
 
@@ -257,7 +238,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       }
 
       if (intentStatus === 'requires_action') {
-        await handleRequiredAction(intent);
+        handleUnresolvedConfirmation(intent, err?.message || 'Card verification could not be completed. Please try the payment again.');
         return;
       }
 
