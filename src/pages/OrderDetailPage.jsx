@@ -49,7 +49,10 @@ export default function OrderDetailPage() {
   };
 
   const prepareRetry = async () => {
-    if (retryLoading) return;
+    // A retry session is created exactly once per Continue/Retry action.
+    // Once a client secret exists, PaymentElement owns the payment attempt;
+    // do not create another backend retry session from the same modal.
+    if (retryLoading || retryIntent?.client_secret) return;
     setRetryLoading(true);
     setRetryError('');
     try {
@@ -88,10 +91,6 @@ export default function OrderDetailPage() {
     finally { setBusy(false); }
   };
 
-  // Keep every hook above the conditional loading/error returns. The order
-  // detail page first renders without data and then renders with data; a hook
-  // created only after the data load violates React's Rules of Hooks and causes
-  // the production error boundary shown on /orders/:orderNumber.
   const retryElementsOptions = retryIntent?.client_secret ? { clientSecret: retryIntent.client_secret } : undefined;
 
   if (error) return <div className="page container"><ErrorState message={error} onRetry={load} /></div>;
