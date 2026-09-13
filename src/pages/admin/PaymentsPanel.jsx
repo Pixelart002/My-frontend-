@@ -42,20 +42,17 @@ function pageData(response) {
 function PaymentRow({ row }) {
   const state = paymentState(row.status, row.payment_method, row.order_status);
   const order = text(row.order_number || row.order_id);
-  const payment = text(row.id).slice(0, 12);
   const method = text(row.payment_method).toUpperCase();
-  const amount = `${money(row.amount)} ${text(row.currency).toUpperCase()}`;
   const created = row.created_at ? new Date(row.created_at).toLocaleString() : '—';
   const statusClass = state.key === 'succeeded' ? 'pill-success' : state.key === 'failed' ? 'pill-danger' : 'pill-muted';
 
   return (
-    <tr key={`${row.payment_method || 'payment'}:${row.id}`}>
+    <tr>
       <td className="payment-order-cell" data-label="Order"><span className="td-strong">{order}</span></td>
       <td data-label="Status"><span className={`admin-pill ${statusClass}`}>{state.label}</span></td>
-      <td className="td-gold" data-label="Amount">{amount}</td>
+      <td className="td-gold" data-label="Amount">{money(row.amount)}</td>
       <td data-label="Attempt"><span className="attempt-value">{attemptLabel(row)}</span><span className="attempt-caption">Made / Allowed</span></td>
       <td data-label="Method"><span className="admin-pill pill-muted">{method}</span></td>
-      <td className="payment-id-cell" data-label="Payment ID">{payment}</td>
       <td data-label="Created">{created}</td>
     </tr>
   );
@@ -123,7 +120,7 @@ export default function PaymentsPanel() {
     <section className="admin-panel">
       <div className="admin-card admin-telemetry-card">
         <div className="admin-toolbar ops-toolbar">
-          <div><h2>Payments</h2><p>Payment attempts, COD orders, status, amount and linked order telemetry.</p></div>
+          <div><h2>Payments</h2><p>Payment activity linked to orders.</p></div>
           <button type="button" className="btn btn-quiet btn-sm" onClick={refresh} disabled={loading || loadingMore}>
             <RiRefreshLine size={16}/>{loading ? 'Loading…' : loadingMore ? 'Loading more…' : 'Refresh'}
           </button>
@@ -137,10 +134,10 @@ export default function PaymentsPanel() {
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table admin-telemetry-table">
-          <thead><tr><th>Order</th><th>Status</th><th>Amount</th><th>Attempt</th><th>Method</th><th>Payment ID</th><th>Created</th></tr></thead>
+          <thead><tr><th>Order</th><th>Status</th><th>Amount</th><th>Attempt</th><th>Method</th><th>Created</th></tr></thead>
           <tbody>
             {rows.length ? rows.map((row) => <PaymentRow key={`${row.payment_method || 'payment'}:${row.id}`} row={row} />) : (
-              <tr><td colSpan="7"><div className="admin-empty">{loading ? 'Loading payment telemetry…' : 'No payment records found.'}</div></td></tr>
+              <tr><td colSpan="6"><div className="admin-empty">{loading ? 'Loading payment activity…' : 'No payment records found.'}</div></td></tr>
             )}
           </tbody>
         </table>
