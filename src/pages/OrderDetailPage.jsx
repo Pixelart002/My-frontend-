@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -88,6 +88,12 @@ export default function OrderDetailPage() {
     finally { setBusy(false); }
   };
 
+  // Keep every hook above the conditional loading/error returns. The order
+  // detail page first renders without data and then renders with data; a hook
+  // created only after the data load violates React's Rules of Hooks and causes
+  // the production error boundary shown on /orders/:orderNumber.
+  const retryElementsOptions = retryIntent?.client_secret ? { clientSecret: retryIntent.client_secret } : undefined;
+
   if (error) return <div className="page container"><ErrorState message={error} onRetry={load} /></div>;
   if (!order) return <div className="page container"><Spinner label="Loading order…" /></div>;
 
@@ -97,8 +103,6 @@ export default function OrderDetailPage() {
   const isCodOrder = paymentMethod === 'cod' || paymentMethod === 'cash_on_delivery' || !order.stripe_payment_intent;
   const isRetryable = status === 'pending' && !isCodOrder;
 
-  // Orders persist a shipping snapshot in flat columns. Retry must use that
-  // historical snapshot instead of the customer's current/default address.
   const shippingSnapshot = {
     full_name: order.shipping_name,
     phone: order.shipping_phone,
@@ -121,7 +125,6 @@ export default function OrderDetailPage() {
   const publicOrderNumber = String(order.order_number || orderNumber).trim();
   const publicInvoiceNumber = String(order.invoice_number || '').trim();
 
-  const retryElementsOptions = useMemo(() => retryIntent?.client_secret ? { clientSecret: retryIntent.client_secret } : undefined, [retryIntent]);
   const paymentContent = retryIntent?.client_secret && stripePromise && retryElementsOptions ? (
     <Elements key={retrySessionKey} stripe={stripePromise} options={retryElementsOptions}>
       <StripePaymentForm
