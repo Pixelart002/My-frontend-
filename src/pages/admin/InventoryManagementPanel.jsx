@@ -3,6 +3,7 @@ import { RiAddLine, RiBox3Line, RiCloseLine, RiInformationLine, RiPencilLine, Ri
 import AdminModal from './Modal';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
+import '../../styles/inventory-modal.css';
 
 const pretty = (v) => v === null || v === undefined || v === '' ? '—' : String(v);
 
