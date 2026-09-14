@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { RiCloseLine } from '@remixicon/react';
 
-export default function AdminModal({ title, sub, onClose, children }) {
+export default function AdminModal({ title, sub, onClose, children, className = '' }) {
   const closeRef = useRef(null);
   const previousFocus = useRef(null);
   const onCloseRef = useRef(onClose);
@@ -39,8 +39,8 @@ export default function AdminModal({ title, sub, onClose, children }) {
         if (e.target === e.currentTarget) onClose?.();
       }}
     >
-      <div className="admin-modal" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={subId}>
-        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label="Close dialog">
+      <div className={`admin-modal ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={subId}>
+        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label="Close dialog" title="Close">
           <RiCloseLine size={20} aria-hidden="true" />
         </button>
         <h2 id={titleId}>{title}</h2>
