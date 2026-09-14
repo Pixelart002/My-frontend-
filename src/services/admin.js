@@ -25,9 +25,6 @@ export const adminService = {
   verify: () => request('GET', '/admin/verify'),
   stats: () => request('GET', '/admin/stats'),
   reports: () => request('GET', '/admin/reports/summary'),
-  // Payment history is operational telemetry and must always reflect the latest
-  // backend/Supabase state. A per-request cache buster prevents stale cached
-  // responses from hiding a newly-created order.
   paymentsReport: (params = {}) => request('GET', `/admin/payments?${qs({ limit: 10, offset: 0, ...params, _ts: Date.now() })}`),
   auditLogs: (limit = 200) => request('GET', `/admin/audit?limit=${limit}`),
 
@@ -54,6 +51,7 @@ export const adminService = {
   deleteCoupon: (id) => request('DELETE', `/coupons/manage/${encodeURIComponent(id)}`),
 
   lowStock: () => request('GET', '/inventory/low-stock'),
+  adjustStock: (productId, delta, reason) => request('POST', '/inventory/admin/adjust', { product_id: productId, delta, reason }),
   scanLowStock: () => request('POST', '/inventory/low-stock/scan'),
   releaseStaleOrders: (minutesOld = 30) => request('POST', `/inventory/stale-orders/release?minutes_old=${minutesOld}`),
 
