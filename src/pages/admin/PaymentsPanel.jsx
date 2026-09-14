@@ -9,6 +9,19 @@ const PAGE_SIZE = 50;
 const MAX_ALLOWED_PAYMENT_ATTEMPTS = 5;
 const text = (value) => value === null || value === undefined || value === '' ? '—' : String(value);
 const money = (value) => formatMoney(Number(value || 0));
+const parseGatewayMetadata = (value) => {
+  if (!value) return {};
+  if (typeof value === 'object') return value;
+  try { const parsed = JSON.parse(value); return parsed && typeof parsed === 'object' ? parsed : {}; } catch { return {}; }
+};
+const clientIp = (row) => {
+  const metadata = parseGatewayMetadata(row?.gateway_metadata);
+  return row?.ip_address ?? row?.ipAddress ?? row?.client_ip ?? row?.clientIp ?? metadata.ip_address ?? metadata.ipAddress ?? metadata.client_ip ?? metadata.clientIp ?? null;
+};
+const userAgent = (row) => {
+  const metadata = parseGatewayMetadata(row?.gateway_metadata);
+  return row?.user_agent ?? row?.userAgent ?? row?.client_user_agent ?? row?.clientUserAgent ?? metadata.user_agent ?? metadata.userAgent ?? metadata.client_user_agent ?? metadata.clientUserAgent ?? null;
+};
 const json = (value) => {
   if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) return '—';
   try { return JSON.stringify(value, null, 2); } catch { return String(value); }
@@ -37,6 +50,8 @@ function Attempt({row,index,total}) {
   const state=paymentState(row.status,row.payment_method,row.order_status);
   const cls=state.key==='succeeded'?'pill-success':state.key==='failed'?'pill-danger':state.key==='expired'?'pill-warning':'pill-muted';
   const attempt=attemptNumber(row)??index+1;
+  const ip=clientIp(row);
+  const ua=userAgent(row);
   return <article className={`payment-attempt-card ${open?'is-open':''}`}>
     <button type="button" className="payment-attempt-toggle" onClick={()=>setOpen(v=>!v)} aria-expanded={open}>
       <span className="payment-attempt-number"><b>{index+1}.</b><span><strong>Attempt #{attempt}</strong><small>{text(row.payment_method).toUpperCase()} · {money(row.amount)}</small></span></span>
@@ -50,7 +65,7 @@ function Attempt({row,index,total}) {
       </div>
       <div className="payment-detail-block"><span>Stripe PaymentIntent</span><code>{text(row.stripe_payment_intent_id)}</code></div>
       {row.error_message&&<div className="payment-detail-block"><span>Error message</span><p>{text(row.error_message)}</p></div>}
-      <div className="payment-detail-grid"><Detail label="Client IP" value={text(row.ip_address)} mono /><Detail label="User agent" value={text(row.user_agent)} mono /></div>
+      <div className="payment-detail-grid"><Detail label="Client IP" value={text(ip)} mono /><Detail label="User agent" value={text(ua)} mono /></div>
       <details className="payment-gateway-details"><summary>Gateway metadata</summary><pre>{json(row.gateway_metadata)}</pre></details>
     </div>}
   </article>;
