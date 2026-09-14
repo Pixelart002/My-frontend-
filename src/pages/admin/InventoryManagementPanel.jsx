@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RiAddLine, RiBox3Line, RiCloseLine, RiPencilLine, RiRefreshLine, RiSearchLine, RiSubtractLine } from '@remixicon/react';
+import { RiAddLine, RiBox3Line, RiCloseLine, RiInformationLine, RiPencilLine, RiRefreshLine, RiSearchLine, RiSubtractLine } from '@remixicon/react';
 import AdminModal from './Modal';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
@@ -102,17 +102,10 @@ export default function InventoryManagementPanel() {
   return <section className="admin-panel">
     <div className="admin-card">
       <div className="admin-toolbar ops-toolbar">
-        <div>
-          <h2>Inventory management</h2>
-          <p>Live stock control, low-stock monitoring and auditable manual adjustments.</p>
-        </div>
+        <div><h2>Inventory management</h2><p>Live stock control, low-stock monitoring and auditable manual adjustments.</p></div>
         <div className="btn-row">
-          <button type="button" className="icon-btn" onClick={scan} disabled={busy === 'scan'} title="Scan low stock" aria-label="Scan low stock">
-            <RiBox3Line size={18} />
-          </button>
-          <button type="button" className="icon-btn" onClick={load} disabled={loading || Boolean(busy)} title="Refresh inventory" aria-label="Refresh inventory">
-            <RiRefreshLine size={18} />
-          </button>
+          <button type="button" className="icon-btn" onClick={scan} disabled={busy === 'scan'} title="Scan low stock" aria-label="Scan low stock"><RiBox3Line size={18} /></button>
+          <button type="button" className="icon-btn" onClick={load} disabled={loading || Boolean(busy)} title="Refresh inventory" aria-label="Refresh inventory"><RiRefreshLine size={18} /></button>
         </div>
       </div>
       <div className="admin-stats">
@@ -125,10 +118,7 @@ export default function InventoryManagementPanel() {
 
     <div className="admin-table-wrap">
       <div className="admin-toolbar">
-        <label className="admin-search">
-          <RiSearchLine size={17} aria-hidden="true" />
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search product or SKU…" aria-label="Search inventory" />
-        </label>
+        <label className="admin-search"><RiSearchLine size={17} aria-hidden="true" /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search product or SKU…" aria-label="Search inventory" /></label>
         <select className="admin-select" value={filter} onChange={e => setFilter(e.target.value)} aria-label="Filter inventory">
           <option value="all">All stock</option><option value="healthy">Healthy</option><option value="low">Low stock</option><option value="out">Out of stock</option>
         </select>
@@ -151,29 +141,39 @@ export default function InventoryManagementPanel() {
       </table>
     </div>
 
-    {editing && <AdminModal title="Edit inventory" sub={`${pretty(editing.name)} · ${pretty(editing.sku)}`} onClose={closeEditor}>
+    {editing && <AdminModal className="inventory-modal" title="Edit inventory" sub={`${pretty(editing.name)} · ${pretty(editing.sku)}`} onClose={closeEditor}>
+      <div className="inventory-modal-status">
+        <span className="inventory-modal-status-icon"><RiBox3Line size={18} /></span>
+        <div><strong>Stock adjustment</strong><span>Update available units with an auditable reason.</span></div>
+      </div>
+
       <div className="inventory-editor-summary">
         <div><span className="stat-label">Current stock</span><strong>{Number(editing.stock || 0)}</strong></div>
         <div><span className="stat-label">Threshold</span><strong>{Number(editing.low_stock_threshold ?? 10)}</strong></div>
       </div>
 
-      <form onSubmit={submitAdjustment}>
-        <label className="admin-field">
-          <span>Stock adjustment</span>
-          <div className="btn-row inventory-adjust-controls">
-            <button type="button" className="icon-btn" onClick={() => setQuantity(v => String((Number(v) || 0) - 1))} disabled={Boolean(busy)} title="Decrease by one" aria-label="Decrease by one"><RiSubtractLine size={18} /></button>
-            <input type="number" step="1" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" disabled={Boolean(busy)} aria-label="Stock adjustment quantity" />
-            <button type="button" className="icon-btn" onClick={() => setQuantity(v => String((Number(v) || 0) + 1))} disabled={Boolean(busy)} title="Increase by one" aria-label="Increase by one"><RiAddLine size={18} /></button>
+      <form onSubmit={submitAdjustment} className="inventory-editor-form">
+        <label className="admin-field inventory-quantity-field">
+          <span>Quantity change</span>
+          <div className="inventory-adjust-controls">
+            <button type="button" className="icon-btn inventory-step-btn" onClick={() => setQuantity(v => String((Number(v) || 0) - 1))} disabled={Boolean(busy)} title="Decrease quantity" aria-label="Decrease quantity"><RiSubtractLine size={18} /></button>
+            <input type="number" inputMode="numeric" step="1" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0" disabled={Boolean(busy)} aria-label="Quantity change" />
+            <button type="button" className="icon-btn inventory-step-btn" onClick={() => setQuantity(v => String((Number(v) || 0) + 1))} disabled={Boolean(busy)} title="Increase quantity" aria-label="Increase quantity"><RiAddLine size={18} /></button>
           </div>
-          <small>Positive adds stock; negative removes stock.</small>
+          <small><RiInformationLine size={14} aria-hidden="true" /> Positive adds stock · negative removes stock</small>
         </label>
+
         <label className="admin-field">
           <span>Reason <b aria-hidden="true">*</b></span>
-          <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Supplier restock, damaged item, stock correction…" maxLength={500} rows={3} disabled={Boolean(busy)} required />
+          <textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Why is the stock being changed?" maxLength={500} rows={3} disabled={Boolean(busy)} required />
+          <small>{reason.length}/500 characters</small>
         </label>
-        <div className="admin-modal-footer">
+
+        <div className="inventory-modal-note"><RiInformationLine size={15} aria-hidden="true" /><span>This adjustment is recorded in the inventory audit trail.</span></div>
+
+        <div className="admin-modal-footer inventory-modal-footer">
           <button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={Boolean(busy)}><RiCloseLine size={17} aria-hidden="true" /> Cancel</button>
-          <button type="submit" className="btn" disabled={Boolean(busy) || !quantity || !reason.trim()}>{busy ? 'Saving…' : 'Save adjustment'}</button>
+          <button type="submit" className="btn" disabled={Boolean(busy) || !quantity || !reason.trim()}><RiPencilLine size={16} aria-hidden="true" /> {busy ? 'Saving…' : 'Apply adjustment'}</button>
         </div>
       </form>
     </AdminModal>}
