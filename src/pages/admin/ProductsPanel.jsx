@@ -19,6 +19,8 @@ const blank = {
   seo_title: '', seo_description: '', seo_keywords: '', canonical_url: '', is_active: true,
 };
 
+const ATTRIBUTE_HINTS = ['Color', 'Material', 'Finish Type', 'Weight', 'Dimensions'];
+
 const toForm = (p) => {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : (p.image_url ? [p.image_url] : []);
   return {
@@ -28,7 +30,8 @@ const toForm = (p) => {
     stock: p.stock != null ? String(p.stock) : '0', low_stock_threshold: p.low_stock_threshold != null ? String(p.low_stock_threshold) : '10',
     weight_grams: p.weight_grams != null ? String(p.weight_grams) : '', hsn_code: p.hsn_code || '',
     gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18', short_description: p.short_description || '',
-    description: p.description || '', image_url: images[0] || '', images, attributes: JSON.stringify(p.attributes || {}, null, 2),
+    description: p.description || '', image_url: images[0] || '', images,
+    attributes: JSON.stringify(p.attributes || {}, null, 2),
     seo_title: p.seo_title || '', seo_description: p.seo_description || '', seo_keywords: p.seo_keywords || '',
     canonical_url: p.canonical_url || '', is_active: p.is_active !== false,
   };
@@ -41,6 +44,8 @@ const parseAttributes = (value) => {
   if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('Attributes must be a JSON object.');
   return parsed;
 };
+
+const fieldLabel = (label, required) => <>{label}{required ? ' *' : ''}</>;
 
 export default function ProductsPanel({ capabilities = {} }) {
   const canCreate = capabilities.productCreate === true;
@@ -61,6 +66,8 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
+
+  const isCreate = !editingId;
 
   const load = useCallback(async () => {
     setError('');
@@ -173,16 +180,25 @@ export default function ProductsPanel({ capabilities = {} }) {
     const threshold = Number(form.low_stock_threshold);
     const weight = form.weight_grams === '' ? null : Number(form.weight_grams);
 
-    if (name.length < 2) return 'Name must be at least 2 characters.';
-    if (!(price > 0)) return 'Price must be greater than zero.';
+    if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
+    if (!isCreate && form.name.trim() && name.length < 2) return 'Name must be at least 2 characters.';
+    if (isCreate && !(price > 0)) return 'Price must be greater than zero.';
+    if (form.price !== '' && !(price > 0)) return 'Price must be greater than zero.';
     if (compare !== null && (!(compare > 0) || compare <= price)) return 'Compare-at price must be greater than the price.';
-    if (!hsn) return 'HSN code is required.';
-    if (!GST_SLABS.includes(Number(form.gst_percentage))) return 'Select a valid GST slab: 0, 5, 12, 18 or 28.';
+    if (isCreate && !hsn) return 'HSN code is required.';
+    if (!isCreate && form.hsn_code !== '' && !hsn) return 'HSN code cannot be empty.';
+    if (isCreate && !GST_SLABS.includes(Number(form.gst_percentage))) return 'Select a valid GST slab: 0, 5, 12, 18 or 28.';
+    if (form.gst_percentage !== '' && !GST_SLABS.includes(Number(form.gst_percentage))) return 'Select a valid GST slab: 0, 5, 12, 18 or 28.';
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
     if (!Number.isInteger(threshold) || threshold < 0) return 'Low-stock threshold must be a whole number of 0 or more.';
     if (weight !== null && (!Number.isInteger(weight) || weight < 0)) return 'Weight must be a whole number of 0 or more.';
     if (form.seo_title.length > 70) return 'SEO title must be 70 characters or fewer.';
     if (form.seo_description.length > 170) return 'SEO description must be 170 characters or fewer.';
+    if (form.seo_keywords.length > 500) return 'SEO keywords must be 500 characters or fewer.';
+    if (form.canonical_url.length > 2048) return 'Canonical URL must be 2048 characters or fewer.';
+    if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
+    if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
+    if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
     if (form.images.length + selectedFiles.length > MAX_IMAGES) return `Maximum ${MAX_IMAGES} images per product.`;
     return null;
   };
@@ -206,13 +222,14 @@ export default function ProductsPanel({ capabilities = {} }) {
     try {
       const images = form.images.filter(Boolean);
       const base = {
+        name: form.name.trim() || undefined,
         category_id: form.category_id || undefined,
         image_url: images[0] || form.image_url.trim() || undefined,
         images,
         short_description: form.short_description.trim() || undefined,
         description: form.description.trim() || undefined,
         attributes,
-        hsn_code: form.hsn_code.trim(),
+        hsn_code: form.hsn_code.trim() || undefined,
         gst_percentage: Number(form.gst_percentage),
         weight_grams: form.weight_grams === '' ? undefined : Number(form.weight_grams),
         seo_title: form.seo_title.trim() || undefined,
@@ -220,7 +237,7 @@ export default function ProductsPanel({ capabilities = {} }) {
         seo_keywords: form.seo_keywords.trim() || undefined,
         canonical_url: form.canonical_url.trim() || undefined,
         is_active: form.is_active,
-        price: Number(form.price),
+        price: form.price === '' ? undefined : Number(form.price),
         compare_price: form.compare_price === '' ? undefined : Number(form.compare_price),
         stock: Number(form.stock),
         low_stock_threshold: Number(form.low_stock_threshold),
@@ -267,10 +284,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   return <div className="products-admin">
     <div className="admin-head">
-      <div>
-        <h1>Products</h1>
-        <p className="admin-sub">{filtered.length} of {items.length} shown · catalogue, pricing, inventory & SEO</p>
-      </div>
+      <div><h1>Products</h1><p className="admin-sub">{filtered.length} of {items.length} shown · catalogue, pricing, inventory & SEO</p></div>
       {canCreate && <button type="button" className="btn btn-sm" onClick={openCreate}><RiAddLine size={16} /> Add product</button>}
     </div>
 
@@ -279,52 +293,48 @@ export default function ProductsPanel({ capabilities = {} }) {
         <label className="admin-search"><RiSearchLine size={16} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, SKU or slug…" /></label>
         <select className="admin-select" value={catFilter} onChange={(e) => setCatFilter(e.target.value)}><option value="">All categories</option>{categories.map((c) => <option key={c.id || c.slug} value={c.id || c.slug}>{c.name}</option>)}</select>
       </div>
-      {filtered.length === 0 ? <div className="admin-empty">No products match.</div> : <table className="admin-table"><thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>GST</th><th>Category</th><th>Status</th>{(canUpdate || canDelete) && <th>Actions</th>}</tr></thead><tbody>
+      {filtered.length === 0 ? <div className="admin-empty">No products match.</div> : <div className="admin-table-scroll"><table className="admin-table"><thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>GST</th><th>Category</th><th>Status</th>{(canUpdate || canDelete) && <th>Actions</th>}</tr></thead><tbody>
         {filtered.map((p) => {
           const cat = categories.find((c) => c.id === p.category_id);
           return <tr key={p.id}>
             <td><div className="product-cell">{p.image_url ? <img src={p.image_url} alt={p.name || ''} loading="lazy" /> : <div className="product-thumb"><RiImageAddLine size={17} /></div>}<div><div className="td-strong">{p.name}</div><div className="td-dim">{p.slug}</div></div></div></td>
-            <td className="td-dim">{p.sku || '—'}</td>
-            <td className="td-gold">{formatMoney(Number(p.price) || 0)}</td>
-            <td>{p.stock ?? 0}</td>
-            <td>{p.gst_percentage ?? '—'}%</td>
-            <td className="td-dim">{cat?.name || '—'}</td>
+            <td className="td-dim">{p.sku || '—'}</td><td className="td-gold">{formatMoney(Number(p.price) || 0)}</td><td>{p.stock ?? 0}</td><td>{p.gst_percentage ?? '—'}%</td><td className="td-dim">{cat?.name || '—'}</td>
             <td>{p.is_active === false ? <span className="admin-pill pill-danger">Inactive</span> : <span className="admin-pill pill-success">Active</span>}</td>
             {(canUpdate || canDelete) && <td><div className="btn-row">{canUpdate && <button type="button" className="icon-btn" onClick={() => openEdit(p)} title="Edit product" aria-label={`Edit ${p.name}`}><RiEditLine size={16} /></button>}{canDelete && <button type="button" className="icon-btn danger-action" onClick={() => remove(p)} disabled={busyId === p.id} title="Delete product" aria-label={`Delete ${p.name}`}><RiDeleteBinLine size={16} /></button>}</div></td>}
           </tr>;
         })}
-      </tbody></table>}
+      </tbody></table></div>}
     </div>
 
-    {editing && <AdminModal className="product-editor-modal" title={editingId ? 'Edit product' : 'Add product'} sub={editingId ? 'Update catalogue information, pricing, inventory, media and SEO.' : 'Create a complete catalogue listing with search-ready metadata.'} onClose={closeEditor}>
+    {editing && <AdminModal className="product-editor-modal" title={editingId ? 'Edit product' : 'Add product'} sub={editingId ? 'Update all catalogue, pricing, inventory, media and SEO fields.' : 'Create a complete catalogue product with backend-compatible data.'} onClose={closeEditor}>
       <form className="product-editor" onSubmit={save}>
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Basic information</h3><p>Customer-facing identity. Slug is generated automatically by the backend.</p></div></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-name">Name *</label><input id="product-name" autoFocus required minLength={2} maxLength={255} value={form.name} onChange={(e) => setField('name', e.target.value)} /></div><div className="field"><label htmlFor="product-sku">SKU</label><input id="product-sku" maxLength={100} value={form.sku} onChange={(e) => setField('sku', e.target.value)} placeholder="Optional internal SKU" disabled={!!editingId} /></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Basic information</h3><p>Required on create: name. SKU is optional and locked after creation. Slug is generated by the backend.</p></div></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-name">{fieldLabel('Name', isCreate)}</label><input id="product-name" autoFocus required={isCreate} minLength={isCreate ? 2 : undefined} maxLength={255} value={form.name} onChange={(e) => setField('name', e.target.value)} /></div><div className="field"><label htmlFor="product-sku">SKU</label><input id="product-sku" maxLength={100} value={form.sku} onChange={(e) => setField('sku', e.target.value)} placeholder="Optional internal SKU" disabled={!!editingId} /></div></div>
           <div className="field-grid"><div className="field"><label htmlFor="product-slug">Slug</label><input id="product-slug" value={form.slug || 'Generated after save'} readOnly disabled /></div><div className="field"><label htmlFor="product-category">Category</label><select id="product-category" value={form.category_id} onChange={(e) => setField('category_id', e.target.value)}><option value="">None</option>{categories.map((c) => <option key={c.id || c.slug} value={c.id || c.slug}>{c.name}</option>)}</select></div></div>
         </div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Pricing, tax & inventory</h3><p>Backend remains authoritative for financial rules; GST is stored per product.</p></div></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-price">Price (₹) *</label><input id="product-price" required type="number" min="0.01" step="0.01" value={form.price} onChange={(e) => setField('price', e.target.value)} /></div><div className="field"><label htmlFor="product-compare">Compare-at price</label><input id="product-compare" type="number" min="0.01" step="0.01" value={form.compare_price} onChange={(e) => setField('compare_price', e.target.value)} /></div></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-gst">GST slab *</label><select id="product-gst" value={form.gst_percentage} onChange={(e) => setField('gst_percentage', e.target.value)}>{GST_SLABS.map((v) => <option key={v} value={v}>{v}%</option>)}</select></div><div className="field"><label htmlFor="product-hsn">HSN code *</label><input id="product-hsn" required minLength={1} maxLength={20} value={form.hsn_code} onChange={(e) => setField('hsn_code', e.target.value)} placeholder="Enter the correct HSN for this product" /></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Pricing, tax & inventory</h3><p>Create requires price and GST; HSN is required separately. Other inventory fields use backend defaults.</p></div></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-price">{fieldLabel('Price (₹)', isCreate)}</label><input id="product-price" required={isCreate} type="number" min="0.01" step="0.01" value={form.price} onChange={(e) => setField('price', e.target.value)} /></div><div className="field"><label htmlFor="product-compare">Compare-at price</label><input id="product-compare" type="number" min="0.01" step="0.01" value={form.compare_price} onChange={(e) => setField('compare_price', e.target.value)} /></div></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-gst">{fieldLabel('GST slab', isCreate)}</label><select id="product-gst" required={isCreate} value={form.gst_percentage} onChange={(e) => setField('gst_percentage', e.target.value)}>{GST_SLABS.map((v) => <option key={v} value={v}>{v}%</option>)}</select></div><div className="field"><label htmlFor="product-hsn">{fieldLabel('HSN code', isCreate)}</label><input id="product-hsn" required={isCreate} minLength={isCreate ? 1 : undefined} maxLength={20} value={form.hsn_code} onChange={(e) => setField('hsn_code', e.target.value)} placeholder="Enter the correct HSN for this product" /></div></div>
           <div className="field-grid"><div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div><div className="field"><label htmlFor="product-threshold">Low-stock threshold</label><input id="product-threshold" type="number" min="0" step="1" value={form.low_stock_threshold} onChange={(e) => setField('low_stock_threshold', e.target.value)} /></div></div>
           <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight (grams)</label><input id="product-weight" type="number" min="0" step="1" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} /></div></div>
         </div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Product media</h3><p>First image is the primary catalogue image.</p></div><span className="image-count">{form.images.length + selectedFiles.length}/{MAX_IMAGES}</span></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Product media</h3><p>Up to 10 images. First image is primary; existing images can be reordered or removed.</p></div><span className="image-count">{form.images.length + selectedFiles.length}/{MAX_IMAGES}</span></div>
           <label className="upload-drop"><RiImageAddLine size={20} /><span><strong>Add product images</strong><small>PNG, JPG, WebP or GIF · max 5 MB each · max 10</small></span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple onChange={selectFiles} disabled={!canManageImages || form.images.length + selectedFiles.length >= MAX_IMAGES} /></label>
           {form.images.length > 0 && <div className="admin-image-grid">{form.images.map((src, index) => <div className={`admin-image-item ${index === 0 ? 'is-primary' : ''}`} key={`${src}-${index}`}><img src={src} alt={`${form.name || 'Product'} image ${index + 1}`} /><span className="admin-image-index">{index === 0 ? <><RiStarFill size={12} /> Primary</> : index + 1}</span><div className="admin-image-actions">{index !== 0 && editingId && canUpdate && <button type="button" className="btn btn-quiet btn-sm" disabled={primaryBusy === index} onClick={() => setPrimary(index)}>{primaryBusy === index ? 'Saving…' : 'Set primary'}</button>}{editingId && canUpdate && <button type="button" className="icon-btn" disabled={deletingImage === index} onClick={() => removeImage(index)} aria-label="Remove image"><RiCloseLine size={14} /></button>}</div></div>)}</div>}
           {selectedFiles.length > 0 && <div className="selected-image-list">{selectedFiles.map((f, i) => <div className="selected-image-row" key={`${f.name}-${f.size}-${i}`}><span>{f.name}</span><button type="button" className="icon-btn" onClick={() => removeSelectedFile(i)} disabled={saving} aria-label={`Remove ${f.name}`}><RiCloseLine size={14} /></button></div>)}</div>}
         </div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Descriptions</h3><p>Useful customer-facing copy for catalogue and product pages.</p></div></div><div className="field"><label htmlFor="product-short">Short description</label><input id="product-short" maxLength="500" value={form.short_description} onChange={(e) => setField('short_description', e.target.value)} /></div><div className="field"><label htmlFor="product-description">Description</label><textarea id="product-description" rows="6" value={form.description} onChange={(e) => setField('description', e.target.value)} /></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Descriptions</h3><p>Customer-facing product copy.</p></div></div><div className="field"><label htmlFor="product-short">Short description</label><input id="product-short" maxLength="500" value={form.short_description} onChange={(e) => setField('short_description', e.target.value)} /></div><div className="field"><label htmlFor="product-description">Description</label><textarea id="product-description" rows="6" value={form.description} onChange={(e) => setField('description', e.target.value)} /></div></div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>SEO</h3><p>Explicit metadata overrides are optional; sensible title/description fallbacks are generated server-side.</p></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>SEO</h3><p>Optional explicit metadata. Leave blank to use backend/server-side fallbacks.</p></div></div>
           <div className="field"><label htmlFor="product-seo-title">SEO title <span className="td-dim">{form.seo_title.length}/70</span></label><input id="product-seo-title" maxLength="70" value={form.seo_title} onChange={(e) => setField('seo_title', e.target.value)} placeholder="Leave blank to use product name" /></div>
-          <div className="field"><label htmlFor="product-seo-description">SEO description <span className="td-dim">{form.seo_description.length}/170</span></label><textarea id="product-seo-description" rows="3" maxLength="170" value={form.seo_description} onChange={(e) => setField('seo_description', e.target.value)} placeholder="Leave blank to derive from short description/description" /></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-seo-keywords">SEO keywords</label><input id="product-seo-keywords" maxLength="500" value={form.seo_keywords} onChange={(e) => setField('seo_keywords', e.target.value)} placeholder="hardware, sanitary, drainage" /></div><div className="field"><label htmlFor="product-canonical">Canonical URL</label><input id="product-canonical" type="url" value={form.canonical_url} onChange={(e) => setField('canonical_url', e.target.value)} placeholder="Optional" /></div></div>
+          <div className="field"><label htmlFor="product-seo-description">SEO description <span className="td-dim">{form.seo_description.length}/170</span></label><textarea id="product-seo-description" rows="3" maxLength="170" value={form.seo_description} onChange={(e) => setField('seo_description', e.target.value)} placeholder="Leave blank to derive from product copy" /></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-seo-keywords">SEO keywords <span className="td-dim">{form.seo_keywords.length}/500</span></label><input id="product-seo-keywords" maxLength="500" value={form.seo_keywords} onChange={(e) => setField('seo_keywords', e.target.value)} placeholder="hardware, sanitary, drainage" /></div><div className="field"><label htmlFor="product-canonical">Canonical URL</label><input id="product-canonical" type="url" maxLength="2048" value={form.canonical_url} onChange={(e) => setField('canonical_url', e.target.value)} placeholder="Optional" /></div></div>
         </div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Attributes</h3><p>Structured product attributes stored as JSON for flexible catalogue data.</p></div></div><div className="field"><label htmlFor="product-attributes">Attributes JSON</label><textarea id="product-attributes" rows="7" value={form.attributes} onChange={(e) => setField('attributes', e.target.value)} placeholder={'{\n  "Color": "Chrome",\n  "Material": "Stainless Steel"\n}'} spellCheck="false" /></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Attributes</h3><p>Flexible JSON object. Standard hints are available; extra keys are allowed by the backend.</p></div></div><div className="attribute-hints">{ATTRIBUTE_HINTS.map((key) => <button key={key} type="button" className="attribute-chip" onClick={() => { try { const obj = parseAttributes(form.attributes); if (!(key in obj)) obj[key] = ''; setField('attributes', JSON.stringify(obj, null, 2)); } catch { toast.error('Fix the existing Attributes JSON before adding a field.'); } }}>{key}</button>)}</div><div className="field"><label htmlFor="product-attributes">Attributes JSON</label><textarea id="product-attributes" rows="9" value={form.attributes} onChange={(e) => setField('attributes', e.target.value)} placeholder={'{\n  "Color": "Chrome",\n  "Material": "Stainless Steel",\n  "Finish Type": "Polished"\n}'} spellCheck="false" /></div></div>
 
         <div className="editor-footer"><label className="check-line"><input type="checkbox" checked={form.is_active} onChange={(e) => setField('is_active', e.target.checked)} /> <span><strong>Active listing</strong><small>Visible to customers when published.</small></span></label><div className="btn-row"><button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button><button className="btn" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button></div></div>
       </form>
