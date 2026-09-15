@@ -113,9 +113,6 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
   const finishConfirmedPayment = async (paymentIntent) => {
     try {
       const confirmation = await paymentService.confirm(paymentIntent.id);
-      // Profile refresh is auxiliary UI state. A successful payment/order
-      // confirmation must never be downgraded because the profile refresh
-      // failed, timed out, or returned an unrelated auth error.
       try {
         await refreshProfile();
       } catch {
@@ -158,11 +155,6 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     setProcessing(false);
   };
 
-  // confirmPayment() is the only client-side confirmation authority. With an
-  // automatic-confirmation PaymentIntent, Stripe handles required customer
-  // authentication as part of confirmPayment(). Never call handleNextAction()
-  // here: doing so can double-confirm the same PaymentIntent and contribute to
-  // Stripe's confirmation-attempt limit.
   const handleUnresolvedConfirmation = (intent, fallbackMessage) => {
     const intentId = intent?.id || paymentIntentId;
     setPaymentIntentId(intentId);
@@ -307,10 +299,11 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
   };
 
   const showProcessingOverlay = processing;
+  const showTerminalState = paymentPending || paymentConfirmationPending;
 
   return (
     <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
-      <div className="payment-element-shell" aria-busy={showProcessingOverlay || retrying}>
+      {!showTerminalState && <div className="payment-element-shell" aria-busy={showProcessingOverlay || retrying}>
         <PaymentElement
           id="payment-element"
           onReady={() => {
@@ -342,16 +335,16 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
             setMessage(event?.error?.message || 'Unable to load the secure card payment form. Please try again.');
           }}
         />
-      </div>
+      </div>}
       {showProcessingOverlay && <PaymentStatusPopup className="payment-processing-popup"><ProcessingPayment /></PaymentStatusPopup>}
       {retrying && !showProcessingOverlay && <PaymentStatusPopup className="payment-retry-popup"><div className="payment-retry-state" role="status" aria-live="polite" style={{ width: 'min(520px, calc(100vw - 28px))', boxSizing: 'border-box', padding: '40px 28px', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)', boxShadow: '0 28px 100px rgba(0,0,0,.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}><span className="payment-processing-ring" aria-hidden="true" /><strong>Retrying payment…</strong><span>Preparing a new secure card session.</span></div></PaymentStatusPopup>}
       {paymentPending ? <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} /> : paymentConfirmationPending ? <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} /> : null}
-      {!paymentPending && !paymentConfirmationPending && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
-      {!paymentPending && !paymentConfirmationPending && <div className="payment-form-actions">
+      {!showTerminalState && message && <div className="form-error payment-form-error" role="alert">{message}</div>}
+      {!showTerminalState && <div className="payment-form-actions">
         <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
         {retrying ? <button className="btn payment-submit-btn" type="button" disabled><RiRefreshLine size={15} /> Retrying…</button> : message && retryAllowed ? <button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={processing}><RiRefreshLine size={15} /> Retry card payment</button> : <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying}><RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span></button>}
       </div>}
-      {!paymentPending && !paymentConfirmationPending && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
+      {!showTerminalState && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
     </form>
   );
 }
