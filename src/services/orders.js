@@ -27,15 +27,17 @@ export const orderService = {
   cancel: (orderNumber) =>
     request('POST', `/orders/my/${encodeURIComponent(requirePublicNumber(orderNumber))}/cancel`, {}),
 
-  checkout: (shippingAddressId, notes = '', idempotencyKey = null) => {
+  checkout: (shippingAddressId, notes = '', idempotencyKey = null, couponCode = null) => {
     const addressId = asId(shippingAddressId);
     if (!addressId) throw new TypeError('A valid shipping address id is required.');
     const cleanNotes = asTrimmedString(notes);
     const key = asTrimmedString(idempotencyKey);
+    const coupon = asTrimmedString(couponCode);
     return request('POST', '/orders/checkout', {
       shipping_address_id: addressId,
       notes: cleanNotes || undefined,
       idempotency_key: key || undefined,
+      coupon_code: coupon || undefined,
     });
   },
 
