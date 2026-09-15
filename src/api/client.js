@@ -15,7 +15,6 @@ import { API_BASE } from '../config/env';
 const PUBLIC_PREFIXES = [
   '/products',
   '/categories',
-  '/pricing/config',
   '/health',
   '/push/vapid-key',
 ];
@@ -155,7 +154,6 @@ async function parseError(res, parsed = null) {
   return new ApiError(String(raw).substring(0, 300), res.status, data?.error_code);
 }
 
-/** Preserve pagination metadata without changing existing service return shapes. */
 function unwrapResponse(json) {
   if (!json || json.success === undefined || json.data === undefined) return json;
 
@@ -163,8 +161,6 @@ function unwrapResponse(json) {
   if (json.meta === undefined) return payload;
 
   if (Array.isArray(payload)) {
-    // Arrays remain arrays for existing callers, while metadata is available
-    // to pagination-aware pages as `result.meta`.
     payload.meta = json.meta;
     return payload;
   }
