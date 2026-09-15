@@ -54,7 +54,6 @@ export const paymentService = {
     const billingId = asId(billingAddressId);
     const coupon = optionalString(couponCode);
     if (billingId) payload.billing_address_id = billingId;
-    const coupon = optionalString(couponCode);
     if (coupon) payload.coupon_code = coupon;
     return request('POST', '/orders/cod', payload);
   },
