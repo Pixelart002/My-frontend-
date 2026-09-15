@@ -54,6 +54,7 @@ export const paymentService = {
     const billingId = asId(billingAddressId);
     const coupon = optionalString(couponCode);
     if (billingId) payload.billing_address_id = billingId;
+    const coupon = optionalString(couponCode);
     if (coupon) payload.coupon_code = coupon;
     return request('POST', '/orders/cod', payload);
   },
@@ -62,6 +63,14 @@ export const paymentService = {
     const number = asTrimmedString(orderNumber);
     if (!number) throw new TypeError('A valid public order number is required.');
     return request('POST', `/payments/retry/${encodeURIComponent(number)}`, {});
+  },
+
+  switchMethod: (orderNumber, method) => {
+    const number = asTrimmedString(orderNumber);
+    const target = asTrimmedString(method).toLowerCase();
+    if (!number) throw new TypeError('A valid public order number is required.');
+    if (!['stripe', 'cod'].includes(target)) throw new TypeError('A supported payment method is required.');
+    return request('POST', `/payments/switch-method/${encodeURIComponent(number)}?method=${encodeURIComponent(target)}`, {});
   },
 
   cancelCheckout: (orderNumber) => {
