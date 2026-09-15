@@ -40,6 +40,8 @@
 .payment-modal-payment,.payment-element-shell { min-width:0; width:100%; box-sizing:border-box; }
 .payment-modal-review #payment-element { width:100%; max-width:100%; }
 .payment-form-actions { width:100%; }
+/* Never leave reusable card fields visible after a successful/processing payment state. */
+.payment-stripe-form:has(.payment-pending-screen) .payment-element-shell { display:none; }
 @media (max-width:480px) {
   .payment-modal { width:100%; max-width:100%; max-height:96dvh; border-radius:20px 20px 0 0; }
 }
