@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { paymentService } from '../../services/payments';
 import { orderService } from '../../services/orders';
-import { cartService } from '../../services/cart';
 import { useAuth } from '../../context/AuthContext';
-import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine, RiShieldCheckLine } from '@remixicon/react';
+import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine, RiShieldCheckLine, RiBankCardLine } from '@remixicon/react';
 
 function ProcessingPayment() {
   return <div className="payment-processing-screen" role="status" aria-live="polite"><div className="payment-processing-ring" aria-hidden="true" /><h3>Confirming card payment...</h3><p>Please don’t close this page. We’re waiting for your card payment to finish confirmation.</p><div className="payment-processing-steps" aria-label="Payment progress"><div className="payment-processing-step is-done"><span className="payment-processing-dot"><RiCheckboxCircleLine size={18} /></span><span>Card details validated</span></div><div className="payment-processing-step is-active"><span className="payment-processing-dot" /><span>Confirming with bank</span></div><div className="payment-processing-step"><span className="payment-processing-dot" /><span>Verifying card payment</span></div><div className="payment-processing-step"><span className="payment-processing-dot" /><span>Finalizing order</span></div></div><span className="payment-processing-brand">LUVIIO</span></div>;
@@ -27,7 +26,7 @@ function PaymentStatusPopup({ children, className = '' }) {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess, onBack, onRetry, onCancelOrder }) {
+export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess, onRetry }) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -138,16 +137,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     setSwitchingMethod(true);
     setMessage('');
     try {
-      const order = await orderService.myOrder(orderNumber);
-      const items = Array.isArray(order?.order_items) ? order.order_items : [];
-      const restoredItems = items.map((item) => ({
-        productId: item?.product_id || item?.products?.id || item?.product?.id,
-        quantity: Math.max(1, Number(item?.quantity) || 1),
-      })).filter((item) => item.productId);
-      if (!restoredItems.length) throw new Error('Order items could not be restored. Please return to the cart and try again.');
       await paymentService.cancelCheckout(orderNumber);
-      try { await cartService.clear(); } catch {}
-      for (const item of restoredItems) await cartService.addItem(item.productId, item.quantity);
       navigate('/checkout', { replace: true });
     } catch (err) {
       setMessage(err?.message || 'Unable to switch payment method right now. Please try again.');
@@ -241,13 +231,13 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       }
       return;
     }
-    setMessage('');
-    setRetryAllowed(false);
+    reloadCardForm();
   };
 
   const loadingState = !showTerminalState && !paymentElementMounted && !paymentElementError && !stripeLoadingTimedOut;
   const showLoadRecovery = !showTerminalState && (paymentElementError || stripeLoadingTimedOut);
   const showProcessingOverlay = processing;
+  const showFailureActions = !showTerminalState && !showLoadRecovery && message && retryAllowed;
 
   return <form onSubmit={handleSubmit} className="stripe-form payment-stripe-form">
     {!showTerminalState && <>
@@ -255,17 +245,14 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       <div className="payment-element-shell" aria-busy={showProcessingOverlay || retrying || loadingState}>
         <PaymentElement key={elementKey} id="payment-element" onReady={() => { setPaymentElementMounted(true); setPaymentReady(false); setPaymentElementError(''); setStripeLoadingTimedOut(false); if (retrying) { if (typeof window !== 'undefined') window.sessionStorage.removeItem(`luviio:payment-retrying:${orderNumber}`); setRetrying(false); setRetryAllowed(false); setMessage(''); } }} onChange={(event) => { setPaymentReady(Boolean(event.complete)); if (event.error) setMessage(event.error.message || 'Please check your card details.'); else if (!processing && !retrying && !retryAllowed) setMessage(''); }} onLoadError={(event) => { if (typeof window !== 'undefined') window.sessionStorage.removeItem(`luviio:payment-retrying:${orderNumber}`); setPaymentElementMounted(false); setPaymentReady(false); setPaymentElementError(event?.error?.message || 'Unable to load the secure card payment form.'); setStripeLoadingTimedOut(false); setRetrying(false); setMessage(event?.error?.message || 'Unable to load the secure card payment form.'); }} />
       </div>
-      {showLoadRecovery && <div className="payment-load-recovery" role="alert"><strong>Card payment isn’t available right now.</strong><span>{paymentElementError || 'The secure card form could not be loaded.'}</span><div className="payment-load-recovery-actions"><button className="btn btn-quiet" type="button" onClick={reloadCardForm} disabled={switchingMethod}>Reload card form</button><button className="btn payment-submit-btn" type="button" onClick={chooseAnotherPaymentMethod} disabled={switchingMethod}>{switchingMethod ? 'Switching…' : 'Choose another payment method'}</button></div></div>}
+      {showLoadRecovery && <div className="payment-load-recovery" role="alert"><strong>Card payment isn’t available right now.</strong><span>{paymentElementError || 'The secure card form could not be loaded.'}</span><div className="payment-load-recovery-actions"><button className="btn payment-secondary-action" type="button" onClick={handleRetry} disabled={switchingMethod || processing || retrying}><RiRefreshLine size={16} /> Retry</button><button className="btn payment-submit-btn" type="button" onClick={chooseAnotherPaymentMethod} disabled={switchingMethod || processing || retrying}><RiBankCardLine size={16} /> Choose another payment method</button></div></div>}
     </>}
     {showProcessingOverlay && <PaymentStatusPopup className="payment-processing-popup"><ProcessingPayment /></PaymentStatusPopup>}
     {retrying && !showProcessingOverlay && <PaymentStatusPopup className="payment-retry-popup"><div className="payment-retry-state" role="status" aria-live="polite"><span className="payment-processing-ring" aria-hidden="true" /><strong>Retrying payment…</strong><span>Preparing a new secure card session.</span></div></PaymentStatusPopup>}
     {paymentPending ? <PaymentPendingState orderNumber={orderNumber} onViewOrder={viewOrder} /> : paymentConfirmationPending ? <PaymentConfirmationPending orderNumber={orderNumber} onViewOrder={viewOrder} /> : null}
     {!showTerminalState && message && !showLoadRecovery && <div className="form-error payment-form-error" role="alert">{message}</div>}
-    {!showTerminalState && <div className="payment-form-actions">
-      <button className="btn btn-quiet payment-back-btn" type="button" onClick={onCancelOrder || onBack} disabled={retrying || processing || switchingMethod}>{onCancelOrder ? 'Cancel order' : 'Back'}</button>
-      {showLoadRecovery ? null : retrying ? <button className="btn payment-submit-btn" type="button" disabled><RiRefreshLine size={15} /> Retrying…</button> : message && retryAllowed ? <button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={processing || switchingMethod}><RiRefreshLine size={15} /> Retry card payment</button> : <button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying || switchingMethod}><RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span></button>}
-      {!showLoadRecovery && message && retryAllowed && <button className="btn btn-quiet" type="button" onClick={chooseAnotherPaymentMethod} disabled={processing || switchingMethod}>{switchingMethod ? 'Switching…' : 'Choose another payment method'}</button>}
-    </div>}
+    {!showTerminalState && showFailureActions && <div className="payment-error-actions" role="group" aria-label="Payment recovery actions"><button className="btn payment-submit-btn" type="button" onClick={handleRetry} disabled={processing || retrying || switchingMethod}><RiRefreshLine size={16} /> Retry</button><button className="btn btn-quiet payment-secondary-action" type="button" onClick={chooseAnotherPaymentMethod} disabled={processing || retrying || switchingMethod}><RiBankCardLine size={16} /> Choose another payment method</button></div>}
+    {!showTerminalState && <div className="payment-form-actions"><button className="btn payment-submit-btn" type="submit" disabled={!stripe || !elements || !paymentElementMounted || !paymentReady || Boolean(paymentElementError) || processing || retrying || switchingMethod || retryAllowed}><RiLockLine size={15} aria-hidden="true" /><span>Pay by card</span></button></div>}
     {!showTerminalState && <p className="hint secure-hint">Your card payment is encrypted and processed securely. Order {orderNumber ? `#${orderNumber}` : ''} stays open until payment succeeds or you cancel it.</p>}
   </form>;
 }
