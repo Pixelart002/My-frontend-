@@ -9,8 +9,9 @@ export default function OrderSuccessPage() {
   const { clearCart } = useCart();
 
   const stateOrderNumber = String(location.state?.orderNumber || '').trim();
-  const queryOrderNumber = useMemo(() => String(new URLSearchParams(location.search).get('order') || '').trim(), [location.search]);
-  const queryPaymentMethod = useMemo(() => String(new URLSearchParams(location.search).get('payment') || '').toLowerCase(), [location.search]);
+  const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const queryOrderNumber = String(query.get('order') || '').trim();
+  const queryPaymentMethod = String(query.get('payment') || '').toLowerCase();
   const orderNumber = stateOrderNumber || queryOrderNumber;
   const paymentMethod = String(location.state?.paymentMethod || queryPaymentMethod).toLowerCase();
   const isCod = paymentMethod === 'cod';
