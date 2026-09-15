@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { RiCheckboxCircleFill, RiMailLine, RiShoppingBag3Line, RiCustomerService2Line, RiArrowRightLine } from '@remixicon/react';
 import { useCart } from '../context/CartContext';
-import { request } from '../services/api/client';
 
 export default function OrderSuccessPage() {
   const location = useLocation();
@@ -10,12 +9,11 @@ export default function OrderSuccessPage() {
   const { clearCart } = useCart();
 
   const stateOrderNumber = String(location.state?.orderNumber || '').trim();
-  const queryOrderNumber = useMemo(() => {
-    const value = new URLSearchParams(location.search).get('order');
-    return String(value || '').trim();
-  }, [location.search]);
+  const queryOrderNumber = useMemo(() => String(new URLSearchParams(location.search).get('order') || '').trim(), [location.search]);
+  const queryPaymentMethod = useMemo(() => String(new URLSearchParams(location.search).get('payment') || '').toLowerCase(), [location.search]);
   const orderNumber = stateOrderNumber || queryOrderNumber;
-  const paymentMethod = String(location.state?.paymentMethod || '').toLowerCase();
+  const paymentMethod = String(location.state?.paymentMethod || queryPaymentMethod).toLowerCase();
+  const isCod = paymentMethod === 'cod';
 
   useEffect(() => {
     if (!orderNumber) return;
@@ -23,13 +21,11 @@ export default function OrderSuccessPage() {
   }, [orderNumber, clearCart]);
 
   useEffect(() => {
-    if (!stateOrderNumber || queryOrderNumber || !paymentMethod) return;
+    if (!stateOrderNumber || queryOrderNumber) return;
     const params = new URLSearchParams({ order: stateOrderNumber });
     if (paymentMethod) params.set('payment', paymentMethod);
-    navigate(`/order/success?${params.toString()}`, { replace: true, state: undefined });
+    navigate(`/order/success?${params.toString()}`, { replace: true });
   }, [stateOrderNumber, queryOrderNumber, paymentMethod, navigate]);
-
-  const isCod = paymentMethod === 'cod';
 
   return (
     <div className="page container">
