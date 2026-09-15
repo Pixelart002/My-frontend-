@@ -1,39 +1,35 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { RiLockLine, RiAddLine, RiArrowRightLine, RiCoupon3Line, RiCloseLine, RiArrowLeftLine, RiAlertLine } from '@remixicon/react';
-import { userService } from '../services/users';
-import { paymentService } from '../services/payments';
-import { couponService } from '../services/coupons';
-import { STRIPE_PK } from '../config/env';
+import { RiArrowLeftLine, RiAddLine, RiCloseLine, RiCoupon3Line, RiLockLine, RiArrowRightLine, RiAlertLine } from '@remixicon/react';
+import { stripePromise } from '../lib/stripe';
 import { useCart } from '../context/CartContext';
-import { formatMoney } from '../utils/format';
-import { Spinner, ErrorState } from '../components/ui/States';
-import StripePaymentForm from '../components/checkout/StripePaymentForm';
+import { userService } from '../services/users';
+import { couponService } from '../services/coupons';
+import { paymentService } from '../services/payments';
+import AddressForm from '../components/account/AddressForm';
 import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
-
-const stripePromise = loadStripe(STRIPE_PK);
-const stripeAppearance = { theme: 'night', variables: { colorPrimary: '#d8ad6a', colorBackground: '#11100f', colorText: '#f5efe7', colorTextSecondary: '#a59b91', colorTextPlaceholder: '#6d655c', colorDanger: '#e0735f', borderRadius: '8px', fontFamily: 'DM Sans, system-ui, sans-serif' }, rules: { '.Input': { border: '1px solid #3a3530', boxShadow: 'none', backgroundColor: '#1b1917' }, '.Input:focus': { border: '1px solid #d8ad6a', boxShadow: '0 0 0 1px #d8ad6a' }, '.Label': { color: '#a59b91' }, '.Tab': { border: '1px solid #3a3530', backgroundColor: '#1b1917', color: '#f5efe7' }, '.Tab--selected': { borderColor: '#d8ad6a', backgroundColor: '#24211e' } } };
-
-function makeIdempotencyKey() { if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID(); return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; const v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
-
-function AddressForm({ onSaved, onCancel }) {
-  const [values, setValues] = useState({ line1: '', line2: '', city: '', state: '', postal_code: '', country: 'IN', phone: '', email: '' });
-  const [error, setError] = useState(''); const [saving, setSaving] = useState(false);
-  const set = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
-  const onSubmit = async (e) => { e.preventDefault(); setError(''); if (!values.line1 || !values.city || !values.postal_code || !values.email.trim()) return setError('Please fill in street, city, postal code and email.'); setSaving(true); try { await userService.addAddress({ line1: values.line1, line2: values.line2 || undefined, city: values.city, state: values.state || undefined, postal_code: values.postal_code, country: values.country.toUpperCase(), phone: values.phone || undefined, email: values.email.trim().toLowerCase() }); onSaved(); } catch (err) { setError(err.message || 'Unable to save this address.'); } finally { setSaving(false); } };
-  return <form className="address-form" onSubmit={onSubmit}>{error && <div className="form-error">{error}</div>}<div className="field"><label htmlFor="addr-line1">Street address *</label><input id="addr-line1" value={values.line1} onChange={set('line1')} placeholder="House no, street" /></div><div className="field"><label htmlFor="addr-line2">Apartment / area (optional)</label><input id="addr-line2" value={values.line2} onChange={set('line2')} placeholder="Apartment, landmark" /></div><div className="field-grid"><div className="field"><label htmlFor="addr-city">City *</label><input id="addr-city" value={values.city} onChange={set('city')} /></div><div className="field"><label htmlFor="addr-state">State</label><input id="addr-state" value={values.state} onChange={set('state')} /></div></div><div className="field-grid"><div className="field"><label htmlFor="addr-postal">Postal code *</label><input id="addr-postal" value={values.postal_code} onChange={set('postal_code')} /></div><div className="field"><label htmlFor="addr-country">Country</label><input id="addr-country" maxLength="2" value={values.country} onChange={set('country')} /></div></div><div className="field"><label htmlFor="addr-email">Email address *</label><input id="addr-email" type="email" value={values.email} onChange={set('email')} placeholder="you@example.com" autoComplete="email" required /></div><div className="field"><label htmlFor="addr-phone">Phone (optional)</label><input id="addr-phone" value={values.phone} onChange={set('phone')} placeholder="For delivery updates" autoComplete="tel" /></div><div className="btn-row"><button className="btn" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save address'}</button><button className="btn btn-quiet" type="button" onClick={onCancel}>Cancel</button></div></form>;
-}
+import StripePaymentForm from '../components/checkout/StripePaymentForm';
+import Spinner from '../components/common/Spinner';
+import ErrorState from '../components/common/ErrorState';
+import { formatMoney, makeIdempotencyKey } from '../utils/formatters';
 
 export default function CheckoutPage() {
-  const navigate = useNavigate(); const { cart, loading: cartLoading } = useCart();
-  const [addresses, setAddresses] = useState(null); const [addressError, setAddressError] = useState(''); const [selected, setSelected] = useState('');
-  const [showForm, setShowForm] = useState(false); const [intent, setIntent] = useState(null); const [intentError, setIntentError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState(null); const [paymentModalOpen, setPaymentModalOpen] = useState(false); const [paymentReview, setPaymentReview] = useState(false);
-  const [creating, setCreating] = useState(false); const [cancellingOrder, setCancellingOrder] = useState(false); const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const navigate = useNavigate();
+  const { cart, loading: cartLoading } = useCart();
+  const [addresses, setAddresses] = useState([]);
+  const [selected, setSelected] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [addressError, setAddressError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentReview, setPaymentReview] = useState(false);
+  const [intent, setIntent] = useState(null);
+  const [intentError, setIntentError] = useState('');
+  const [creating, setCreating] = useState(false);
   const [activeOrder, setActiveOrder] = useState(null); const [checkoutKey, setCheckoutKey] = useState(''); const [paymentSessionKey, setPaymentSessionKey] = useState('');
   const [couponInput, setCouponInput] = useState(''); const [coupon, setCoupon] = useState(null); const [couponError, setCouponError] = useState(''); const [couponLoading, setCouponLoading] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false); const [cancellingOrder, setCancellingOrder] = useState(false);
 
   const loadAddresses = useCallback(async () => { setAddressError(''); try { const list = await userService.getAddresses(); setAddresses(Array.isArray(list) ? list : []); } catch (err) { setAddressError(err.message || 'Unable to load your addresses.'); } }, []);
   useEffect(() => { loadAddresses(); }, [loadAddresses]);
@@ -75,12 +71,18 @@ export default function CheckoutPage() {
     setPaymentSessionKey(`${data.payment_intent_id}:${Date.now()}`);
     setIntent(data); setActiveOrder((current) => ({ ...(current || {}), orderNumber: data.order_number || orderNumber, orderId: data.order_id, paymentMethod: 'stripe', paymentIntentId: data.payment_intent_id }));
   };
+  const goToOrderSuccess = (orderNumber, method) => {
+    const number = String(orderNumber || '').trim();
+    if (!number) { navigate('/orders', { replace: true }); return; }
+    const params = new URLSearchParams({ order: number, payment: method });
+    navigate(`/order/success?${params.toString()}`, { replace: true });
+  };
   const intentOptions = useMemo(() => ({ clientSecret: intent?.client_secret, appearance: stripeAppearance, loader: 'auto' }), [intent]);
 
   if (cartLoading) return <div className="page container checkout-loading-page"><Spinner label="Preparing your checkout…" /></div>;
   if (!canProceed && !activeOrder) return <div className="page container"><div className="page-heading compact"><p className="eyebrow">Checkout</p><h1>Your bag is empty.</h1></div><button className="btn" onClick={() => navigate('/shop')}>Continue shopping</button></div>;
 
-  const paymentContent = intent?.client_secret ? <Elements key={paymentSessionKey || intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} clientSecret={intent.client_secret} onSuccess={() => navigate('/order/success', { replace: true, state: { orderNumber: intent.order_number || activeOrder?.orderNumber, paymentMethod: 'stripe' } })} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
+  const paymentContent = intent?.client_secret ? <Elements key={paymentSessionKey || intent.payment_intent_id} stripe={stripePromise} options={intentOptions}><StripePaymentForm orderNumber={intent.order_number || activeOrder?.orderNumber} clientSecret={intent.client_secret} onSuccess={() => goToOrderSuccess(intent.order_number || activeOrder?.orderNumber, 'stripe')} onBack={handleModalBack} onRetry={retryPayment} onCancelOrder={requestCancelOrder} /></Elements> : null;
 
   return <div className="page container checkout">
     <button type="button" className="checkout-back" onClick={() => { if (!activeOrder) navigate('/cart'); }} disabled={Boolean(activeOrder)}><RiArrowLeftLine size={16} /> Back to cart</button>
@@ -90,10 +92,11 @@ export default function CheckoutPage() {
       <div className="checkout-main">
         <section className="checkout-section"><h2>1 · Delivery address</h2>{addressError && <ErrorState message={addressError} onRetry={loadAddresses} />}{addresses && addresses.length > 0 && !showForm && <div className="address-list">{addresses.map((addr) => <label key={addr.id} className={`address-card ${selected === addr.id ? 'is-selected' : ''}`}><input type="radio" name="address" disabled={Boolean(activeOrder)} checked={selected === addr.id} onChange={() => { setSelected(addr.id); setIntent(null); setPaymentModalOpen(false); setPaymentReview(false); }} /><div><strong>{addr.full_name || 'Delivery'}</strong><p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>{addr.email && <p>{addr.email}</p>}{addr.is_default && <span className="chip chip-sm">Default</span>}</div></label>)}<button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add a new address</button></div>}{addresses && addresses.length === 0 && !showForm && <div className="state"><p>You’ll need a delivery address to check out.</p></div>}{showForm && !activeOrder && <AddressForm onSaved={() => { setShowForm(false); loadAddresses(); }} onCancel={() => setShowForm(false)} />}</section>
         <section className="checkout-section"><h2>2 · Coupon</h2>{coupon ? <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Applied coupon</span><strong>{coupon.code}</strong><small>You saved {formatMoney(couponDiscount)} on this order.</small></div><button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={removeCoupon}><RiCloseLine size={15} /> Remove</button></div> : <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Have a coupon?</span><small>Enter a valid promo code to apply the backend-calculated discount.</small></div><div className="coupon-input-row"><input disabled={Boolean(activeOrder)} value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="PROMO CODE" maxLength={40} autoComplete="off" aria-label="Coupon code" /><button className="btn" type="button" onClick={applyCoupon} disabled={couponLoading || !couponInput.trim() || Boolean(activeOrder)}>{couponLoading ? 'Applying…' : 'Apply'}</button></div></div>}{couponError && <div className="form-error" role="alert">{couponError}</div>}</section>
-        <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose a payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
+        <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
       </div>
       <aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Total</dt><dd>{formatMoney(finalTotal)}</dd></div></dl>{cart.amount_to_free_shipping > 0 && !cart.free_shipping_eligible && <p className="free-ship-note"><RiArrowRightLine size={15} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>}</aside>
     </div>
     <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) { setPaymentModalOpen(false); setPaymentReview(false); setIntent(null); } }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={formatMoney(finalTotal)} onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you. You can cancel it here before processing.</p></div></div> : null)}</PaymentMethodModal>
+    {cancelConfirmOpen && <div className="modal-backdrop" role="presentation"><div className="modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title"><h3 id="cancel-order-title">Cancel this order?</h3><p>This will cancel order <b>{activeOrder?.orderNumber}</b> and release its reservation. You can place a new order afterward.</p><div className="modal-actions"><button type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Cancel order'}</button></div></div></div>}
   </div>;
 }
