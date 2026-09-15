@@ -113,13 +113,24 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
   const finishConfirmedPayment = async (paymentIntent) => {
     try {
       const confirmation = await paymentService.confirm(paymentIntent.id);
-      await refreshProfile();
+      // Profile refresh is auxiliary UI state. A successful payment/order
+      // confirmation must never be downgraded because the profile refresh
+      // failed, timed out, or returned an unrelated auth error.
+      try {
+        await refreshProfile();
+      } catch {
+        // Payment confirmation remains authoritative; continue to success UI.
+      }
       onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
       return true;
     } catch {
       const reconciled = await reconcileOrder();
       if (String(reconciled?.status || '').toLowerCase() === 'paid') {
-        await refreshProfile();
+        try {
+          await refreshProfile();
+        } catch {
+          // Do not block a reconciled paid order on profile refresh.
+        }
         onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: paymentIntent.id });
         return true;
       }
@@ -251,7 +262,11 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
 
       const reconciled = await reconcileOrder();
       if (String(reconciled?.status || '').toLowerCase() === 'paid') {
-        await refreshProfile();
+        try {
+          await refreshProfile();
+        } catch {
+          // Do not block a reconciled paid order on profile refresh.
+        }
         onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: intent?.id || paymentIntentId || undefined });
         return;
       }
