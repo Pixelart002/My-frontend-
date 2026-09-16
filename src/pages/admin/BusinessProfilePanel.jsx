@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { RiBuilding4Line, RiContactsLine, RiFileShield2Line, RiRefreshLine, RiSave3Line, RiShieldCheckLine } from '@remixicon/react';
+import { RiBuilding4Line, RiContactsLine, RiFileShield2Line, RiRefreshLine, RiSave3Line, RiShieldCheckLine, RiUserStarLine } from '@remixicon/react';
 import { adminService } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 
@@ -29,6 +29,10 @@ const FIELDS = [
     ['seller_gst_registered', 'GST registered', 'Enable only when actually GST registered'],
     ['seller_gstin', 'GSTIN', 'Required when GST registered'],
     ['seller_pan', 'PAN', 'Seller PAN'],
+  ]},
+  { section: 'Authorised signatory', icon: RiUserStarLine, items: [
+    ['business_authorised_signatory_name', 'Signatory name', 'Name printed on issued invoices'],
+    ['business_authorised_signatory_designation', 'Designation', 'e.g. Proprietor, Partner, Director'],
   ]},
 ];
 
