@@ -47,7 +47,7 @@ export default function ShopPage() {
 
   useEffect(() => {
     const categoryName = category ? categories.find((item) => item.slug === category)?.name : '';
-    const filtered = Boolean(q || category || inStockOnly || minPrice || maxPrice || isNew);
+    const noindexFiltered = Boolean(q || inStockOnly || minPrice || maxPrice || isNew);
     const title = categoryName
       ? `${categoryName} — Luviio`
       : q
@@ -59,20 +59,20 @@ export default function ShopPage() {
     setPageSeo({
       title,
       description,
-      path: `/shop${searchParams.toString() ? `?${searchParams.toString()}` : ''}`,
+      path: category ? `/shop?category=${encodeURIComponent(category)}` : '/shop',
       image: `${siteUrl}/og-default.svg`,
-      noindex: filtered,
+      noindex: noindexFiltered,
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
         name: title,
         description,
-        url: `${siteUrl}/shop`,
+        url: category ? `${siteUrl}/shop?category=${encodeURIComponent(category)}` : `${siteUrl}/shop`,
         isPartOf: { '@type': 'WebSite', name: 'Luviio', url: siteUrl },
         about: categoryName || 'Hardware, sanitary and drainage products',
       },
     });
-  }, [categories, q, category, inStockOnly, minPrice, maxPrice, isNew, searchParams]);
+  }, [categories, q, category, inStockOnly, minPrice, maxPrice, isNew]);
 
   const buildParams = useCallback((page) => {
     const params = { page, page_size: PAGE_SIZE };
