@@ -1,0 +1,25 @@
+.business-profile-panel { display:grid; gap:0; }
+.business-profile-hero { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px; }
+.business-profile-hero h2 { margin:4px 0 6px; font-family:var(--font-display); font-size:clamp(26px,3vw,34px); }
+.business-profile-hero p { margin:0; max-width:720px; color:var(--muted); font-size:13px; line-height:1.6; }
+.eyebrow { display:flex; align-items:center; gap:6px; color:var(--gold-soft); font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.business-profile-notice { margin:0 0 18px; padding:13px 15px; border:1px solid var(--line); border-left:2px solid var(--gold); border-radius:var(--radius-sm); background:var(--surface-2); color:var(--muted); font-size:12px; line-height:1.55; }
+.business-profile-notice strong { color:var(--text); }
+.business-profile-section { padding:20px; }
+.business-section-head { display:flex; align-items:center; gap:12px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid var(--line-soft); }
+.business-section-icon { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface-2); color:var(--gold-soft); }
+.business-section-head h3 { margin:0 0 3px; font-size:16px; }
+.business-section-head p { margin:0; color:var(--dim); font-size:11px; }
+.business-profile-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.business-field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.business-field > span { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.business-field input,.business-field select { width:100%; min-height:42px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font:inherit; outline:none; }
+.business-field input::placeholder { color:var(--dim); }
+.business-field input:focus,.business-field select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(210,170,90,.08); }
+@media (max-width:700px) {
+  .business-profile-hero { align-items:stretch; flex-direction:column; }
+  .business-profile-hero .btn-row { width:100%; }
+  .business-profile-hero .btn-row .btn { flex:1 1 140px; }
+  .business-profile-grid { grid-template-columns:1fr; gap:13px; }
+  .business-profile-section { padding:15px; }
+}
