@@ -23,8 +23,8 @@ const upsertLink = (rel, href) => {
 };
 
 export function setPageSeo({
-  title = 'Luviio — Beautiful essentials for everyday living',
-  description = 'Considered essentials for a more beautiful everyday.',
+  title = 'Luviio — Hardware, Sanitary & Drainage Solutions',
+  description = 'Shop hardware, sanitary, bathroom and drainage products from Luviio for everyday Indian homes and spaces.',
   path = '/',
   image = DEFAULT_IMAGE,
   type = 'website',
