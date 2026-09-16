@@ -1,6 +1,6 @@
 import { request } from '../api/client';
 
 export const locationService = {
-  autocomplete: (query) => request('GET', `/locations/autocomplete?query=${encodeURIComponent(String(query || '').trim())}`),
-  details: (placeId) => request('GET', `/locations/details/${encodeURIComponent(placeId)}`),
+  autocomplete: (input, language = 'en') => request('GET', `/locations/autocomplete?input=${encodeURIComponent(String(input || '').trim())}&language=${encodeURIComponent(language)}`),
+  details: (placeId, language = 'en') => request('GET', `/locations/details?place_id=${encodeURIComponent(String(placeId || '').trim())}&language=${encodeURIComponent(language)}`),
 };
