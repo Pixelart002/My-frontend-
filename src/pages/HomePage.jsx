@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
+import { setPageSeo, siteUrl } from '../utils/seo';
 import '../styles/marketing.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,10 +14,10 @@ gsap.registerPlugin(ScrollTrigger);
 const CATEGORY_ICONS = {
   'bathroom fittings': RiHomeGearLine,
   'drainage systems': RiGridLine,
-  'sanitary': RiDropLine,
+  sanitary: RiDropLine,
   'pipes & fittings': RiWaterFlashLine,
   'bathroom accessories': RiHomeGearLine,
-  'hardware': RiToolsLine,
+  hardware: RiToolsLine,
 };
 
 function categoryIcon(name) {
@@ -43,6 +44,43 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => { loadStore(); }, [loadStore]);
+
+  useEffect(() => {
+    setPageSeo({
+      title: 'Luviio — Hardware, Sanitary & Drainage Solutions',
+      description: 'Shop hardware, sanitary, bathroom and drainage products from Luviio for everyday Indian homes and spaces.',
+      path: '/',
+      image: `${siteUrl}/og-default.svg`,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'Organization',
+            name: 'Luviio',
+            url: siteUrl,
+            logo: `${siteUrl}/og-default.svg`,
+            description: 'Online store for hardware, sanitary, bathroom and drainage products.',
+          },
+          {
+            '@type': 'WebSite',
+            name: 'Luviio',
+            url: siteUrl,
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: `${siteUrl}/shop?q={search_term_string}`,
+              'query-input': 'required name=search_term_string',
+            },
+          },
+          {
+            '@type': 'WebPage',
+            name: 'Luviio — Hardware, Sanitary & Drainage Solutions',
+            url: siteUrl,
+            isPartOf: { '@type': 'WebSite', name: 'Luviio', url: siteUrl },
+          },
+        ],
+      },
+    });
+  }, []);
 
   useEffect(() => {
     const root = document.querySelector('.home-landing');
