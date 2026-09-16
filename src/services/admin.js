@@ -21,6 +21,12 @@ const normalizePermissionMatrix = (res) => {
   return { ...res, effective };
 };
 
+const uploadBusinessAsset = async (assetType, file) => {
+  const form = new FormData();
+  form.append('file', file, file.name || `business-${assetType}`);
+  return request('POST', `/settings/business-profile/assets/${encodeURIComponent(assetType)}`, form);
+};
+
 export const adminService = {
   verify: () => request('GET', '/admin/verify'),
   stats: () => request('GET', '/admin/stats'),
@@ -80,4 +86,6 @@ export const adminService = {
   settings: (category) => request('GET', `/settings/?${qs({ category })}`),
   updateSetting: (key, value, reason) => request('PATCH', `/settings/${encodeURIComponent(key)}`, { value, reason }),
   resetSetting: (key) => request('POST', `/settings/${encodeURIComponent(key)}/reset`),
+  uploadBusinessLogo: (file) => uploadBusinessAsset('logo', file),
+  uploadBusinessSignature: (file) => uploadBusinessAsset('signature', file),
 };
