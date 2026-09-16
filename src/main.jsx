@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import registerServiceWorker from './registerServiceWorker';
+import { installLocationAutocomplete } from './services/locationAutocomplete';
 import './styles/tokens.css';
 import './styles/viewport-fix.css';
 import './styles/pages.css';
@@ -26,7 +27,9 @@ import './styles/footer-layout.css';
 import './styles/mockup-ui.css';
 import './styles/luviio-pro-max.css';
 import './styles/admin-business-profile.css';
+import './styles/location-autocomplete.css';
 
 registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(<App />);
+installLocationAutocomplete();
