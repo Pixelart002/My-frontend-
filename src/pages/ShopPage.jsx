@@ -4,6 +4,7 @@ import { RiEqualizerLine, RiSearchLine, RiCloseLine, RiLoader4Line } from '@remi
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeletons, ErrorState, EmptyState } from '../components/ui/States';
+import { setPageSeo, siteUrl } from '../utils/seo';
 
 const PAGE_SIZE = 20;
 
@@ -43,6 +44,35 @@ export default function ShopPage() {
     setMinPrice(searchParams.get('min_price') || '');
     setMaxPrice(searchParams.get('max_price') || '');
   }, [searchParams]);
+
+  useEffect(() => {
+    const categoryName = category ? categories.find((item) => item.slug === category)?.name : '';
+    const filtered = Boolean(q || category || inStockOnly || minPrice || maxPrice || isNew);
+    const title = categoryName
+      ? `${categoryName} — Luviio`
+      : q
+        ? `Search results for “${q}” — Luviio`
+        : 'Shop Hardware, Sanitary & Drainage Products — Luviio';
+    const description = categoryName
+      ? `Browse ${categoryName} products available from Luviio.`
+      : 'Browse Luviio hardware, sanitary, bathroom, drainage and everyday home products.';
+    setPageSeo({
+      title,
+      description,
+      path: `/shop${searchParams.toString() ? `?${searchParams.toString()}` : ''}`,
+      image: `${siteUrl}/og-default.svg`,
+      noindex: filtered,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: title,
+        description,
+        url: `${siteUrl}/shop`,
+        isPartOf: { '@type': 'WebSite', name: 'Luviio', url: siteUrl },
+        about: categoryName || 'Hardware, sanitary and drainage products',
+      },
+    });
+  }, [categories, q, category, inStockOnly, minPrice, maxPrice, isNew, searchParams]);
 
   const buildParams = useCallback((page) => {
     const params = { page, page_size: PAGE_SIZE };
@@ -157,7 +187,7 @@ export default function ShopPage() {
 
   return (
     <div className="page container">
-      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Everyday, <em>elevated.</em></h1><p>Useful objects and quiet luxuries for the spaces you call home.</p></div>
+      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Shop Hardware, <em>Sanitary & Drainage.</em></h1><p>Practical products for everyday Indian homes, bathrooms and spaces.</p></div>
       <div className="shop-toolbar">
         <form className="shop-search" onSubmit={(e) => { e.preventDefault(); setParam('q', e.currentTarget.q.value.trim()); }}>
           <input name="q" defaultValue={q} placeholder="Search products…" aria-label="Search products" />
