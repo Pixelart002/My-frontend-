@@ -25,6 +25,7 @@ import './styles/change-password.css';
 import './styles/footer-layout.css';
 import './styles/mockup-ui.css';
 import './styles/luviio-pro-max.css';
+import './styles/admin-business-profile.css';
 
 registerServiceWorker();
 
