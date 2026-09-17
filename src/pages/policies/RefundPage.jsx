@@ -12,50 +12,52 @@ export default function RefundPage() {
     <PolicyLayout
       eyebrow="Policies"
       title="Refund Policy"
-      lead="What to expect when a refund applies to your order, and how quickly the money comes back."
-      updated="2026-01-05"
+      lead="What to expect when a refund applies to your Luviio order in India."
+      updated="2026-09-17"
     >
       <Section title="1. When a refund applies">
         <p>
-          A refund may be issued when an order is cancelled before dispatch, when a product is returned
-          under our return policy and approved, when an item arrives damaged or defective, or when an
-          order cannot be fulfilled.
+          A refund may apply when an order is cancelled before dispatch, an eligible return is approved,
+          a product arrives damaged or defective, an order cannot be fulfilled, or another refund is
+          required under applicable law or the relevant order terms.
         </p>
       </Section>
 
       <Section title="2. Refund method and timing">
         <p>
-          Refunds are issued to the original payment method used at checkout. Once a refund is approved,
-          it is usually processed within 3–7 business days. The time taken for the amount to appear in
-          your account depends on your bank or card issuer.
+          Refunds for online payments are normally sent through the original payment route used at
+          checkout. Once a refund is approved, Luviio will initiate it within the applicable processing
+          period. The time taken for the amount to appear in your bank or payment account can depend on
+          the payment provider or bank.
         </p>
         <p>
-          In some cases we may issue the refund to your store credit or wallet balance instead, but only
-          where this has been communicated and agreed with you.
+          Store credit or another refund method will be used only where appropriate and, where consent or
+          agreement is required, with the customer's agreement.
         </p>
       </Section>
 
       <Section title="3. Partial refunds">
         <p>
-          Where only part of an order is returned, or where an item is returned in a used or damaged
-          condition, a partial refund may apply. Any return shipping or restocking charges will be
-          clearly explained before we proceed.
+          Where only part of an order is eligible for refund, we may issue a partial refund for the
+          affected item or amount. Any lawful deductions or return-related charges will be communicated
+          with the applicable resolution and will not be used to remove a consumer right that cannot be
+          excluded by law.
         </p>
       </Section>
 
-      <Section title="4. How to claim a refund">
+      <Section title="4. How to request a refund">
         <p>
-          To request a refund for an eligible order, contact our support team with your order number and
-          the reason for your request. Include relevant details or photos for damaged or defective items
-          so we can assess your claim quickly.
+          Contact support with your order number and the reason for the request. For damaged or defective
+          products, include relevant photographs or other information so that the claim can be assessed.
         </p>
       </Section>
 
-      <Section title="5. Non-refundable items">
+      <Section title="5. Non-refundable or restricted items">
         <p>
-          Certain items may not be eligible for refund, for example products that have been used,
-          altered, or are not in their original condition, and items from final-sale promotions where
-          stated at the time of purchase.
+          Certain products may have lawful refund restrictions because of their condition, use,
+          customisation, hygiene or safety characteristics, or because a product-specific exception
+          applies. Any restriction will be communicated where applicable and will not override a right
+          that cannot lawfully be excluded.
         </p>
       </Section>
     </PolicyLayout>

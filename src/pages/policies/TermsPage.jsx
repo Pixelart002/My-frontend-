@@ -12,81 +12,91 @@ export default function TermsPage() {
     <PolicyLayout
       eyebrow="Legal"
       title="Terms & Conditions"
-      lead="The terms that govern your use of the Luviio store and the purchase of our products."
-      updated="2026-01-05"
+      lead="The terms that govern your use of the Luviio India store and purchase of our products."
+      updated="2026-09-17"
     >
       <Section title="1. Acceptance of terms">
         <p>
-          By accessing or using the Luviio website and placing an order, you agree to be bound by these
-          terms and our related policies. If you do not agree, please do not use the site or place an
-          order.
+          By accessing or using Luviio.in and placing an order, you agree to these terms and the related
+          policies published on the website. These terms are intended to operate subject to applicable
+          Indian law and do not exclude any consumer right that cannot lawfully be excluded.
         </p>
       </Section>
 
-      <Section title="2. Your account">
+      <Section title="2. Account information">
         <p>
-          You are responsible for keeping your account credentials confidential and for all activity
-          that takes place under your account. You agree to provide accurate, current information and
-          to keep it up to date.
+          You are responsible for keeping your account credentials secure and for providing accurate,
+          current information. Please notify us if information needed to fulfil an order changes.
         </p>
       </Section>
 
-      <Section title="3. Orders and pricing">
+      <Section title="3. Products, orders, and pricing">
         <p>
-          All prices are shown in Indian Rupees (INR) and include applicable taxes unless stated
-          otherwise. We take reasonable care to ensure prices and product details are accurate, but
-          errors may occasionally occur. If we discover an obvious pricing error after you order, we
-          will contact you before processing it.
+          Product descriptions, availability, prices, applicable taxes, shipping charges, and other
+          material order information will be shown through the store and checkout flow. Prices are shown
+          in Indian Rupees (INR). Product-specific GST information is applied according to the applicable
+          product configuration and law.
         </p>
         <p>
-          Placing an order constitutes an offer to purchase. We may accept or decline an order at any
-          time, for example where an item is out of stock, we cannot verify your details, or we suspect
-          fraud. Where an order is declined after payment, we will refund the amount paid.
-        </p>
-      </Section>
-
-      <Section title="4. Product descriptions">
-        <p>
-          We work hard to describe and photograph our products accurately. However, colours may vary
-          slightly due to screen settings, and images are illustrative. We do not warrant that every
-          description is completely free of error.
+          An order may be declined where an item is unavailable, payment cannot be verified, required
+          information is materially incomplete, or there is a genuine error or suspected fraud. If a
+          paid order cannot be fulfilled, the applicable refund will be processed.
         </p>
       </Section>
 
-      <Section title="5. Payment">
+      <Section title="4. Product information and consumer rights">
         <p>
-          Payment is taken securely at the time you place an order through our payment provider. By
-          providing payment details you confirm you are authorised to use the payment method selected.
+          We take reasonable care to keep product information accurate. Colours can vary between screens
+          and physical products. Nothing in these terms limits rights or remedies available to consumers
+          under applicable Indian consumer protection law.
         </p>
       </Section>
 
-      <Section title="6. Ownership and use of the site">
+      <Section title="5. Payments">
         <p>
-          The content, design, and branding of the Luviio site are protected by applicable intellectual
-          property laws. You may use the site for personal, non-commercial purposes only and may not
-          copy, reproduce, or exploit its content without permission.
+          Payments are processed through the payment methods presented at checkout. Payment credentials
+          are handled by the relevant payment provider. Luviio retains transaction references and order
+          information needed to reconcile and support payments.
         </p>
       </Section>
 
-      <Section title="7. Limitation of liability">
+      <Section title="6. Cancellation, returns, and refunds">
         <p>
-          To the maximum extent permitted by law, Luviio is not liable for indirect or consequential
-          losses arising from your use of the site or products, and our total liability is limited to
-          the amount you paid for the order in question.
+          Order cancellation, returns, exchanges, and refunds are governed by the applicable Luviio
+          policies published on the website and by applicable law. Where a consumer right cannot lawfully
+          be excluded, these terms do not exclude it.
         </p>
       </Section>
 
-      <Section title="8. Changes to these terms">
+      <Section title="7. Intellectual property">
         <p>
-          We may update these terms from time to time. The latest version will always be available on
-          this page, and continued use of the store after changes means you accept the updated terms.
+          The Luviio name, branding, website design, original content, and other protected material may
+          not be copied, reproduced, or commercially exploited without permission, except to the extent
+          permitted by applicable law.
         </p>
       </Section>
 
-      <Section title="9. Contact">
+      <Section title="8. Limitation of liability">
         <p>
-          For questions about these terms, please reach out through the contact page and our team will
-          be glad to help.
+          Nothing in these terms excludes or limits liability or consumer remedies where doing so would be
+          unlawful. Subject to that limitation, Luviio will be responsible only to the extent provided by
+          applicable law and the circumstances of the relevant order.
+        </p>
+      </Section>
+
+      <Section title="9. Changes to these terms">
+        <p>
+          We may update these terms from time to time. The current version will be published on this page
+          with its effective/update date. Changes will not retrospectively remove rights that have already
+          accrued under applicable law.
+        </p>
+      </Section>
+
+      <Section title="10. Grievance and support">
+        <p>
+          For order, consumer, or policy complaints, contact Luviio at <strong>official@luviio.in</strong>
+          and include your order number where relevant. Luviio will process applicable complaints through
+          its designated grievance mechanism and applicable Indian law.
         </p>
       </Section>
     </PolicyLayout>

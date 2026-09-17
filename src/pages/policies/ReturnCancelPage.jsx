@@ -12,53 +12,63 @@ export default function ReturnCancelPage() {
     <PolicyLayout
       eyebrow="Policies"
       title="Returns & Cancellation"
-      lead="How to return an item you're not happy with, and when you can cancel an order."
-      updated="2026-01-05"
+      lead="How returns, cancellations, and exchanges work for Luviio orders in India."
+      updated="2026-09-17"
     >
-      <Section title="1. Return window">
+      <Section title="1. Return eligibility">
         <p>
-          You can return most items within a set period of receiving your order. To be eligible, the
-          item must be unused, in its original condition, and in its original packaging where
-          applicable. Please check your order details or contact us for the specific window that applies.
+          Eligible products may be returned within the return period communicated for the order or
+          product. Unless a product-specific exception applies, returned goods should be unused, in
+          original condition, and accompanied by original packaging and components where applicable.
+          Nothing in this policy limits any non-excludable consumer right available under applicable law.
         </p>
       </Section>
 
       <Section title="2. How to request a return">
         <p>
-          To start a return, contact our support team with your order number and the item(s) you wish to
-          return. We will confirm eligibility and provide the return instructions. Items should be
-          packed securely and shipped back using the method we recommend so the parcel can be tracked.
+          Contact support with your order number, the item you want to return, and the reason for the
+          request. We will confirm the applicable eligibility and provide return instructions. Keep the
+          shipment securely packed and retain the return tracking information where available.
         </p>
       </Section>
 
-      <Section title="3. Condition of returned items">
+      <Section title="3. Damaged or defective products">
         <p>
-          Items are inspected when they arrive back with us. Products that are returned used, damaged,
-          or missing components may be rejected or subject to a reduced refund, and we will explain the
-          outcome to you.
+          If an item arrives damaged, defective, incorrect, or materially different from the order,
+          contact us promptly with the order number and relevant photographs or other evidence. We will
+          assess the issue and provide the applicable replacement, repair, refund, or other resolution.
         </p>
       </Section>
 
-      <Section title="4. Cancelling an order">
+      <Section title="4. Cancellation">
         <p>
-          You may cancel an order before it is dispatched. Once an order has been shipped, it can no
-          longer be cancelled, but it may still be eligible for return once it arrives. Where an order
-          is cancelled before dispatch, any payment made is refunded to your original payment method.
+          You may request cancellation before dispatch through the available support channel. If an
+          order has already been dispatched, cancellation may no longer be technically possible and the
+          applicable return process may instead apply. Any refund will be handled under the Refund Policy
+          and applicable law.
         </p>
       </Section>
 
       <Section title="5. Exchanges">
         <p>
-          If you would like a different size, colour, or variant, the easiest option is generally to
-          return the original item and place a new order. This helps us get your replacement out as
-          quickly as possible.
+          Where an exchange is available for the particular product, support will confirm the available
+          options. Otherwise, the original item may need to be returned and a new order placed.
         </p>
       </Section>
 
-      <Section title="6. Non-returnable items">
+      <Section title="6. Non-returnable or restricted items">
         <p>
-          Certain categories may not be returnable for hygiene or safety reasons, and final-sale items
-          are clearly marked as such at the time of purchase.
+          Certain products may have lawful return restrictions because of hygiene, safety, customisation,
+          installation, use, or other product-specific characteristics. Any such restriction will be
+          communicated where applicable and will not override rights that cannot lawfully be excluded.
+        </p>
+      </Section>
+
+      <Section title="7. Refunds">
+        <p>
+          Approved refunds are handled according to the Refund Policy. Where a payment has already been
+          captured, the refund is normally returned through the original payment route, subject to the
+          payment provider and applicable banking timelines.
         </p>
       </Section>
     </PolicyLayout>
