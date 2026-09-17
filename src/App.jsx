@@ -22,6 +22,7 @@ import ProfilePage from './pages/ProfilePage';
 import AddressesPage from './pages/AddressesPage';
 import SettingsPage from './pages/SettingsPage';
 import PrivacyPage from './pages/policies/PrivacyPage';
+import DPDPNoticePage from './pages/policies/DPDPNoticePage';
 import TermsPage from './pages/policies/TermsPage';
 import ShippingPage from './pages/policies/ShippingPage';
 import RefundPage from './pages/policies/RefundPage';
@@ -53,6 +54,7 @@ function StoreRoutes() {
       <Route path="/account/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/account/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/privacy/dpdp" element={<DPDPNoticePage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/shipping" element={<ShippingPage />} />
       <Route path="/refund" element={<RefundPage />} />
