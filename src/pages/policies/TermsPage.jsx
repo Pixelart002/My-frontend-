@@ -18,8 +18,8 @@ export default function TermsPage() {
       <Section title="1. Acceptance of terms">
         <p>
           By accessing or using Luviio.in and placing an order, you agree to these terms and the related
-          policies published on the website. These terms are intended to operate subject to applicable
-          Indian law and do not exclude any consumer right that cannot lawfully be excluded.
+          policies published on the website. These terms operate subject to applicable Indian law and do
+          not exclude any consumer right that cannot lawfully be excluded.
         </p>
       </Section>
 
@@ -30,12 +30,18 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="3. Products, orders, and pricing">
+      <Section title="3. Products, orders, pricing, and disclosures">
         <p>
           Product descriptions, availability, prices, applicable taxes, shipping charges, and other
           material order information will be shown through the store and checkout flow. Prices are shown
           in Indian Rupees (INR). Product-specific GST information is applied according to the applicable
           product configuration and law.
+        </p>
+        <p>
+          Where a product is pre-packaged or otherwise subject to mandatory product disclosures, Luviio
+          will provide the information required by applicable consumer-protection and legal-metrology
+          requirements. Where country-of-origin information is required for a product listing, it will be
+          displayed as applicable.
         </p>
         <p>
           An order may be declined where an item is unavailable, payment cannot be verified, required
@@ -68,7 +74,16 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="7. Intellectual property">
+      <Section title="7. Fair marketplace and listing practices">
+        <p>
+          Luviio will not intentionally use misleading product information or unfair practices to distort
+          a consumer's purchase decision. Any sponsored or paid placement, if introduced, will be disclosed
+          as required by applicable law. Product search and sorting are intended to remain relevant to the
+          user's query and disclosed commercial arrangements.
+        </p>
+      </Section>
+
+      <Section title="8. Intellectual property">
         <p>
           The Luviio name, branding, website design, original content, and other protected material may
           not be copied, reproduced, or commercially exploited without permission, except to the extent
@@ -76,7 +91,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="8. Limitation of liability">
+      <Section title="9. Limitation of liability">
         <p>
           Nothing in these terms excludes or limits liability or consumer remedies where doing so would be
           unlawful. Subject to that limitation, Luviio will be responsible only to the extent provided by
@@ -84,19 +99,24 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="9. Changes to these terms">
-        <p>
-          We may update these terms from time to time. The current version will be published on this page
-          with its effective/update date. Changes will not retrospectively remove rights that have already
-          accrued under applicable law.
-        </p>
-      </Section>
-
       <Section title="10. Grievance and support">
         <p>
-          For order, consumer, or policy complaints, contact Luviio at <strong>official@luviio.in</strong>
-          and include your order number where relevant. Luviio will process applicable complaints through
-          its designated grievance mechanism and applicable Indian law.
+          For order, consumer, privacy, or policy complaints, contact Luviio at
+          <strong> official@luviio.in</strong> and include your order number where relevant.
+        </p>
+        <p>
+          <strong>Grievance Officer &amp; Proprietor: Kyro</strong><br />
+          Address: Palam, New Delhi, Delhi, India
+        </p>
+        <p>
+          Consumer grievances can also be taken to the National Consumer Helpline through the official
+          channels, including helpline <strong>1915</strong>. Luviio will process applicable complaints
+          through its designated grievance mechanism and applicable Indian law.
+        </p>
+        <p>
+          The Consumer Protection (E-Commerce) (Amendment) Rules, 2026 are scheduled to come into force
+          on 1 January 2027. Luviio will update applicable marketplace disclosures and processes before
+          those provisions become effective.
         </p>
       </Section>
     </PolicyLayout>
