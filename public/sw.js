@@ -25,7 +25,16 @@ const resolveNotificationUrl = (value) => {
   try {
     const url = new URL(value, self.location.origin);
     if (url.origin !== self.location.origin) return SAFE_DEFAULT_URL;
-    return `${url.pathname}${url.search}${url.hash}` || SAFE_DEFAULT_URL;
+
+    // Backward-compatible mapping for legacy static-page notification URLs.
+    // Luviio is now a React SPA, so notification targets must use SPA routes.
+    const legacyRoutes = {
+      '/orders.html': '/orders',
+      '/cart.html': '/cart',
+      '/admin.html': '/admin',
+    };
+    const pathname = legacyRoutes[url.pathname] || url.pathname;
+    return pathname + url.search + url.hash || SAFE_DEFAULT_URL;
   } catch {
     return SAFE_DEFAULT_URL;
   }
