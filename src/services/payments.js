@@ -77,10 +77,8 @@ export const paymentService = {
     if (!number) throw new TypeError('A valid public order number is required.');
 
     // The backend cancellation RPC is the single source of truth. It cancels
-    // the pending checkout, restores reserved stock and, for a customer
-    // initiated checkout cancellation, restores the order items into the
-    // customer's cart atomically. Never clear the cart afterwards: doing so
-    // would erase the items that the backend just restored.
+    // the pending checkout and releases reserved stock. Cancelled order items
+    // are intentionally not restored to the customer's cart.
     return request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
   },
 };
