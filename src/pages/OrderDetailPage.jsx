@@ -77,7 +77,12 @@ export default function OrderDetailPage() {
   };
 
   const onCancel = async () => {
-    if (!window.confirm('Cancel this order? Your payment will be refunded.')) return;
+    const cancelMessage = status === 'pending'
+      ? 'Cancel this order? Reserved stock will be released.'
+      : isCodOrder
+        ? 'Cancel this COD order? No online payment refund will be initiated.'
+        : 'Cancel this order? Your payment will be refunded.';
+    if (!window.confirm(cancelMessage)) return;
     setBusy(true);
     try { await orderService.cancel(orderNumber); toast.success('Order cancelled.'); load(); }
     catch (err) { toast.error(err.message || 'Unable to cancel this order.'); }
