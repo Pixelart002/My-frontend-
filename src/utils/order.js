@@ -29,10 +29,10 @@ export const ORDER_STATUS_TONES = {
 export const CANCELLABLE_STATUSES = ['pending', 'paid', 'processing'];
 
 /**
- * Statuses in which the backend will serve an invoice PDF
- * (OrderPolicy.assert_can_download_invoice).
+ * Statuses in which the customer can download an invoice PDF.
+ * Refunded orders intentionally do not expose the invoice download action.
  */
-export const INVOICE_STATUSES = ['paid', 'processing', 'shipped', 'delivered', 'refunded'];
+export const INVOICE_STATUSES = ['paid', 'processing', 'shipped', 'delivered'];
 
 export function orderStatusLabel(status) {
   return ORDER_STATUS_LABELS[status] || status || 'Unknown';
