@@ -6,10 +6,54 @@
 import { request } from '../api/client';
 
 const urlBase64ToUint8Array = (value) => {
-  const padding = '='.repeat((4 - (value.length % 4)) % 4);
-  const base64 = `${value}${padding}`.replace(/-/g, '+').replace(/_/g, '/');
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error('Push notification configuration is unavailable.');
+  }
+
+  const normalized = value.trim().replace(/\\s/g, '');
+  if (!/^[A-Za-z0-9_-]+$/.test(normalized)) {
+    throw new Error('Push notification configuration is invalid.');
+  }
+
+  const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
+  const base64 = `${normalized}${padding}`.replace(/-/g, '+').replace(/_/g, '/');
   const raw = window.atob(base64);
-  return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
+  const bytes = Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
+
+  // Web Push VAPID applicationServerKey is an uncompressed P-256
+  // public key: 0x04 followed by 64 bytes of X/Y coordinates.
+  if (bytes.length !== 65 || bytes[0] !== 0x04) {
+    throw new Error('Push notification configuration is invalid.');
+  }
+
+  return bytes;
+};
+
+const classifyPushError = (error) => {
+  const name = error?.name || '';
+  const message = String(error?.message || error || '').trim();
+
+  if (name === 'NotAllowedError') {
+    return new Error('Notification permission was not granted.');
+  }
+
+  if (
+    name === 'AbortError' ||
+    /push service error/i.test(message) ||
+    /registration failed/i.test(message)
+  ) {
+    return new Error(
+      'The browser push service could not create a subscription on this device. ' +
+      'Please update Chrome and Google Play services, then retry. ' +
+      'If it still fails, clear Luviio site data and try again.'
+    );
+  }
+
+  if (name === 'TypeError' || /applicationServerKey|invalid/i.test(message)) {
+    return new Error('Push notification configuration is invalid.');
+  }
+
+  return error instanceof Error ? error : new Error('Unable to enable push notifications.');
 };
 
 const getRegistration = async () => {
@@ -54,10 +98,23 @@ export const pushService = {
     }
 
     const publicKey = await getVapidPublicKey();
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
-    });
+    const applicationServerKey = urlBase64ToUint8Array(publicKey);
+
+    let subscription;
+    try {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
+    } catch (error) {
+      console.error('[Luviio Push] subscription failed', {
+        name: error?.name || 'UnknownError',
+        message: error?.message || String(error),
+        permission,
+        secureContext: window.isSecureContext,
+      });
+      throw classifyPushError(error);
+    }
 
     await request('POST', '/push/subscribe', subscription.toJSON());
     return subscription;
