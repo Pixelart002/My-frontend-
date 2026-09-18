@@ -10,7 +10,7 @@ const urlBase64ToUint8Array = (value) => {
     throw new Error('Push notification configuration is unavailable.');
   }
 
-  const normalized = value.trim().replace(/\\s/g, '');
+    const normalized = value.trim().replace(/\s/g, '');
   if (!/^[A-Za-z0-9_-]+$/.test(normalized)) {
     throw new Error('Push notification configuration is invalid.');
   }
