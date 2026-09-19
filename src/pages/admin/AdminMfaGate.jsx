@@ -92,7 +92,7 @@ export default function AdminMfaGate({ role, onVerified }) {
     setBusy(true);
     setError('');
     try {
-      await adminService.mfaUnenroll(factorId);
+      await adminService.mfaResetPending(factorId);
       setFactor(null);
       setEnrollment(null);
       setCode('');
@@ -196,7 +196,7 @@ export default function AdminMfaGate({ role, onVerified }) {
           <button className="btn btn-block" type="submit" disabled={busy || !factorId}>
             {busy ? 'Verifying…' : 'Verify & open console'}
           </button>
-          {factor?.status !== 'verified' && !enrollment && (
+          {factor?.status !== 'verified' && (
             <button
               className="btn btn-quiet btn-block"
               type="button"
