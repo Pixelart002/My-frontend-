@@ -14,7 +14,7 @@ const blank = {
   name: '', slug: '', sku: '', category_id: '', price: '', compare_price: '', stock: '0',
   low_stock_threshold: '10', weight_grams: '', hsn_code: '', gst_percentage: '18',
   short_description: '', description: '', image_url: '', images: [], attributes: '{}',
-  seo_title: '', seo_description: '', seo_keywords: '', canonical_url: '', is_active: true,
+  seo_title: '', seo_description: '', seo_keywords: '', canonical_url: '', country_of_origin: '', is_active: true,
 };
 
 const ATTRIBUTE_HINTS = ['Color', 'Material', 'Finish Type', 'Weight', 'Dimensions'];
@@ -31,7 +31,7 @@ const toForm = (p) => {
     description: p.description || '', image_url: images[0] || '', images,
     attributes: JSON.stringify(p.attributes || {}, null, 2),
     seo_title: p.seo_title || '', seo_description: p.seo_description || '', seo_keywords: p.seo_keywords || '',
-    canonical_url: p.canonical_url || '', is_active: p.is_active !== false,
+    canonical_url: p.canonical_url || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
   };
 };
 
@@ -164,7 +164,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   const lookupHsn = async (code = form.hsn_code) => {
     const value = String(code || '').trim();
-    if (!/^\\d{2,8}$/.test(value)) return;
+    if (!/^\\d{4,8}$/.test(value)) return;
     setHsnLoading(true);
     setHsnError('');
     try {
@@ -255,6 +255,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (form.price !== '' && !(price > 0)) return 'Price must be greater than zero.';
     if (compare !== null && (!(compare > 0) || compare <= price)) return 'Compare-at price must be greater than the price.';
     if (isCreate && !hsn) return 'HSN code is required.';
+    if (hsn && !/^\\d{4,8}$/.test(hsn)) return 'HSN code must contain 4-8 digits.';
     if (!isCreate && form.hsn_code !== '' && !hsn) return 'HSN code cannot be empty.';
     const gst = Number(form.gst_percentage);
     if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
@@ -306,6 +307,7 @@ export default function ProductsPanel({ capabilities = {} }) {
         seo_description: form.seo_description.trim() || undefined,
         seo_keywords: form.seo_keywords.trim() || undefined,
         canonical_url: form.canonical_url.trim() || undefined,
+        country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
         compare_price: form.compare_price === '' ? undefined : Number(form.compare_price),
@@ -415,7 +417,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             </div>
           </div>
           <div className="field-grid"><div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div><div className="field"><label htmlFor="product-threshold">Low-stock threshold</label><input id="product-threshold" type="number" min="0" step="1" value={form.low_stock_threshold} onChange={(e) => setField('low_stock_threshold', e.target.value)} /></div></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight (grams)</label><input id="product-weight" type="number" min="0" step="1" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} /></div></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight (grams)</label><input id="product-weight" type="number" min="0" step="1" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} /></div><div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div></div>
         </div>
 
         <div className="editor-section"><div className="editor-section-head"><div><h3>Product media</h3><p>Up to 10 images. First image is primary; existing images can be reordered or removed.</p></div><span className="image-count">{form.images.length + selectedFiles.length}/{MAX_IMAGES}</span></div>
