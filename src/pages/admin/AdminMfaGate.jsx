@@ -4,10 +4,12 @@ import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 
-function verifiedTotpFactor(factors) {
+function totpFactors(factors) {
   const totp = Array.isArray(factors?.totp) ? factors.totp : [];
   const all = Array.isArray(factors?.all) ? factors.all : [];
-  return [...totp, ...all].find((factor) => factor?.factor_type === 'totp' && factor?.status === 'verified') || null;
+  return [...totp, ...all].filter((factor, index, list) => (
+    factor?.factor_type === 'totp' && list.findIndex((item) => item?.id === factor?.id) === index
+  ));
 }
 
 function factorIdOf(value) {
@@ -45,9 +47,17 @@ export default function AdminMfaGate({ role, onVerified }) {
         onVerified();
         return;
       }
-      const verified = verifiedTotpFactor(data?.factors);
-      setFactor(verified);
-      setState(verified ? 'verify' : 'setup');
+
+      const factors = totpFactors(data?.factors);
+      const verified = factors.find((item) => item?.status === 'verified') || null;
+      const pending = factors.find((item) => item?.status !== 'verified') || null;
+
+      setFactor(verified || pending);
+      setState(verified || pending ? 'verify' : 'setup');
+
+      if (pending && !verified) {
+        setError('An existing authenticator setup is waiting for verification. Enter the current code from that setup.');
+      }
     } catch (err) {
       setError(err?.message || 'Unable to load MFA status.');
       setState('error');
@@ -130,7 +140,11 @@ export default function AdminMfaGate({ role, onVerified }) {
       <h1>Verify admin MFA</h1>
       <p>
         {role || 'Staff'} console access requires a second authentication factor.
-        {factor ? ' Enter the current code from your authenticator app.' : ' Set up an authenticator app to continue.'}
+        {factor?.status === 'verified'
+          ? ' Enter the current code from your authenticator app.'
+          : factor
+            ? ' An existing authenticator setup was found. Enter its current code to finish verification.'
+            : ' Set up an authenticator app to continue.'}
       </p>
 
       {!factor && !enrollment && (
