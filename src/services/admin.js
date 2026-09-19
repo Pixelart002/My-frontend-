@@ -32,6 +32,7 @@ export const adminService = {
   mfaStatus: () => request('GET', '/auth/mfa/status'),
   mfaEnroll: (friendlyName = 'Luviio Admin') => request('POST', '/auth/mfa/enroll', { friendly_name: friendlyName }),
   mfaVerify: (factorId, code) => request('POST', '/auth/mfa/verify', { factor_id: factorId, code }),
+  mfaUnenroll: (factorId) => request('POST', '/auth/mfa/unenroll', { factor_id: factorId }),
   stats: () => request('GET', '/admin/stats'),
   reports: () => request('GET', '/admin/reports/summary'),
   paymentsReport: (params = {}) => request('GET', `/admin/payments?${qs({ limit: 10, offset: 0, ...params, _ts: Date.now() })}`),
