@@ -42,6 +42,8 @@ export const adminService = {
   uploadProductImages: async (id, files) => { const form = new FormData(); Array.from(files || []).forEach((file) => form.append('files', file, file.name)); return request('POST', `/products/${encodeURIComponent(id)}/images`, form); },
   deleteProductImage: (id, index) => request('DELETE', `/products/${encodeURIComponent(id)}/images/${index}`),
   reorderProductImages: (id, orderedUrls) => request('PUT', `/products/${encodeURIComponent(id)}/images/reorder`, orderedUrls),
+  taxonomyHsnSearch: (query, limit = 8) => request('GET', `/products/taxonomy/hsn-search?${qs({ q: query, limit })}`),
+  taxonomyHsnLookup: (code) => request('GET', `/products/taxonomy/hsn/${encodeURIComponent(code)}`),
   categories: () => request('GET', '/categories'),
   createCategory: (data) => request('POST', '/categories', data),
   deleteCategory: (id) => request('DELETE', `/categories/${encodeURIComponent(id)}`),
