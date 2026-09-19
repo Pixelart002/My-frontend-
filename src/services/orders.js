@@ -24,6 +24,9 @@ export const orderService = {
   myOrder: (orderNumber) =>
     request('GET', `/orders/my/${encodeURIComponent(requirePublicNumber(orderNumber))}`),
 
+  myShipment: (orderNumber) =>
+    request('GET', `/shipping/my/${encodeURIComponent(requirePublicNumber(orderNumber))}`),
+
   cancel: (orderNumber) =>
     request('POST', `/orders/my/${encodeURIComponent(requirePublicNumber(orderNumber))}/cancel`, {}),
 
