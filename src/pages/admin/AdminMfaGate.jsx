@@ -87,6 +87,24 @@ export default function AdminMfaGate({ role, onVerified }) {
     }
   };
 
+  const resetPendingEnrollment = async () => {
+    if (!factorId || factor?.status === 'verified') return;
+    setBusy(true);
+    setError('');
+    try {
+      await adminService.mfaUnenroll(factorId);
+      setFactor(null);
+      setEnrollment(null);
+      setCode('');
+      setState('setup');
+      toast.success('Pending MFA setup removed. You can start a fresh authenticator setup.');
+    } catch (err) {
+      setError(err?.message || 'Unable to reset the pending MFA setup.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const verify = async (event) => {
     event.preventDefault();
     if (!factorId || !/^\d{6,8}$/.test(code)) {
@@ -178,6 +196,16 @@ export default function AdminMfaGate({ role, onVerified }) {
           <button className="btn btn-block" type="submit" disabled={busy || !factorId}>
             {busy ? 'Verifying…' : 'Verify & open console'}
           </button>
+          {factor?.status !== 'verified' && !enrollment && (
+            <button
+              className="btn btn-quiet btn-block"
+              type="button"
+              onClick={resetPendingEnrollment}
+              disabled={busy || !factorId}
+            >
+              {busy ? 'Resetting…' : 'Reset pending setup'}
+            </button>
+          )}
         </form>
       )}
 
