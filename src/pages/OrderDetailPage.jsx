@@ -12,6 +12,7 @@ import { orderStatusLabel, orderStatusTone, canCancelOrder, canDownloadInvoice }
 import { formatMoney } from '../utils/format';
 import { Spinner, ErrorState } from '../components/ui/States';
 import { useToast } from '../context/ToastContext';
+import ShipmentTimeline from '../components/orders/ShipmentTimeline';
 
 const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 
@@ -20,6 +21,7 @@ export default function OrderDetailPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [order, setOrder] = useState(null);
+  const [shipment, setShipment] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [retryOpen, setRetryOpen] = useState(false);
@@ -34,7 +36,12 @@ export default function OrderDetailPage() {
     return orderService.myOrder(orderNumber).then(setOrder).catch((err) => setError(err.message || 'Unable to load this order.'));
   }, [orderNumber]);
 
-  useEffect(() => { setOrder(null); load(); }, [load]);
+  useEffect(() => {
+    let active = true;
+    setOrder(null); setShipment(null); load();
+    if (orderNumber) orderService.myShipment(orderNumber).then((res) => active && setShipment(res)).catch(() => active && setShipment(null));
+    return () => { active = false; };
+  }, [load, orderNumber]);
 
   const closeRetry = useCallback(() => {
     if (retryLoading) return;
@@ -166,6 +173,7 @@ export default function OrderDetailPage() {
           {canCancelOrder(status) && <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}><RiCloseCircleLine size={15} /> Cancel order</button>}
         </div>
         {retryError && <div className="form-error" role="alert">{retryError}</div>}
+        <ShipmentTimeline shipment={shipment} />
         <div className="order-detail-items">
           <div className="order-section-label">Items</div>
           {items.map((item, index) => {
