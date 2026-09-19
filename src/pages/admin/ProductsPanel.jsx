@@ -12,26 +12,28 @@ const MAX_IMAGES = 10;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const blank = {
   name: '', slug: '', sku: '', category_id: '', price: '', compare_price: '', stock: '0',
-  low_stock_threshold: '10', weight_grams: '', hsn_code: '', gst_percentage: '18',
-  short_description: '', description: '', image_url: '', images: [], attributes: '{}',
-  seo_title: '', seo_description: '', seo_keywords: '', canonical_url: '', country_of_origin: '', is_active: true,
+  weight_grams: '', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
+  image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
+  part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
+  specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
 };
-
-const ATTRIBUTE_HINTS = ['Color', 'Material', 'Finish Type', 'Weight', 'Dimensions'];
 
 const toForm = (p) => {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : (p.image_url ? [p.image_url] : []);
+  const specs = p.specifications && typeof p.specifications === 'object' ? p.specifications : {};
   return {
     ...blank,
     name: p.name || '', slug: p.slug || '', sku: p.sku || '', category_id: p.category_id || '',
     price: p.price != null ? String(p.price) : '', compare_price: p.compare_price != null ? String(p.compare_price) : '',
-    stock: p.stock != null ? String(p.stock) : '0', low_stock_threshold: p.low_stock_threshold != null ? String(p.low_stock_threshold) : '10',
-    weight_grams: p.weight_grams != null ? String(p.weight_grams) : '', hsn_code: p.hsn_code || '',
-    gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18', short_description: p.short_description || '',
-    description: p.description || '', image_url: images[0] || '', images,
-    attributes: JSON.stringify(p.attributes || {}, null, 2),
-    seo_title: p.seo_title || '', seo_description: p.seo_description || '', seo_keywords: p.seo_keywords || '',
-    canonical_url: p.canonical_url || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
+    stock: p.stock != null ? String(p.stock) : '0', weight_grams: p.weight_grams != null ? String(p.weight_grams) : '',
+    hsn_code: p.hsn_code || '', gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18',
+    short_description: p.short_description || '', description: p.description || '', image_url: images[0] || '', images,
+    brand: p.brand || '', manufacturer: p.manufacturer || '', model_number: p.model_number || '',
+    gtin: p.gtin || '', ean: p.ean || '', part_number: p.part_number || '',
+    key_features: Array.isArray(p.key_features) ? p.key_features.join('\n') : '',
+    material: p.material || '', finish: p.finish || '', color: p.color || '', size: p.size || '',
+    dimensions: p.dimensions || '', specifications: JSON.stringify(specs, null, 2),
+    warranty: p.warranty || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
   };
 };
 
@@ -246,7 +248,6 @@ export default function ProductsPanel({ capabilities = {} }) {
     const price = Number(form.price);
     const compare = form.compare_price === '' ? null : Number(form.compare_price);
     const stock = Number(form.stock);
-    const threshold = Number(form.low_stock_threshold);
     const weight = form.weight_grams === '' ? null : Number(form.weight_grams);
 
     if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
@@ -261,12 +262,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!isCreate && form.gst_percentage !== '' && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
-    if (!Number.isInteger(threshold) || threshold < 0) return 'Low-stock threshold must be a whole number of 0 or more.';
     if (weight !== null && (!Number.isInteger(weight) || weight < 0)) return 'Weight must be a whole number of 0 or more.';
-    if (form.seo_title.length > 70) return 'SEO title must be 70 characters or fewer.';
-    if (form.seo_description.length > 170) return 'SEO description must be 170 characters or fewer.';
-    if (form.seo_keywords.length > 500) return 'SEO keywords must be 500 characters or fewer.';
-    if (form.canonical_url.length > 2048) return 'Canonical URL must be 2048 characters or fewer.';
     if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
     if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
     if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
@@ -282,16 +278,17 @@ export default function ProductsPanel({ capabilities = {} }) {
     const problem = validate();
     if (problem) return toast.error(problem);
 
-    let attributes;
+    let specifications;
     try {
-      attributes = parseAttributes(form.attributes);
+      specifications = parseAttributes(form.specifications);
     } catch (err) {
-      return toast.error(err.message);
+      return toast.error(err.message.replace('Attributes', 'Specifications'));
     }
 
     setSaving(true);
     try {
       const images = form.images.filter(Boolean);
+      const keyFeatures = form.key_features.split('\n').map((v) => v.trim()).filter(Boolean);
       const base = {
         name: form.name.trim() || undefined,
         category_id: form.category_id || undefined,
@@ -299,20 +296,28 @@ export default function ProductsPanel({ capabilities = {} }) {
         images,
         short_description: form.short_description.trim() || undefined,
         description: form.description.trim() || undefined,
-        attributes,
+        brand: form.brand.trim() || undefined,
+        manufacturer: form.manufacturer.trim() || undefined,
+        model_number: form.model_number.trim() || undefined,
+        gtin: form.gtin.trim() || undefined,
+        ean: form.ean.trim() || undefined,
+        part_number: form.part_number.trim() || undefined,
+        key_features: keyFeatures,
+        material: form.material.trim() || undefined,
+        finish: form.finish.trim() || undefined,
+        color: form.color.trim() || undefined,
+        size: form.size.trim() || undefined,
+        dimensions: form.dimensions.trim() || undefined,
+        specifications,
+        warranty: form.warranty.trim() || undefined,
         hsn_code: form.hsn_code.trim() || undefined,
         gst_percentage: Number(form.gst_percentage),
         weight_grams: form.weight_grams === '' ? undefined : Number(form.weight_grams),
-        seo_title: form.seo_title.trim() || undefined,
-        seo_description: form.seo_description.trim() || undefined,
-        seo_keywords: form.seo_keywords.trim() || undefined,
-        canonical_url: form.canonical_url.trim() || undefined,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
         compare_price: form.compare_price === '' ? undefined : Number(form.compare_price),
         stock: Number(form.stock),
-        low_stock_threshold: Number(form.low_stock_threshold),
       };
 
       if (editingId) {
@@ -356,7 +361,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   return <div className="products-admin">
     <div className="admin-head">
-      <div><h1>Products</h1><p className="admin-sub">{filtered.length} of {items.length} shown · catalogue, pricing, inventory & SEO</p></div>
+      <div><h1>Products</h1><p className="admin-sub">{filtered.length} of {items.length} shown · catalogue, pricing, inventory & hardware specifications</p></div>
       {canCreate && <button type="button" className="btn btn-sm" onClick={openCreate}><RiAddLine size={16} /> Add product</button>}
     </div>
 
@@ -378,7 +383,7 @@ export default function ProductsPanel({ capabilities = {} }) {
       </tbody></table></div>}
     </div>
 
-    {editing && <AdminModal className="product-editor-modal" title={editingId ? 'Edit product' : 'Add product'} sub={editingId ? 'Update all catalogue, pricing, inventory, media and SEO fields.' : 'Create a complete catalogue product with backend-compatible data.'} onClose={closeEditor}>
+    {editing && <AdminModal className="product-editor-modal" title={editingId ? 'Edit product' : 'Add product'} sub={editingId ? 'Update catalogue, pricing, inventory, media and hardware fields.' : 'Create a hardware catalogue product with backend-compatible data.'} onClose={closeEditor}>
       <form className="product-editor" onSubmit={save}>
         <div className="editor-section"><div className="editor-section-head"><div><h3>Basic information</h3><p>Required on create: name. SKU is optional and locked after creation. Slug is generated by the backend.</p></div></div>
           <div className="field-grid"><div className="field"><label htmlFor="product-name">{fieldLabel('Name', isCreate)}</label><input id="product-name" autoFocus required={isCreate} minLength={isCreate ? 2 : undefined} maxLength={255} value={form.name} onChange={(e) => setField('name', e.target.value)} /></div><div className="field"><label htmlFor="product-sku">SKU</label><input id="product-sku" maxLength={100} value={form.sku} onChange={(e) => setField('sku', e.target.value)} placeholder="Optional internal SKU" disabled={!!editingId} /></div></div>
@@ -428,13 +433,34 @@ export default function ProductsPanel({ capabilities = {} }) {
 
         <div className="editor-section"><div className="editor-section-head"><div><h3>Descriptions</h3><p>Customer-facing product copy.</p></div></div><div className="field"><label htmlFor="product-short">Short description</label><input id="product-short" maxLength="500" value={form.short_description} onChange={(e) => setField('short_description', e.target.value)} /></div><div className="field"><label htmlFor="product-description">Description</label><textarea id="product-description" rows="6" value={form.description} onChange={(e) => setField('description', e.target.value)} /></div></div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>SEO</h3><p>Optional explicit metadata. Leave blank to use backend/server-side fallbacks.</p></div></div>
-          <div className="field"><label htmlFor="product-seo-title">SEO title <span className="td-dim">{form.seo_title.length}/70</span></label><input id="product-seo-title" maxLength="70" value={form.seo_title} onChange={(e) => setField('seo_title', e.target.value)} placeholder="Leave blank to use product name" /></div>
-          <div className="field"><label htmlFor="product-seo-description">SEO description <span className="td-dim">{form.seo_description.length}/170</span></label><textarea id="product-seo-description" rows="3" maxLength="170" value={form.seo_description} onChange={(e) => setField('seo_description', e.target.value)} placeholder="Leave blank to derive from product copy" /></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-seo-keywords">SEO keywords <span className="td-dim">{form.seo_keywords.length}/500</span></label><input id="product-seo-keywords" maxLength="500" value={form.seo_keywords} onChange={(e) => setField('seo_keywords', e.target.value)} placeholder="hardware, sanitary, drainage" /></div><div className="field"><label htmlFor="product-canonical">Canonical URL</label><input id="product-canonical" type="url" maxLength="2048" value={form.canonical_url} onChange={(e) => setField('canonical_url', e.target.value)} placeholder="Optional" /></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Hardware details</h3><p>Common hardware catalogue fields. Category-specific details go into Specifications.</p></div></div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-brand">Brand</label><input id="product-brand" maxLength="120" value={form.brand} onChange={(e) => setField('brand', e.target.value)} /></div>
+            <div className="field"><label htmlFor="product-manufacturer">Manufacturer</label><input id="product-manufacturer" maxLength="160" value={form.manufacturer} onChange={(e) => setField('manufacturer', e.target.value)} /></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-model">Model number</label><input id="product-model" maxLength="120" value={form.model_number} onChange={(e) => setField('model_number', e.target.value)} /></div>
+            <div className="field"><label htmlFor="product-part">Part number</label><input id="product-part" maxLength="120" value={form.part_number} onChange={(e) => setField('part_number', e.target.value)} /></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-gtin">GTIN</label><input id="product-gtin" maxLength="32" value={form.gtin} onChange={(e) => setField('gtin', e.target.value)} /></div>
+            <div className="field"><label htmlFor="product-ean">EAN</label><input id="product-ean" maxLength="32" value={form.ean} onChange={(e) => setField('ean', e.target.value)} /></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-material">Material</label><input id="product-material" maxLength="160" value={form.material} onChange={(e) => setField('material', e.target.value)} placeholder="e.g. Stainless Steel" /></div>
+            <div className="field"><label htmlFor="product-finish">Finish</label><input id="product-finish" maxLength="120" value={form.finish} onChange={(e) => setField('finish', e.target.value)} placeholder="e.g. Polished" /></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-color">Color</label><input id="product-color" maxLength="80" value={form.color} onChange={(e) => setField('color', e.target.value)} /></div>
+            <div className="field"><label htmlFor="product-size">Size</label><input id="product-size" maxLength="120" value={form.size} onChange={(e) => setField('size', e.target.value)} /></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-dimensions">Dimensions</label><input id="product-dimensions" maxLength="160" value={form.dimensions} onChange={(e) => setField('dimensions', e.target.value)} placeholder="e.g. 150 x 150 x 50 mm" /></div>
+            <div className="field"><label htmlFor="product-warranty">Warranty</label><input id="product-warranty" maxLength="500" value={form.warranty} onChange={(e) => setField('warranty', e.target.value)} /></div>
+          </div>
+          <div className="field"><label htmlFor="product-features">Key features <span className="td-dim">one per line</span></label><textarea id="product-features" rows="4" value={form.key_features} onChange={(e) => setField('key_features', e.target.value)} placeholder={'304 grade\nAnti-rust\nEasy installation'} /></div>
+          <div className="field"><label htmlFor="product-specifications">Specifications JSON</label><textarea id="product-specifications" rows="7" value={form.specifications} onChange={(e) => setField('specifications', e.target.value)} placeholder={'{\n  "outlet_size": "110 mm",\n  "installation_type": "Floor"\n}'} spellCheck="false" /></div>
         </div>
-
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Attributes</h3><p>Flexible JSON object. Standard hints are available; extra keys are allowed by the backend.</p></div></div><div className="attribute-hints">{ATTRIBUTE_HINTS.map((key) => <button key={key} type="button" className="attribute-chip" onClick={() => { try { const obj = parseAttributes(form.attributes); if (!(key in obj)) obj[key] = ''; setField('attributes', JSON.stringify(obj, null, 2)); } catch { toast.error('Fix the existing Attributes JSON before adding a field.'); } }}>{key}</button>)}</div><div className="field"><label htmlFor="product-attributes">Attributes JSON</label><textarea id="product-attributes" rows="9" value={form.attributes} onChange={(e) => setField('attributes', e.target.value)} placeholder={'{\n  "Color": "Chrome",\n  "Material": "Stainless Steel",\n  "Finish Type": "Polished"\n}'} spellCheck="false" /></div></div>
 
         <div className="editor-footer"><label className="check-line"><input type="checkbox" checked={form.is_active} onChange={(e) => setField('is_active', e.target.checked)} /> <span><strong>Active listing</strong><small>Visible to customers when published.</small></span></label><div className="btn-row"><button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button><button className="btn" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button></div></div>
       </form>
