@@ -74,7 +74,7 @@ export const adminService = {
 
   subscriptionPlans: (activeOnly = true) => request('GET', `/subscriptions/plans?active_only=${activeOnly}`),
   createSubscription: (data) => request('POST', '/subscriptions/plans', data),
-  updateSubscription: (id, data) => request('PUT', `/subscriptions/plans/${encodeURIComponent(id)}`),
+  updateSubscription: (id, data) => request('PUT', `/subscriptions/plans/${encodeURIComponent(id)}`, data),
 
   permissionCatalogue: () => request('GET', '/rbac/permissions/catalogue'),
   permissions: async () => normalizePermissionMatrix(await request('GET', '/rbac/permissions')),
