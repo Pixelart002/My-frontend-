@@ -32,6 +32,7 @@ export const adminService = {
   mfaStatus: () => request('GET', '/auth/mfa/status'),
   mfaEnroll: (friendlyName = 'Luviio Admin') => request('POST', '/auth/mfa/enroll', { friendly_name: friendlyName }),
   mfaVerify: (factorId, code) => request('POST', '/auth/mfa/verify', { factor_id: factorId, code }),
+  mfaResetPending: (factorId) => request('POST', '/auth/mfa/reset-pending', { factor_id: factorId }),
   stats: () => request('GET', '/admin/stats'),
   reports: () => request('GET', '/admin/reports/summary'),
   paymentsReport: (params = {}) => request('GET', `/admin/payments?${qs({ limit: 10, offset: 0, ...params, _ts: Date.now() })}`),
@@ -73,7 +74,7 @@ export const adminService = {
 
   subscriptionPlans: (activeOnly = true) => request('GET', `/subscriptions/plans?active_only=${activeOnly}`),
   createSubscription: (data) => request('POST', '/subscriptions/plans', data),
-  updateSubscription: (id, data) => request('PUT', `/subscriptions/plans/${encodeURIComponent(id)}`, data),
+  updateSubscription: (id, data) => request('PUT', `/subscriptions/plans/${encodeURIComponent(id)}`),
 
   permissionCatalogue: () => request('GET', '/rbac/permissions/catalogue'),
   permissions: async () => normalizePermissionMatrix(await request('GET', '/rbac/permissions')),
