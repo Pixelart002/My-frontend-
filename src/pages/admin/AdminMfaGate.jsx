@@ -4,14 +4,27 @@ import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 
-function verifiedTotpFactor(factors) {
+function totpFactors(factors) {
   const totp = Array.isArray(factors?.totp) ? factors.totp : [];
   const all = Array.isArray(factors?.all) ? factors.all : [];
-  return [...totp, ...all].find((factor) => factor?.factor_type === 'totp' && factor?.status === 'verified') || null;
+  return [...totp, ...all].filter((factor, index, list) => (
+    factor?.factor_type === 'totp' && list.findIndex((item) => item?.id === factor?.id) === index
+  ));
 }
 
 function factorIdOf(value) {
   return value?.id || value?.factor?.id || value?.totp?.factor_id || value?.totp?.id || '';
+}
+
+export function qrCodeImageSource(value) {
+  if (typeof value !== 'string') return '';
+  const qr = value.trim();
+  if (!qr) return '';
+  if (/^data:image\//i.test(qr)) return qr;
+  if (/^<svg(?:\s|>)/i.test(qr) || /^<\?xml[\s\S]*<svg(?:\s|>)/i.test(qr)) {
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qr)}`;
+  }
+  return qr;
 }
 
 export default function AdminMfaGate({ role, onVerified }) {
@@ -34,9 +47,17 @@ export default function AdminMfaGate({ role, onVerified }) {
         onVerified();
         return;
       }
-      const verified = verifiedTotpFactor(data?.factors);
-      setFactor(verified);
-      setState(verified ? 'verify' : 'setup');
+
+      const factors = totpFactors(data?.factors);
+      const verified = factors.find((item) => item?.status === 'verified') || null;
+      const pending = factors.find((item) => item?.status !== 'verified') || null;
+
+      setFactor(verified || pending);
+      setState(verified || pending ? 'verify' : 'setup');
+
+      if (pending && !verified) {
+        setError('An existing authenticator setup is waiting for verification. Enter the current code from that setup.');
+      }
     } catch (err) {
       setError(err?.message || 'Unable to load MFA status.');
       setState('error');
@@ -109,7 +130,7 @@ export default function AdminMfaGate({ role, onVerified }) {
     );
   }
 
-  const qrCode = enrollment?.totp?.qr_code || enrollment?.qr_code || '';
+  const qrCode = qrCodeImageSource(enrollment?.totp?.qr_code || enrollment?.qr_code || '');
   const secret = enrollment?.totp?.secret || enrollment?.secret || '';
 
   return (
@@ -119,7 +140,11 @@ export default function AdminMfaGate({ role, onVerified }) {
       <h1>Verify admin MFA</h1>
       <p>
         {role || 'Staff'} console access requires a second authentication factor.
-        {factor ? ' Enter the current code from your authenticator app.' : ' Set up an authenticator app to continue.'}
+        {factor?.status === 'verified'
+          ? ' Enter the current code from your authenticator app.'
+          : factor
+            ? ' An existing authenticator setup was found. Enter its current code to finish verification.'
+            : ' Set up an authenticator app to continue.'}
       </p>
 
       {!factor && !enrollment && (
