@@ -14,6 +14,17 @@ function factorIdOf(value) {
   return value?.id || value?.factor?.id || value?.totp?.factor_id || value?.totp?.id || '';
 }
 
+export function qrCodeImageSource(value) {
+  if (typeof value !== 'string') return '';
+  const qr = value.trim();
+  if (!qr) return '';
+  if (/^data:image\//i.test(qr)) return qr;
+  if (/^<svg(?:\s|>)/i.test(qr) || /^<\?xml[\s\S]*<svg(?:\s|>)/i.test(qr)) {
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qr)}`;
+  }
+  return qr;
+}
+
 export default function AdminMfaGate({ role, onVerified }) {
   const { toast } = useToast();
   const [state, setState] = useState('loading');
@@ -109,7 +120,7 @@ export default function AdminMfaGate({ role, onVerified }) {
     );
   }
 
-  const qrCode = enrollment?.totp?.qr_code || enrollment?.qr_code || '';
+  const qrCode = qrCodeImageSource(enrollment?.totp?.qr_code || enrollment?.qr_code || '');
   const secret = enrollment?.totp?.secret || enrollment?.secret || '';
 
   return (
