@@ -154,3 +154,13 @@
   .admin-head h1 { font-size:23px; }
   .admin-sub { font-size:12px !important; }
 }
+
+.admin-mfa-gate { width:min(100%,560px); margin:clamp(28px,8vh,80px) auto; padding:clamp(24px,5vw,40px); border:1px solid var(--line-soft); border-radius:20px; background:var(--panel); text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.22); }
+.admin-mfa-gate h1 { margin:8px 0 10px; font-size:clamp(28px,6vw,40px); }
+.admin-mfa-gate > p:not(.eyebrow) { color:var(--muted); line-height:1.65; }
+.admin-mfa-setup { display:grid; justify-items:center; gap:14px; margin:22px 0; }
+.admin-mfa-qr { width:min(240px,72vw); aspect-ratio:1; padding:10px; border-radius:12px; background:#fff; }
+.admin-mfa-secret { display:block; max-width:100%; overflow:auto; padding:10px 12px; border:1px solid var(--line-soft); border-radius:8px; color:var(--text); }
+.admin-mfa-form { display:grid; gap:10px; margin-top:22px; text-align:left; }
+.admin-mfa-form input { width:100%; text-align:center; letter-spacing:.28em; font-size:22px; padding:13px 14px; }
+.admin-mfa-note { margin-top:20px; font-size:12px; color:var(--dim); }
