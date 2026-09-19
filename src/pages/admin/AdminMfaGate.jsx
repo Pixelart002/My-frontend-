@@ -193,7 +193,7 @@ export default function AdminMfaGate({ role, onVerified }) {
             autoFocus
           />
           {error && <div className="form-error">{error}</div>}
-          {factor?.status !== 'verified' && !enrollment && (
+          {factor?.status !== 'verified' && (
             <button className="btn btn-block" type="button" onClick={resetPendingEnrollment} disabled={busy || !factorId}>
               {busy ? 'Resetting setup…' : 'Reset setup & generate new QR'}
             </button>
