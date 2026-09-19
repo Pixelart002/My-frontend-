@@ -4,6 +4,7 @@ import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { formatMoney } from '../../utils/format';
 import './operations-panel.css';
+import FulfillmentPanel from './FulfillmentPanel';
 
 const pretty = (value) => value === null || value === undefined || value === '' ? '—' : typeof value === 'object' ? JSON.stringify(value) : String(value);
 
@@ -13,7 +14,7 @@ function Toolbar({ title, description, onRefresh, children }) {
 
 export default function OperationsPanel({ section }) {
   if (section === 'inventory') return <InventoryPanel/>;
-  if (section === 'shipping') return <ShippingPanel/>;
+  if (section === 'shipping') return <><ShippingPanel/><FulfillmentPanel/></>;
   if (section === 'subscriptions') return <SubscriptionPanel/>;
   if (section === 'user-actions') return <UserActionsPanel/>;
   if (section === 'rbac') return <RbacPanel/>;
