@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { RiAddLine, RiDeleteBinLine, RiEditLine, RiImageAddLine, RiSearchLine, RiCloseLine, RiStarFill } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
@@ -68,7 +69,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ ...blank });
   const [saving, setSaving] = useState(false);
-  const [busyId, setBusyId] = useState(null);
+  const [busyId, setBusyId] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
@@ -404,7 +405,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             <td><div className="product-cell">{p.image_url ? <img src={p.image_url} alt={p.name || ''} loading="lazy" /> : <div className="product-thumb"><RiImageAddLine size={17} /></div>}<div><div className="td-strong">{p.name}</div><div className="td-dim">{p.slug}</div></div></div></td>
             <td className="td-dim">{p.sku || '—'}</td><td className="td-gold">{formatMoney(Number(p.price) || 0)}</td><td>{p.stock ?? 0}</td><td>{p.gst_percentage ?? '—'}%</td><td className="td-dim">{cat?.name || '—'}</td>
             <td>{p.is_active === false ? <span className="admin-pill pill-danger">Inactive</span> : <span className="admin-pill pill-success">Active</span>}</td>
-            {(canUpdate || canDelete) && <td><div className="btn-row">{canUpdate && <button type="button" className="icon-btn" onClick={() => openEdit(p)} title="Edit product" aria-label={`Edit ${p.name}`}><RiEditLine size={16} /></button>}{canDelete && <button type="button" className="icon-btn danger-action" onClick={() => remove(p)} disabled={busyId === p.id} title="Delete product" aria-label={`Delete ${p.name}`}><RiDeleteBinLine size={16} /></button>}</div></td>}
+            {(canUpdate || canDelete) && <td><div className="btn-row">{canUpdate && <button type="button" className="icon-btn" onClick={() => openEdit(p)} title="Edit product" aria-label={`Edit ${p.name}`}><RiEditLine size={16} /></button>}{canDelete && <button type="button" className="icon-btn danger-action" onClick={() => setDeleteTarget(p)} disabled={busyId === p.id} title="Delete product" aria-label={`Delete ${p.name}`}><RiDeleteBinLine size={16} /></button>}</div></td>}
           </tr>;
         })}
       </tbody></table></div>}
@@ -500,5 +501,5 @@ export default function ProductsPanel({ capabilities = {} }) {
         <div className="editor-footer"><label className="check-line"><input type="checkbox" checked={form.is_active} onChange={(e) => setField('is_active', e.target.checked)} /> <span><strong>Active listing</strong><small>Visible to customers when published.</small></span></label><div className="btn-row"><button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button><button className="btn" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button></div></div>
       </form>
     </AdminModal>}
-  </div>;
+  </div><ConfirmDialog open={Boolean(deleteTarget)} title="Delete product?" message={deleteTarget ? `Delete “${deleteTarget.name}”? This cannot be undone.` : ''} confirmLabel="Delete product" danger onCancel={()=>setDeleteTarget(null)} onConfirm={async()=>{await remove(deleteTarget);setDeleteTarget(null)}} /></div>;
 }
