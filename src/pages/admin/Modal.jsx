@@ -4,7 +4,6 @@ import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function AdminModal({ title, sub, onClose, children, className = '' }) {
   const closeRef = useRef(null);
-  const previousFocus = useRef(null);
   const modalRef = useRef(null);
 
   useFocusTrap({
