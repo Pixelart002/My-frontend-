@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { Link } from 'react-router-dom';
 import { RiArrowLeftLine, RiAddLine, RiDeleteBinLine } from '@remixicon/react';
 import { userService } from '../services/users';
@@ -49,6 +50,8 @@ function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = fal
       setSaving(false);
     }
   };
+
+  const confirmDelete = async () => { if (!deleteId) return; await onDelete(deleteId); setDeleteId(null); };
 
   return (
     <form className="address-form" onSubmit={onSubmit}>
@@ -126,6 +129,7 @@ export default function AddressesPage() {
   const [addresses, setAddresses] = useState(null);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const load = useCallback(() => {
     setError('');
@@ -138,7 +142,6 @@ export default function AddressesPage() {
   useEffect(load, [load]);
 
   const onDelete = async (id) => {
-    if (!window.confirm('Remove this address?')) return;
     try {
       await userService.deleteAddress(id);
       toast.success('Address removed.');
@@ -176,7 +179,7 @@ export default function AddressesPage() {
                 </p>
                 {addr.email && <small className="address-email">{addr.email}</small>}
               </div>
-              <button className="btn btn-danger btn-sm" onClick={() => onDelete(addr.id)} aria-label="Delete address">
+              <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(addr.id)} aria-label={`Delete ${addr.full_name || 'address'}`}>
                 <RiDeleteBinLine size={15} />
               </button>
             </div>
@@ -188,6 +191,7 @@ export default function AddressesPage() {
           )}
         </div>
       )}
+      <ConfirmDialog open={Boolean(deleteId)} title="Remove address?" message="This saved delivery address will be removed from your account." confirmLabel="Remove address" danger busy={false} onCancel={() => setDeleteId(null)} onConfirm={confirmDelete} />
     </div>
   );
 }
