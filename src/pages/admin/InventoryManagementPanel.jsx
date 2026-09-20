@@ -36,14 +36,14 @@ export default function InventoryManagementPanel() {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
       const stock = Number(p.stock || 0);
-      const threshold = Number(p.low_stock_threshold ?? 10);
+      const threshold = 10;
       const state = stock <= 0 ? 'out' : stock <= threshold ? 'low' : 'healthy';
       return (filter === 'all' || filter === state) && (!q || [p.name, p.sku, p.slug].some(v => String(v || '').toLowerCase().includes(q)));
     });
   }, [products, query, filter]);
 
   const counts = useMemo(() => products.reduce((a, p) => {
-    const stock = Number(p.stock || 0), threshold = Number(p.low_stock_threshold ?? 10);
+    const stock = Number(p.stock || 0), threshold = 10;
     a.total += 1; a.units += stock;
     if (stock <= 0) a.out += 1; else if (stock <= threshold) a.low += 1; else a.healthy += 1;
     return a;
@@ -129,7 +129,7 @@ export default function InventoryManagementPanel() {
         <thead><tr><th>Product</th><th>SKU</th><th>On hand</th><th>Threshold</th><th>Status</th><th aria-label="Actions"></th></tr></thead>
         <tbody>
           {rows.length ? rows.map(p => {
-            const stock = Number(p.stock || 0), threshold = Number(p.low_stock_threshold ?? 10);
+            const stock = Number(p.stock || 0), threshold = 10;
             const state = stock <= 0 ? 'out' : stock <= threshold ? 'low' : 'healthy';
             return <tr key={p.id}>
               <td><div className="td-strong">{pretty(p.name)}</div><div className="td-dim">{pretty(p.slug)}</div></td>
@@ -150,7 +150,7 @@ export default function InventoryManagementPanel() {
 
       <div className="inventory-editor-summary">
         <div><span className="stat-label">Current stock</span><strong>{Number(editing.stock || 0)}</strong></div>
-        <div><span className="stat-label">Threshold</span><strong>{Number(editing.low_stock_threshold ?? 10)}</strong></div>
+        <div><span className="stat-label">Threshold</span><strong>{10}</strong></div>
       </div>
 
       <form onSubmit={submitAdjustment} className="inventory-editor-form">
