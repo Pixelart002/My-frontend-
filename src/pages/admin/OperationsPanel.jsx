@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { formatMoney } from '../../utils/format';
 import './operations-panel.css';
 import FulfillmentPanel from './FulfillmentPanel';
+import AdminModal from './Modal';
 
 const pretty = (value) => value === null || value === undefined || value === '' ? '—' : typeof value === 'object' ? JSON.stringify(value) : String(value);
 
@@ -50,7 +51,120 @@ function RbacPanel(){const {toast}=useToast();const [matrix,setMatrix]=useState(
 
 function NotificationsPanel(){const {toast}=useToast();const [stats,setStats]=useState(null);const [loading,setLoading]=useState(true);const [title,setTitle]=useState('');const [body,setBody]=useState('');const [url,setUrl]=useState('/');const [sending,setSending]=useState(false);const load=async()=>{setLoading(true);try{setStats(await adminService.pushStats())}catch(e){toast.error(e.message||'Unable to load notification stats.')}finally{setLoading(false)}};useEffect(()=>{load()},[]);const send=async(e)=>{e.preventDefault();setSending(true);try{const r=await adminService.sendPush({user_ids:null,title:title.trim(),body:body.trim(),url:url.trim()||'/'});toast.success(r?.message||'Notification dispatched.');setTitle('');setBody('');await load()}catch(e){toast.error(e.message||'Unable to send notification.')}finally{setSending(false)}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="Notifications" description="Send controlled customer messaging and monitor Web Push subscriptions." onRefresh={load}/><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Subscribed devices</div><div className="stat-value">{loading?'…':pretty(stats?.subscriptions??stats?.total??0)}</div></div><div className="admin-stat"><div className="stat-label">Delivery health</div><div className="stat-value" style={{fontSize:22}}>Server-side</div></div></div><form onSubmit={send} className="ops-form"><label>Title<input required maxLength="80" value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Message<textarea required maxLength="240" rows="4" value={body} onChange={e=>setBody(e.target.value)}/></label><label>Destination URL<input value={url} onChange={e=>setUrl(e.target.value)} /></label><button className="btn" disabled={sending}><RiSendPlaneLine size={16}/>{sending?'Sending…':'Send notification'}</button></form></div></section>}
 
-function SettingsPanel(){const {toast}=useToast();const [settings,setSettings]=useState([]);const [loading,setLoading]=useState(true);const load=async()=>{setLoading(true);try{setSettings(itemsOfList(await adminService.settings()))}catch(e){toast.error(e.message||'Unable to load settings.')}finally{setLoading(false)}};useEffect(()=>{load()},[]);const save=async(s)=>{try{const raw=window.prompt(`New value for ${s.key}`,typeof s.value==='string'?s.value:JSON.stringify(s.value));if(raw===null)return;let value=raw;try{value=JSON.parse(raw)}catch{}await adminService.updateSetting(s.key,value,'Updated from admin console');toast.success('Setting updated.');await load()}catch(e){toast.error(e.message||'Unable to update setting.')}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="System settings" description="Operational, financial and UI configuration with server-side validation." onRefresh={load}/><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Key</th><th>Category</th><th>Type</th><th>Value</th><th/></tr></thead><tbody>{settings.length?settings.map(s=><tr key={s.key}><td className="td-strong">{s.key}</td><td>{s.category}</td><td>{s.data_type}</td><td className="td-dim">{pretty(s.value)}</td><td>{s.is_system_locked?<span className="admin-pill pill-muted">Locked</span>:<button className="btn btn-quiet btn-sm" onClick={()=>save(s)}>Edit</button>}</td></tr>):<tr><td colSpan="5"><div className="admin-empty">{loading?'Loading settings…':'No settings found.'}</div></td></tr>}</tbody></table></div></div></section>}
+function SettingsPanel(){
+  const { toast } = useToast();
+  const [settings, setSettings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      setSettings(itemsOfList(await adminService.settings()));
+    } catch (e) {
+      toast.error(e.message || 'Unable to load settings.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const openEditor = (setting) => {
+    setEditing(setting);
+    setDraft(typeof setting.value === 'string' ? setting.value : JSON.stringify(setting.value, null, 2));
+  };
+
+  const closeEditor = () => {
+    if (!saving) {
+      setEditing(null);
+      setDraft('');
+    }
+  };
+
+  const parseDraft = (setting) => {
+    const raw = draft.trim();
+    if (setting?.data_type === 'string') return draft;
+    if (setting?.data_type === 'number' || setting?.data_type === 'integer') {
+      const value = Number(raw);
+      if (!Number.isFinite(value)) throw new Error('Enter a valid numeric value.');
+      return value;
+    }
+    if (setting?.data_type === 'boolean') {
+      if (!['true', 'false'].includes(raw.toLowerCase())) throw new Error('Enter true or false.');
+      return raw.toLowerCase() === 'true';
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return draft;
+    }
+  };
+
+  const save = async (event) => {
+    event.preventDefault();
+    if (!editing || saving) return;
+    setSaving(true);
+    try {
+      await adminService.updateSetting(editing.key, parseDraft(editing), 'Updated from admin console');
+      toast.success('Setting updated.');
+      closeEditor();
+      await load();
+    } catch (e) {
+      toast.error(e.message || 'Unable to update setting.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <section className="admin-panel">
+    <div className="admin-card">
+      <Toolbar title="System settings" description="Operational, financial and UI configuration with server-side validation." onRefresh={load}/>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead><tr><th>Key</th><th>Category</th><th>Type</th><th>Value</th><th/></tr></thead>
+          <tbody>
+            {settings.length ? settings.map((setting) => (
+              <tr key={setting.key}>
+                <td className="td-strong">{setting.key}</td>
+                <td>{setting.category}</td>
+                <td>{setting.data_type}</td>
+                <td className="td-dim">{pretty(setting.value)}</td>
+                <td>{setting.is_system_locked
+                  ? <span className="admin-pill pill-muted">Locked</span>
+                  : <button type="button" className="btn btn-quiet btn-sm" onClick={() => openEditor(setting)}>Edit</button>}</td>
+              </tr>
+            )) : <tr><td colSpan="5"><div className="admin-empty">{loading ? 'Loading settings…' : 'No settings found.'}</div></td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {editing && <AdminModal title={`Edit setting · ${editing.key}`} sub={`Type: ${editing.data_type || 'auto'} · Changes are validated server-side.`} onClose={closeEditor}>
+      <form onSubmit={save}>
+        <div className="field">
+          <label htmlFor="admin-setting-value">Value</label>
+          <textarea
+            id="admin-setting-value"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            rows={editing.data_type === 'json' || typeof editing.value === 'object' ? 9 : 5}
+            spellCheck="false"
+            autoFocus
+            aria-describedby="admin-setting-help"
+          />
+          <small id="admin-setting-help">For JSON values, enter valid JSON. String values are preserved as typed.</small>
+        </div>
+        <div className="btn-row">
+          <button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button>
+          <button type="submit" className="btn" disabled={saving}>{saving ? 'Saving…' : 'Save setting'}</button>
+        </div>
+      </form>
+    </AdminModal>}
+  </section>;
+}
 
 function PaymentsPanel(){const {toast}=useToast();const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);const load=async()=>{setLoading(true);try{setRows(itemsOfList(await adminService.paymentsReport()))}catch(e){toast.error(e.message||'Unable to load payment telemetry.')}finally{setLoading(false)}};useEffect(()=>{load()},[]);return <section className="admin-panel"><div className="admin-card"><Toolbar title="Payments" description="Gateway attempts, payment state and order reconciliation. No card data is exposed." onRefresh={load}/><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Attempts</div><div className="stat-value">{loading?'…':rows.length}</div></div><div className="admin-stat"><div className="stat-label">Successful</div><div className="stat-value">{rows.filter(r=>['succeeded','paid'].includes(r.status)).length}</div></div><div className="admin-stat"><div className="stat-label">Needs attention</div><div className="stat-value">{rows.filter(r=>!['succeeded','paid'].includes(r.status)).length}</div></div></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Attempts</th><th>Intent</th><th>Created</th></tr></thead><tbody>{rows.map(r=><tr key={r.id}><td className="td-strong">{r.orders?.order_number||'—'}</td><td className="td-gold">{formatMoney(Number(r.amount)||0)}</td><td><span className={`admin-pill ${['succeeded','paid'].includes(r.status)?'pill-success':'pill-muted'}`}>{r.status}</span></td><td>{r.attempt_number||1}/{r.total_attempts||1}</td><td className="td-dim">{r.latest_payment_intent_id?`${String(r.latest_payment_intent_id).slice(0,10)}…`:'—'}</td><td className="td-dim">{r.created_at?new Date(r.created_at).toLocaleString('en-IN'):''}</td></tr>)}</tbody></table></div></section>}
 
