@@ -89,7 +89,7 @@ export default function FulfillmentPanel() {
         <div className="btn-row">
           <select className="admin-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="">All shipments</option>
-            <option value="created">Created</option><option value="awb_assigned">AWB assigned</option>
+            <option value="ready_to_create">Ready to create</option><option value="created">Created</option><option value="awb_assigned">AWB assigned</option>
             <option value="pickup_scheduled">Pickup scheduled</option><option value="in_transit">In transit</option>
             <option value="out_for_delivery">Out for delivery</option><option value="delivered">Delivered</option>
           </select>
@@ -121,7 +121,7 @@ export default function FulfillmentPanel() {
                   {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':generateProviderInvoice'} onClick={() => action(row.id, 'generateProviderInvoice', 'Courier invoice generated.') }><RiFileTextLine size={14}/>Invoice</button>}
                   {row.tracking_url && <a className="btn btn-quiet btn-sm" href={row.tracking_url} target="_blank" rel="noreferrer"><RiLinksLine size={14}/>Track</a>}
                 </div>
-                {row.status === 'created' && <div className="field-grid" style={{marginTop:10}}>
+                {row.status === 'ready_to_create' && <div className="field-grid" style={{marginTop:10}}>
                   <input placeholder="Pickup location" value={f.pickup_location || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,pickup_location:e.target.value}}))}/>
                   <input type="number" min="0.01" step="0.01" placeholder="Weight kg" value={f.weight_kg || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,weight_kg:e.target.value}}))}/>
                   <input type="number" min="1" step="0.1" placeholder="Length cm" value={f.length_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,length_cm:e.target.value}}))}/>
