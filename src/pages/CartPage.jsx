@@ -111,11 +111,11 @@ export default function CartPage() {
           <div className="summary-heading"><p className="eyebrow">Order summary</p></div>
           <dl className="summary-lines">
             <div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div>
-            <div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div>
+            <div><dt>Shipping</dt><dd className="shipping-at-checkout">Calculated at checkout</dd></div>
             <div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>
-            <div className="total"><dt>Total</dt><dd>{formatMoney(cart.total_amount)}</dd></div>
+            <div className="total"><dt>Before shipping</dt><dd>{formatMoney(cart.total_amount)}</dd></div>
           </dl>
-          {cart.free_shipping_eligible ? <p className="free-ship-note"><RiTruckLine size={16} /> You qualify for free shipping!</p> : cart.amount_to_free_shipping > 0 && <p className="free-ship-note"><RiTruckLine size={16} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>}
+          <p className="free-ship-note"><RiTruckLine size={16} /> Live Shiprocket shipping is calculated after you select your delivery PIN.</p>
           <button className="btn btn-block cart-checkout" onClick={() => navigate('/checkout')} disabled={loading || Boolean(updatingId) || cart.has_unavailable_items || items.some((i) => !i.in_stock)}><RiLockLine size={17} /> Checkout securely <RiArrowRightLine size={17} /></button>
           <p className="cart-secure-note">Secure checkout · Your payment details are protected.</p>
         </aside>
