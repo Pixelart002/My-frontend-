@@ -117,6 +117,6 @@ export default function Header() {
       </div>
     </div>
     <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen} onClick={closeAll}/>
-    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button ref={mobileCloseRef} type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
+    <aside ref={mobileNavRef} id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button ref={mobileCloseRef} type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
   </header>;
 }
