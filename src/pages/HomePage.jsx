@@ -47,10 +47,18 @@ export default function HomePage() {
   useEffect(() => {
     const root = document.querySelector('.home-landing');
     if (!root) return undefined;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return undefined;
+
     const ctx = gsap.context(() => {
       gsap.fromTo('[data-rise]', { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: .75, stagger: .08, ease: 'power3.out' });
-      gsap.utils.toArray('[data-reveal]').forEach(el => gsap.fromTo(el, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+      gsap.utils.toArray('[data-reveal]').forEach((el) => gsap.fromTo(
+        el,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } },
+      ));
     }, root);
+
     return () => ctx.revert();
   }, []);
 
