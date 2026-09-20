@@ -25,6 +25,7 @@ export default function OrderDetailPage() {
   const [shipment, setShipment] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [retryOpen, setRetryOpen] = useState(false);
   const [retryLoading, setRetryLoading] = useState(false);
   const [retryIntent, setRetryIntent] = useState(null);
@@ -85,14 +86,8 @@ export default function OrderDetailPage() {
   };
 
   const onCancel = async () => {
-    const cancelMessage = status === 'pending'
-      ? 'Cancel this order? Reserved stock will be released.'
-      : isCodOrder
-        ? 'Cancel this COD order? No online payment refund will be initiated.'
-        : 'Cancel this order? Your payment will be refunded.';
-    if (!window.confirm(cancelMessage)) return;
     setBusy(true);
-    try { await orderService.cancel(orderNumber); toast.success('Order cancelled.'); load(); }
+    try { await orderService.cancel(orderNumber); toast.success('Order cancelled.'); await load(); setCancelOpen(false); }
     catch (err) { toast.error(err.message || 'Unable to cancel this order.'); }
     finally { setBusy(false); }
   };
@@ -171,7 +166,7 @@ export default function OrderDetailPage() {
         <div className="order-detail-actions">
           {isRetryable && <button className="btn btn-sm" onClick={openRetry} disabled={busy || retryLoading}>Retry payment</button>}
           {canDownloadInvoice(status) && <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}><RiFileTextLine size={15} /> Download invoice</button>}
-          {canCancelOrder(status) && <button className="btn btn-danger btn-sm" onClick={onCancel} disabled={busy}><RiCloseCircleLine size={15} /> Cancel order</button>}
+          {canCancelOrder(status) && <button className="btn btn-danger btn-sm" onClick={() => setCancelOpen(true)} disabled={busy}><RiCloseCircleLine size={15} /> Cancel order</button>}
         </div>
         {retryError && <div className="form-error" role="alert">{retryError}</div>}
         <ShipmentTimeline shipment={shipment} />
@@ -209,6 +204,21 @@ export default function OrderDetailPage() {
       <PaymentMethodModal open={retryOpen} value="stripe" onChange={() => {}} onClose={closeRetry} onContinue={prepareRetry} loading={retryLoading} review address={retryAddress} total={formatMoney(order.total_amount ?? order.grand_total)} onBack={closeRetry}>
         {retryLoading && !retryIntent ? <Spinner label="Preparing secure payment…" /> : paymentContent}
       </PaymentMethodModal>
-    </div>
+          <ConfirmDialog
+        open={cancelOpen}
+        title="Cancel order?"
+        message={status === 'pending'
+          ? 'Reserved stock will be released.'
+          : isCodOrder
+            ? 'No online payment refund will be initiated for this COD order.'
+            : 'Your payment will be refunded according to the payment flow.'}
+        confirmLabel="Cancel order"
+        cancelLabel="Keep order"
+        danger
+        busy={busy}
+        onCancel={() => setCancelOpen(false)}
+        onConfirm={onCancel}
+      />
+</div>
   );
 }
