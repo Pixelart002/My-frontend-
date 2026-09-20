@@ -36,14 +36,87 @@ function InventoryPanel() {
   return <section className="admin-panel"><div className="admin-card"><Toolbar title="Inventory" description="Monitor stock risk and release abandoned checkout reservations." onRefresh={load}><button className="btn btn-sm" disabled={scanning} onClick={scan}>{scanning?'Scanning…':'Scan low stock'}</button></Toolbar><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Low-stock products</div><div className="stat-value">{loading?'…':lowStock.length}</div></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Threshold</th></tr></thead><tbody>{lowStock.length?lowStock.map((p,i)=><tr key={p.id||i}><td className="td-strong">{pretty(p.name||p.product_name)}</td><td className="td-gold">{pretty(p.stock??p.quantity)}</td><td>{pretty(p.low_stock_threshold??p.threshold)}</td></tr>):<tr><td colSpan="3"><div className="admin-empty">{loading?'Loading inventory…':'No low-stock products.'}</div></td></tr>}</tbody></table></div></div></section>;
 }
 
-function ShippingPanel(){
-  const {toast}=useToast(); const [deleteTarget,setDeleteTarget]=useState(null); const empty={name:'',type:'flat',base_rate:0,threshold:'',per_item_rate:'',weight_rate:'',estimated_days:3,is_active:true,sort_order:0}; const [methods,setMethods]=useState([]); const [form,setForm]=useState(empty); const [editing,setEditing]=useState(null); const [loading,setLoading]=useState(true);
-  const load=async()=>{setLoading(true);try{setMethods(itemsOfList(await adminService.shippingMethods(false)))}catch(e){toast.error(e.message||'Unable to load shipping methods.')}finally{setLoading(false)}};useEffect(()=>{load()},[]);
-  const save=async(e)=>{e.preventDefault();try{const payload={...form,base_rate:Number(form.base_rate||0),estimated_days:Number(form.estimated_days||3),sort_order:Number(form.sort_order||0),threshold:form.threshold===''?null:Number(form.threshold),per_item_rate:form.per_item_rate===''?null:Number(form.per_item_rate),weight_rate:form.weight_rate===''?null:Number(form.weight_rate)};if(editing)await adminService.updateShipping(editing,payload);else await adminService.createShipping(payload);toast.success(editing?'Shipping method updated.':'Shipping method created.');setEditing(null);setForm(empty);await load()}catch(e){toast.error(e.message||'Unable to save shipping method.')}};
-  const remove=async(id)=>{try{await adminService.deleteShipping(id);toast.success('Shipping method deleted.');await load()}catch(e){toast.error(e.message||'Unable to delete shipping method.')}};
-  return (<><section className="admin-panel"><div className="admin-card"><Toolbar title="Shipping methods" description="Legacy shipping methods are retained for administrative records only. Customer checkout uses live Shiprocket courier rates and does not use these methods." onRefresh={load}/><form onSubmit={save}><div className="field-grid"><label>Name<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Type<select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}><option value="flat">Flat</option><option value="free_threshold">Free above threshold</option><option value="per_item">Per item</option><option value="weight">By weight</option></select></label><label>Base rate<input type="number" min="0" step="0.01" value={form.base_rate} onChange={e=>setForm({...form,base_rate:e.target.value})}/></label><label>Threshold<input type="number" min="0" step="0.01" value={form.threshold} onChange={e=>setForm({...form,threshold:e.target.value})}/></label><label>Per-item rate<input type="number" min="0" step="0.01" value={form.per_item_rate} onChange={e=>setForm({...form,per_item_rate:e.target.value})}/></label><label>Weight rate<input type="number" min="0" step="0.01" value={form.weight_rate} onChange={e=>setForm({...form,weight_rate:e.target.value})}/></label><label>Estimated days<input type="number" min="1" max="30" value={form.estimated_days} onChange={e=>setForm({...form,estimated_days:e.target.value})}/></label><label>Sort order<input type="number" value={form.sort_order} onChange={e=>setForm({...form,sort_order:e.target.value})}/></label><label className="checkbox-field"><input type="checkbox" checked={!!form.is_active} onChange={e=>setForm({...form,is_active:e.target.checked})}/> Active</label></div><div className="btn-row ops-form-actions"><button className="btn btn-sm"><RiSaveLine size={16}/>{editing?'Update method':'Create method'}</button>{editing&&<button type="button" className="btn btn-quiet btn-sm" onClick={()=>{setEditing(null);setForm(empty)}}>Cancel</button>}</div></form></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Name</th><th>Type</th><th>Base</th><th>Days</th><th>Status</th><th/></tr></thead><tbody>{methods.length?methods.map(m=><tr key={m.id}><td className="td-strong">{m.name}</td><td>{m.type}</td><td className="td-gold">{formatMoney(Number(m.base_rate)||0)}</td><td>{m.estimated_days}</td><td><span className={`admin-pill ${m.is_active?'pill-success':'pill-muted'}`}>{m.is_active?'Active':'Inactive'}</span></td><td><div className="btn-row"><button className="icon-btn" onClick={()=>{setEditing(m.id);setForm({...empty,...m})}} aria-label="Edit"><RiSaveLine size={15}/></button><button className="icon-btn" onClick={()=>setDeleteTarget(m)} aria-label="Delete"><RiDeleteBinLine size={15}/></button></div></td></tr>):<tr><td colSpan="6"><div className="admin-empty">{loading?'Loading shipping methods…':'No legacy shipping methods configured. Customer checkout uses live Shiprocket rates.'}</div></td></tr>}</tbody></table></div></section>
-      <ConfirmDialog open={Boolean(deleteTarget)} title="Delete shipping method?" message={deleteTarget ? `Delete “${deleteTarget.name}”?` : ''} confirmLabel="Delete method" danger onCancel={()=>setDeleteTarget(null)} onConfirm={async()=>{await remove(deleteTarget?.id);setDeleteTarget(null)}} />
-    </>
+function ShippingPanel() {
+  const { toast } = useToast();
+  const [methods, setMethods] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      setMethods(itemsOfList(await adminService.shippingMethods(false)));
+    } catch (e) {
+      toast.error(e.message || 'Unable to load shipping history.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Shipping"
+          description="Customer checkout uses live Shiprocket courier pricing. Legacy flat/free-threshold methods are inactive and are not used for new orders."
+          onRefresh={load}
+        />
+        <div className="admin-stats">
+          <div className="admin-stat">
+            <div className="stat-label">Checkout provider</div>
+            <div className="stat-value" style={{ fontSize: 22 }}>Shiprocket</div>
+          </div>
+          <div className="admin-stat">
+            <div className="stat-label">Customer rate</div>
+            <div className="stat-value" style={{ fontSize: 22 }}>Live courier</div>
+          </div>
+          <div className="admin-stat">
+            <div className="stat-label">Legacy methods</div>
+            <div className="stat-value" style={{ fontSize: 22 }}>{loading ? '…' : methods.length}</div>
+          </div>
+        </div>
+        <div className="admin-page-note">
+          Rate is calculated server-side from delivery PIN, parcel weight, payment method and Shiprocket serviceability.
+          No admin-entered flat shipping amount is applied to customer checkout.
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-toolbar">
+          <div>
+            <h2>Legacy shipping methods</h2>
+            <p>Historical records retained for audit/admin visibility. They should remain inactive.</p>
+          </div>
+        </div>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr><th>Name</th><th>Type</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {methods.length ? methods.map((method) => (
+                <tr key={method.id}>
+                  <td className="td-strong">{method.name}</td>
+                  <td>{method.type}</td>
+                  <td>
+                    <span className="admin-pill pill-muted">Archived / ignored</span>
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan="3">
+                    <div className="admin-empty">
+                      {loading ? 'Loading shipping history…' : 'No legacy shipping methods found.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   );
 }
 
