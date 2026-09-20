@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { RiCloseLine, RiBankCardLine, RiCashLine, RiArrowRightLine, RiMapPinLine, RiShieldCheckLine, RiCheckboxCircleFill } from '@remixicon/react';
+import { useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const iconStyle = { display: 'block', width: 20, height: 20, flex: '0 0 auto', color: 'currentColor' };
 
@@ -9,6 +11,8 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
   const isCodSuccess = activeOrder && value === 'cod';
   const hasPaymentContent = Boolean(children) && !isCodSuccess;
   const locked = !isCodSuccess && (activeOrder || hasPaymentContent);
+  const modalRef = useRef(null);
+  const closeRef = useRef(null);
   const title = isCodSuccess ? 'Order placed successfully' : hasPaymentContent ? 'Complete payment' : review ? 'Review your order' : 'Choose payment method';
   const goToOrderSuccess = () => {
     const orderNumber = String(activeOrder?.orderNumber || '').trim();
@@ -21,11 +25,18 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
     onClose?.();
   };
 
+  useFocusTrap({
+    enabled: open,
+    containerRef: modalRef,
+    initialFocusRef: closeRef,
+    onEscape: () => { if (!loading && !cancellingOrder) handleClose(); },
+  });
+
   return <div className="payment-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !loading && (isCodSuccess || !locked)) handleClose(); }}>
-    <div className={`payment-modal ${review ? 'payment-modal-review' : ''} ${hasPaymentContent ? 'payment-modal-active' : ''}`} role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+    <div ref={modalRef} tabIndex={-1} className={`payment-modal ${review ? 'payment-modal-review' : ''} ${hasPaymentContent ? 'payment-modal-active' : ''}`} role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
       <header className="payment-modal-header">
         <div className="payment-modal-title-wrap"><p className="eyebrow">Secure checkout</p><h3 id="payment-modal-title">{title}</h3></div>
-        <button type="button" className="btn btn-quiet btn-icon payment-modal-close" aria-label={isCodSuccess ? 'View order confirmation' : locked ? 'Cancel order' : 'Close payment dialog'} onClick={handleClose} disabled={loading || cancellingOrder}>
+        <button ref={closeRef} type="button" className="btn btn-quiet btn-icon payment-modal-close" aria-label={isCodSuccess ? 'View order confirmation' : locked ? 'Cancel order' : 'Close payment dialog'} onClick={handleClose} disabled={loading || cancellingOrder}>
           <RiCloseLine aria-hidden="true" style={iconStyle} />
         </button>
       </header>
