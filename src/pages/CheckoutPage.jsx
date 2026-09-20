@@ -121,13 +121,43 @@ export default function CheckoutPage() {
     return total > 0 ? total : 0.5;
   }, [items]);
 
-  // Shipping is authoritative on the backend payment/COD flow. The customer UI
-  // must not call the admin-only provider-rate endpoint (it requires shipping
-  // permissions/MFA). This avoids false checkout errors; the final amount is
-  // calculated from the live Shiprocket quote server-side.
-  const shippingQuote = null;
-  const shippingQuoteLoading = false;
-  const shippingQuoteError = '';
+  const [shippingQuote, setShippingQuote] = useState(null);
+
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadLiveShipping = async () => {
+      if (!selectedAddress?.postal_code || !items.length) {
+        setShippingQuote(null);
+        setShippingQuoteError('');
+        return;
+      }
+      setShippingQuoteLoading(true);
+      setShippingQuoteError('');
+      try {
+        const result = await shippingService.providerRate({
+          deliveryPostcode: selectedAddress.postal_code,
+          weightKg: shipmentWeightKg,
+          cod: paymentMethod === 'cod',
+          declaredValue: Number(cart?.subtotal) || 0,
+        });
+        const selectedQuote = result?.selected || result?.data?.selected;
+        if (!selectedQuote || Number.isNaN(Number(selectedQuote.shipping_cost))) {
+          throw new Error('Live Shiprocket rate was not returned.');
+        }
+        if (!cancelled) setShippingQuote(selectedQuote);
+      } catch (err) {
+        if (!cancelled) {
+          setShippingQuote(null);
+          setShippingQuoteError(err?.message || 'Live shipping could not be calculated yet.');
+        }
+      } finally {
+        if (!cancelled) setShippingQuoteLoading(false);
+      }
+    };
+    loadLiveShipping();
+    return () => { cancelled = true; };
+  }, [selectedAddress?.postal_code, shipmentWeightKg, paymentMethod, cart?.subtotal, items.length]);
 
 
 
@@ -282,8 +312,8 @@ export default function CheckoutPage() {
       <section className="checkout-section"><h2>1 · Delivery address</h2>{addressError && <ErrorState message={addressError} onRetry={loadAddresses} />}{addresses.length > 0 && !showForm && <div className="address-list">{addresses.map((addr) => <label key={addr.id} className={`address-card ${String(selected) === String(addr.id) ? 'is-selected' : ''}`}><input type="radio" name="address" disabled={Boolean(activeOrder)} checked={String(selected) === String(addr.id)} onChange={() => { setSelected(addr.id); resetPayment(); }} /><div><strong>{addr.full_name || 'Delivery'}</strong><p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>{addr.email && <p>{addr.email}</p>}{addr.is_default && <span className="chip chip-sm">Default</span>}</div></label>)}<button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add a new address</button></div>}{addresses.length === 0 && !showForm && <div className="state"><p>You’ll need a delivery address to check out.</p></div>}{showForm && !activeOrder && <AddressForm onSaved={() => { setShowForm(false); loadAddresses(); }} onCancel={() => setShowForm(false)} />}</section>
       <section className="checkout-section"><h2>2 · Coupon</h2>{coupon ? <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Applied coupon</span><strong>{coupon.code}</strong><small>You saved {formatMoney(couponDiscount)} on this order.</small></div><button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={removeCoupon}><RiCloseLine size={15} /> Remove</button></div> : <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Have a coupon?</span><small>Enter a valid promo code to apply the backend-calculated discount.</small></div><div className="coupon-input-row"><input disabled={Boolean(activeOrder)} value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="PROMO CODE" maxLength={40} autoComplete="off" aria-label="Coupon code" /><button className="btn" type="button" onClick={applyCoupon} disabled={couponLoading || !couponInput.trim() || Boolean(activeOrder)}>{couponLoading ? 'Applying…' : 'Apply'}</button></div></div>}{couponError && <div className="form-error" role="alert">{couponError}</div>}</section>
       <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
-    </div><aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>Calculated at checkout</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}{shippingQuote ? ' + shipping GST at payment' : ''}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Before shipping</dt><dd>{formatMoney(finalTotal)}</dd></div></dl><p className="free-ship-note"><RiArrowRightLine size={15} /> Live Shiprocket shipping and GST are calculated securely when you continue to payment.</p></aside></div>
-    <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total="Shipping + GST calculated securely at payment" onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
+    </div><aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>Calculated at checkout</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}{shippingQuote ? ' + shipping GST at payment' : ''}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Before shipping</dt><dd>{formatMoney(finalTotal)}</dd></div></dl>{shippingQuoteError ? <p className="free-ship-note" role="status">{shippingQuoteError}</p> : shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Live rate: {shippingQuote.courier_name || "Shiprocket courier"}{shippingQuote.estimated_delivery_days ? ` · ${shippingQuote.estimated_delivery_days} days` : ""}.</p>}</aside></div>
+    <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={shippingQuote ? `${formatMoney(finalTotal)} + ${formatMoney(shippingQuote.shipping_cost)} shipping + GST at payment` : 'Shipping + GST calculated securely at payment'} onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
     {cancelConfirmOpen && <div className="checkout-cancel-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !cancellingOrder) setCancelConfirmOpen(false); }}><div ref={cancelModalRef} className="checkout-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title" aria-describedby="cancel-order-description" tabIndex={-1}><div className="checkout-cancel-modal-icon" aria-hidden="true"><RiErrorWarningLine size={26} /></div><div className="checkout-cancel-modal-copy"><p className="eyebrow">Payment checkout</p><h3 id="cancel-order-title">Are you sure you want to cancel this order?</h3><p id="cancel-order-description">This will cancel order <b>#{activeOrder?.orderNumber}</b> and release its reserved stock. The cancelled order items will not be added back to your cart.</p></div><div className="checkout-cancel-modal-actions"><button ref={cancelCloseRef} type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn checkout-cancel-danger" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Yes, cancel order'}</button></div></div></div>}
   </div>;
 }
