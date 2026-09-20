@@ -69,7 +69,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ ...blank });
   const [saving, setSaving] = useState(false);
-  const [busyId, setBusyId] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null);
+  const [busyId, setBusyId] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
@@ -501,5 +501,5 @@ export default function ProductsPanel({ capabilities = {} }) {
         <div className="editor-footer"><label className="check-line"><input type="checkbox" checked={form.is_active} onChange={(e) => setField('is_active', e.target.checked)} /> <span><strong>Active listing</strong><small>Visible to customers when published.</small></span></label><div className="btn-row"><button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button><button className="btn" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button></div></div>
       </form>
     </AdminModal>}
-  </div><ConfirmDialog open={Boolean(deleteTarget)} title="Delete product?" message={deleteTarget ? `Delete “${deleteTarget.name}”? This cannot be undone.` : ''} confirmLabel="Delete product" danger onCancel={()=>setDeleteTarget(null)} onConfirm={async()=>{await remove(deleteTarget);setDeleteTarget(null)}} /></div>;
+  </div><ConfirmDialog open={Boolean(deleteTarget)} title="Delete product?" message={deleteTarget ? `Delete “${deleteTarget.name}”? This cannot be undone.` : ''} confirmLabel="Delete product" danger onCancel={()=>setDeleteTarget(null)} onConfirm={async()=>{await remove(deleteTarget);setDeleteTarget(null)}} /></div><ConfirmDialog open={Boolean(deleteTarget)} title="Delete product?" message={deleteTarget ? `Delete “${deleteTarget.name}”? This cannot be undone.` : ''} confirmLabel="Delete product" danger onCancel={()=>setDeleteTarget(null)} onConfirm={async()=>{await remove(deleteTarget);setDeleteTarget(null)}} /></div>;
 }
