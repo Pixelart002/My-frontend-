@@ -27,9 +27,11 @@ export function useFocusTrap({ enabled = true, containerRef, initialFocusRef, on
     const container = containerRef.current;
 
     const getFocusable = () =>
-      Array.from(container.querySelectorAll(FOCUSABLE)).filter(
-        (element) => element.getAttribute('aria-hidden') !== 'true' && element.offsetParent !== null,
-      );
+      Array.from(container.querySelectorAll(FOCUSABLE)).filter((element) => {
+        if (element.getAttribute('aria-hidden') === 'true') return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0;
+      });
 
     const initial = initialFocusRef?.current || getFocusable()[0];
     initial?.focus?.();
