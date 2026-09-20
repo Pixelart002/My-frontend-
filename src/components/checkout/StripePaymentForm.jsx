@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
@@ -6,6 +6,7 @@ import { paymentService } from '../../services/payments';
 import { orderService } from '../../services/orders';
 import { useAuth } from '../../context/AuthContext';
 import { RiLockLine, RiCheckboxCircleLine, RiRefreshLine, RiArrowRightLine, RiShieldCheckLine, RiBankCardLine, RiCashLine, RiCloseLine } from '@remixicon/react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 function ProcessingPayment() {
   return <div className="payment-processing-screen" role="status" aria-live="polite"><div className="payment-processing-ring" aria-hidden="true" /><h3>Confirming card payment...</h3><p>Please don’t close this page. We’re waiting for your card payment to finish confirmation.</p><div className="payment-processing-steps" aria-label="Payment progress"><div className="payment-processing-step is-done"><span className="payment-processing-dot"><RiCheckboxCircleLine size={18} /></span><span>Card details validated</span></div><div className="payment-processing-step is-active"><span className="payment-processing-dot" /><span>Confirming with bank</span></div><div className="payment-processing-step"><span className="payment-processing-dot" /><span>Verifying card payment</span></div><div className="payment-processing-step"><span className="payment-processing-dot" /><span>Finalizing order</span></div></div><span className="payment-processing-brand">LUVIIO</span></div>;
@@ -25,16 +26,25 @@ function PaymentStatusPopup({ children, className = '' }) {
 }
 
 function PaymentMethodChooser({ value, onSelect, onClose, busy }) {
+  const chooserRef = useRef(null);
+  const closeRef = useRef(null);
+  useFocusTrap({
+    enabled: true,
+    containerRef: chooserRef,
+    initialFocusRef: closeRef,
+    onEscape: () => { if (!busy) onClose(); },
+  });
+
   const options = [
     { id: 'stripe', title: 'Stripe', description: 'Use a card or another supported online method. You can enter a different card.', Icon: RiBankCardLine },
     { id: 'cod', title: 'Cash on Delivery', description: 'Keep this same order and pay when it arrives.', Icon: RiCashLine },
   ];
   return createPortal(
     <div className="payment-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose(); }} style={{ zIndex: 12000 }}>
-      <div role="dialog" aria-modal="true" aria-labelledby="payment-method-switch-title" style={{ width: 'min(620px, calc(100vw - 24px))', maxHeight: 'min(760px, calc(100dvh - 24px))', overflowY: 'auto', boxSizing: 'border-box', padding: 'clamp(20px, 4vw, 32px)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)', boxShadow: '0 28px 100px rgba(0,0,0,.7)' }}>
+      <div ref={chooserRef} role="dialog" aria-modal="true" aria-labelledby="payment-method-switch-title" tabIndex={-1} style={{ width: 'min(620px, calc(100vw - 24px))', maxHeight: 'min(760px, calc(100dvh - 24px))', overflowY: 'auto', boxSizing: 'border-box', padding: 'clamp(20px, 4vw, 32px)', border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)', boxShadow: '0 28px 100px rgba(0,0,0,.7)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
           <div><p className="eyebrow">Payment</p><h3 id="payment-method-switch-title" style={{ margin: 0 }}>Choose another payment method</h3><p style={{ margin: '8px 0 0', opacity: .72 }}>Your order, address, total and checkout payload stay the same.</p></div>
-          <button type="button" className="btn btn-quiet btn-icon" aria-label="Close payment method chooser" onClick={onClose} disabled={busy}><RiCloseLine size={20} /></button>
+          <button ref={closeRef} type="button" className="btn btn-quiet btn-icon" aria-label="Close payment method chooser" onClick={onClose} disabled={busy}><RiCloseLine size={20} /></button>
         </div>
         <div role="radiogroup" aria-label="Available payment methods" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))', gap: 12, marginTop: 22 }}>
           {options.map(({ id, title, description, Icon }) => {
