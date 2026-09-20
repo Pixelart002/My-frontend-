@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { RiArchive2Line, RiCloseLine, RiGridLine, RiHeartLine, RiHomeLine, RiInformationLine, RiLogoutBoxRLine, RiMailLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiStore2Line, RiUser3Line, RiUserLine, RiCoupon3Line, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiDashboardLine } from '@remixicon/react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import '../styles/desktop-menu.css';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const ADMIN_NAV = [
   ['dashboard', 'Dashboard', RiDashboardLine],
@@ -41,6 +42,8 @@ export default function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const mobileNavRef = useRef(null);
+  const mobileCloseRef = useRef(null);
   const path = location.pathname;
   const isAdminPage = path === '/admin' || path.startsWith('/admin/');
   const isAdmin = ['admin','super_admin','owner'].includes(String(user?.role || '').toLowerCase()) || user?.is_admin === true;
@@ -48,14 +51,19 @@ export default function Header() {
   useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [location.pathname, location.search]);
   useEffect(() => {
     if (!mobileOpen) return undefined;
-    const closeOnEscape = (e) => { if (e.key === 'Escape') setMobileOpen(false); };
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    document.addEventListener('keydown', closeOnEscape);
-    return () => { document.body.style.overflow = previous; document.removeEventListener('keydown', closeOnEscape); };
+    return () => { document.body.style.overflow = previous; };
   }, [mobileOpen]);
 
   const closeAll = () => { setMobileOpen(false); setMenuOpen(false); };
+
+  useFocusTrap({
+    enabled: mobileOpen,
+    containerRef: mobileNavRef,
+    initialFocusRef: mobileCloseRef,
+    onEscape: closeAll,
+  });
   const onSearch = (e) => { e.preventDefault(); const q = e.currentTarget.query.value.trim(); navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop'); closeAll(); };
   const onLogout = async () => { closeAll(); await logout(); toast.success('You have been signed out.'); navigate('/'); };
   const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
@@ -109,6 +117,6 @@ export default function Header() {
       </div>
     </div>
     <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen} onClick={closeAll}/>
-    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
+    <aside id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button ref={mobileCloseRef} type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
   </header>;
 }
