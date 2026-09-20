@@ -12,7 +12,7 @@ const MAX_IMAGES = 10;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const blank = {
   name: '', slug: '', sku: '', category_id: '', price: '', compare_price: '', stock: '0',
-  weight_grams: '', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
+  weight: '', weight_unit: 'g', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
   image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
   part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
   specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
@@ -25,7 +25,7 @@ const toForm = (p) => {
     ...blank,
     name: p.name || '', slug: p.slug || '', sku: p.sku || '', category_id: p.category_id || '',
     price: p.price != null ? String(p.price) : '', compare_price: p.compare_price != null ? String(p.compare_price) : '',
-    stock: p.stock != null ? String(p.stock) : '0', weight_grams: p.weight_grams != null ? String(p.weight_grams) : '',
+    stock: p.stock != null ? String(p.stock) : '0', weight: p.weight != null ? String(p.weight) : '', weight_unit: p.weight_unit || 'g',
     hsn_code: p.hsn_code || '', gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18',
     short_description: p.short_description || '', description: p.description || '', image_url: images[0] || '', images,
     brand: p.brand || '', manufacturer: p.manufacturer || '', model_number: p.model_number || '',
@@ -248,7 +248,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     const price = Number(form.price);
     const compare = form.compare_price === '' ? null : Number(form.compare_price);
     const stock = Number(form.stock);
-    const weight = form.weight_grams === '' ? null : Number(form.weight_grams);
+    const weight = form.weight === '' ? null : Number(form.weight);
 
     if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
     if (!isCreate && form.name.trim() && name.length < 2) return 'Name must be at least 2 characters.';
@@ -262,7 +262,8 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!isCreate && form.gst_percentage !== '' && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
-    if (weight !== null && (!Number.isInteger(weight) || weight < 0)) return 'Weight must be a whole number of 0 or more.';
+    if (weight !== null && (!Number.isFinite(weight) || weight < 0)) return 'Weight must be 0 or more.';
+    if (!['g', 'kg'].includes(form.weight_unit)) return 'Weight unit must be g or kg.';
     if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
     if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
     if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
@@ -312,7 +313,8 @@ export default function ProductsPanel({ capabilities = {} }) {
         warranty: form.warranty.trim() || undefined,
         hsn_code: form.hsn_code.trim() || undefined,
         gst_percentage: Number(form.gst_percentage),
-        weight_grams: form.weight_grams === '' ? undefined : Number(form.weight_grams),
+        weight: form.weight === '' ? undefined : Number(form.weight),
+        weight_unit: form.weight === '' ? undefined : form.weight_unit,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
@@ -422,7 +424,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             </div>
           </div>
           <div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight (grams)</label><input id="product-weight" type="number" min="0" step="1" value={form.weight_grams} onChange={(e) => setField('weight_grams', e.target.value)} /></div><div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div></div>
+          <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight</label><div className="field-inline"><input id="product-weight" type="number" min="0" step="0.001" value={form.weight} onChange={(e) => setField('weight', e.target.value)} placeholder="e.g. 250" /><select aria-label="Weight unit" value={form.weight_unit} onChange={(e) => setField('weight_unit', e.target.value)}><option value="g">g</option><option value="kg">kg</option></select></div></div><div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div></div>
         </div>
 
         <div className="editor-section"><div className="editor-section-head"><div><h3>Product media</h3><p>Up to 10 images. First image is primary; existing images can be reordered or removed.</p></div><span className="image-count">{form.images.length + selectedFiles.length}/{MAX_IMAGES}</span></div>
