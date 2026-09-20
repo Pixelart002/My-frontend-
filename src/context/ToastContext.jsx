@@ -66,7 +66,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-stack" role="status" aria-live="polite">
+      <div className="toast-stack" aria-label="Notifications">
         {toasts.map((item) => {
           const Icon = ICONS[item.tone] || RiInformationLine;
           return (
