@@ -70,7 +70,7 @@ export function ToastProvider({ children }) {
         {toasts.map((item) => {
           const Icon = ICONS[item.tone] || RiInformationLine;
           return (
-            <div key={item.id} className={`toast toast-${item.tone}`}>
+            <div key={item.id} className={`toast toast-${item.tone}`} role={item.tone === 'error' ? 'alert' : 'status'} aria-live={item.tone === 'error' ? 'assertive' : 'polite'}>
               <Icon size={17} />
               <span>{item.message}</span>
               <button
