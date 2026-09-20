@@ -138,7 +138,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
     setProcessing(true);
     setRetryAllowed(false);
     if (intentId) {
-      try { await paymentService.notifyFailed(intentId, fallbackMessage); } catch {}
+      try { await paymentService.notifyFailed(intentId, fallbackMessage); } catch { /* Failure notification is best-effort. */ }
     }
     setPaymentIntentId(intentId);
     setMessage(paymentStatus === 'requires_payment_method' ? fallbackMessage : 'Card payment could not be completed. Please try again.');
@@ -262,7 +262,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
       if (paymentStatus === 'requires_action') { handleUnresolvedConfirmation(intent, err?.message || 'Card verification could not be completed. Please try the payment again.'); return; }
       if (paymentStatus === 'processing') { setPaymentPending(true); setProcessing(false); return; }
       const reconciled = await reconcileOrder();
-      if (String(reconciled?.status || '').toLowerCase() === 'paid') { try { await refreshProfile(); } catch {} onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: intent?.id || paymentIntentId || undefined }); return; }
+      if (String(reconciled?.status || '').toLowerCase() === 'paid') { try { await refreshProfile(); } catch { /* Profile refresh is best-effort. */ } onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: intent?.id || paymentIntentId || undefined }); return; }
       setProcessing(false);
       setMessage(err?.message || 'Card payment status could not be confirmed. Please check your order status before trying again.');
     }
