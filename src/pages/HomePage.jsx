@@ -116,7 +116,7 @@ export default function HomePage() {
       </div>
       <div className="luviio-marketing-points">
         <div><RiShieldCheckLine size={22} /><span><strong>Verified checkout</strong><small>Secure payment flow and order tracking</small></span></div>
-        <div><RiTruckLine size={22} /><span><strong>Local-friendly delivery</strong><small>Clear shipping threshold and order updates</small></span></div>
+        <div><RiTruckLine size={22} /><span><strong>Local-friendly delivery</strong><small>Live courier rates and order updates</small></span></div>
         <div><RiPriceTag3Line size={22} /><span><strong>Honest product pricing</strong><small>Product-level GST and backend-calculated totals</small></span></div>
       </div>
     </section>
