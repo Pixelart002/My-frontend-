@@ -226,8 +226,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--lm-brand-500) !i
   .product-price-row { font-size: 13px !important; }
 }
 
-/* Respect reduced-motion users */
+/* Respect reduced-motion users across the final UI layer. */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
   .product-card:hover .product-media-link img { transform: none !important; }
-  *, *::before, *::after { scroll-behavior: auto !important; }
 }
