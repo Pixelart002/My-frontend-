@@ -69,7 +69,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ ...blank });
   const [saving, setSaving] = useState(false);
-  const [busyId, setBusyId] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null);
+  const [busyId, setBusyId] = useState(null); const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
