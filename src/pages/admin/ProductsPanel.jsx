@@ -173,7 +173,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   const lookupHsn = async (code = form.hsn_code) => {
     const value = String(code || '').trim();
-    if (!/^\\d{4,8}$/.test(value)) return;
+    if (!/^\d{4,8}$/.test(value)) return;
     setHsnLoading(true);
     setHsnError('');
     try {
@@ -268,7 +268,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (form.price !== '' && !(price > 0)) return 'Price must be greater than zero.';
     if (compare !== null && (!(compare > 0) || compare <= price)) return 'Compare-at price must be greater than the price.';
     if (isCreate && !hsn) return 'HSN code is required.';
-    if (hsn && !/^\\d{4,8}$/.test(hsn)) return 'HSN code must contain 4-8 digits.';
+    if (hsn && !/^\d{4,8}$/.test(hsn)) return 'HSN code must contain 4-8 digits.';
     if (!isCreate && form.hsn_code !== '' && !hsn) return 'HSN code cannot be empty.';
     const gst = Number(form.gst_percentage);
     if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
@@ -423,7 +423,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             <div className="field">
               <label htmlFor="product-hsn">{fieldLabel('HSN code', isCreate)}</label>
               <div className="field-inline">
-                <input id="product-hsn" required={isCreate} minLength={isCreate ? 1 : undefined} maxLength={20} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\\D/g, '').slice(0, 8)); setHsnQuery(e.target.value); }} onBlur={() => lookupHsn()} placeholder="Search or enter HSN" inputMode="numeric" />
+                <input id="product-hsn" required={isCreate} minLength={isCreate ? 1 : undefined} maxLength={20} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\D/g, '').slice(0, 8)); setHsnQuery(e.target.value); }} onBlur={() => lookupHsn()} placeholder="Search or enter HSN" inputMode="numeric" />
                 <button type="button" className="btn btn-quiet btn-sm" onClick={searchHsn} disabled={hsnLoading}>{hsnLoading ? 'Searching…' : 'Find HSN'}</button>
               </div>
               <small>Search uses the configured live HSN/GST taxonomy provider. You can also enter a code manually.</small>
