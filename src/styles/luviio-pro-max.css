@@ -103,6 +103,9 @@
   --info-dim: var(--lm-info-bg);
 }
 
+/* Interaction affordances: clickable controls should look clickable without relying on color alone. */
+button:not(:disabled), a, [role='button']:not([aria-disabled='true']) { cursor: pointer; }
+
 /* Global contrast + surfaces */
 body { background: var(--lm-bg); color: var(--lm-text); }
 ::selection { background: rgba(217,170,91,.24); color: var(--lm-neutral-0); }
