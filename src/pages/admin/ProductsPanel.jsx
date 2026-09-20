@@ -386,7 +386,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (items === null) return <Spinner label="Loading products…" />;
 
-  return <div className="products-admin">
+  return (<><div className="products-admin">
     <div className="admin-head">
       <div><h1>Products</h1><p className="admin-sub">{filtered.length} of {items.length} shown · catalogue, pricing, inventory & hardware specifications</p></div>
       {canCreate && <button type="button" className="btn btn-sm" onClick={openCreate}><RiAddLine size={16} /> Add product</button>}
