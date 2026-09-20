@@ -109,7 +109,7 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
         const order = await orderService.myOrder(orderNumber);
         const status = String(order?.status || '').toLowerCase();
         if (status === 'paid' || status === 'cancelled' || status === 'failed') return order;
-      } catch {}
+      } catch { /* Best-effort reconciliation; retry the order lookup. */ }
       if (attempt < 7) await wait(750);
     }
     return null;
@@ -118,13 +118,13 @@ export default function StripePaymentForm({ orderNumber, clientSecret, onSuccess
   const finishConfirmedPayment = async (paymentIntent) => {
     try {
       const confirmation = await paymentService.confirm(paymentIntent.id);
-      try { await refreshProfile(); } catch {}
+      try { await refreshProfile(); } catch { /* Profile refresh is best-effort after payment. */ }
       onSuccess({ ...(confirmation || {}), payment_intent_id: paymentIntent.id });
       return true;
     } catch {
       const reconciled = await reconcileOrder();
       if (String(reconciled?.status || '').toLowerCase() === 'paid') {
-        try { await refreshProfile(); } catch {}
+        try { await refreshProfile(); } catch { /* Profile refresh is best-effort. */ }
         onSuccess({ status: 'paid', order_number: orderNumber, payment_intent_id: paymentIntent.id });
         return true;
       }
