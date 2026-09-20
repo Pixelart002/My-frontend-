@@ -16,6 +16,8 @@ const blank = {
   image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
   part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
   specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
+  volume: '', volume_unit: 'L', length: '', width: '', height: '', dimension_unit: 'mm',
+  quantity: '', quantity_unit: 'piece',
 };
 
 const toForm = (p) => {
@@ -33,6 +35,10 @@ const toForm = (p) => {
     key_features: Array.isArray(p.key_features) ? p.key_features.join('\n') : '',
     material: p.material || '', finish: p.finish || '', color: p.color || '', size: p.size || '',
     dimensions: p.dimensions || '', specifications: JSON.stringify(specs, null, 2),
+    volume: p.volume != null ? String(p.volume) : '', volume_unit: p.volume_unit || 'L',
+    length: p.length != null ? String(p.length) : '', width: p.width != null ? String(p.width) : '',
+    height: p.height != null ? String(p.height) : '', dimension_unit: p.dimension_unit || 'mm',
+    quantity: p.quantity != null ? String(p.quantity) : '', quantity_unit: p.quantity_unit || 'piece',
     warranty: p.warranty || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
   };
 };
@@ -249,6 +255,11 @@ export default function ProductsPanel({ capabilities = {} }) {
     const compare = form.compare_price === '' ? null : Number(form.compare_price);
     const stock = Number(form.stock);
     const weight = form.weight === '' ? null : Number(form.weight);
+    const volume = form.volume === '' ? null : Number(form.volume);
+    const length = form.length === '' ? null : Number(form.length);
+    const width = form.width === '' ? null : Number(form.width);
+    const height = form.height === '' ? null : Number(form.height);
+    const quantity = form.quantity === '' ? null : Number(form.quantity);
 
     if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
     if (!isCreate && form.name.trim() && name.length < 2) return 'Name must be at least 2 characters.';
@@ -264,6 +275,12 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
     if (weight !== null && (!Number.isFinite(weight) || weight < 0)) return 'Weight must be 0 or more.';
     if (!['g', 'kg'].includes(form.weight_unit)) return 'Weight unit must be g or kg.';
+    if (volume !== null && (!Number.isFinite(volume) || volume < 0)) return 'Volume must be 0 or more.';
+    if (volume !== null && !['ml', 'L'].includes(form.volume_unit)) return 'Volume unit must be ml or L.';
+    if ([length, width, height].some((v) => v !== null && (!Number.isFinite(v) || v < 0))) return 'Dimensions must be 0 or more.';
+    if ([length, width, height].some((v) => v !== null) && !['mm', 'cm', 'm', 'in', 'ft'].includes(form.dimension_unit)) return 'Dimension unit is invalid.';
+    if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) return 'Quantity must be 0 or more.';
+    if (quantity !== null && !['piece', 'pack', 'set', 'pair', 'box'].includes(form.quantity_unit)) return 'Quantity unit is invalid.';
     if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
     if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
     if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
@@ -315,6 +332,14 @@ export default function ProductsPanel({ capabilities = {} }) {
         gst_percentage: Number(form.gst_percentage),
         weight: form.weight === '' ? undefined : Number(form.weight),
         weight_unit: form.weight === '' ? undefined : form.weight_unit,
+        volume: form.volume === '' ? undefined : Number(form.volume),
+        volume_unit: form.volume === '' ? undefined : form.volume_unit,
+        length: form.length === '' ? undefined : Number(form.length),
+        width: form.width === '' ? undefined : Number(form.width),
+        height: form.height === '' ? undefined : Number(form.height),
+        dimension_unit: [form.length, form.width, form.height].some((v) => v !== '') ? form.dimension_unit : undefined,
+        quantity: form.quantity === '' ? undefined : Number(form.quantity),
+        quantity_unit: form.quantity === '' ? undefined : form.quantity_unit,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
@@ -424,7 +449,14 @@ export default function ProductsPanel({ capabilities = {} }) {
             </div>
           </div>
           <div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div>
-          <div className="field-grid"><div className="field"><label htmlFor="product-weight">Weight</label><div className="field-inline"><input id="product-weight" type="number" min="0" step="0.001" value={form.weight} onChange={(e) => setField('weight', e.target.value)} placeholder="e.g. 250" /><select aria-label="Weight unit" value={form.weight_unit} onChange={(e) => setField('weight_unit', e.target.value)}><option value="g">g</option><option value="kg">kg</option></select></div></div><div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div></div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-weight">Weight</label><div className="field-inline"><input id="product-weight" type="number" min="0" step="0.001" value={form.weight} onChange={(e) => setField('weight', e.target.value)} placeholder="e.g. 250" /><select aria-label="Weight unit" value={form.weight_unit} onChange={(e) => setField('weight_unit', e.target.value)}><option value="g">g</option><option value="kg">kg</option></select></div></div>
+            <div className="field"><label htmlFor="product-volume">Volume / Capacity</label><div className="field-inline"><input id="product-volume" type="number" min="0" step="0.001" value={form.volume} onChange={(e) => setField('volume', e.target.value)} placeholder="e.g. 1" /><select aria-label="Volume unit" value={form.volume_unit} onChange={(e) => setField('volume_unit', e.target.value)}><option value="ml">ml</option><option value="L">L</option></select></div></div>
+          </div>
+          <div className="field-grid">
+            <div className="field"><label htmlFor="product-quantity">Selling quantity</label><div className="field-inline"><input id="product-quantity" type="number" min="0" step="0.001" value={form.quantity} onChange={(e) => setField('quantity', e.target.value)} placeholder="e.g. 1" /><select aria-label="Quantity unit" value={form.quantity_unit} onChange={(e) => setField('quantity_unit', e.target.value)}><option value="piece">piece</option><option value="pack">pack</option><option value="set">set</option><option value="pair">pair</option><option value="box">box</option></select></div></div>
+            <div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div>
+          </div>
         </div>
 
         <div className="editor-section"><div className="editor-section-head"><div><h3>Product media</h3><p>Up to 10 images. First image is primary; existing images can be reordered or removed.</p></div><span className="image-count">{form.images.length + selectedFiles.length}/{MAX_IMAGES}</span></div>
@@ -457,9 +489,10 @@ export default function ProductsPanel({ capabilities = {} }) {
             <div className="field"><label htmlFor="product-size">Size</label><input id="product-size" maxLength="120" value={form.size} onChange={(e) => setField('size', e.target.value)} /></div>
           </div>
           <div className="field-grid">
-            <div className="field"><label htmlFor="product-dimensions">Dimensions</label><input id="product-dimensions" maxLength="160" value={form.dimensions} onChange={(e) => setField('dimensions', e.target.value)} placeholder="e.g. 150 x 150 x 50 mm" /></div>
-            <div className="field"><label htmlFor="product-warranty">Warranty</label><input id="product-warranty" maxLength="500" value={form.warranty} onChange={(e) => setField('warranty', e.target.value)} /></div>
+            <div className="field"><label>Dimensions</label><div className="field-inline"><input aria-label="Length" type="number" min="0" step="0.001" value={form.length} onChange={(e) => setField('length', e.target.value)} placeholder="Length" /><input aria-label="Width" type="number" min="0" step="0.001" value={form.width} onChange={(e) => setField('width', e.target.value)} placeholder="Width" /><input aria-label="Height" type="number" min="0" step="0.001" value={form.height} onChange={(e) => setField('height', e.target.value)} placeholder="Height" /><select aria-label="Dimension unit" value={form.dimension_unit} onChange={(e) => setField('dimension_unit', e.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="in">in</option><option value="ft">ft</option></select></div><small>L × W × H</small></div>
+            <div className="field"><label htmlFor="product-dimensions-text">Legacy/display dimensions</label><input id="product-dimensions-text" maxLength="160" value={form.dimensions} onChange={(e) => setField('dimensions', e.target.value)} placeholder="Optional display text, e.g. 150 x 150 x 50 mm" /></div>
           </div>
+          <div className="field"><label htmlFor="product-warranty">Warranty</label><input id="product-warranty" maxLength="500" value={form.warranty} onChange={(e) => setField('warranty', e.target.value)} /></div>
           <div className="field"><label htmlFor="product-features">Key features <span className="td-dim">one per line</span></label><textarea id="product-features" rows="4" value={form.key_features} onChange={(e) => setField('key_features', e.target.value)} placeholder={'304 grade\nAnti-rust\nEasy installation'} /></div>
           <div className="field"><label htmlFor="product-specifications">Specifications JSON</label><textarea id="product-specifications" rows="7" value={form.specifications} onChange={(e) => setField('specifications', e.target.value)} placeholder={'{\n  "outlet_size": "110 mm",\n  "installation_type": "Floor"\n}'} spellCheck="false" /></div>
         </div>
