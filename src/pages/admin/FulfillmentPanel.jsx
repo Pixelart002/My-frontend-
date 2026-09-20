@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { Spinner } from '../../components/ui/States';
 
 const text = (v) => v === null || v === undefined || v === '' ? '—' : String(v);
-const statusTone = (s) => ['delivered','picked_up','in_transit'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : 'pill-muted';
+const statusTone = (s) => ['delivered','picked_up','in_transit'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : ['ready_to_create','created'].includes(String(s||'').toLowerCase()) ? 'pill-gold' : 'pill-muted';
 
 export default function FulfillmentPanel() {
   const { toast } = useToast();
@@ -16,7 +16,39 @@ export default function FulfillmentPanel() {
 
   const load = useCallback(async () => {
     try {
-      setRows(itemsOfList(await adminService.fulfillmentShipments(filter || null)));
+      const [shipmentResponse, orderResponse] = await Promise.all([
+        adminService.fulfillmentShipments(filter || null),
+        adminService.listOrders({ page: 1, page_size: 100 }),
+      ]);
+
+      const shipments = itemsOfList(shipmentResponse);
+      const orders = itemsOfList(orderResponse);
+      const shippedOrderIds = new Set(
+        shipments.map((shipment) => String(shipment.order_id || shipment.orders?.id || '')).filter(Boolean)
+      );
+
+      // A fresh paid/COD order has no shipping_shipments row until Shiprocket
+      // booking happens. Surface it here so the Create button is reachable.
+      const eligibleOrders = orders.filter((order) => {
+        const status = String(order?.status || '').toLowerCase();
+        const method = String(order?.payment_method || '').toLowerCase();
+        if (!order?.id || shippedOrderIds.has(String(order.id))) return false;
+        if (['cancelled', 'refunded', 'delivered', 'shipped'].includes(status)) return false;
+        return ['paid', 'processing'].includes(status) || ['cod', 'cash_on_delivery'].includes(method);
+      });
+
+      const pendingRows = eligibleOrders.map((order) => ({
+        id: 'order:' + String(order.id),
+        order_id: order.id,
+        status: 'ready_to_create',
+        provider_key: 'shiprocket',
+        courier_name: null,
+        tracking_number: null,
+        tracking_url: null,
+        orders: order,
+      }));
+
+      setRows([...pendingRows, ...shipments]);
     } catch (err) {
       toast.error(err.message || 'Unable to load fulfillment shipments.');
       setRows([]);
@@ -95,7 +127,7 @@ export default function FulfillmentPanel() {
                   <input type="number" min="1" step="0.1" placeholder="Length cm" value={f.length_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,length_cm:e.target.value}}))}/>
                   <input type="number" min="1" step="0.1" placeholder="Breadth cm" value={f.breadth_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,breadth_cm:e.target.value}}))}/>
                   <input type="number" min="1" step="0.1" placeholder="Height cm" value={f.height_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,height_cm:e.target.value}}))}/>
-                  <button className="btn btn-sm" disabled={busy === order.id + ':create'} onClick={() => create(order)}>Create shipment</button>
+                  <button className="btn btn-sm" disabled={busy === order.id + ':create'} onClick={() => create(order)}>Create Shiprocket shipment</button>
                 </div>}
               </td>
             </tr>;
