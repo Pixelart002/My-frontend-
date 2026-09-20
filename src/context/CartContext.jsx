@@ -3,7 +3,7 @@
  * actions that call the real cart endpoints. Totals are always taken from the
  * backend response (source of truth); the UI never re-computes pricing.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { cartService } from '../services/cart';
 import { useAuth } from './AuthContext';
@@ -40,17 +40,20 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(EMPTY_CART);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const sessionVersion = useRef(0);
 
   const load = useCallback(async () => {
     if (!isAuthenticated) {
       setCart(EMPTY_CART);
       return EMPTY_CART;
     }
+    const version = sessionVersion.current;
     setLoading(true);
     setError(null);
     try {
       const data = await cartService.get();
       const next = data || EMPTY_CART;
+      if (version !== sessionVersion.current) return EMPTY_CART;
       setCart(next);
       return next;
     } catch (err) {
@@ -62,7 +65,9 @@ export function CartProvider({ children }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    sessionVersion.current += 1;
     setCart(EMPTY_CART);
+    setError(null);
     if (isAuthenticated) load();
   }, [isAuthenticated, token, load]);
 
@@ -98,7 +103,9 @@ export function CartProvider({ children }) {
   const removeItem = useCallback(async (productId) => {
     setLoading(true);
     try {
+      const version = sessionVersion.current;
       const data = await cartService.removeItem(productId);
+      if (version !== sessionVersion.current) return EMPTY_CART;
       setCart(data || EMPTY_CART);
       return data;
     } finally {
@@ -113,6 +120,7 @@ export function CartProvider({ children }) {
       // DELETE /cart is intentionally followed by a fresh GET. This prevents
       // the UI from claiming the cart is empty when a transient request or
       // backend write leaves stale line items behind.
+      const version = sessionVersion.current;
       let verifiedCart = null;
       let lastError = null;
 
@@ -120,6 +128,7 @@ export function CartProvider({ children }) {
         try {
           await cartService.clear();
           verifiedCart = await cartService.get();
+          if (version !== sessionVersion.current) return EMPTY_CART;
           if (!verifiedCart?.items?.length) {
             setCart(EMPTY_CART);
             return EMPTY_CART;
