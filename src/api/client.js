@@ -172,10 +172,10 @@ export async function downloadFile(path, defaultFilename) {
   if (!blob.size) throw new ApiError('Invoice PDF is empty.', res.status, 'EMPTY_FILE');
 
   const disposition = res.headers.get('Content-Disposition') || '';
-  const match = disposition.match(/filename\*?=(?:UTF-8''|\")?([^;\"]+)/i);
+  const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;"]+)/i);
   let filename = defaultFilename;
   if (match?.[1]) {
-    try { filename = decodeURIComponent(match[1].trim().replace(/^\"|\"$/g, '')); } catch { filename = match[1].trim(); }
+    try { filename = decodeURIComponent(match[1].trim().replace(/^"|"$/g, '')); } catch { filename = match[1].trim(); }
   }
 
   const url = window.URL.createObjectURL(blob);
