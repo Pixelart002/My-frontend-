@@ -17,8 +17,6 @@ const blank = {
   image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
   part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
   specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
-  volume: '', volume_unit: 'L', length: '', width: '', height: '', dimension_unit: 'mm',
-  quantity: '', quantity_unit: 'piece',
 };
 
 const toForm = (p) => {
@@ -36,10 +34,6 @@ const toForm = (p) => {
     key_features: Array.isArray(p.key_features) ? p.key_features.join('\n') : '',
     material: p.material || '', finish: p.finish || '', color: p.color || '', size: p.size || '',
     dimensions: p.dimensions || '', specifications: JSON.stringify(specs, null, 2),
-    volume: p.volume != null ? String(p.volume) : '', volume_unit: p.volume_unit || 'L',
-    length: p.length != null ? String(p.length) : '', width: p.width != null ? String(p.width) : '',
-    height: p.height != null ? String(p.height) : '', dimension_unit: p.dimension_unit || 'mm',
-    quantity: p.quantity != null ? String(p.quantity) : '', quantity_unit: p.quantity_unit || 'piece',
     warranty: p.warranty || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
   };
 };
@@ -256,11 +250,6 @@ export default function ProductsPanel({ capabilities = {} }) {
     const compare = form.compare_price === '' ? null : Number(form.compare_price);
     const stock = Number(form.stock);
     const weight = form.weight === '' ? null : Number(form.weight);
-    const volume = form.volume === '' ? null : Number(form.volume);
-    const length = form.length === '' ? null : Number(form.length);
-    const width = form.width === '' ? null : Number(form.width);
-    const height = form.height === '' ? null : Number(form.height);
-    const quantity = form.quantity === '' ? null : Number(form.quantity);
 
     if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
     if (!isCreate && form.name.trim() && name.length < 2) return 'Name must be at least 2 characters.';
@@ -276,12 +265,6 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
     if (weight !== null && (!Number.isFinite(weight) || weight < 0)) return 'Weight must be 0 or more.';
     if (!['g', 'kg'].includes(form.weight_unit)) return 'Weight unit must be g or kg.';
-    if (volume !== null && (!Number.isFinite(volume) || volume < 0)) return 'Volume must be 0 or more.';
-    if (volume !== null && !['ml', 'L'].includes(form.volume_unit)) return 'Volume unit must be ml or L.';
-    if ([length, width, height].some((v) => v !== null && (!Number.isFinite(v) || v < 0))) return 'Dimensions must be 0 or more.';
-    if ([length, width, height].some((v) => v !== null) && !['mm', 'cm', 'm', 'in', 'ft'].includes(form.dimension_unit)) return 'Dimension unit is invalid.';
-    if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) return 'Quantity must be 0 or more.';
-    if (quantity !== null && !['piece', 'pack', 'set', 'pair', 'box'].includes(form.quantity_unit)) return 'Quantity unit is invalid.';
     if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
     if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
     if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
@@ -333,14 +316,6 @@ export default function ProductsPanel({ capabilities = {} }) {
         gst_percentage: Number(form.gst_percentage),
         weight: form.weight === '' ? undefined : Number(form.weight),
         weight_unit: form.weight === '' ? undefined : form.weight_unit,
-        volume: form.volume === '' ? undefined : Number(form.volume),
-        volume_unit: form.volume === '' ? undefined : form.volume_unit,
-        length: form.length === '' ? undefined : Number(form.length),
-        width: form.width === '' ? undefined : Number(form.width),
-        height: form.height === '' ? undefined : Number(form.height),
-        dimension_unit: [form.length, form.width, form.height].some((v) => v !== '') ? form.dimension_unit : undefined,
-        quantity: form.quantity === '' ? undefined : Number(form.quantity),
-        quantity_unit: form.quantity === '' ? undefined : form.quantity_unit,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
