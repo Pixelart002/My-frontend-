@@ -37,9 +37,9 @@ export default function ShippingPage() {
 
       <Section title="3. Shipping charges">
         <p>
-          Shipping charges are calculated using the applicable Luviio shipping rules and are shown before
-          you complete your order. Where free shipping applies, the qualifying conditions will be shown
-          at checkout or in the relevant offer.
+          Shipping charges are calculated from the live Shiprocket courier quote for the selected delivery PIN,
+          payment method, shipment weight, and declared value. The live rate is shown at checkout; legacy
+          flat-rate and free-shipping threshold settings are not used.
         </p>
       </Section>
 
