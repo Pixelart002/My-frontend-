@@ -151,6 +151,8 @@ export default function AddressesPage() {
     }
   };
 
+  const confirmDelete = async () => { if (!deleteId) return; await onDelete(deleteId); setDeleteId(null); };
+
   return (
     <div className="page container">
       <Link className="back-link" to="/account"><RiArrowLeftLine size={15} /> Back to profile</Link>
