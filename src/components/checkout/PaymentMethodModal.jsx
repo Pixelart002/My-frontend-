@@ -7,12 +7,14 @@ const iconStyle = { display: 'block', width: 20, height: 20, flex: '0 0 auto', c
 
 export default function PaymentMethodModal({ open, value, onChange, onClose, onContinue, loading, review = false, address, total, children, onBack, activeOrder = false, onCancelOrder, cancellingOrder = false }) {
   const navigate = useNavigate();
-  if (!open) return null;
+  const modalRef = useRef(null);
+  const closeRef = useRef(null);
+
+  // Hooks must run on every render. Returning before useFocusTrap when
+  // `open` was false caused a hook-order violation when the modal opened.
   const isCodSuccess = activeOrder && value === 'cod';
   const hasPaymentContent = Boolean(children) && !isCodSuccess;
   const locked = !isCodSuccess && (activeOrder || hasPaymentContent);
-  const modalRef = useRef(null);
-  const closeRef = useRef(null);
   const title = isCodSuccess ? 'Order placed successfully' : hasPaymentContent ? 'Complete payment' : review ? 'Review your order' : 'Choose payment method';
   const goToOrderSuccess = () => {
     const orderNumber = String(activeOrder?.orderNumber || '').trim();
@@ -31,6 +33,8 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
     initialFocusRef: closeRef,
     onEscape: () => { if (!loading && !cancellingOrder) handleClose(); },
   });
+
+  if (!open) return null;
 
   return <div className="payment-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !loading && (isCodSuccess || !locked)) handleClose(); }}>
     <div ref={modalRef} tabIndex={-1} className={`payment-modal ${review ? 'payment-modal-review' : ''} ${hasPaymentContent ? 'payment-modal-active' : ''}`} role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
