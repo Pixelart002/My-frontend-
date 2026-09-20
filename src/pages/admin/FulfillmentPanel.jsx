@@ -101,7 +101,7 @@ export default function FulfillmentPanel() {
         <tbody>
           {rows.length ? rows.map((row) => {
             const order = row.orders || {};
-            const f = packageForm[order.id] || {};
+            
             return <tr key={row.id}>
               <td className="td-gold">#{text(order.order_number)}</td>
               <td>{text(order.shipping_name)}<br/><span className="td-dim">{text(order.shipping_city)} · {text(order.shipping_postal_code)}</span></td>
