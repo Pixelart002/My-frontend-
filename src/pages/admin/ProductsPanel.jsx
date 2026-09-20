@@ -371,7 +371,6 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   const remove = async (p) => {
     if (!canDelete || busyId) return;
-    if (!window.confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
     setBusyId(p.id);
     try {
       await adminService.deleteProduct(p.id);
