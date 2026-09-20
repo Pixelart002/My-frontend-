@@ -1,6 +1,6 @@
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RiAddLine, RiAlertLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiCoupon3Line, RiLockLine, RiErrorWarningLine } from '@remixicon/react';
 import { STRIPE_PK } from '../config/env';
@@ -12,6 +12,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 const makeIdempotencyKey = () => {
@@ -82,6 +83,8 @@ export default function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const cancelModalRef = useRef(null);
+  const cancelCloseRef = useRef(null);
 
   const loadAddresses = useCallback(async () => {
     setAddressError('');
@@ -199,6 +202,13 @@ export default function CheckoutPage() {
     if (activeOrder && !cancellingOrder) setCancelConfirmOpen(true);
   };
 
+  useFocusTrap({
+    enabled: cancelConfirmOpen,
+    containerRef: cancelModalRef,
+    initialFocusRef: cancelCloseRef,
+    onEscape: () => { if (!cancellingOrder) setCancelConfirmOpen(false); },
+  });
+
   const cancelActiveOrder = async () => {
     if (!activeOrder?.orderNumber || cancellingOrder) return;
     setCancellingOrder(true);
@@ -249,6 +259,6 @@ export default function CheckoutPage() {
       <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
     </div><aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines"><div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div><div><dt>Shipping</dt><dd>{cart.shipping_cost > 0 ? formatMoney(cart.shipping_cost) : 'Free'}</dd></div><div><dt>Taxes</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>{couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}<div className="total"><dt>Total</dt><dd>{formatMoney(finalTotal)}</dd></div></dl>{cart.amount_to_free_shipping > 0 && !cart.free_shipping_eligible && <p className="free-ship-note"><RiArrowRightLine size={15} /> Add {formatMoney(cart.amount_to_free_shipping)} more for free shipping.</p>}</aside></div>
     <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={formatMoney(finalTotal)} onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
-    {cancelConfirmOpen && <div className="checkout-cancel-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !cancellingOrder) setCancelConfirmOpen(false); }}><div className="checkout-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title" aria-describedby="cancel-order-description"><div className="checkout-cancel-modal-icon" aria-hidden="true"><RiErrorWarningLine size={26} /></div><div className="checkout-cancel-modal-copy"><p className="eyebrow">Payment checkout</p><h3 id="cancel-order-title">Are you sure you want to cancel this order?</h3><p id="cancel-order-description">This will cancel order <b>#{activeOrder?.orderNumber}</b> and release its reserved stock. The cancelled order items will not be added back to your cart.</p></div><div className="checkout-cancel-modal-actions"><button type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn checkout-cancel-danger" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Yes, cancel order'}</button></div></div></div>}
+    {cancelConfirmOpen && <div className="checkout-cancel-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !cancellingOrder) setCancelConfirmOpen(false); }}><div ref={cancelModalRef} className="checkout-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title" aria-describedby="cancel-order-description" tabIndex={-1}><div className="checkout-cancel-modal-icon" aria-hidden="true"><RiErrorWarningLine size={26} /></div><div className="checkout-cancel-modal-copy"><p className="eyebrow">Payment checkout</p><h3 id="cancel-order-title">Are you sure you want to cancel this order?</h3><p id="cancel-order-description">This will cancel order <b>#{activeOrder?.orderNumber}</b> and release its reserved stock. The cancelled order items will not be added back to your cart.</p></div><div className="checkout-cancel-modal-actions"><button ref={cancelCloseRef} type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn checkout-cancel-danger" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Yes, cancel order'}</button></div></div></div>}
   </div>;
 }
