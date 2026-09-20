@@ -12,8 +12,7 @@ export default function FulfillmentPanel() {
   const [rows, setRows] = useState(null);
   const [filter, setFilter] = useState('');
   const [busy, setBusy] = useState('');
-  const [packageForm, setPackageForm] = useState({});
-
+  
   const load = useCallback(async () => {
     try {
       const [shipmentResponse, orderResponse] = await Promise.all([
@@ -66,15 +65,13 @@ export default function FulfillmentPanel() {
 
   const create = async (order) => {
     const id = order?.id;
-    const f = packageForm[id] || {};
-    if (!id || !f.pickup_location || !f.weight_kg || !f.length_cm || !f.breadth_cm || !f.height_cm) {
-      toast.error('Pickup location, weight and final package dimensions are required.');
-      return;
-    }
+    if (!id) return;
     setBusy(id + ':create');
     try {
-      await adminService.createProviderShipment(id, f);
-      toast.success('Courier shipment created.');
+      // Backend derives pickup location, parcel weight and default dimensions
+      // from the order/product data and Shiprocket account configuration.
+      await adminService.createProviderShipment(id, {});
+      toast.success('Courier shipment created with server-derived package details.');
       await load();
     } catch (err) { toast.error(err.message || 'Unable to create courier shipment.'); }
     finally { setBusy(''); }
@@ -121,13 +118,12 @@ export default function FulfillmentPanel() {
                   {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':generateProviderInvoice'} onClick={() => action(row.id, 'generateProviderInvoice', 'Courier invoice generated.') }><RiFileTextLine size={14}/>Invoice</button>}
                   {row.tracking_url && <a className="btn btn-quiet btn-sm" href={row.tracking_url} target="_blank" rel="noreferrer"><RiLinksLine size={14}/>Track</a>}
                 </div>
-                {row.status === 'ready_to_create' && <div className="field-grid" style={{marginTop:10}}>
-                  <input placeholder="Pickup location" value={f.pickup_location || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,pickup_location:e.target.value}}))}/>
-                  <input type="number" min="0.01" step="0.01" placeholder="Weight kg" value={f.weight_kg || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,weight_kg:e.target.value}}))}/>
-                  <input type="number" min="1" step="0.1" placeholder="Length cm" value={f.length_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,length_cm:e.target.value}}))}/>
-                  <input type="number" min="1" step="0.1" placeholder="Breadth cm" value={f.breadth_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,breadth_cm:e.target.value}}))}/>
-                  <input type="number" min="1" step="0.1" placeholder="Height cm" value={f.height_cm || ''} onChange={e => setPackageForm(p => ({...p,[order.id]:{...f,height_cm:e.target.value}}))}/>
-                  <button className="btn btn-sm" disabled={busy === order.id + ':create'} onClick={() => create(order)}>Create Shiprocket shipment</button>
+                {row.status === 'ready_to_create' && <div className="admin-page-note fulfillment-auto-note" style={{marginTop:10}}>
+                  <RiTruckLine size={15}/>
+                  <span>Pickup location, order weight and fallback parcel dimensions are filled server-side from the order/product data and Shiprocket configuration.</span>
+                  <button className="btn btn-sm" disabled={busy === order.id + ':create'} onClick={() => create(order)}>
+                    {busy === order.id + ':create' ? 'Creating…' : 'Create Shiprocket shipment'}
+                  </button>
                 </div>}
               </td>
             </tr>;
