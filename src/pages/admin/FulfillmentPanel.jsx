@@ -5,9 +5,9 @@ import { useToast } from '../../context/ToastContext';
 import { Spinner } from '../../components/ui/States';
 
 const text = (v) => v === null || v === undefined || v === '' ? '—' : String(v);
-const statusTone = (s) => ['delivered','picked_up','in_transit','out_for_delivery','shipped'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto','rto_delivered'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : ['ready_to_create','created','awb_assigned','pickup_scheduled'].includes(String(s||'').toLowerCase()) ? 'pill-gold' : 'pill-muted';
+const statusTone = (s) => ['delivered','picked_up','in_transit','out_for_delivery','shipped'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto','rto_delivered'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : ['ready_to_create','created','awb_assigned','pickup_scheduled','manifest_generated','label_generated','invoice_generated','documents_ready'].includes(String(s||'').toLowerCase()) ? 'pill-gold' : 'pill-muted';
 const workflowLabel = (row) => {
-  const step = String(row?.metadata?.workflow?.step || '').toLowerCase();
+  const step = String(row?.workflow_status || row?.metadata?.workflow?.step || row?.status || '').toLowerCase();
   return ({
     awb_assigned: 'AWB assigned', pickup_scheduled: 'Pickup scheduled',
     label_generated: 'Label generated', manifest_generated: 'Manifest generated',
@@ -138,7 +138,7 @@ export default function FulfillmentPanel() {
 
     <div className="admin-table-wrap fulfillment-table-wrap">
       <table className="admin-table fulfillment-table">
-        <thead><tr><th>Order</th><th>Customer</th><th>Courier</th><th>AWB</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Order</th><th>Customer</th><th>Courier / service</th><th>AWB</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
           {rows.length ? rows.map((row) => {
             const order = row.orders || {};
@@ -147,11 +147,11 @@ export default function FulfillmentPanel() {
             return <tr key={row.id}>
               <td className="td-gold">#{text(order.order_number)}</td>
               <td>{text(order.shipping_name)}<br/><span className="td-dim">{text(order.shipping_city)} · {text(order.shipping_postal_code)}</span></td>
-              <td>{text(row.courier_name)}</td>
+              <td>{text(row.courier_name)}<br/><span className="td-dim">{text(row.service_type)}</span></td>
               <td>{text(row.tracking_number)}</td>
               <td>
                 <span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span>
-                {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && (
+                {row.status !== 'ready_to_create' && row.workflow_status !== 'documents_ready' && row.workflow_status !== 'delivered' && row.metadata?.workflow?.completed !== true && (
                   <div className="td-dim fulfillment-next-step">Next: {nextWorkflowStep(row)}</div>
                 )}
               </td>
