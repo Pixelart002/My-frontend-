@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { RiRefreshLine, RiTruckLine, RiFileCopyLine, RiMapPinLine, RiFileTextLine, RiLinksLine } from '@remixicon/react';
+import { RiRefreshLine, RiTruckLine, RiLinksLine } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { Spinner } from '../../components/ui/States';
@@ -17,6 +17,17 @@ const workflowLabel = (row) => {
 const documentLinks = (row) => [
   ['Label', row?.label_url], ['Manifest', row?.manifest_url], ['Invoice', row?.provider_invoice_url],
 ].filter(([, url]) => url);
+
+const nextWorkflowStep = (row) => {
+  if (row?.status === 'ready_to_create') return 'Create shipment';
+  if (!row?.tracking_number) return 'Assign AWB';
+  if (!row?.pickup_id) return 'Schedule pickup';
+  if (!row?.manifest_url) return 'Generate manifest';
+  if (!row?.label_url) return 'Generate label';
+  if (!row?.provider_invoice_url) return 'Generate invoice';
+  if (row?.metadata?.workflow?.completed === true) return 'Complete';
+  return 'Resume workflow';
+};
 
 export default function FulfillmentPanel() {
   const { toast } = useToast();
@@ -138,18 +149,19 @@ export default function FulfillmentPanel() {
               <td>{text(order.shipping_name)}<br/><span className="td-dim">{text(order.shipping_city)} · {text(order.shipping_postal_code)}</span></td>
               <td>{text(row.courier_name)}</td>
               <td>{text(row.tracking_number)}</td>
-              <td><span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span></td>
+              <td>
+                <span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span>
+                {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && (
+                  <div className="td-dim fulfillment-next-step">Next: {nextWorkflowStep(row)}</div>
+                )}
+              </td>
               <td>
                 <div className="fulfillment-action-row">
                   {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && <button className="btn btn-sm" disabled={rowBusy} onClick={() => process(row)}>
-                    {busy === row.id + ':process' ? 'Processing…' : 'Process workflow'}
+                    <RiTruckLine size={14}/>
+                    {busy === row.id + ':process' ? 'Processing…' : `Continue: ${nextWorkflowStep(row)}`}
                   </button>}
-                  {row.status === 'created' && <button className="btn btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'assignAwb', 'AWB assigned.') }><RiTruckLine size={14}/>AWB</button>}
-                  {row.status === 'awb_assigned' && <button className="btn btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'schedulePickup', 'Pickup scheduled.') }><RiMapPinLine size={14}/>Pickup</button>}
                   {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'syncTracking', 'Tracking synchronized.')}>Sync</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateLabel', 'Label generated.') }><RiFileTextLine size={14}/>Label</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateManifest', 'Manifest generated.') }><RiFileCopyLine size={14}/>Manifest</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateProviderInvoice', 'Courier invoice generated.') }><RiFileTextLine size={14}/>Invoice</button>}
                   {row.tracking_url && <a className="btn btn-quiet btn-sm" href={row.tracking_url} target="_blank" rel="noreferrer"><RiLinksLine size={14}/>Track</a>}
                 </div>
                 {documentLinks(row).length > 0 && <div className="btn-row" style={{marginTop:8}}>
