@@ -125,8 +125,8 @@ export default function FulfillmentPanel() {
       </div>
     </div>
 
-    <div className="admin-table-wrap">
-      <table className="admin-table">
+    <div className="admin-table-wrap fulfillment-table-wrap">
+      <table className="admin-table fulfillment-table">
         <thead><tr><th>Order</th><th>Customer</th><th>Courier</th><th>AWB</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
           {rows.length ? rows.map((row) => {
@@ -139,7 +139,7 @@ export default function FulfillmentPanel() {
               <td>{text(row.tracking_number)}</td>
               <td><span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span></td>
               <td>
-                <div className="btn-row">
+                <div className="fulfillment-action-row">
                   {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && <button className="btn btn-sm" disabled={busy === row.id + ':process'} onClick={() => process(row)}>
                     {busy === row.id + ':process' ? 'Processing…' : 'Process workflow'}
                   </button>}
@@ -163,7 +163,7 @@ export default function FulfillmentPanel() {
                 </div>}
               </td>
             </tr>;
-          }) : <tr><td colSpan="6"><div className="admin-empty">No provider shipments yet.</div></td></tr>}
+          }) : <tr><td colSpan="6"><div className="admin-empty">{filter ? `No shipments match “${filter.replaceAll("_", " ")}”.` : "No provider shipments yet."}</div></td></tr>}
         </tbody>
       </table>
     </div>
