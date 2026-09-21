@@ -165,3 +165,12 @@
   .checkout-live-badge{font-size:.65rem;padding:5px 8px}
   .checkout-shipping-detail{align-items:flex-start}
 }
+
+.shipping-courier-list{display:grid;gap:10px;margin-top:14px}
+.shipping-courier-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:13px 14px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.02);cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.shipping-courier-card:hover,.shipping-courier-card.is-selected{border-color:rgba(220,176,91,.65);background:rgba(220,176,91,.07)}
+.shipping-courier-card input{accent-color:#dcb05b}
+.shipping-courier-copy{display:grid;gap:3px;min-width:0}
+.shipping-courier-copy strong{font-size:.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shipping-courier-copy small{font-size:.72rem;opacity:.62}
+.shipping-courier-price{font-weight:700;white-space:nowrap}
