@@ -16,6 +16,35 @@ import { formatMoney } from '../utils/format';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
+
+const normalizeDeliveryMode = (value) => {
+  const raw = String(value || '').trim().toLowerCase().replace(/[-_]+/g, ' ');
+  if (!raw) return '';
+  if (raw.includes('quick') || raw.includes('hyperlocal') || raw.includes('instant')) return 'Quick delivery';
+  if (raw.includes('2 wheel') || raw.includes('two wheel') || raw === '2w') return '2-wheeler';
+  if (raw.includes('3 wheel') || raw.includes('three wheel') || raw === '3w') return '3-wheeler';
+  if (raw.includes('4 wheel') || raw.includes('four wheel') || raw === '4w') return '4-wheeler';
+  if (raw.includes('surface')) return 'Surface';
+  if (raw.includes('air')) return 'Air';
+  return String(value).trim();
+};
+
+const getDeliveryMode = (courier) =>
+  normalizeDeliveryMode(
+    courier?.vehicle_type ||
+    courier?.vehicle ||
+    courier?.vehicle_mode ||
+    courier?.delivery_mode ||
+    courier?.delivery_type ||
+    courier?.mode
+  ) || normalizeDeliveryMode(courier?.service_type || courier?.service || courier?.shipment_type || courier?.courier_type);
+
+const isValidIndianPhone = (value) => {
+  const raw = String(value || '').replace(/[\s()-]/g, '');
+  const digits = raw.startsWith('+91') ? raw.slice(3) : raw.startsWith('91') && raw.length === 12 ? raw.slice(2) : raw.startsWith('0') && raw.length === 11 ? raw.slice(1) : raw;
+  return /^[6-9]\d{9}$/.test(digits);
+};
+
 const makeIdempotencyKey = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   return `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -33,8 +62,8 @@ function AddressForm({ onSaved, onCancel }) {
   const setField = (name, value) => setForm((current) => ({ ...current, [name]: value }));
   const submit = async (event) => {
     event.preventDefault();
-    if (!form.email.trim() || !form.line1.trim() || !form.city.trim() || !form.postal_code.trim()) {
-      setError('Email, address line, city and PIN code are required.');
+    if (!form.email.trim() || !form.line1.trim() || !form.city.trim() || !form.postal_code.trim() || !isValidIndianPhone(form.phone)) {
+      setError('Email, valid 10-digit Indian phone, address line, city and PIN code are required.');
       return;
     }
     setBusy(true);
@@ -52,7 +81,7 @@ function AddressForm({ onSaved, onCancel }) {
   return <form className="address-form" onSubmit={submit}>
     {error && <div className="form-error" role="alert">{error}</div>}
     <div className="field-grid"><div className="field"><label>Full name</label><input value={form.full_name} onChange={(e) => setField('full_name', e.target.value)} autoComplete="name" /></div><div className="field"><label>Email *</label><input type="email" required value={form.email} onChange={(e) => setField('email', e.target.value)} autoComplete="email" /></div></div>
-    <div className="field-grid"><div className="field"><label>Phone</label><input value={form.phone} onChange={(e) => setField('phone', e.target.value)} autoComplete="tel" inputMode="tel" maxLength={20} /></div><div className="field"><label>PIN code *</label><input required value={form.postal_code} onChange={(e) => setField('postal_code', e.target.value)} autoComplete="postal-code" inputMode="numeric" maxLength={10} /></div></div>
+    <div className="field-grid"><div className="field"><label>Phone *</label><input required value={form.phone} onChange={(e) => setField('phone', e.target.value)} autoComplete="tel" inputMode="tel" maxLength={16} placeholder="+91 9876543210" /></div><div className="field"><label>PIN code *</label><input required value={form.postal_code} onChange={(e) => setField('postal_code', e.target.value)} autoComplete="postal-code" inputMode="numeric" maxLength={10} /></div></div>
     <div className="field"><label>Address line 1 *</label><input required value={form.line1} onChange={(e) => setField('line1', e.target.value)} autoComplete="address-line1" /></div>
     <div className="field"><label>Address line 2</label><input value={form.line2} onChange={(e) => setField('line2', e.target.value)} autoComplete="address-line2" /></div>
     <div className="field-grid"><div className="field"><label>City *</label><input required value={form.city} onChange={(e) => setField('city', e.target.value)} autoComplete="address-level2" /></div><div className="field"><label>State</label><input value={form.state} onChange={(e) => setField('state', e.target.value)} autoComplete="address-level1" /></div></div>
@@ -109,6 +138,8 @@ export default function CheckoutPage() {
   const items = cart?.items || [];
   const canProceed = items.length > 0 && !cart?.has_unavailable_items;
   const selectedAddress = useMemo(() => addresses.find((address) => String(address.id) === String(selected)) || null, [addresses, selected]);
+  const selectedPhoneValid = isValidIndianPhone(selectedAddress?.phone);
+  const selectedDeliveryMode = getDeliveryMode(shippingQuote);
   const couponDiscount = Number(coupon?.discount) || 0;
   const finalTotal = Math.max((Number(cart?.total_amount) || 0) - couponDiscount, 0);
 
@@ -356,15 +387,17 @@ export default function CheckoutPage() {
             const checked = id === String(selectedCourierId);
             return <label key={id} className={`shipping-courier-card ${checked ? 'is-selected' : ''}`}>
               <input type="radio" name="shipping-courier" value={id} checked={checked} disabled={Boolean(activeOrder)} onChange={() => selectCourier(courier)} />
-              <span className="shipping-courier-copy"><strong>{courier.courier_name || 'Shiprocket courier'}</strong><small>{courier.estimated_delivery_days ? `Estimated delivery: ${courier.estimated_delivery_days} days` : courier.etd_hours ? `Estimated delivery: ${courier.etd_hours} hours` : 'Delivery estimate from Shiprocket'}</small></span>
+              <span className="shipping-courier-copy"><strong>{courier.courier_name || 'Shiprocket courier'}</strong><small>{getDeliveryMode(courier) ? `${getDeliveryMode(courier)} · ` : ''}{courier.estimated_delivery_days ? `Estimated delivery: ${courier.estimated_delivery_days} days` : courier.etd_hours ? `Estimated delivery: ${courier.etd_hours} hours` : 'Delivery estimate from Shiprocket'}</small></span>
               <span className="shipping-courier-price">{formatMoney(courier.shipping_cost)}</span>
             </label>;
           })}
         </div>}
-        {shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Selected: <b>{shippingQuote.courier_name || 'Shiprocket courier'}</b> · {formatMoney(shippingQuote.shipping_cost)}</p>}
+        {shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Selected: <b>{shippingQuote.courier_name || 'Shiprocket courier'}</b>{selectedDeliveryMode ? <> · {selectedDeliveryMode}</> : null} · {formatMoney(shippingQuote.shipping_cost)}</p>}
+        {shippingQuote && !selectedDeliveryMode && <p className="free-ship-note">Delivery mode is shown only when Shiprocket returns it; LUVIIO does not guess 2/3/4-wheeler service from a generic courier name.</p>}
       </section>
       <section className="checkout-section"><h2>2 · Coupon</h2>{coupon ? <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Applied coupon</span><strong>{coupon.code}</strong><small>You saved {formatMoney(couponDiscount)} on this order.</small></div><button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={removeCoupon}><RiCloseLine size={15} /> Remove</button></div> : <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Have a coupon?</span><small>Enter a valid promo code to apply the backend-calculated discount.</small></div><div className="coupon-input-row"><input disabled={Boolean(activeOrder)} value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="PROMO CODE" maxLength={40} autoComplete="off" aria-label="Coupon code" /><button className="btn" type="button" onClick={applyCoupon} disabled={couponLoading || !couponInput.trim() || Boolean(activeOrder)}>{couponLoading ? 'Applying…' : 'Apply'}</button></div></div>}{couponError && <div className="form-error" role="alert">{couponError}</div>}</section>
-      <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || !selectedCourierId || !shippingQuote || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
+      <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || !selectedPhoneValid || !selectedCourierId || !shippingQuote || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button>
+        {!selectedPhoneValid && selectedAddress && <p className="form-error" role="alert">A valid Indian mobile number is required for courier booking. Edit this address before continuing.</p>}</div></section>
     </div><aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines">
       <div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div>
       <div><dt>Shipping</dt><dd>{shippingQuote ? formatMoney(shippingQuote.shipping_cost) : shippingQuoteLoading ? "Calculating…" : "Calculated at checkout"}</dd></div>
