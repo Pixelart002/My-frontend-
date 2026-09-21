@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { Spinner } from '../../components/ui/States';
 
 const text = (v) => v === null || v === undefined || v === '' ? '—' : String(v);
-const statusTone = (s) => ['delivered','picked_up','in_transit','out_for_delivery'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto','rto_delivered'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : ['ready_to_create','created','awb_assigned','pickup_scheduled'].includes(String(s||'').toLowerCase()) ? 'pill-gold' : 'pill-muted';
+const statusTone = (s) => ['delivered','picked_up','in_transit','out_for_delivery','shipped'].includes(String(s||'').toLowerCase()) ? 'pill-success' : ['failed','cancelled','rto','rto_delivered'].includes(String(s||'').toLowerCase()) ? 'pill-danger' : ['ready_to_create','created','awb_assigned','pickup_scheduled'].includes(String(s||'').toLowerCase()) ? 'pill-gold' : 'pill-muted';
 const workflowLabel = (row) => {
   const step = String(row?.metadata?.workflow?.step || '').toLowerCase();
   return ({
@@ -47,7 +47,7 @@ export default function FulfillmentPanel() {
         return ['paid', 'processing'].includes(status) || ['cod', 'cash_on_delivery'].includes(method);
       });
 
-      const pendingRows = eligibleOrders.map((order) => ({
+      const pendingRows = eligibleOrders.filter((order) => !filter || filter === 'ready_to_create').map((order) => ({
         id: 'order:' + String(order.id),
         order_id: order.id,
         status: 'ready_to_create',
@@ -100,16 +100,25 @@ export default function FulfillmentPanel() {
 
   if (rows === null) return <div className="admin-panel"><Spinner label="Loading fulfillment…" /></div>;
 
+  const readyCount = rows.filter((row) => row.status === 'ready_to_create').length;
+  const activeCount = rows.filter((row) => row.status !== 'ready_to_create' && !['delivered','cancelled','refunded'].includes(String(row.status || '').toLowerCase())).length;
+  const deliveredCount = rows.filter((row) => String(row.status || '').toLowerCase() === 'delivered').length;
+
   return <section className="admin-panel">
+    <div className="admin-stats fulfillment-stats">
+      <div className="admin-stat"><div className="stat-label">Ready to create</div><div className="stat-value">{readyCount}</div></div>
+      <div className="admin-stat"><div className="stat-label">Active shipments</div><div className="stat-value">{activeCount}</div></div>
+      <div className="admin-stat"><div className="stat-label">Delivered</div><div className="stat-value">{deliveredCount}</div></div>
+    </div>
     <div className="admin-card">
       <div className="admin-toolbar">
-        <div><h2>Courier fulfillment</h2><p>Process paid/COD orders from provider shipment creation through AWB, pickup, label, manifest and tracking.</p></div>
-        <div className="btn-row">
+        <div><div className="fulfillment-title-row"><h2>Courier fulfillment</h2><span className="admin-pill pill-gold">Shiprocket · Sandbox</span></div><p>Manage shipment creation, AWB, pickup, documents and tracking from one place. Provider events remain the source of truth for shipped/delivered status.</p></div>
+        <div className="fulfillment-actions">
           <select className="admin-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="">All shipments</option>
             <option value="ready_to_create">Ready to create</option><option value="created">Created</option><option value="awb_assigned">AWB assigned</option>
             <option value="pickup_scheduled">Pickup scheduled</option><option value="out_for_delivery">Out for delivery</option><option value="in_transit">In transit</option>
-            <option value="out_for_delivery">Out for delivery</option><option value="delivered">Delivered</option>
+            <option value="shipped">Shipped</option><option value="delivered">Delivered</option>
           </select>
           <button className="btn btn-quiet btn-sm" onClick={load}><RiRefreshLine size={16}/>Refresh</button>
         </div>
@@ -131,7 +140,7 @@ export default function FulfillmentPanel() {
               <td><span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span></td>
               <td>
                 <div className="btn-row">
-                  {row.status !== 'ready_to_create' && <button className="btn btn-sm" disabled={busy === row.id + ':process'} onClick={() => process(row)}>
+                  {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && <button className="btn btn-sm" disabled={busy === row.id + ':process'} onClick={() => process(row)}>
                     {busy === row.id + ':process' ? 'Processing…' : 'Process workflow'}
                   </button>}
                   {row.status === 'created' && <button className="btn btn-sm" disabled={busy === row.id + ':awb'} onClick={() => action(row.id, 'assignAwb', 'AWB assigned.') }><RiTruckLine size={14}/>AWB</button>}
