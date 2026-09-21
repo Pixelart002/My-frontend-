@@ -22,7 +22,7 @@ function optionalString(value) {
 }
 
 export const paymentService = {
-  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
+  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null, shippingCourierId = null) => {
     const payload = {
       shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
       idempotency_key: requireId(idempotencyKey, 'idempotency key'),
@@ -31,6 +31,7 @@ export const paymentService = {
     const coupon = optionalString(couponCode);
     if (billingId) payload.billing_address_id = billingId;
     if (coupon) payload.coupon_code = coupon;
+    if (Number.isInteger(Number(shippingCourierId)) && Number(shippingCourierId) > 0) payload.shipping_courier_id = Number(shippingCourierId);
     return request('POST', '/payments/create-intent', payload);
   },
 
@@ -45,7 +46,7 @@ export const paymentService = {
       error_message: asTrimmedString(errorMessage),
     }),
 
-  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
+  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null, shippingCourierId = null) => {
     const payload = {
       shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
       payment_method: 'cod',
@@ -55,6 +56,7 @@ export const paymentService = {
     const coupon = optionalString(couponCode);
     if (billingId) payload.billing_address_id = billingId;
     if (coupon) payload.coupon_code = coupon;
+    if (Number.isInteger(Number(shippingCourierId)) && Number(shippingCourierId) > 0) payload.shipping_courier_id = Number(shippingCourierId);
     return request('POST', '/orders/cod', payload);
   },
 
