@@ -167,9 +167,7 @@ export default function CheckoutPage() {
           throw new Error('Live Shiprocket courier options were not returned.');
         }
         const options = quotes.length ? quotes : [serverSelected];
-        const currentId = selectedCourierId ? String(selectedCourierId) : '';
-        const preserved = options.find((quote) => String(quote?.courier_id || '') === currentId);
-        const next = preserved || serverSelected || options[0];
+        const next = serverSelected || options[0];
         if (!next || Number.isNaN(Number(next.shipping_cost)) || !next.courier_id) {
           throw new Error('Live Shiprocket courier options are incomplete.');
         }
