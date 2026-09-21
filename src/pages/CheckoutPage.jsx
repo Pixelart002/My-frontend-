@@ -83,6 +83,8 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [shippingQuote, setShippingQuote] = useState(null);
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedCourierId, setSelectedCourierId] = useState('');
   const [shippingQuoteLoading, setShippingQuoteLoading] = useState(false);
   const [shippingQuoteError, setShippingQuoteError] = useState('');
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -144,6 +146,8 @@ export default function CheckoutPage() {
     const loadLiveShipping = async () => {
       if (!selectedAddress?.postal_code || !items.length) {
         setShippingQuote(null);
+        setShippingOptions([]);
+        setSelectedCourierId('');
         setShippingQuoteError('');
         return;
       }
@@ -156,11 +160,24 @@ export default function CheckoutPage() {
           cod: paymentMethod === 'cod',
           declaredValue: Number(cart?.subtotal) || 0,
         });
-        const selectedQuote = result?.selected || result?.data?.selected;
-        if (!selectedQuote || Number.isNaN(Number(selectedQuote.shipping_cost))) {
-          throw new Error('Live Shiprocket rate was not returned.');
+        const data = result?.data || result || {};
+        const quotes = Array.isArray(data?.couriers) ? data.couriers : Array.isArray(data?.quotes) ? data.quotes : [];
+        const serverSelected = data?.selected;
+        if (!quotes.length && (!serverSelected || Number.isNaN(Number(serverSelected.shipping_cost)))) {
+          throw new Error('Live Shiprocket courier options were not returned.');
         }
-        if (!cancelled) setShippingQuote(selectedQuote);
+        const options = quotes.length ? quotes : [serverSelected];
+        const currentId = selectedCourierId ? String(selectedCourierId) : '';
+        const preserved = options.find((quote) => String(quote?.courier_id || '') === currentId);
+        const next = preserved || serverSelected || options[0];
+        if (!next || Number.isNaN(Number(next.shipping_cost)) || !next.courier_id) {
+          throw new Error('Live Shiprocket courier options are incomplete.');
+        }
+        if (!cancelled) {
+          setShippingOptions(options);
+          setSelectedCourierId(String(next.courier_id));
+          setShippingQuote(next);
+        }
       } catch (err) {
         if (!cancelled) {
           setShippingQuote(null);
@@ -175,6 +192,13 @@ export default function CheckoutPage() {
   }, [selectedAddress?.postal_code, shipmentWeightKg, paymentMethod, cart?.subtotal, items.length]);
 
 
+
+  const selectCourier = (courier) => {
+    if (!courier?.courier_id) return;
+    setSelectedCourierId(String(courier.courier_id));
+    setShippingQuote(courier);
+    resetPayment();
+  };
 
   const resetPayment = () => {
     setIntent(null);
@@ -214,7 +238,7 @@ export default function CheckoutPage() {
   }, [cart?.subtotal]);
 
   const openPaymentChooser = () => {
-    if (!selected || creating || activeOrder) return;
+    if (!selected || !selectedCourierId || !shippingQuote || creating || activeOrder) return;
     setIntentError('');
     setPaymentReview(false);
     setIntent(null);
@@ -233,14 +257,14 @@ export default function CheckoutPage() {
       const key = checkoutKey || makeIdempotencyKey();
       if (!checkoutKey) setCheckoutKey(key);
       if (paymentMethod === 'cod') {
-        const order = await paymentService.createCodOrder(selected, key, null, coupon?.code || null);
+        const order = await paymentService.createCodOrder(selected, key, null, coupon?.code || null, selectedCourierId);
         const orderNumber = order?.order_number;
         if (!orderNumber) throw new Error('COD order could not be created. Please try again.');
         setActiveOrder({ orderNumber, orderId: order?.order_id, paymentMethod: 'cod' });
         setPaymentReview(true);
         return;
       }
-      const data = await paymentService.createIntent(selected, key, null, coupon?.code || null);
+      const data = await paymentService.createIntent(selected, key, null, coupon?.code || null, selectedCourierId);
       if (!data?.client_secret || !data?.payment_intent_id || !data?.order_number) throw new Error('Payment session was not created correctly. Please try again.');
       setIntent(data);
       setActiveOrder({ orderNumber: data.order_number, orderId: data.order_id, paymentMethod: 'stripe', paymentIntentId: data.payment_intent_id });
@@ -325,8 +349,24 @@ export default function CheckoutPage() {
     <div className="checkout-steps" aria-label="Checkout progress"><span className="is-complete"><b>1</b> Shipping</span><i /><span className="is-current" aria-current="step"><b>2</b> Payment</span><i /><span><b>3</b> Review</span></div>
     <div className="checkout-layout checkout-layout-refined"><div className="checkout-main">
       <section className="checkout-section"><div className="checkout-section-heading"><div><p className="section-kicker">Delivery</p><h2>1 · Delivery address</h2></div><span className="checkout-live-badge">Used for shipping</span></div>{addressError && <ErrorState message={addressError} onRetry={loadAddresses} />}{addresses.length > 0 && !showForm && <div className="address-list">{addresses.map((addr) => <label key={addr.id} className={`address-card ${String(selected) === String(addr.id) ? 'is-selected' : ''}`}><input type="radio" name="address" disabled={Boolean(activeOrder)} checked={String(selected) === String(addr.id)} onChange={() => { setSelected(addr.id); resetPayment(); }} /><div><strong>{addr.full_name || 'Delivery'}</strong><p>{addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}{addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}</p>{addr.email && <p>{addr.email}</p>}{addr.is_default && <span className="chip chip-sm">Default</span>}</div></label>)}<button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add a new address</button></div>}{addresses.length === 0 && !showForm && <div className="state"><p>You’ll need a delivery address to check out.</p></div>}{showForm && !activeOrder && <AddressForm onSaved={() => { setShowForm(false); loadAddresses(); }} onCancel={() => setShowForm(false)} />}{selectedAddress && <div className="address-flow-note"><RiLockLine size={15} /><div><strong>Billing address</strong><span>Same as your delivery address. It will be mapped automatically to the order.</span></div></div>}</section>
+      <section className="checkout-section checkout-shipping-options"><div className="checkout-section-heading"><div><p className="section-kicker">Shipping</p><h2>Choose delivery partner</h2></div><span className="checkout-live-badge">Live Shiprocket rates</span></div>
+        {shippingQuoteLoading && <p className="free-ship-note" role="status">Loading available courier partners…</p>}
+        {shippingQuoteError && <div className="form-error" role="alert">{shippingQuoteError}</div>}
+        {!shippingQuoteLoading && !shippingQuoteError && shippingOptions.length > 0 && <div className="shipping-courier-list" role="radiogroup" aria-label="Choose delivery partner">
+          {shippingOptions.map((courier) => {
+            const id = String(courier?.courier_id || '');
+            const checked = id === String(selectedCourierId);
+            return <label key={id} className={`shipping-courier-card ${checked ? 'is-selected' : ''}`}>
+              <input type="radio" name="shipping-courier" value={id} checked={checked} disabled={Boolean(activeOrder)} onChange={() => selectCourier(courier)} />
+              <span className="shipping-courier-copy"><strong>{courier.courier_name || 'Shiprocket courier'}</strong><small>{courier.estimated_delivery_days ? `Estimated delivery: ${courier.estimated_delivery_days} days` : courier.etd_hours ? `Estimated delivery: ${courier.etd_hours} hours` : 'Delivery estimate from Shiprocket'}</small></span>
+              <span className="shipping-courier-price">{formatMoney(courier.shipping_cost)}</span>
+            </label>;
+          })}
+        </div>}
+        {shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Selected: <b>{shippingQuote.courier_name || 'Shiprocket courier'}</b> · {formatMoney(shippingQuote.shipping_cost)}</p>}
+      </section>
       <section className="checkout-section"><h2>2 · Coupon</h2>{coupon ? <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Applied coupon</span><strong>{coupon.code}</strong><small>You saved {formatMoney(couponDiscount)} on this order.</small></div><button className="btn btn-quiet btn-sm" type="button" disabled={Boolean(activeOrder)} onClick={removeCoupon}><RiCloseLine size={15} /> Remove</button></div> : <div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label"><RiCoupon3Line size={15} /> Have a coupon?</span><small>Enter a valid promo code to apply the backend-calculated discount.</small></div><div className="coupon-input-row"><input disabled={Boolean(activeOrder)} value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }} placeholder="PROMO CODE" maxLength={40} autoComplete="off" aria-label="Coupon code" /><button className="btn" type="button" onClick={applyCoupon} disabled={couponLoading || !couponInput.trim() || Boolean(activeOrder)}>{couponLoading ? 'Applying…' : 'Apply'}</button></div></div>}{couponError && <div className="form-error" role="alert">{couponError}</div>}</section>
-      <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
+      <section className="checkout-section checkout-payment-launch"><h2>3 · Payment</h2>{intentError && <div className="form-error" role="alert">{intentError}</div>}<div className="payment-selector"><div className="payment-selector-copy"><span className="payment-selector-label">Payment &amp; review</span><strong>{paymentMethod === 'stripe' ? 'Stripe' : paymentMethod === 'cod' ? 'Cash on Delivery' : 'Choose payment method'}</strong><small>{activeOrder ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.` : 'Select your payment method, review the selected address and complete payment in the secure popup.'}</small></div><button className="btn" type="button" onClick={openPaymentChooser} disabled={creating || !selected || !selectedCourierId || !shippingQuote || Boolean(activeOrder)}>{creating ? 'Preparing…' : 'Choose Payment Method'} <RiArrowRightLine size={17} /></button></div></section>
     </div><aside className="summary checkout-summary"><p className="eyebrow">Order summary</p><ul className="summary-items">{items.slice(0, 6).map((item) => <li key={item.product_id}><span>{item.name} × {item.quantity}</span><strong>{formatMoney(item.line_total)}</strong></li>)}{items.length > 6 && <li><span>+ {items.length - 6} more</span></li>}</ul><dl className="summary-lines">
       <div><dt>Subtotal</dt><dd>{formatMoney(cart.subtotal)}</dd></div>
       <div><dt>Shipping</dt><dd>{shippingQuote ? formatMoney(shippingQuote.shipping_cost) : shippingQuoteLoading ? "Calculating…" : "Calculated at checkout"}</dd></div>
@@ -335,7 +375,7 @@ export default function CheckoutPage() {
       {shippingQuote && <div><dt>Shipping GST</dt><dd>{formatMoney(shippingTaxEstimate)}</dd></div>}
       {couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}
       <div className="total"><dt>{shippingQuote ? "Estimated total" : "Before shipping"}</dt><dd>{shippingQuote ? formatMoney(estimatedCheckoutTotal) : formatMoney(finalTotal)}</dd></div>
-    </dl>{shippingQuoteLoading && <p className="free-ship-note shipping-loading-note" role="status">Calculating the live courier rate for {selectedAddress?.postal_code}…</p>}{shippingQuoteError ? <p className="free-ship-note" role="status">{shippingQuoteError}</p> : shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Quickest live courier: {shippingQuote.courier_name || "Shiprocket courier"}{shippingQuote.estimated_delivery_days ? ` · ${shippingQuote.estimated_delivery_days} days` : ""}.</p>}</aside></div>
+    </dl>{shippingQuoteLoading && <p className="free-ship-note shipping-loading-note" role="status">Calculating live courier rates…</p>}{shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Selected courier: {shippingQuote.courier_name || "Shiprocket courier"}.</p>}</aside></div>
     <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={shippingQuote ? formatMoney(estimatedCheckoutTotal) : 'Shipping + GST calculated securely at payment'} onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
     {cancelConfirmOpen && <div className="checkout-cancel-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !cancellingOrder) setCancelConfirmOpen(false); }}><div ref={cancelModalRef} className="checkout-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title" aria-describedby="cancel-order-description" tabIndex={-1}><div className="checkout-cancel-modal-icon" aria-hidden="true"><RiErrorWarningLine size={26} /></div><div className="checkout-cancel-modal-copy"><p className="eyebrow">Payment checkout</p><h3 id="cancel-order-title">Are you sure you want to cancel this order?</h3><p id="cancel-order-description">This will cancel order <b>#{activeOrder?.orderNumber}</b> and release its reserved stock. The cancelled order items will not be added back to your cart.</p></div><div className="checkout-cancel-modal-actions"><button ref={cancelCloseRef} type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn checkout-cancel-danger" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Yes, cancel order'}</button></div></div></div>}
   </div>;
