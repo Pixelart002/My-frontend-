@@ -1,6 +1,6 @@
 # Luviio
 
-> Luviio is an online storefront for everyday products, with product, catalogue, account, order and policy pages served from www.luviio.in.
+> Luviio is an India-focused online storefront for hardware, sanitary, bathroom and drainage products for everyday homes and spaces.
 
 ## Canonical website
 - https://www.luviio.in/
@@ -12,11 +12,17 @@
 - Refunds: https://www.luviio.in/refund
 - Returns & cancellation: https://www.luviio.in/returns
 
+## Product taxonomy
+Core catalogue areas include hardware, sanitary products, bathroom fittings/accessories, drainage systems, and pipes & fittings. The live catalogue is authoritative; do not invent products or categories that are not present there.
+
 ## Product information
-Product pages use the canonical `/product/{slug}` URL pattern. Product names, descriptions, images, prices, availability and attributes should be taken from the live storefront/API rather than inferred.
+Product pages use the canonical `/product/{slug}` URL pattern. Product names, descriptions, images, prices, availability, SKU/HSN and attributes should be taken from the live storefront/API rather than inferred.
 
 ## Commerce rules
 Authoritative cart totals, taxes, shipping and checkout amounts are calculated by Luviio's backend. Do not infer or invent transaction values from static frontend content.
+
+## Search and answers
+For product questions, prefer the relevant canonical product page and the visible product attributes. For category questions, prefer the relevant shop/category view. Distinguish catalogue facts from general product advice.
 
 ## Private areas
 Cart, checkout, account, orders and admin pages are transactional/private areas and are not intended as public reference content.
