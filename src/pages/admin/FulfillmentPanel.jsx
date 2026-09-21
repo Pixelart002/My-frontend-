@@ -131,6 +131,7 @@ export default function FulfillmentPanel() {
         <tbody>
           {rows.length ? rows.map((row) => {
             const order = row.orders || {};
+            const rowBusy = typeof busy === 'string' && busy.startsWith(row.id + ':');
             
             return <tr key={row.id}>
               <td className="td-gold">#{text(order.order_number)}</td>
@@ -140,15 +141,15 @@ export default function FulfillmentPanel() {
               <td><span className={`admin-pill ${statusTone(row.status)}`}>{workflowLabel(row)}</span></td>
               <td>
                 <div className="fulfillment-action-row">
-                  {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && <button className="btn btn-sm" disabled={busy === row.id + ':process'} onClick={() => process(row)}>
+                  {row.status !== 'ready_to_create' && row.metadata?.workflow?.completed !== true && <button className="btn btn-sm" disabled={rowBusy} onClick={() => process(row)}>
                     {busy === row.id + ':process' ? 'Processing…' : 'Process workflow'}
                   </button>}
-                  {row.status === 'created' && <button className="btn btn-sm" disabled={busy === row.id + ':awb'} onClick={() => action(row.id, 'assignAwb', 'AWB assigned.') }><RiTruckLine size={14}/>AWB</button>}
-                  {row.status === 'awb_assigned' && <button className="btn btn-sm" disabled={busy === row.id + ':pickup'} onClick={() => action(row.id, 'schedulePickup', 'Pickup scheduled.') }><RiMapPinLine size={14}/>Pickup</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':syncTracking'} onClick={() => action(row.id, 'syncTracking', 'Tracking synchronized.')}>Sync</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':generateLabel'} onClick={() => action(row.id, 'generateLabel', 'Label generated.') }><RiFileTextLine size={14}/>Label</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':generateManifest'} onClick={() => action(row.id, 'generateManifest', 'Manifest generated.') }><RiFileCopyLine size={14}/>Manifest</button>}
-                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={busy === row.id + ':generateProviderInvoice'} onClick={() => action(row.id, 'generateProviderInvoice', 'Courier invoice generated.') }><RiFileTextLine size={14}/>Invoice</button>}
+                  {row.status === 'created' && <button className="btn btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'assignAwb', 'AWB assigned.') }><RiTruckLine size={14}/>AWB</button>}
+                  {row.status === 'awb_assigned' && <button className="btn btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'schedulePickup', 'Pickup scheduled.') }><RiMapPinLine size={14}/>Pickup</button>}
+                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'syncTracking', 'Tracking synchronized.')}>Sync</button>}
+                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateLabel', 'Label generated.') }><RiFileTextLine size={14}/>Label</button>}
+                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateManifest', 'Manifest generated.') }><RiFileCopyLine size={14}/>Manifest</button>}
+                  {row.tracking_number && <button className="btn btn-quiet btn-sm" disabled={rowBusy} onClick={() => action(row.id, 'generateProviderInvoice', 'Courier invoice generated.') }><RiFileTextLine size={14}/>Invoice</button>}
                   {row.tracking_url && <a className="btn btn-quiet btn-sm" href={row.tracking_url} target="_blank" rel="noreferrer"><RiLinksLine size={14}/>Track</a>}
                 </div>
                 {documentLinks(row).length > 0 && <div className="btn-row" style={{marginTop:8}}>
