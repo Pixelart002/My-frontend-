@@ -75,6 +75,7 @@ export const adminService = {
   generateLabel: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/label`),
   generateManifest: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/manifest`),
   generateProviderInvoice: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/invoice`),
+  processProviderShipment: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/process`),
   syncTracking: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/sync`),
   cancelProviderShipment: (shipmentId) => request('POST', `/shipping/provider/shipments/${encodeURIComponent(shipmentId)}/cancel`),
   createShipping: (data) => request('POST', '/shipping/manage', data),
