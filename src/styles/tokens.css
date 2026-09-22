@@ -42,6 +42,9 @@
   --font-display: 'Playfair Display', Georgia, serif;
   --shadow-card: 0 18px 44px rgba(0, 0, 0, 0.22);
   --transition-fast: 160ms ease;
+  --ease-standard: cubic-bezier(.22,.61,.36,1);
+  --space-section: clamp(40px, 7vw, 96px);
+  --text-measure: 68ch;
 }
 
 *,
