@@ -4,7 +4,10 @@ const DEFAULT_TITLE = 'Luviio — Beautiful essentials for everyday living';
 const DEFAULT_DESCRIPTION = 'Considered essentials for a more beautiful everyday.';
 
 const upsertMeta = (selector, attrs, content) => {
-  if (!content) return;
+  if (!content) {
+    document.head.querySelectorAll(selector).forEach((node) => node.remove());
+    return;
+  }
   let node = document.head.querySelector(selector);
   if (!node) {
     node = document.createElement('meta');
@@ -15,9 +18,10 @@ const upsertMeta = (selector, attrs, content) => {
 };
 
 const upsertLink = (rel, href) => {
-  let node = document.head.querySelector(`link[rel="${rel}"]`);
-  if (!node) {
-    node = document.createElement('link');
+  const links = [...document.head.querySelectorAll(`link[rel="${rel}"]`)];
+  const node = links[0] || document.createElement('link');
+  links.slice(1).forEach((duplicate) => duplicate.remove());
+  if (!links.length) {
     node.setAttribute('rel', rel);
     document.head.appendChild(node);
   }

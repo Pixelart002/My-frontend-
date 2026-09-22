@@ -73,7 +73,11 @@ function RouteSeo() {
   useEffect(() => {
     const privateRoute = /^\/(cart|checkout|orders?|account|admin|order\/)/.test(pathname);
     const authRoute = /^(\/login|\/register|\/forgot-password|\/change-password)/.test(pathname);
-    if (privateRoute || authRoute) setPageSeo({ path: pathname, noindex: true });
+    if (privateRoute || authRoute) {
+      setPageSeo({ path: pathname, noindex: true });
+    } else if (!pathname.startsWith('/product')) {
+      setPageSeo({ path: pathname });
+    }
   }, [pathname]);
   return null;
 }
