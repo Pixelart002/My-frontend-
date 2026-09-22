@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RiRefreshLine, RiCoupon3Line } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { formatMoney } from '../../utils/format';
@@ -12,7 +12,7 @@ export default function DashboardPanel({ onNavigate }) {
   const [ordersError, setOrdersError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError('');
     setOrdersError('');
@@ -35,11 +35,11 @@ export default function DashboardPanel({ onNavigate }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   if (loading && !stats) {
     return <div className="state spinner"><span className="spin">●</span><span>Loading dashboard…</span></div>;
