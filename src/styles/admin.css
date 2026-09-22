@@ -64,6 +64,7 @@
 .admin-table-wrap .admin-search { display:flex; align-items:center; gap:8px; flex:1 1 220px; max-width:320px; min-width:0; padding:0 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--dim); }
 .admin-search input { flex:1; min-width:0; padding:9px 0; border:0; background:transparent; color:var(--text); }
 .admin-search input:focus { outline:none; }
+/* Focus ring is supplied by the global accessible focus-visible layer. */
 .admin-select { max-width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--muted); }
 .admin-page-note { margin:12px 4px 0; font-size:12px; color:var(--dim); }
 .admin-pill { display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; text-transform:capitalize; white-space:nowrap; }
@@ -78,7 +79,8 @@
 .segmented-control button.is-active { background:var(--surface); color:var(--text); box-shadow:0 2px 8px rgba(0,0,0,.15); }
 .field-hint { display:block; margin-top:6px; color:var(--muted); font-size:12px; }
 .admin-inline { padding:6px 8px; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:var(--text); width:80px; max-width:100%; }
-.admin-inline:hover,.admin-inline:focus { border-color:var(--gold); background:var(--bg); outline:none; }
+.admin-inline:hover { border-color:var(--gold); background:var(--bg); }
+.admin-inline:focus-visible { border-color:var(--gold); background:var(--bg); }
 .admin-inline-sm { width:120px; }
 .admin-modal-overlay { position:fixed; inset:0; z-index:120; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); }
 .admin-modal { width:min(560px,94vw); max-width:100%; max-height:90vh; max-height:calc(100dvh - 40px); overflow-y:auto; overscroll-behavior:contain; padding:24px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); }
