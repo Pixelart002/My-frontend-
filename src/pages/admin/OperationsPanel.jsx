@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { RiRefreshLine, RiSaveLine, RiDeleteBinLine, RiSendPlaneLine, RiShieldCheckLine, RiCheckLine, RiCloseLine } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
@@ -30,7 +30,7 @@ export default function OperationsPanel({ section }) {
 
 function InventoryPanel() {
   const { toast } = useToast(); const [lowStock,setLowStock]=useState([]); const [loading,setLoading]=useState(true); const [scanning,setScanning]=useState(false);
-  const load=async()=>{setLoading(true);try{setLowStock(itemsOfList(await adminService.lowStock()));}catch(e){toast.error(e.message||'Unable to load inventory.')}finally{setLoading(false)}}; useEffect(()=>{load()},[]);
+  const load=useCallback(async()=>{setLoading(true);try{setLowStock(itemsOfList(await adminService.lowStock()));}catch(e){toast.error(e.message||'Unable to load inventory.')}finally{setLoading(false)}},[toast]); useEffect(()=>{load()},[load]);
   const scan=async()=>{setScanning(true);try{const r=await adminService.scanLowStock();toast.success(`${r?.alerts_published??0} low-stock alert(s) published.`);await load()}catch(e){toast.error(e.message||'Low-stock scan failed.')}finally{setScanning(false)}};
   return <section className="admin-panel"><div className="admin-card"><Toolbar title="Inventory" description="Monitor stock risk and release abandoned checkout reservations." onRefresh={load}><button className="btn btn-sm" disabled={scanning} onClick={scan}>{scanning?'Scanning…':'Scan low stock'}</button></Toolbar><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Low-stock products</div><div className="stat-value">{loading?'…':lowStock.length}</div></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Threshold</th></tr></thead><tbody>{lowStock.length?lowStock.map((p,i)=><tr key={p.id||i}><td className="td-strong">{pretty(p.name||p.product_name)}</td><td className="td-gold">{pretty(p.stock??p.quantity)}</td><td>{pretty(p.low_stock_threshold??p.threshold)}</td></tr>):<tr><td colSpan="3"><div className="admin-empty">{loading?'Loading inventory…':'No low-stock products.'}</div></td></tr>}</tbody></table></div></div></section>;
 }
@@ -40,7 +40,7 @@ function ShippingPanel() {
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setMethods(itemsOfList(await adminService.shippingMethods(false)));
@@ -49,9 +49,9 @@ function ShippingPanel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   return (
     <section className="admin-panel">
@@ -135,7 +135,7 @@ function SettingsPanel(){
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setSettings(itemsOfList(await adminService.settings()));
@@ -144,9 +144,9 @@ function SettingsPanel(){
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const openEditor = (setting) => {
     setEditing(setting);
