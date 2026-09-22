@@ -11,14 +11,10 @@ import {
   RiTruckLine,
   RiPriceTag3Line,
 } from '@remixicon/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
 import '../styles/marketing.css';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORY_ICONS = {
   'bathroom fittings': RiHomeGearLine,
@@ -63,29 +59,34 @@ export default function HomePage() {
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return undefined;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '[data-rise]',
-        { y: 22, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.75, stagger: 0.08, ease: 'power3.out' },
-      );
+    let cancelled = false;
+    let ctx;
 
-      gsap.utils.toArray('[data-reveal]').forEach((el) =>
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([gsapModule, triggerModule]) => {
+      if (cancelled) return;
+      const gsap = gsapModule.default;
+      const ScrollTrigger = triggerModule.ScrollTrigger || triggerModule.default;
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
         gsap.fromTo(
-          el,
-          { y: 24, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: el, start: 'top 88%' },
-          },
-        ),
-      );
-    }, root);
+          '[data-rise]',
+          { y: 22, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.75, stagger: 0.08, ease: 'power3.out' },
+        );
+        gsap.utils.toArray('[data-reveal]').forEach((el) =>
+          gsap.fromTo(
+            el,
+            { y: 24, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' } },
+          ),
+        );
+      }, root);
+    }).catch(() => {});
 
-    return () => ctx.revert();
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   return (
