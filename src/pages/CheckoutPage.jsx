@@ -247,8 +247,13 @@ export default function CheckoutPage() {
   };
 
   useEffect(() => {
-    if (coupon && Number(coupon.subtotal) !== Number(cart?.subtotal || 0) && !activeOrder) removeCoupon();
-  }, [cart?.subtotal]);
+    if (coupon && Number(coupon.subtotal) !== Number(cart?.subtotal || 0) && !activeOrder) {
+      setCoupon(null);
+      setCouponError('');
+      setCouponInput('');
+      resetPayment();
+    }
+  }, [cart?.subtotal, coupon, activeOrder]);
 
   const openPaymentChooser = () => {
     if (!selected || !selectedCourierId || !shippingQuote || creating || activeOrder) return;
