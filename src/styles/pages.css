@@ -198,3 +198,162 @@
   .hero-reference-copy .hero-actions .btn,
   .hero-reference-copy .hero-actions .home-secondary-link { min-height: 42px; }
 }
+
+
+/* ============================================================
+   GLOBAL PAGE HIERARCHY — all customer-facing routes
+   Contract: context → heading → primary content → action → support.
+   Existing page-specific behavior stays intact.
+   ============================================================ */
+.store-main { min-width: 0; }
+.store-page-frame { min-width: 0; }
+
+.store-page-frame > .page:not(.home-landing) {
+  width: min(100%, var(--maxw));
+  margin-inline: auto;
+  min-width: 0;
+}
+
+/* Shared heading rhythm */
+.store-page-frame .page-heading {
+  position: relative;
+  max-width: 780px;
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+.store-page-frame .page-heading.compact {
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+.store-page-frame .page-heading h1 {
+  text-wrap: balance;
+}
+.store-page-frame .page-heading > p:last-of-type {
+  max-width: 58ch;
+}
+
+/* Breadcrumbs/context always sit above the primary content. */
+.store-page-frame .breadcrumbs,
+.store-page-frame .back-link {
+  margin-bottom: 24px;
+}
+.store-page-frame .breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--lm-text-dim, #756f67);
+  font-size: 12px;
+}
+.store-page-frame .breadcrumbs a:hover,
+.store-page-frame .back-link:hover { color: var(--lm-brand-300, #e3bd72); }
+
+/* Primary content containers share a predictable visual rhythm. */
+.store-page-frame .card,
+.store-page-frame .checkout-section,
+.store-page-frame .summary,
+.store-page-frame .address-card-manage,
+.store-page-frame .settings-section,
+.store-page-frame .auth-card {
+  min-width: 0;
+}
+
+/* Shop: discovery controls precede catalogue. */
+.store-page-frame .shop-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.store-page-frame .shop-search {
+  flex: 1 1 520px;
+  min-width: 0;
+}
+.store-page-frame .filter-toggle { flex: 0 0 auto; }
+.store-page-frame .products-grid {
+  align-items: start;
+}
+
+/* Product detail: media is visual anchor; purchase info is action anchor. */
+.store-page-frame .product-detail {
+  align-items: start;
+}
+.store-page-frame .product-info {
+  min-width: 0;
+}
+.store-page-frame .product-info h1 {
+  max-width: 18ch;
+  text-wrap: balance;
+}
+.store-page-frame .product-info .btn {
+  min-height: 44px;
+}
+
+/* Commerce pages: summary stays visually subordinate to the main action. */
+.store-page-frame .cart-layout,
+.store-page-frame .checkout-layout,
+.store-page-frame .order-layout {
+  align-items: start;
+}
+.store-page-frame .summary,
+.store-page-frame .order-summary {
+  position: relative;
+}
+
+/* Account pages: sections become clear task groups. */
+.store-page-frame .settings-section + .settings-section,
+.store-page-frame .profile-section + .profile-section {
+  margin-top: clamp(32px, 5vw, 56px);
+}
+.store-page-frame .settings-section-heading {
+  margin-bottom: 16px;
+}
+.store-page-frame .settings-section-heading h2 {
+  text-wrap: balance;
+}
+
+/* Forms: label → control → hint/error; actions stay at the bottom. */
+.store-page-frame .field {
+  min-width: 0;
+}
+.store-page-frame .field .hint {
+  display: block;
+  margin-top: 6px;
+}
+.store-page-frame form .btn-row,
+.store-page-frame form > .btn {
+  margin-top: 8px;
+}
+
+/* Policy / informational pages should read like documents, not dashboards. */
+.store-page-frame .policy-layout {
+  max-width: 860px;
+  margin-inline: auto;
+}
+.store-page-frame .policy-layout h2,
+.store-page-frame .policy-layout h3 {
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+
+/* Mobile: hierarchy becomes single-column, with primary actions full-width where appropriate. */
+@media (max-width: 760px) {
+  .store-page-frame > .page:not(.home-landing) {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .store-page-frame .page-heading { margin-bottom: 28px; }
+  .store-page-frame .shop-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .store-page-frame .shop-search { flex-basis: auto; }
+  .store-page-frame .filter-toggle { width: 100%; }
+  .store-page-frame .product-info h1 { max-width: none; }
+}
+
+/* Keep desktop breathing room without letting content drift between page types. */
+@media (min-width: 761px) {
+  .store-page-frame > .page:not(.home-landing) {
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+  }
+}
