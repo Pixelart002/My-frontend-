@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RiAddLine, RiBox3Line, RiCloseLine, RiInformationLine, RiPencilLine, RiRefreshLine, RiSearchLine, RiSubtractLine } from '@remixicon/react';
 import AdminModal from './Modal';
 import { adminService, itemsOfList } from '../../services/admin';
@@ -18,7 +18,7 @@ export default function InventoryManagementPanel() {
   const [quantity, setQuantity] = useState('');
   const [reason, setReason] = useState('');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const response = await adminService.listProducts({ page: 1, page_size: 100 });
@@ -30,7 +30,9 @@ export default function InventoryManagementPanel() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  }, [toast]);
+
+  useEffect(() => { load(); }, [load]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
