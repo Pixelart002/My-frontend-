@@ -17,6 +17,7 @@
 .business-field input,.business-field select { width:100%; min-height:42px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font:inherit;  transition:border-color .16s ease,box-shadow .16s ease; }
 .business-field input::placeholder { color:var(--dim); }
 .business-field input:focus,.business-field select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(210,170,90,.08); }
+.business-field input:focus-visible,.business-field select:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 .business-field small { color:var(--dim); font-size:10px; line-height:1.45; }
 .brand-assets-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .asset-card { display:flex; flex-direction:column; gap:10px; min-width:0; padding:16px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface-2); }
