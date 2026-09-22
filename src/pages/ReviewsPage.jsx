@@ -14,7 +14,7 @@ function Stars({ value = 0, interactive = false, onChange }) {
 export default function ReviewsPage() {
   const [params] = useSearchParams(); const productId=params.get('product'); const {isAuthenticated}=useAuth(); const {toast}=useToast();
   const [reviews,setReviews]=useState(null); const [error,setError]=useState(''); const [rating,setRating]=useState(5); const [title,setTitle]=useState(''); const [body,setBody]=useState(''); const [saving,setSaving]=useState(false);
-  const load=useCallback(async()=>{if(!productId){setError('Choose a product to view reviews.');return}try{setError('');setReviews(await reviewService.listForProduct(productId))}catch(e){setError(e.message||'Unable to load reviews.')}}},[productId]);
+  const load=useCallback(async()=>{if(!productId){setError('Choose a product to view reviews.');return}try{setError('');setReviews(await reviewService.listForProduct(productId))}catch(e){setError(e.message||'Unable to load reviews.')}},[productId]);
   useEffect(()=>{load()},[load]);
   const submit=async(e)=>{e.preventDefault();if(!isAuthenticated){toast.info('Please sign in to review a purchased product.');return}setSaving(true);try{await reviewService.create(productId,{rating,title:title.trim()||undefined,body:body.trim()});toast.success('Review submitted. It will appear after moderation.');setTitle('');setBody('');setRating(5);await load()}catch(e){toast.error(e.message||'Unable to submit review.')}finally{setSaving(false)}};
   if(error)return <div className="page container"><ErrorState message={error} onRetry={load}/></div>;
