@@ -1,6 +1,9 @@
 {
   "name": "luviio-frontend",
   "private": true,
+  "config": {
+    "fund": false
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
