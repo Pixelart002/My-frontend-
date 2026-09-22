@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import gsap from 'gsap';
 
 /**
  * Shared layout for static store pages (policies, about, contact).
@@ -10,12 +9,22 @@ export default function PolicyLayout({ eyebrow, title, lead, updated, children }
   useEffect(() => {
     const els = document.querySelectorAll('[data-rise]');
     if (!els.length) return;
-    const tween = gsap.fromTo(
-      els,
-      { y: 24, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out' }
-    );
-    return () => tween.kill();
+
+    let cancelled = false;
+    let tween;
+    import('gsap').then(({ default: gsap }) => {
+      if (cancelled) return;
+      tween = gsap.fromTo(
+        els,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out' }
+      );
+    }).catch(() => {});
+
+    return () => {
+      cancelled = true;
+      tween?.kill();
+    };
   }, []);
 
   const updatedAt = updated
