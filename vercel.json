@@ -39,12 +39,27 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
+      "source": "/product/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "/(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot)/i"
+        }
+      ],
+      "destination": "/api/product?slug=:slug"
     },
     {
       "source": "/share/products/:slug",
-      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1/products/share/:slug"
+      "destination": "/api/product?slug=:slug"
+    },
+    {
+      "source": "/api/og",
+      "destination": "/api/og"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
     },
     {
       "source": "/(.*)",
