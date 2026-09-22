@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { RiArchive2Line, RiCloseLine, RiGridLine, RiHeartLine, RiHomeLine, RiInformationLine, RiLogoutBoxRLine, RiMailLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiStore2Line, RiUser3Line, RiUserLine, RiCoupon3Line, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiDashboardLine } from '@remixicon/react';
+import { RiArchive2Line, RiCloseLine, RiGridLine, RiHeartLine, RiHomeLine, RiInformationLine, RiLogoutBoxRLine, RiMailLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiStore2Line, RiUser3Line, RiUserLine, RiCoupon3Line, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiDashboardLine, RiStarLine, RiBuilding4Line } from '@remixicon/react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -15,12 +15,15 @@ const ADMIN_NAV = [
   ['coupons', 'Coupons', RiCoupon3Line],
   ['inventory', 'Inventory', RiStackLine],
   ['shipping', 'Shipping', RiTruckLine],
+  ['fulfillment', 'Fulfillment', RiTruckLine],
   ['subscriptions', 'Subscriptions', RiVipCrownLine],
   ['users', 'Users', RiUser3Line],
   ['user-actions', 'User Actions', RiUserSettingsLine],
+  ['reviews', 'Reviews', RiStarLine],
   ['rbac', 'Roles & Permissions', RiShieldKeyholeLine],
   ['notifications', 'Notifications', RiNotification3Line],
   ['settings', 'Settings', RiSettings3Line],
+  ['business-profile', 'Business Profile', RiBuilding4Line],
   ['payments', 'Payments', RiBankCardLine],
   ['reports', 'Reports', RiBarChart2Line],
   ['audit', 'Audit Logs', RiFileList3Line],
@@ -29,8 +32,9 @@ const ADMIN_NAV = [
 const ADMIN_GROUPS = [
   ['Overview', ['dashboard']],
   ['Catalogue', ['products', 'categories']],
-  ['Commerce', ['orders', 'coupons', 'inventory', 'shipping', 'subscriptions', 'payments']],
-  ['Customers', ['users', 'user-actions']],
+  ['Commerce', ['orders', 'coupons', 'inventory', 'shipping', 'fulfillment', 'subscriptions', 'payments']],
+  ['Customers', ['users', 'user-actions', 'reviews']],
+  ['Business', ['business-profile']],
   ['Operations', ['rbac', 'notifications', 'reports', 'audit', 'settings']],
 ];
 
@@ -57,6 +61,22 @@ export default function Header() {
   }, [mobileOpen]);
 
   const closeAll = () => { setMobileOpen(false); setMenuOpen(false); };
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onPointerDown = (event) => {
+      if (!event.target.closest('.account-menu-wrap')) setMenuOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [menuOpen]);
 
   useFocusTrap({
     enabled: mobileOpen,
@@ -110,9 +130,9 @@ export default function Header() {
       <div className="header-actions">
         <form className="search-form" onSubmit={onSearch} role="search"><RiSearchLine className="search-icon" size={18}/><input name="query" placeholder="Search for products..." aria-label="Search for products..." autoComplete="off"/></form>
         {!isAuthenticated && <Link className="icon-btn header-account-icon" to="/account" aria-label="Account"><RiUserLine size={20}/></Link>}
-        <Link className="icon-btn header-heart-icon" to="/account" aria-label="Wishlist"><RiHeartLine size={21}/></Link>
+        
         <Link className="icon-btn header-cart-icon" to="/cart" aria-label={`Shopping bag, ${itemCount} items`}><RiShoppingBagLine size={21}/>{itemCount > 0 && <span className="cart-count">{itemCount > 99 ? '99+' : itemCount}</span>}</Link>
-        {isAuthenticated && <div className="account-menu-wrap"><button type="button" className="icon-btn account-trigger" onClick={() => setMenuOpen(v => !v)} aria-label="Account menu" aria-expanded={menuOpen}><RiUserLine size={20}/></button>{menuOpen && <div className="account-menu"><div className="menu-user"><strong>{user?.full_name || user?.name || 'Welcome'}</strong><span>{user?.email || ''}</span></div><Link to="/account" onClick={closeAll}><RiUser3Line size={16}/> Profile</Link><Link to="/orders" onClick={closeAll}><RiArchive2Line size={16}/> Orders</Link><Link to="/account/addresses" onClick={closeAll}><RiMapPin2Line size={16}/> Addresses</Link><Link to="/account/settings" onClick={closeAll}><RiSettings3Line size={16}/> Settings</Link>{isAdmin && <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={16}/> Admin dashboard</Link>}<button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16}/> Sign out</button></div>}</div>}
+        {isAuthenticated && <div className="account-menu-wrap"><button type="button" className="icon-btn account-trigger" onClick={() => setMenuOpen(v => !v)} aria-label="Account menu" aria-expanded={menuOpen} aria-controls="account-menu"><RiUserLine size={20}/></button>{menuOpen && <div id="account-menu" className="account-menu"><div className="menu-user"><strong>{user?.full_name || user?.name || 'Welcome'}</strong><span>{user?.email || ''}</span></div><Link to="/account" onClick={closeAll}><RiUser3Line size={16}/> Profile</Link><Link to="/orders" onClick={closeAll}><RiArchive2Line size={16}/> Orders</Link><Link to="/account/addresses" onClick={closeAll}><RiMapPin2Line size={16}/> Addresses</Link><Link to="/account/settings" onClick={closeAll}><RiSettings3Line size={16}/> Settings</Link>{isAdmin && <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={16}/> Admin dashboard</Link>}<button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16}/> Sign out</button></div>}</div>}
         <button type="button" className="menu-button" onClick={(e) => { e.preventDefault(); setMobileOpen(v => !v); setMenuOpen(false); }} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? 'Close menu' : 'Open menu'}>{mobileOpen ? <RiCloseLine size={22}/> : <RiMenuLine size={22}/>}</button>
       </div>
     </div>
