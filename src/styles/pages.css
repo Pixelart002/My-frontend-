@@ -86,3 +86,115 @@
 }
 @media (max-width:480px) { .hero-reference-copy{padding-top:135px}.hero-benefits>div{gap:7px}.hero-benefits span{min-width:0}.hero-benefits small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.home-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-view-all{font-size:10px} }
 @media (prefers-reduced-motion:reduce) { .home-category-card,.hero-reference-btn{transition:none} }
+
+
+/* ============================================================
+   LUVIIO HOME — hierarchy/alignment contract
+   Order: orientation → trust → products → categories → value.
+   ============================================================ */
+.home-content-width {
+  width: min(var(--maxw), 100%);
+  margin-inline: auto;
+}
+
+.home-secondary-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 43px;
+  padding-inline: 4px;
+  color: var(--lm-text-muted, #aaa49b);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transition: color var(--lm-fast, 140ms) ease;
+}
+.home-secondary-link:hover { color: var(--lm-brand-300, #e3bd72); }
+
+.home-trust-strip {
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: #0d0d0c;
+}
+.home-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  min-height: 82px;
+}
+.home-trust-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 28px;
+  border-right: 1px solid rgba(255,255,255,.07);
+}
+.home-trust-grid > div:first-child { padding-left: var(--pad); }
+.home-trust-grid > div:last-child {
+  border-right: 0;
+  padding-right: var(--pad);
+}
+.home-trust-grid svg { color: var(--lm-brand-400, #d9aa5b); flex: 0 0 auto; }
+.home-trust-grid span { display: grid; gap: 2px; min-width: 0; }
+.home-trust-grid strong { color: var(--lm-text, #f4f1ea); font-size: 12px; font-weight: 600; }
+.home-trust-grid small { color: var(--lm-text-dim, #756f67); font-size: 10px; }
+
+.home-products-section { padding-top: clamp(54px, 7vw, 88px); }
+.home-category-section { padding-top: clamp(48px, 6vw, 72px); }
+.home-value-section {
+  padding-top: clamp(60px, 8vw, 100px);
+  padding-bottom: clamp(70px, 9vw, 120px);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.home-value-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: clamp(36px, 7vw, 100px);
+  align-items: start;
+}
+.home-value-section .luviio-marketing-copy {
+  max-width: 620px;
+}
+.home-value-section .luviio-marketing-copy > p:not(.eyebrow) {
+  max-width: 54ch;
+  margin-top: 20px;
+  color: var(--lm-text-muted, #aaa49b);
+}
+.home-value-section .luviio-marketing-points {
+  display: grid;
+  gap: 0;
+  margin-top: 4px;
+}
+.home-value-section .luviio-marketing-points > div {
+  min-height: 74px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.home-value-section .luviio-marketing-points > div:first-child {
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.home-value-section .luviio-marketing-points svg {
+  color: var(--lm-brand-400, #d9aa5b);
+}
+
+@media (max-width: 760px) {
+  .home-trust-grid { grid-template-columns: 1fr; }
+  .home-trust-grid > div,
+  .home-trust-grid > div:first-child,
+  .home-trust-grid > div:last-child {
+    min-height: 64px;
+    padding: 14px 18px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .home-trust-grid > div:last-child { border-bottom: 0; }
+
+  .home-secondary-link { font-size: 10px; }
+  .home-value-grid { grid-template-columns: 1fr; gap: 42px; }
+  .home-value-section .luviio-marketing-points { margin-top: 0; }
+}
+
+@media (max-width: 480px) {
+  .home-reference-copy .hero-actions,
+  .hero-reference-copy .hero-actions { align-items: stretch; }
+  .hero-reference-copy .hero-actions .btn,
+  .hero-reference-copy .hero-actions .home-secondary-link { min-height: 42px; }
+}
