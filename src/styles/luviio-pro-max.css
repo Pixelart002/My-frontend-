@@ -573,3 +573,94 @@ button:not(.icon-btn), .btn, select, input[type='submit'], input[type='button'] 
     padding:12px !important;
   }
 }
+
+
+/* Account + orders — scanable status and customer-facing identifiers */
+.orders-list,
+.order-detail,
+.account-links,
+.account-card {
+  min-width:0;
+}
+.orders-list {
+  overflow:hidden;
+  border:1px solid var(--lm-border);
+  border-radius:var(--lm-r-md);
+  background:var(--lm-surface-1);
+}
+.order-row {
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  cursor:pointer;
+}
+.order-row > div {
+  min-width:0;
+}
+.order-row strong,
+.order-row span {
+  overflow-wrap:anywhere;
+}
+.order-row strong {
+  font-weight:750;
+  letter-spacing:.01em;
+}
+.order-row:hover {
+  background:var(--lm-surface-2);
+}
+.account-links {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.account-links a {
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+  border:1px solid var(--lm-border);
+  border-radius:var(--lm-r-sm);
+  background:var(--lm-surface-1);
+  color:var(--lm-text);
+  overflow-wrap:anywhere;
+}
+.account-links a:hover,
+.account-links a:focus-visible {
+  border-color:var(--lm-brand-500);
+  background:var(--lm-surface-2);
+}
+.order-detail .order-layout {
+  align-items:start;
+}
+.order-detail .order-number,
+.order-detail [data-order-number] {
+  overflow-wrap:anywhere;
+  font-weight:750;
+}
+.order-detail .status-badge,
+.order-detail .order-status,
+.order-row .status-badge {
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media (max-width:700px) {
+  .order-row {
+    align-items:flex-start;
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
+  }
+  .account-links {
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width:375px) {
+  .orders-list { border-radius:12px; }
+  .order-row { padding-inline:14px; }
+  .account-links a { min-height:46px; }
+}
