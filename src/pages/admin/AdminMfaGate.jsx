@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RiShieldKeyholeLine, RiRefreshLine } from '@remixicon/react';
 import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
@@ -38,7 +38,7 @@ export default function AdminMfaGate({ role, onVerified }) {
 
   const factorId = useMemo(() => factorIdOf(factor) || factorIdOf(enrollment), [factor, enrollment]);
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     setError('');
     setState('loading');
     try {
@@ -62,11 +62,11 @@ export default function AdminMfaGate({ role, onVerified }) {
       setError(err?.message || 'Unable to load MFA status.');
       setState('error');
     }
-  };
+  }, [onVerified]);
 
   useEffect(() => {
     loadStatus();
-  }, []);
+  }, [loadStatus]);
 
   const startEnrollment = async () => {
     setBusy(true);
