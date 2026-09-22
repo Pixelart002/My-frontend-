@@ -136,3 +136,34 @@
   .mobile-admin-group a:hover svg,.mobile-admin-group a:focus-visible svg { color:var(--gold); }
   .mobile-admin-nav + a { margin-top:12px; padding-top:14px; border-top:1px solid var(--line); }
 }
+
+
+/* ---------- Header / dropdown stacking hardening ---------- */
+.header {
+  isolation: isolate;
+}
+.header-actions,
+.header-reference-inner {
+  min-width: 0;
+}
+.account-menu-wrap {
+  isolation: isolate;
+}
+.account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 230px;
+  max-width: min(320px, calc(100vw - 24px));
+  max-height: min(70vh, 520px);
+  overflow: auto;
+  z-index: var(--ui-z-dropdown, 300) !important;
+}
+@media (max-width: 760px) {
+  .header-actions { gap: 6px; }
+  .account-menu {
+    position: fixed;
+    top: calc(var(--header-h) + 8px);
+    right: 12px;
+  }
+}
