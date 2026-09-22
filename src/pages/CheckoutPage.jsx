@@ -141,23 +141,7 @@ export default function CheckoutPage() {
   const selectedPhoneValid = isValidIndianPhone(selectedAddress?.phone);
   const selectedDeliveryMode = getDeliveryMode(shippingQuote);
   const couponDiscount = Number(coupon?.discount) || 0;
-  const finalTotal = Math.max((Number(cart?.total_amount) || 0) - couponDiscount, 0);
-
-  const shippingTaxEstimate = useMemo(() => {
-    if (!shippingQuote || !Number.isFinite(Number(shippingQuote.shipping_cost)) || Number(cart?.subtotal) <= 0) return 0;
-    const shipping = Number(shippingQuote.shipping_cost);
-    const subtotal = Number(cart.subtotal) || 0;
-    let tax = 0;
-    for (const item of items) {
-      const value = (Number(item?.price_snapshot ?? item?.unit_price) || 0) * (Number(item?.quantity) || 0);
-      const gst = Number(item?.gst_percentage);
-      if (!Number.isFinite(value) || value <= 0 || !Number.isFinite(gst) || gst < 0) continue;
-      tax += (shipping * value / subtotal) * gst / 100;
-    }
-    return Math.round(tax * 100) / 100;
-  }, [shippingQuote, cart?.subtotal, items]);
-
-  const estimatedCheckoutTotal = finalTotal + (Number(shippingQuote?.shipping_cost) || 0) + shippingTaxEstimate;
+  const backendCartTotal = cart?.total_amount;
 
   const shipmentWeightKg = useMemo(() => {
     let total = 0;
@@ -403,11 +387,11 @@ export default function CheckoutPage() {
       <div><dt>Shipping</dt><dd>{shippingQuote ? formatMoney(shippingQuote.shipping_cost) : shippingQuoteLoading ? "Calculating…" : "Calculated at checkout"}</dd></div>
       {shippingQuote && <div className="checkout-shipping-detail"><span><b>{shippingQuote.courier_name || "Shiprocket courier"}</b>{shippingQuote.estimated_delivery_days ? <small>Estimated delivery: {shippingQuote.estimated_delivery_days} days</small> : shippingQuote.etd_hours ? <small>Estimated delivery: {shippingQuote.etd_hours} hours</small> : null}</span><em>Live rate</em></div>}
       <div><dt>Product GST</dt><dd>{formatMoney(cart.tax_amount)}</dd></div>
-      {shippingQuote && <div><dt>Shipping GST</dt><dd>{formatMoney(shippingTaxEstimate)}</dd></div>}
+      {shippingQuote && <div><dt>Live courier rate</dt><dd>{formatMoney(shippingQuote.shipping_cost)}</dd></div>}
       {couponDiscount > 0 && <div><dt>Coupon</dt><dd>−{formatMoney(couponDiscount)}</dd></div>}
-      <div className="total"><dt>{shippingQuote ? "Estimated total" : "Before shipping"}</dt><dd>{shippingQuote ? formatMoney(estimatedCheckoutTotal) : formatMoney(finalTotal)}</dd></div>
+      <div className="total"><dt>Order total</dt><dd>{backendCartTotal != null ? formatMoney(backendCartTotal) : "Confirmed at payment"}</dd></div>
     </dl>{shippingQuoteLoading && <p className="free-ship-note shipping-loading-note" role="status">Calculating live courier rates…</p>}{shippingQuote && <p className="free-ship-note"><RiArrowRightLine size={15} /> Selected courier: {shippingQuote.courier_name || "Shiprocket courier"}.</p>}</aside></div>
-    <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total={shippingQuote ? formatMoney(estimatedCheckoutTotal) : 'Shipping + GST calculated securely at payment'} onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
+    <PaymentMethodModal open={paymentModalOpen} value={paymentMethod} onChange={(method) => { if (activeOrder) return; setPaymentMethod(method); setIntent(null); setIntentError(''); }} onClose={() => { if (!creating && !activeOrder) resetPayment(); }} onContinue={handleModalContinue} loading={creating} review={paymentReview} address={selectedAddress} total="Confirmed securely by Luviio at payment" onBack={handleModalBack} activeOrder={activeOrder} onCancelOrder={requestCancelOrder} cancellingOrder={cancellingOrder}>{paymentContent || (activeOrder?.paymentMethod === 'cod' ? <div className="payment-review"><div className="payment-review-card"><RiAlertLine size={20} /><strong>COD order created</strong><p>Order <b>{activeOrder.orderNumber}</b> is reserved for you.</p></div></div> : null)}</PaymentMethodModal>
     {cancelConfirmOpen && <div className="checkout-cancel-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !cancellingOrder) setCancelConfirmOpen(false); }}><div ref={cancelModalRef} className="checkout-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-title" aria-describedby="cancel-order-description" tabIndex={-1}><div className="checkout-cancel-modal-icon" aria-hidden="true"><RiErrorWarningLine size={26} /></div><div className="checkout-cancel-modal-copy"><p className="eyebrow">Payment checkout</p><h3 id="cancel-order-title">Are you sure you want to cancel this order?</h3><p id="cancel-order-description">This will cancel order <b>#{activeOrder?.orderNumber}</b> and release its reserved stock. The cancelled order items will not be added back to your cart.</p></div><div className="checkout-cancel-modal-actions"><button ref={cancelCloseRef} type="button" className="btn btn-quiet" onClick={() => setCancelConfirmOpen(false)} disabled={cancellingOrder}>Keep order</button><button type="button" className="btn checkout-cancel-danger" onClick={cancelActiveOrder} disabled={cancellingOrder}>{cancellingOrder ? 'Cancelling…' : 'Yes, cancel order'}</button></div></div></div>}
   </div>;
 }
