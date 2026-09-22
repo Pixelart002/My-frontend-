@@ -188,3 +188,44 @@
     right: 12px;
   }
 }
+
+
+/* UI UX Pro Max — header breakpoint hardening */
+@media (min-width:1440px) {
+  .header-reference-inner { padding-inline:clamp(48px, 8.333vw, 120px); }
+  .header .search-form { width:min(302px, 24vw); min-width:220px; }
+}
+@media (max-width:1024px) and (min-width:901px) {
+  .header-reference-inner { padding-inline:clamp(24px, 5vw, 52px); column-gap:20px; }
+  .header .nav-links { gap:clamp(16px, 2.2vw, 24px); }
+  .header .search-form { width:clamp(190px, 22vw, 230px); min-width:190px; }
+}
+@media (max-width:768px) {
+  .header-reference-inner { padding-inline:16px; }
+  .header .brand { font-size:29px; }
+  .header .header-actions > .icon-btn { width:44px; height:44px; flex-basis:44px; min-width:44px; }
+  .header .menu-button { width:44px; height:44px; min-width:44px; }
+}
+@media (max-width:375px) {
+  .header-reference-inner { padding-inline:12px; }
+  .header .brand { font-size:26px; }
+  .header .header-actions { gap:1px; }
+  .header .header-actions > .icon-btn { width:42px; height:42px; flex-basis:42px; min-width:42px; }
+  .header .menu-button { width:42px; height:42px; min-width:42px; }
+  .header .cart-count { top:-2px; right:-2px; }
+}
+
+/* Account dropdown: operable targets + resilient text */
+.account-menu > a,
+.account-menu > button {
+  min-height:44px;
+  gap:10px;
+  cursor:pointer;
+}
+.account-menu .menu-user {
+  max-width:100%;
+}
+.account-menu .menu-user strong,
+.account-menu .menu-user span {
+  overflow-wrap:anywhere;
+}
