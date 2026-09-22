@@ -112,7 +112,7 @@
   .header .header-actions { margin-left:auto; }
   .header .header-actions > .header-heart-icon,.header .header-actions > .header-account-icon { display:none; }
   .header .search-form { max-width:180px; width:180px; min-width:0; }
-  .header .account-menu-wrap { display:none; }
+  .header .account-menu-wrap { display:flex; }
 }
 @media (max-width:640px) {
   .header-reference-inner { padding:0 14px; }
