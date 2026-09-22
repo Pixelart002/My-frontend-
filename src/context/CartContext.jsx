@@ -88,16 +88,19 @@ export function CartProvider({ children }) {
 
   const updateItem = useCallback(
     async (productId, quantity) => {
+      if (!isAuthenticated) throw new Error('Please sign in to update your bag.');
+      const version = sessionVersion.current;
       setLoading(true);
       try {
         const data = await cartService.updateItem(productId, quantity);
+        if (version !== sessionVersion.current) return EMPTY_CART;
         setCart(data || EMPTY_CART);
         return data;
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [isAuthenticated],
   );
 
   const removeItem = useCallback(async (productId) => {
