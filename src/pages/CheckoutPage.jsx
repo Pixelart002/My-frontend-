@@ -155,7 +155,8 @@ export default function CheckoutPage() {
       const raw = Number(item?.weight);
       if (!Number.isFinite(raw) || raw <= 0) continue;
       const unit = String(item?.weight_unit || 'g').toLowerCase();
-      const kg = unit === 'kg' ? raw : unit === 'mg' ? raw / 1000000 : unit === 'lb' ? raw * 0.45359237 : raw / 1000;
+      const kg = unit === 'kg' ? raw : unit === 'g' ? raw / 1000 : 0;
+      if (kg <= 0) continue;
       total += kg * Math.max(0, Number(item?.quantity) || 0);
     }
     return total > 0 ? total : 0.5;
