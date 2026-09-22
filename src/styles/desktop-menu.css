@@ -130,7 +130,7 @@
   .header .mobile-nav a:focus-visible,
   .header .mobile-nav button:focus-visible {
     background:var(--surface-2);
-    outline:none;
+    
   }
 
   .header .mobile-search {
