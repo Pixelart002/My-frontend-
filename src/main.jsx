@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/viewport-fix.css';
 import './styles/pages.css';
 import './styles/products.css';
+import './styles/final-ui.css';
 import './styles/product-primary.css';
 import './styles/forms.css';
 import './styles/app.css';
