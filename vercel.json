@@ -39,29 +39,6 @@
   ],
   "rewrites": [
     {
-      "source": "/product/:slug",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": {
-            "re": "(?i)(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|orcascan|applebot|ahrefsbot|semrushbot|duckduckbot)"
-          }
-        }
-      ],
-      "destination": "/api/product?slug=:slug"
-    },
-    {
-      "source": "/product/:slug",
-      "missing": [
-        {
-          "type": "header",
-          "key": "sec-fetch-mode"
-        }
-      ],
-      "destination": "/api/product?slug=:slug"
-    },
-    {
       "source": "/share/products/:slug",
       "destination": "/api/product?slug=:slug"
     },
