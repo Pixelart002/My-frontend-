@@ -90,3 +90,22 @@
 .order-result-meta div { display:grid; gap:5px; justify-items:center; min-width:0; color:var(--muted); font-size:11px; }
 .order-result-meta svg { color:var(--gold-soft); }
 @media (max-width:480px) { .order-result-meta { grid-template-columns:1fr; gap:16px; } }
+
+
+/* Final cost + transparent shipping breakdown */
+.checkout-summary .summary-lines > div { min-width:0; }
+.checkout-summary .summary-lines dt, .checkout-summary .summary-lines dd { min-width:0; }
+.checkout-summary .summary-source { padding-top:10px; margin-top:4px; border-top:1px dashed var(--line); color:var(--dim); font-size:11px; }
+.checkout-summary .final-cost-row { margin-top:12px; padding-top:16px; border-top:1px solid var(--gold); align-items:center; }
+.checkout-summary .final-cost-row dt { font-size:15px; font-weight:700; color:var(--text); }
+.checkout-summary .final-cost-row dd { font-size:22px; font-weight:800; color:var(--gold-soft); white-space:nowrap; }
+.checkout-summary .checkout-shipping-detail small { display:block; margin-top:3px; color:var(--dim); }
+.product-parameters { margin-top:24px; border-top:1px solid var(--line); padding-top:22px; }
+.product-parameters-heading { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:12px; }
+.product-parameters-heading h2 { margin:4px 0 0; font-size:18px; }
+.product-parameters-heading > span { color:var(--dim); font-size:11px; white-space:nowrap; }
+.product-parameters .attributes { margin-top:0; padding-top:0; border-top:0; gap:0; }
+.product-parameters .attribute-row { display:grid; grid-template-columns:minmax(130px,.8fr) minmax(0,1.2fr); gap:18px; padding:11px 0; border-bottom:1px solid var(--line-soft); }
+.product-parameters .attribute-row dt { width:auto; color:var(--dim); font-size:12px; text-transform:capitalize; overflow-wrap:anywhere; }
+.product-parameters .attribute-row dd { color:var(--text); overflow-wrap:anywhere; word-break:break-word; }
+@media (max-width:560px) { .product-parameters .attribute-row { grid-template-columns:1fr; gap:4px; } .product-parameters-heading { align-items:start; } .checkout-summary .final-cost-row dd { font-size:20px; } }
