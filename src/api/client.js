@@ -12,7 +12,7 @@
 
 import { API_BASE } from '../config/env';
 
-const PUBLIC_PREFIXES = ['/products', '/categories', '/health', '/push/vapid-key'];
+const PUBLIC_PREFIXES = ['/products', '/categories', '/reviews/products', '/health', '/push/vapid-key'];
 const PUBLIC_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const IDEMPOTENT = new Set(['GET', 'PUT', 'HEAD']);
 const MAX_RETRIES = 2;
