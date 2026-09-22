@@ -51,8 +51,6 @@ function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = fal
     }
   };
 
-  const confirmDelete = async () => { if (!deleteId) return; await onDelete(deleteId); setDeleteId(null); };
-
   return (
     <form className="address-form" onSubmit={onSubmit}>
       {error && <div className="form-error" role="alert">{error}</div>}
