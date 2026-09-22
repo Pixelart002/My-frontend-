@@ -22,13 +22,8 @@ export default function OrdersPage() {
   }, [page, status]);
 
   useEffect(() => {
-    let active = true;
-    setData(null); setError('');
-    orderService.myOrders(page, 10, status || null)
-      .then((res) => active && setData(res))
-      .catch((err) => active && setError(err.message || 'Unable to load your orders.'));
-    return () => { active = false; };
-  }, [page, status]);
+    load();
+  }, [load]);
 
   const orders = Array.isArray(data) ? data : data?.items || [];
   const totalPages = data?.meta?.total_pages || 1;
