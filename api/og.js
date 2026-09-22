@@ -1,29 +1,135 @@
+import { ImageResponse } from '@vercel/og';
+
 const BACKEND = (process.env.LUVIIO_API_BASE || 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1').replace(/\/$/, '');
 const SITE = 'https://www.luviio.in';
 
-const escapeXml = (value = '') => String(value).replace(/[<>&'\"]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[char]));
+export const config = { runtime: 'edge' };
 
-export default async function handler(req, res) {
-  const slug = String(req.query?.slug || '').trim();
-  if (!slug) return res.status(400).setHeader('Content-Type', 'text/plain').send('Missing slug');
+const clean = (value = '') => String(value).replace(/\s+/g, ' ').trim();
+
+export default async function handler(req) {
+  const url = new URL(req.url);
+  const slug = String(url.searchParams.get('slug') || '').trim();
+
+  if (!slug) return new Response('Missing slug', { status: 400 });
 
   let product = null;
   try {
-    const response = await fetch(`${BACKEND}/products/${encodeURIComponent(slug)}`, { headers: { accept: 'application/json' } });
+    const response = await fetch(`${BACKEND}/products/${encodeURIComponent(slug)}`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
     if (response.ok) {
       const payload = await response.json();
       product = payload?.data || payload;
     }
   } catch {}
 
-  const name = product?.name || 'Luviio product';
-  const category = product?.categories?.name || product?.category_name || 'Luviio collection';
-  const price = Number(product?.price);
-  const image = product?.image_url || `${SITE}/og-default.svg`;
-  const title = `${name} — Luviio`;
-  const subtitle = Number.isFinite(price) && price > 0 ? `Shop ${category} · ₹${price.toLocaleString('en-IN')}` : `Shop ${category}`;
+  if (!product) return new Response('Product not found', { status: 404 });
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#101010"/><rect x="34" y="34" width="1132" height="562" rx="28" fill="#171717" stroke="#3b3328"/><text x="72" y="112" fill="#d8ad6a" font-family="Georgia,serif" font-size="25" letter-spacing="7">LUVIIO</text><rect x="72" y="145" width="420" height="410" rx="18" fill="#211f1c"/>${image ? `<image href="${escapeXml(image)}" x="72" y="145" width="420" height="410" preserveAspectRatio="xMidYMid slice"/>` : ''}<text x="535" y="225" fill="#aaa39a" font-family="Arial,sans-serif" font-size="22" letter-spacing="2">${escapeXml(category.toUpperCase())}</text><text x="535" y="295" fill="#f3eee7" font-family="Georgia,serif" font-size="48">${escapeXml(name.slice(0, 34))}</text><text x="535" y="350" fill="#aaa39a" font-family="Arial,sans-serif" font-size="25">${escapeXml(subtitle)}</text><text x="535" y="515" fill="#d8ad6a" font-family="Arial,sans-serif" font-size="21">www.luviio.in</text></svg>`;
+  const name = clean(product.name || 'Luviio product');
+  const category = clean(product.categories?.name || product.category_name || 'Luviio collection');
+  const price = Number(product.price);
+  const image = String(product.image_url || product.images?.[0] || '').trim() || `${SITE}/og-default.svg`;
+  const subtitle = Number.isFinite(price) && price > 0
+    ? `Shop ${category} · ₹${price.toLocaleString('en-IN')}`
+    : `Shop ${category}`;
 
-  res.status(200).setHeader('Content-Type', 'image/svg+xml; charset=utf-8').setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600').send(svg);
+  const response = new ImageResponse({
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px',
+        height: '630px',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#101010',
+        color: '#f3eee7',
+        padding: '34px',
+        fontFamily: 'Arial',
+      },
+      children: [{
+        type: 'div',
+        props: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            width: '1132px',
+            height: '562px',
+            borderRadius: '28px',
+            background: '#171717',
+            border: '1px solid #3b3328',
+            overflow: 'hidden',
+            padding: '38px',
+            boxSizing: 'border-box',
+          },
+          children: [
+            {
+              type: 'div',
+              props: {
+                style: { display: 'flex', color: '#d8ad6a', fontSize: '25px', letterSpacing: '7px', marginBottom: '28px' },
+                children: 'LUVIIO',
+              },
+            },
+            {
+              type: 'div',
+              props: {
+                style: { display: 'flex', flexDirection: 'row', flex: 1, gap: '42px' },
+                children: [
+                  {
+                    type: 'img',
+                    props: {
+                      src: image,
+                      width: 420,
+                      height: 410,
+                      style: { width: '420px', height: '410px', objectFit: 'cover', borderRadius: '18px' },
+                    },
+                  },
+                  {
+                    type: 'div',
+                    props: {
+                      style: { display: 'flex', flexDirection: 'column', flex: 1, paddingTop: '28px' },
+                      children: [
+                        {
+                          type: 'div',
+                          props: {
+                            style: { display: 'flex', color: '#aaa39a', fontSize: '22px', letterSpacing: '2px', marginBottom: '24px' },
+                            children: category.toUpperCase(),
+                          },
+                        },
+                        {
+                          type: 'div',
+                          props: {
+                            style: { display: 'flex', color: '#f3eee7', fontSize: '46px', lineHeight: 1.08, fontWeight: 600, marginBottom: '22px' },
+                            children: name.slice(0, 58),
+                          },
+                        },
+                        {
+                          type: 'div',
+                          props: {
+                            style: { display: 'flex', color: '#aaa39a', fontSize: '25px', lineHeight: 1.3 },
+                            children: subtitle,
+                          },
+                        },
+                        {
+                          type: 'div',
+                          props: {
+                            style: { display: 'flex', color: '#d8ad6a', fontSize: '21px', marginTop: 'auto' },
+                            children: 'www.luviio.in',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }],
+    },
+  }, { width: 1200, height: 630 });
+
+  response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+  return response;
 }
