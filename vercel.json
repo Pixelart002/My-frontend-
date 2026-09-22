@@ -43,10 +43,6 @@
       "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
     },
     {
-      "source": "/share/products/:slug",
-      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/share/products/:slug"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
