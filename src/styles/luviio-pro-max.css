@@ -664,3 +664,131 @@ button:not(.icon-btn), .btn, select, input[type='submit'], input[type='button'] 
   .order-row { padding-inline:14px; }
   .account-links a { min-height:46px; }
 }
+
+
+/* Admin — dense operational UI without sacrificing touch targets */
+.admin-shell,
+.admin-main,
+.admin-panel,
+.admin-card,
+.admin-toolbar,
+.admin-stats,
+.admin-table-wrap {
+  min-width:0;
+  max-width:100%;
+}
+.admin-card {
+  overflow:hidden;
+}
+.admin-toolbar {
+  align-items:flex-start;
+}
+.admin-toolbar > div {
+  min-width:0;
+}
+.admin-toolbar h2,
+.admin-toolbar p,
+.admin-card h3,
+.admin-card td,
+.admin-card th {
+  overflow-wrap:anywhere;
+}
+.admin-toolbar .btn,
+.admin-toolbar button {
+  min-height:44px;
+  flex:0 0 auto;
+}
+.admin-stats {
+  min-width:0;
+}
+.admin-stat {
+  min-width:0;
+}
+.admin-stat .stat-value,
+.admin-stat .stat-label {
+  overflow-wrap:anywhere;
+}
+.admin-table-wrap {
+  width:100%;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+}
+.admin-table {
+  min-width:680px;
+}
+.admin-table th,
+.admin-table td {
+  vertical-align:middle;
+}
+.admin-table a,
+.admin-table button {
+  min-height:44px;
+}
+.admin-filter-row,
+.admin-form-grid {
+  min-width:0;
+}
+.admin-filter-row input,
+.admin-filter-row select,
+.admin-form-grid input,
+.admin-form-grid select,
+.admin-form-grid textarea {
+  min-width:0;
+  width:100%;
+}
+.admin-pill,
+.admin-badge,
+.admin-status,
+.pill-gold {
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media (max-width:1024px) {
+  .admin-main {
+    min-width:0;
+  }
+  .admin-stats {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:768px) {
+  .admin-card { padding:16px; }
+  .admin-toolbar {
+    flex-direction:column;
+  }
+  .admin-toolbar > .btn,
+  .admin-toolbar > button {
+    width:100%;
+  }
+  .admin-stats {
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .admin-filter-row {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+}
+@media (max-width:480px) {
+  .admin-card {
+    padding:14px;
+    border-radius:14px;
+  }
+  .admin-stats {
+    grid-template-columns:1fr;
+  }
+  .admin-table {
+    min-width:620px;
+  }
+  .admin-toolbar {
+    gap:12px;
+  }
+}
+@media (max-width:375px) {
+  .admin-card { padding:12px; }
+  .admin-table {
+    min-width:600px;
+  }
+}
