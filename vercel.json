@@ -56,10 +56,6 @@
       "missing": [
         {
           "type": "header",
-          "key": "sec-fetch-site"
-        },
-        {
-          "type": "header",
           "key": "sec-fetch-mode"
         }
       ],
