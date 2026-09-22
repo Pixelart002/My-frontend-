@@ -411,3 +411,103 @@ textarea {
   color: var(--dim);
   overflow-wrap: anywhere;
 }
+
+
+/* ---------- UI stability layer ---------- */
+:root {
+  --ui-z-base: 0;
+  --ui-z-content: 1;
+  --ui-z-sticky: 20;
+  --ui-z-header: 100;
+  --ui-z-dropdown: 300;
+  --ui-z-overlay: 500;
+  --ui-z-modal: 600;
+  --ui-z-toast: 700;
+}
+
+/* Prevent flex/grid children from creating accidental horizontal overflow. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { min-width: 0; }
+img, svg, video, canvas { max-width: 100%; }
+
+/* Buttons: one consistent visual language. */
+button, .btn, a.btn {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 650;
+  line-height: 1.1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled,
+button:disabled,
+a.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: .48;
+  transform: none;
+}
+.btn.btn-quiet {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line);
+}
+.btn.btn-quiet:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--gold-soft);
+  border-color: var(--gold-dim);
+}
+.btn.btn-sm {
+  min-height: 38px;
+  padding: 8px 13px;
+  font-size: 12px;
+}
+.btn:focus-visible,
+button:focus-visible,
+a.btn:focus-visible {
+  outline: 2px solid var(--gold-soft);
+  outline-offset: 2px;
+}
+
+/* Don't let text/controls force their parent grid wider than the viewport. */
+.page, .container, .card, .section, .shop-toolbar, .filter-panel,
+.product-detail, .cart-layout, .checkout-layout, .order-layout,
+.products-grid, .product-info, .summary { min-width: 0; }
+
+/* Layering contract: header and overlays always sit above page content. */
+.header { position: relative; z-index: var(--ui-z-header); }
+.account-menu-wrap { position: relative; z-index: var(--ui-z-dropdown); }
+.account-menu { z-index: var(--ui-z-dropdown) !important; }
+.mobile-menu-backdrop { z-index: var(--ui-z-overlay) !important; }
+.mobile-nav { z-index: calc(var(--ui-z-overlay) + 1) !important; }
+.modal-backdrop, .dialog-backdrop, [role="dialog"]::before { z-index: var(--ui-z-overlay); }
+.modal, .dialog, [role="dialog"] { z-index: var(--ui-z-modal); }
+
+/* Sticky cards must never cover menus or dialogs. */
+.gallery, .summary, .checkout-summary, .order-summary { z-index: var(--ui-z-sticky); }
+.header .gallery, .header .summary { z-index: auto; }
+
+/* Decorative/3D layers stay behind interactive content. */
+.hero-reference-image,
+.hero-reference::after,
+.hero::after { pointer-events: none; }
+.hero-reference-image { z-index: -2; }
+.hero-reference { isolation: isolate; }
