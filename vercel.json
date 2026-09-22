@@ -6,12 +6,36 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    {"source": "/shop.html", "destination": "/shop", "permanent": true},
-    {"source": "/cart.html", "destination": "/cart", "permanent": true},
-    {"source": "/checkout.html", "destination": "/checkout", "permanent": true},
-    {"source": "/login.html", "destination": "/login", "permanent": true},
-    {"source": "/register.html", "destination": "/register", "permanent": true},
-    {"source": "/admin.html", "destination": "/admin", "permanent": true}
+    {
+      "source": "/shop.html",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/cart.html",
+      "destination": "/cart",
+      "permanent": true
+    },
+    {
+      "source": "/checkout.html",
+      "destination": "/checkout",
+      "permanent": true
+    },
+    {
+      "source": "/login.html",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/register.html",
+      "destination": "/register",
+      "permanent": true
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/admin",
+      "permanent": true
+    }
   ],
   "rewrites": [
     {
@@ -20,7 +44,9 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "/(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|orcascan|applebot|ahrefsbot|semrushbot|duckduckbot)/i"
+          "value": {
+            "re": "(?i)(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|orcascan|applebot|ahrefsbot|semrushbot|duckduckbot)"
+          }
         }
       ],
       "destination": "/api/product?slug=:slug"
@@ -42,21 +68,36 @@
     {
       "source": "/(.*)",
       "headers": [
-        {"key": "X-Content-Type-Options", "value": "nosniff"},
-        {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"},
-        {"key": "Strict-Transport-Security", "value": "max-age=63072000"}
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000"
+        }
       ]
     },
     {
       "source": "/index.html",
       "headers": [
-        {"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     },
     {
       "source": "/sw.js",
       "headers": [
-        {"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     }
   ]
