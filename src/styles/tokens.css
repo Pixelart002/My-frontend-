@@ -511,3 +511,155 @@ a.btn:focus-visible {
 .hero::after { pointer-events: none; }
 .hero-reference-image { z-index: -2; }
 .hero-reference { isolation: isolate; }
+
+
+/* ============================================================
+   FINAL UI FOUNDATION — div, borders, surfaces, glass & depth
+   ============================================================ */
+
+/* Every structural wrapper must remain measurable and bounded. */
+div, section, main, article, aside, nav, header, footer, form {
+  max-width: 100%;
+}
+.store-page-frame,
+.store-page-frame > * {
+  min-width: 0;
+}
+
+/* Consistent surface hierarchy — avoid random opaque/glass mixtures. */
+.surface,
+.card,
+.panel,
+.section-card,
+.filter-panel,
+.summary,
+.checkout-summary,
+.order-summary {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+/* Borders: single-pixel, low-contrast, no doubled nested borders. */
+.card > .card,
+.panel > .panel,
+.surface > .surface {
+  border-color: var(--line-soft, var(--line));
+}
+hr {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--line);
+}
+
+/* Radius hierarchy. */
+.card, .panel, .surface, .filter-panel { border-radius: var(--radius); }
+.btn, input, select, textarea { border-radius: var(--radius-sm); }
+
+/* Inputs must never inherit decorative backdrop effects. */
+input, select, textarea, button {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Controlled glass: only floating navigation/overlays use blur. */
+.header,
+.mobile-nav,
+.account-menu,
+.modal,
+.dialog,
+.toast,
+[role="dialog"] {
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+/* Give glass layers a real fallback surface so blur never becomes transparent soup. */
+.header {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+.account-menu,
+.modal,
+.dialog,
+[role="dialog"] {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: 0 18px 60px rgba(0,0,0,.34);
+}
+.mobile-nav {
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border-left: 1px solid var(--line);
+}
+
+/* Never blur the actual page content behind ordinary cards. */
+.store-main,
+.store-page-frame,
+.page,
+.products-grid,
+.product-detail,
+.cart-layout,
+.checkout-layout,
+.order-layout {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Avoid accidental stacking contexts from transforms on structural wrappers. */
+.store-page-frame,
+.store-page-frame .page,
+.products-grid,
+.cart-layout,
+.checkout-layout,
+.order-layout {
+  isolation: auto;
+}
+
+/* Images stay inside their media boxes. */
+.product-media,
+.product-media-link,
+.gallery-main,
+.gallery,
+.hero-reference-image,
+.home-category-card {
+  min-width: 0;
+  overflow: hidden;
+}
+.product-media img,
+.product-media-link img,
+.gallery-main img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Decorative overlays cannot intercept clicks. */
+::before,
+::after {
+  box-sizing: border-box;
+}
+.hero::before,
+.hero::after,
+.hero-reference::before,
+.hero-reference::after,
+.product-media::before,
+.product-media::after {
+  pointer-events: none;
+}
+
+/* Stronger fallback for browsers without color-mix. */
+@supports not (background: color-mix(in srgb, black 50%, transparent)) {
+  .header { background: var(--bg); }
+  .account-menu, .modal, .dialog, [role="dialog"] { background: var(--surface); }
+  .mobile-nav { background: var(--surface); }
+}
+
+/* Reduced motion also disables expensive glass transition effects. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
