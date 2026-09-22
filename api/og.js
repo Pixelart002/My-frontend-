@@ -4,7 +4,6 @@ import { ImageResponse } from '@vercel/og';
 const BACKEND = (process.env.LUVIIO_API_BASE || 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1').replace(/\/$/, '');
 const SITE = 'https://www.luviio.in';
 
-export const config = { runtime: 'edge' };
 
 const clean = (value = '') => String(value).replace(/\s+/g, ' ').trim();
 const h = React.createElement;
