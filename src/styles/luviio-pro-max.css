@@ -474,3 +474,102 @@ button:not(.icon-btn), .btn, select, input[type='submit'], input[type='button'] 
   .product-detail .qty-row { align-items:flex-start; flex-direction:column; }
   .product-detail .qty-stepper { align-self:flex-start; }
 }
+
+
+/* Cart + checkout — task-first hierarchy */
+.cart-layout-refined,
+.checkout-layout-refined { min-width:0; }
+.cart-items,
+.checkout-main > .checkout-section {
+  min-width:0;
+}
+.cart-summary,
+.checkout-summary {
+  min-width:0;
+}
+.cart-row,
+.address-card,
+.shipping-option,
+.checkout-section-heading {
+  min-width:0;
+}
+.cart-row h3,
+.address-card p,
+.shipping-option,
+.checkout-section-heading > div {
+  overflow-wrap:anywhere;
+}
+.cart-row .qty-stepper,
+.cart-row button,
+.address-card input,
+.shipping-option input {
+  flex:0 0 auto;
+}
+.cart-summary,
+.checkout-summary {
+  border:1px solid var(--lm-border) !important;
+  background:var(--lm-surface-1) !important;
+  border-radius:var(--lm-r-md) !important;
+}
+.cart-summary h2,
+.checkout-summary h2 {
+  text-wrap:balance;
+}
+.cart-summary .total,
+.checkout-summary .total,
+.checkout-summary .grand-total {
+  font-weight:750;
+}
+.cart-summary .checkout-button,
+.checkout-summary .checkout-button,
+.checkout-summary button[type="submit"] {
+  min-height:48px;
+  width:100%;
+}
+.cart-row .remove-button,
+.cart-row .qty-stepper button,
+.checkout-section button,
+.address-card {
+  cursor:pointer;
+}
+.address-card,
+.shipping-option {
+  min-height:64px;
+}
+.checkout-section-heading {
+  gap:12px;
+}
+.checkout-live-badge {
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media (max-width:700px) {
+  .cart-summary,
+  .checkout-summary {
+    width:100%;
+    position:static !important;
+  }
+  .cart-row {
+    align-items:flex-start;
+  }
+}
+@media (max-width:480px) {
+  .cart-layout-refined,
+  .checkout-layout-refined { gap:16px !important; }
+  .cart-items,
+  .checkout-main > .checkout-section {
+    border-radius:14px;
+  }
+  .checkout-section-heading {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .checkout-live-badge {
+    align-self:flex-start;
+  }
+  .address-card,
+  .shipping-option {
+    padding:12px !important;
+  }
+}
