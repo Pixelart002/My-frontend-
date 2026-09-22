@@ -247,3 +247,44 @@ input:focus, select:focus, textarea:focus { border-color: var(--lm-brand-500) !i
 .confirm-dialog h2{margin:0 0 8px;font-size:1.2rem}
 .confirm-dialog p{margin:0 0 22px;color:var(--muted,#aaa);line-height:1.55}
 @media (prefers-reduced-motion:reduce){.confirm-dialog-backdrop{backdrop-filter:none}}
+
+/* UI UX PRO MAX — production checklist alignment */
+body, main, section, article, aside, form, p, h1, h2, h3, h4, label, td, th, button, a, .badge, .chip, .tag, .meta { overflow-wrap: anywhere; min-width: 0; }
+.badge, .chip, .tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+button:not(.icon-btn), .btn, select, input[type='submit'], input[type='button'] { min-height: 44px; }
+.icon-btn { width: 44px; min-width: 44px; height: 44px; }
+.table-wrap, .responsive-table, .admin-table-wrap, .data-table-wrap, .overflow-x-auto { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (min-width: 1440px) {
+  .container, .home-content-width, .hero-reference-inner { max-width: 1440px; margin-inline: auto; }
+}
+
+@media (max-width: 1024px) {
+  .nav-links { gap: 20px; }
+  .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-value-grid { grid-template-columns: minmax(0, 1fr) minmax(260px, .8fr); gap: 40px; }
+}
+
+@media (max-width: 768px) {
+  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-trust-grid { grid-template-columns: 1fr; }
+  .home-trust-grid > div, .home-trust-grid > div:first-child, .home-trust-grid > div:last-child { padding: 14px var(--pad); border-right: 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .home-trust-grid > div:last-child { border-bottom: 0; }
+  .home-value-grid { grid-template-columns: 1fr; }
+  .section-heading-row { align-items: flex-start; }
+}
+
+@media (max-width: 375px) {
+  .container, .home-content-width { padding-inline: 12px; }
+  .products-grid { gap: 10px 8px; }
+  .product-card h3, .product-meta h3 { font-size: 13px !important; }
+  .product-price-row { font-size: 12px !important; }
+  .section-heading-row { gap: 12px; }
+  .section-view-all { white-space: normal; text-align: right; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover:not(:disabled), .category-card:hover, .home-category-card:hover, .product-card:hover .product-media-link img { transform: none !important; }
+}
