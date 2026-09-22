@@ -74,9 +74,11 @@ export function CartProvider({ children }) {
   const addItem = useCallback(
     async (productId, quantity = 1) => {
       if (!isAuthenticated) throw new Error('Please sign in to add items to your bag.');
+      const version = sessionVersion.current;
       setLoading(true);
       try {
         const data = await cartService.addItem(productId, quantity);
+        if (version !== sessionVersion.current) return EMPTY_CART;
         setCart(data || EMPTY_CART);
         return data;
       } finally {
@@ -104,9 +106,10 @@ export function CartProvider({ children }) {
   );
 
   const removeItem = useCallback(async (productId) => {
+    if (!isAuthenticated) throw new Error('Please sign in to update your bag.');
+    const version = sessionVersion.current;
     setLoading(true);
     try {
-      const version = sessionVersion.current;
       const data = await cartService.removeItem(productId);
       if (version !== sessionVersion.current) return EMPTY_CART;
       setCart(data || EMPTY_CART);
@@ -114,7 +117,7 @@ export function CartProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const clearCart = useCallback(async () => {
     setLoading(true);
