@@ -257,6 +257,10 @@ export default function CheckoutPage() {
 
   const openPaymentChooser = () => {
     if (!selected || !selectedCourierId || !shippingQuote || creating || activeOrder) return;
+    if (!selectedPhoneValid) {
+      setIntentError('Please update this delivery address with a valid 10-digit Indian mobile number before payment.');
+      return;
+    }
     setIntentError('');
     setPaymentReview(false);
     setIntent(null);
