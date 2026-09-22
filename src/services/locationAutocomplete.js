@@ -3,6 +3,7 @@ import { locationService } from './locations';
 const mounted = new WeakSet();
 const timers = new WeakMap();
 const requestVersions = new WeakMap();
+const cleanupHandlers = new WeakMap();
 
 function fieldById(id) { return document.getElementById(id); }
 function findFieldByLabel(text) {
@@ -97,12 +98,23 @@ function attach(input) {
     } catch { close(menu); }
   };
 
-  input.addEventListener('input', () => {
+  const onInput = () => {
     window.clearTimeout(timers.get(input));
     timers.set(input, window.setTimeout(search, 350));
+  };
+  const onFocus = () => { if (input.value.trim().length >= 2) search(); };
+  const onBlur = () => window.setTimeout(() => close(menu), 180);
+  input.addEventListener('input', onInput);
+  input.addEventListener('focus', onFocus);
+  input.addEventListener('blur', onBlur);
+  cleanupHandlers.set(input, () => {
+    window.clearTimeout(timers.get(input));
+    requestVersions.set(input, (requestVersions.get(input) || 0) + 1);
+    input.removeEventListener('input', onInput);
+    input.removeEventListener('focus', onFocus);
+    input.removeEventListener('blur', onBlur);
+    close(menu);
   });
-  input.addEventListener('focus', () => { if (input.value.trim().length >= 2) search(); });
-  input.addEventListener('blur', () => window.setTimeout(() => close(menu), 180));
 }
 
 export function installLocationAutocomplete() {
@@ -110,5 +122,8 @@ export function installLocationAutocomplete() {
   scan();
   const observer = new MutationObserver(scan);
   observer.observe(document.body, { childList: true, subtree: true });
-  return () => observer.disconnect();
+  return () => {
+    observer.disconnect();
+    document.querySelectorAll('input').forEach((input) => cleanupHandlers.get(input)?.());
+  };
 }
