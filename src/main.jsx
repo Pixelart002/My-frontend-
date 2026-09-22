@@ -29,6 +29,7 @@ import './styles/mockup-ui.css';
 import './styles/luviio-pro-max.css';
 import './styles/admin-business-profile.css';
 import './styles/location-autocomplete.css';
+import './styles/luviio-real-world.css';
 
 registerServiceWorker();
 
