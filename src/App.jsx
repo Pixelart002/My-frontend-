@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -30,7 +31,7 @@ import ReturnCancelPage from './pages/policies/ReturnCancelPage';
 import AboutPage from './pages/policies/AboutPage';
 import ReviewsPage from './pages/ReviewsPage';
 import NotFoundPage from './pages/NotFoundPage';
-import AdminPage from './pages/admin/AdminPage';
+const AdminPage = lazy(() => import('./pages/admin/AdminPage'));
 
 function StoreRoutes() {
   return (
@@ -67,11 +68,13 @@ function StoreRoutes() {
 
 function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="page container"><div className="state spinner" role="status" aria-live="polite"><span className="spin">●</span><span>Loading…</span></div></div>}>
+      <Routes>
       {StoreRoutes()}
       <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
       <Route path="/admin/*" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 
