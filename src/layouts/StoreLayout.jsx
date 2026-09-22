@@ -42,8 +42,10 @@ export default function StoreLayout() {
   return (
     <>
       <Header />
-      <main>
-        <Outlet />
+      <main className="store-main" data-route={pathname}>
+        <div className="store-page-frame">
+          <Outlet />
+        </div>
       </main>
       {shouldShowFooter(pathname) && <Footer />}
     </>
