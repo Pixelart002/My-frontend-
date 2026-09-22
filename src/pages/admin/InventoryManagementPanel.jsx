@@ -28,8 +28,6 @@ export default function InventoryManagementPanel() {
     } finally {
       setLoading(false);
     }
-  };
-
   }, [toast]);
 
   useEffect(() => { load(); }, [load]);
