@@ -52,6 +52,20 @@
       "destination": "/api/product?slug=:slug"
     },
     {
+      "source": "/product/:slug",
+      "missing": [
+        {
+          "type": "header",
+          "key": "sec-fetch-site"
+        },
+        {
+          "type": "header",
+          "key": "sec-fetch-mode"
+        }
+      ],
+      "destination": "/api/product?slug=:slug"
+    },
+    {
       "source": "/share/products/:slug",
       "destination": "/api/product?slug=:slug"
     },
