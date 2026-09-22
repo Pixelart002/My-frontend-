@@ -143,20 +143,20 @@ export default function ShopPage() {
 
   return (
     <div className="page container">
-      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Everyday, <em>elevated.</em></h1><p>Useful objects and quiet luxuries for the spaces you call home.</p></div>
+      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Everyday, <em>elevated.</em></h1><p>Practical hardware, sanitary and drainage products for the spaces you use every day.</p></div>
       <div className="shop-toolbar">
         <form className="shop-search" onSubmit={(e) => { e.preventDefault(); setParam('q', e.currentTarget.q.value.trim()); }}>
           <input name="q" defaultValue={q} placeholder="Search products…" aria-label="Search products" />
           <button type="submit" aria-label="Search"><RiSearchLine size={18} /></button>
         </form>
-        <button type="button" className="btn btn-quiet btn-sm filter-toggle" onClick={() => setShowFilters((v) => !v)}><RiEqualizerLine size={16} /> Filters</button>
+        <button type="button" className="btn btn-quiet btn-sm filter-toggle" onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters} aria-controls="shop-filters"><RiEqualizerLine size={16} /> Filters</button>
       </div>
 
       {showFilters && (
-        <div className="filter-panel">
+        <div id="shop-filters" className="filter-panel">
           <div className="filter-group"><span className="filter-label">Category</span><div className="chip-row">
-            <button type="button" className={`chip ${!category ? 'is-active' : ''}`} onClick={() => setParam('category', '')}>All</button>
-            {categories.map((c) => <button type="button" key={c.slug || c.id} className={`chip ${category === c.slug ? 'is-active' : ''}`} onClick={() => setParam('category', c.slug)}>{c.name}</button>)}
+            <button type="button" className={`chip ${!category ? 'is-active' : ''}`} aria-pressed={!category} onClick={() => setParam('category', '')}>All</button>
+            {categories.map((c) => <button type="button" key={c.slug || c.id} className={`chip ${category === c.slug ? 'is-active' : ''}`} aria-pressed={category === c.slug} onClick={() => setParam('category', c.slug)}>{c.name}</button>)}
           </div></div>
           <div className="filter-group"><span className="filter-label">Availability</span><label className="check-line"><input type="checkbox" checked={inStockOnly} onChange={(e) => setParam('in_stock', e.target.checked ? '1' : '')} /> In stock only</label></div>
           <div className="filter-group"><span className="filter-label">Price</span><form className="price-row" onSubmit={applyPrice}><input type="number" min="0" placeholder="Min ₹" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} /><span>–</span><input type="number" min="0" placeholder="Max ₹" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} /><button className="btn btn-sm" type="submit">Apply</button></form></div>
