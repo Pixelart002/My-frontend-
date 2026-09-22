@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -31,18 +31,36 @@ export default function OrderDetailPage() {
   const [retryIntent, setRetryIntent] = useState(null);
   const [retrySessionKey, setRetrySessionKey] = useState(0);
   const [retryError, setRetryError] = useState('');
+  const requestVersion = useRef(0);
 
-  const load = useCallback(() => {
-    if (!orderNumber) return Promise.resolve();
+  const load = useCallback(async () => {
+    if (!orderNumber) return;
+    const version = ++requestVersion.current;
     setError('');
-    return orderService.myOrder(orderNumber).then(setOrder).catch((err) => setError(err.message || 'Unable to load this order.'));
+    try {
+      const result = await orderService.myOrder(orderNumber);
+      if (version !== requestVersion.current) return;
+      setOrder(result);
+    } catch (err) {
+      if (version !== requestVersion.current) return;
+      setError(err.message || 'Unable to load this order.');
+    }
   }, [orderNumber]);
 
   useEffect(() => {
     let active = true;
-    setOrder(null); setShipment(null); load();
-    if (orderNumber) orderService.myShipment(orderNumber).then((res) => active && setShipment(res)).catch(() => active && setShipment(null));
-    return () => { active = false; };
+    setOrder(null);
+    setShipment(null);
+    load();
+    if (orderNumber) {
+      orderService.myShipment(orderNumber)
+        .then((res) => active && setShipment(res))
+        .catch(() => active && setShipment(null));
+    }
+    return () => {
+      active = false;
+      requestVersion.current += 1;
+    };
   }, [load, orderNumber]);
 
   const closeRetry = useCallback(() => {
