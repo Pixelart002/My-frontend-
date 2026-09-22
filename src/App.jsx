@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { setPageSeo } from './utils/seo';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
@@ -66,9 +68,20 @@ function StoreRoutes() {
   );
 }
 
+function RouteSeo() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const privateRoute = /^\/(cart|checkout|orders?|account|admin|order\/)/.test(pathname);
+    const authRoute = /^(\/login|\/register|\/forgot-password|\/change-password)/.test(pathname);
+    if (privateRoute || authRoute) setPageSeo({ path: pathname, noindex: true });
+  }, [pathname]);
+  return null;
+}
+
 function AppRoutes() {
   return (
     <Suspense fallback={<div className="page container"><div className="state spinner" role="status" aria-live="polite"><span className="spin">●</span><span>Loading…</span></div></div>}>
+      <RouteSeo />
       <Routes>
       {StoreRoutes()}
       <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />

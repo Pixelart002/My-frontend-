@@ -1,15 +1,17 @@
 const SITE = 'https://www.luviio.in';
 const DEFAULT_IMAGE = `${SITE}/og-default.svg`;
+const DEFAULT_TITLE = 'Luviio — Beautiful essentials for everyday living';
+const DEFAULT_DESCRIPTION = 'Considered essentials for a more beautiful everyday.';
 
 const upsertMeta = (selector, attrs, content) => {
+  if (!content) return;
   let node = document.head.querySelector(selector);
   if (!node) {
     node = document.createElement('meta');
     Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
     document.head.appendChild(node);
   }
-  node.setAttribute('content', content || '');
-  return node;
+  node.setAttribute('content', content);
 };
 
 const upsertLink = (rel, href) => {
@@ -22,31 +24,63 @@ const upsertLink = (rel, href) => {
   node.setAttribute('href', href);
 };
 
+const absoluteUrl = (value, fallback = DEFAULT_IMAGE) => {
+  if (!value || typeof value !== 'string') return fallback;
+  try {
+    const url = new URL(value, SITE);
+    return url.protocol === 'https:' ? url.href : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const cleanText = (value, fallback = '') => String(value || fallback).replace(/\s+/g, ' ').trim();
+
+export const productImage = (product) => {
+  const candidates = [product?.image_url, ...(Array.isArray(product?.images) ? product.images : [])];
+  return candidates.map((value) => absoluteUrl(value, '')).find(Boolean) || DEFAULT_IMAGE;
+};
+
+export const productDescription = (product) => cleanText(
+  product?.short_description || product?.description,
+  `Shop ${cleanText(product?.name, 'this product')} from Luviio.`,
+).slice(0, 180);
+
 export function setPageSeo({
-  title = 'Luviio — Beautiful essentials for everyday living',
-  description = 'Considered essentials for a more beautiful everyday.',
+  title = DEFAULT_TITLE,
+  description = DEFAULT_DESCRIPTION,
   path = '/',
   image = DEFAULT_IMAGE,
   type = 'website',
   noindex = false,
   jsonLd,
+  imageAlt = title,
+  imageType,
 }) {
   if (typeof document === 'undefined') return;
 
-  const url = new URL(path || '/', SITE).href;
+  const url = absoluteUrl(path, `${SITE}/`);
+  const shareImage = absoluteUrl(image);
   document.title = title;
   upsertMeta('meta[name="description"]', { name: 'description' }, description);
   upsertMeta('meta[name="robots"]', { name: 'robots' }, noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
   upsertMeta('meta[property="og:type"]', { property: 'og:type' }, type);
   upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, 'Luviio');
+  upsertMeta('meta[property="og:locale"]', { property: 'og:locale' }, 'en_IN');
   upsertMeta('meta[property="og:title"]', { property: 'og:title' }, title);
   upsertMeta('meta[property="og:description"]', { property: 'og:description' }, description);
   upsertMeta('meta[property="og:url"]', { property: 'og:url' }, url);
-  upsertMeta('meta[property="og:image"]', { property: 'og:image' }, image || DEFAULT_IMAGE);
+  upsertMeta('meta[property="og:image"]', { property: 'og:image' }, shareImage);
+  upsertMeta('meta[property="og:image:secure_url"]', { property: 'og:image:secure_url' }, shareImage);
+  upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, imageAlt);
+  upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width' }, '1200');
+  upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height' }, '630');
+  if (imageType) upsertMeta('meta[property="og:image:type"]', { property: 'og:image:type' }, imageType);
   upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
   upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, title);
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, description);
-  upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, image || DEFAULT_IMAGE);
+  upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, shareImage);
+  upsertMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt' }, imageAlt);
   upsertLink('canonical', url);
 
   const existing = document.getElementById('luviio-jsonld');
@@ -60,5 +94,8 @@ export function setPageSeo({
   }
 }
 
+export const setNoindexSeo = (path = '/') => setPageSeo({ path, noindex: true });
 export const siteUrl = SITE;
 export const defaultShareImage = DEFAULT_IMAGE;
+export const defaultSeo = { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
+export { absoluteUrl };
