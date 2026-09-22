@@ -164,7 +164,7 @@ export default function ShopPage() {
       )}
 
       {hasActiveFilters && <button type="button" className="clear-filters" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}><RiCloseLine size={14} /> Clear all filters</button>}
-      {error && data !== null ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
+      {error ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
         <EmptyState title="No products found" message="Try adjusting your filters or search terms." action={<button type="button" className="btn btn-quiet btn-sm" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}>Clear filters</button>} />
       ) : (
         <>
