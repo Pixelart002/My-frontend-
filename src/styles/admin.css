@@ -63,7 +63,7 @@
 .admin-section-label { margin:28px 0 12px; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); }
 .admin-table-wrap .admin-search { display:flex; align-items:center; gap:8px; flex:1 1 220px; max-width:320px; min-width:0; padding:0 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--dim); }
 .admin-search input { flex:1; min-width:0; padding:9px 0; border:0; background:transparent; color:var(--text); }
-.admin-search input:focus { outline:none; }
+.admin-search input:focus { outline:2px solid var(--gold); outline-offset:2px; }
 /* Focus ring is supplied by the global accessible focus-visible layer. */
 .admin-select { max-width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--muted); }
 .admin-page-note { margin:12px 4px 0; font-size:12px; color:var(--dim); }
