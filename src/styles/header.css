@@ -56,7 +56,8 @@
   .mobile-nav-section + .mobile-nav-section { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
   .mobile-nav .nav-section-label { display:none !important; }
   .mobile-nav a,.mobile-nav button { min-height:46px; display:flex !important; align-items:center; width:100%; flex:0 0 auto; padding:11px 10px; border:0; border-radius:10px; background:transparent; color:var(--text); text-align:left; font:inherit; text-decoration:none; cursor:pointer; touch-action:manipulation; }
-  .mobile-nav a:hover,.mobile-nav button:hover,.mobile-nav a:focus-visible,.mobile-nav button:focus-visible { background:var(--surface-2); outline:none; }
+  .mobile-nav a:hover,.mobile-nav button:hover { background:var(--surface-2); }
+.mobile-nav a:focus-visible,.mobile-nav button:focus-visible { background:var(--surface-2); }
   .mobile-nav a.is-active { background:var(--surface-2); color:var(--gold); }
   .mobile-nav button { gap:9px; }
   .mobile-search { display:flex; align-items:center; gap:9px; margin:0 0 12px; padding:0 12px; min-height:46px; border:1px solid var(--line); border-radius:11px; background:var(--bg); color:var(--dim); }
