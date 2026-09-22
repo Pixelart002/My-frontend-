@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /api/og/
 
 # Transactional/private areas should not be indexed.
 Disallow: /cart
