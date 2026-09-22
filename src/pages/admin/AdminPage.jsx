@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { RiDashboardLine, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiGroupLine, RiCoupon3Line, RiLogoutBoxRLine, RiShieldStarLine, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiSettings3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiStarLine, RiMenuLine, RiCloseLine, RiBuilding4Line } from '@remixicon/react';
 import { adminService } from '../../services/admin';
@@ -43,7 +43,7 @@ const CAPABILITIES={
 export default function AdminPage(){
  const {user,logout}=useAuth();const {toast}=useToast();const navigate=useNavigate();const [searchParams,setSearchParams]=useSearchParams();const requestedPanel=searchParams.get('panel');const isFulfillmentRoute=window.location.pathname==='/admin/fulfillment';const createCoupon=searchParams.get('create')==='1';const [status,setStatus]=useState('verifying');const [profile,setProfile]=useState(null);const [panel,setPanel]=useState(isFulfillmentRoute?'fulfillment':(ROLE_PANELS[user?.role]?.includes(requestedPanel)?requestedPanel:(requestedPanel&&requestedPanel!=='dashboard'?requestedPanel:'dashboard')));const [drawerOpen,setDrawerOpen]=useState(false);
  const drawerRef=useRef(null);const drawerCloseRef=useRef(null);const role=profile?.role||user?.role;const allowed=ROLE_PANELS[role]||[];const capabilities=CAPABILITIES[role]||{};const effectivePanel=allowed.includes(panel)?panel:(allowed[0]||'dashboard');
- const verifyAdmin=async()=>{const res=await adminService.verify();setProfile(res?.profile||null);setStatus('verified');return res};
+ const verifyAdmin=useCallback(async()=>{const res=await adminService.verify();setProfile(res?.profile||null);setStatus('verified');return res},[]);
  useEffect(()=>{let active=true;adminService.verify().then(res=>{if(!active)return;setProfile(res?.profile||null);setStatus('verified')}).catch(err=>{if(!active)return;const next=classifyAdminAccessError(err);if(next==='mfa-required'){setStatus('mfa-required');return}if(next==='auth-required'){setStatus('auth-required');return}setStatus('denied');console.warn('Admin gate:',err.message)});return()=>{active=false}},[]);
  useEffect(()=>{if(status==='verified'&&effectivePanel!==panel){setPanel(effectivePanel);setSearchParams({panel:effectivePanel})}},[status,effectivePanel,panel,setSearchParams]);
  useEffect(()=>{if(!drawerOpen)return undefined;const previous=document.body.style.overflow;document.body.style.overflow='hidden';return()=>document.body.style.overflow=previous},[drawerOpen]);
