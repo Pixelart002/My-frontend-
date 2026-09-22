@@ -59,7 +59,6 @@ export default async function handler(req, res) {
 <meta property="og:image" content="${escapeHtml(productImage)}">
 <meta property="og:image:secure_url" content="${escapeHtml(productImage)}">
 <meta property="og:image:alt" content="${escapeHtml(name)}">
-<meta property="og:image">
 <meta property="og:image" content="${generatedImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
