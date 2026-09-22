@@ -14,7 +14,7 @@
 .business-field { display:flex; flex-direction:column; gap:7px; min-width:0; }
 .business-field > span { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
 .business-field > span em { flex:none; color:var(--gold-soft); font-size:9px; font-style:normal; letter-spacing:.04em; text-transform:none; }
-.business-field input,.business-field select { width:100%; min-height:42px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font:inherit; outline:none; transition:border-color .16s ease,box-shadow .16s ease; }
+.business-field input,.business-field select { width:100%; min-height:42px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font:inherit;  transition:border-color .16s ease,box-shadow .16s ease; }
 .business-field input::placeholder { color:var(--dim); }
 .business-field input:focus,.business-field select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(210,170,90,.08); }
 .business-field small { color:var(--dim); font-size:10px; line-height:1.45; }
