@@ -288,3 +288,20 @@ button:not(.icon-btn), .btn, select, input[type='submit'], input[type='button'] 
 @media (prefers-reduced-motion: reduce) {
   .btn:hover:not(:disabled), .category-card:hover, .home-category-card:hover, .product-card:hover .product-media-link img { transform: none !important; }
 }
+
+
+/* Touch-target + responsive text controls */
+.clear-filters,
+.section-view-all,
+.home-secondary-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.section-view-all,
+.home-secondary-link { gap: 8px; }
+@media (max-width: 560px) {
+  .shop-toolbar { align-items: stretch; }
+  .shop-search { min-width: 0; flex: 1 1 100%; }
+  .filter-toggle { width: 100%; justify-content: center; }
+}
