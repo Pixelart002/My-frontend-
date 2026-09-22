@@ -87,12 +87,16 @@ export default function Header() {
   const onSearch = (e) => { e.preventDefault(); const q = e.currentTarget.query.value.trim(); navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop'); closeAll(); };
   const onLogout = async () => { closeAll(); await logout(); toast.success('You have been signed out.'); navigate('/'); };
   const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
+  const adminMenuLink = (key, label, Icon = null) => {
+    const active = isAdminPage && new URLSearchParams(location.search).get('panel') === key;
+    return <Link to={`/admin?panel=${key}`} onClick={closeAll} className={active ? 'is-active' : undefined} aria-current={active ? 'page' : undefined}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
+  };
   const adminItemMap = new Map(ADMIN_NAV.map(([key, label, Icon]) => [key, [label, Icon]]));
 
   const mobileContent = isAdminPage && isAdmin
     ? <>
         <div className="mobile-nav-section mobile-admin-nav">
-          {ADMIN_GROUPS.map(([group, keys]) => <div key={group} className="mobile-admin-group"><div className="mobile-admin-label">{group}</div>{keys.map((key) => { const [label, Icon] = adminItemMap.get(key); return menuLink(`/admin?panel=${key}`, label, Icon); })}</div>)}
+          {ADMIN_GROUPS.map(([group, keys]) => <div key={group} className="mobile-admin-group"><div className="mobile-admin-label">{group}</div>{keys.map((key) => { const [label, Icon] = adminItemMap.get(key); return adminMenuLink(key, label, Icon); })}</div>)}
         </div>
         {menuLink('/', 'View storefront', RiHomeLine)}
       </>
