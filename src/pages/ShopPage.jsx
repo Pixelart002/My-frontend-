@@ -66,22 +66,8 @@ export default function ShopPage() {
   }, [buildParams]);
 
   useEffect(() => {
-    let active = true;
-    setData(null);
-    setError('');
-    loadingMoreRef.current = false;
-
-    (async () => {
-      try {
-        const res = normalizeResponse(await productService.list(buildParams(1)));
-        if (active) setData(res);
-      } catch (err) {
-        if (active) setError(err.message || 'Unable to load products.');
-      }
-    })();
-
-    return () => { active = false; };
-  }, [buildParams]);
+    loadProducts();
+  }, [loadProducts]);
 
   const meta = data?.meta || {};
   const currentPage = Number(meta.page) || 1;
