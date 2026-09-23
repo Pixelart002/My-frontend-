@@ -40,10 +40,7 @@ const absoluteUrl = (value, fallback = DEFAULT_IMAGE) => {
 
 const cleanText = (value, fallback = '') => String(value || fallback).replace(/\s+/g, ' ').trim();
 
-export const productImage = (product) => {
-  const candidates = [product?.image_url, ...(Array.isArray(product?.images) ? product.images : [])];
-  return candidates.map((value) => absoluteUrl(value, '')).find(Boolean) || DEFAULT_IMAGE;
-};
+export const productImage = () => DEFAULT_IMAGE;
 
 export const productDescription = (product) => cleanText(
   product?.short_description || product?.description,
