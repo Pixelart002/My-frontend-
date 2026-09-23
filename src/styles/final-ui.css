@@ -133,7 +133,7 @@ td { color: var(--text); border-top: 1px solid var(--line-soft); }
 .product-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .product-actions .btn:first-child { order: 0; }
 .gallery-main { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg, 14px); }
-.gallery-main img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; }
+.gallery-main img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
 
 /* Cart/checkout/order: summary follows content on mobile */
 .cart-layout, .checkout-layout, .order-layout {
