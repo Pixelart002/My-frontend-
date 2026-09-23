@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { RiAddLine, RiDeleteBinLine, RiEditLine, RiImageAddLine, RiSearchLine, RiCloseLine, RiStarFill } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
@@ -59,6 +59,9 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
+  const [hsnSuggestions, setHsnSuggestions] = useState([]);
+  const [hsnSuggesting, setHsnSuggesting] = useState(false);
+  const hsnRequestSeq = useRef(0);
 
   const isCreate = !editingId;
   const measurementTypes = measurementCatalog.types || [];
@@ -122,6 +125,34 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (typeof raw !== 'string') return [];
     return raw.replace(/%/g, '').replace(/,/g, '/').split('/').map((v) => Number(v.trim())).filter((v) => Number.isFinite(v) && v >= 0 && v <= 100);
   }))].sort((a, b) => a - b);
+
+  useEffect(() => {
+    const query = form.name.trim();
+    const seq = ++hsnRequestSeq.current;
+    if (query.length < 2) {
+      setHsnSuggestions([]);
+      setHsnSuggesting(false);
+      return undefined;
+    }
+    const timer = setTimeout(async () => {
+      setHsnSuggesting(true);
+      try {
+        const result = await adminService.hsnSuggestions(query);
+        if (seq !== hsnRequestSeq.current) return;
+        setHsnSuggestions(Array.isArray(result?.items) ? result.items : []);
+      } catch {
+        if (seq === hsnRequestSeq.current) setHsnSuggestions([]);
+      } finally {
+        if (seq === hsnRequestSeq.current) setHsnSuggesting(false);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [form.name]);
+
+  const selectHsnSuggestion = (item) => {
+    setField('hsn_code', String(item?.hsn_code || '').replace(/\\D/g, '').slice(0, 8));
+    setHsnSuggestions([]);
+  };
 
   const applyHsnResult = (item) r('Each image must be 5 MB or smaller.');
     }
@@ -319,8 +350,17 @@ export default function ProductsPanel({ capabilities = {} }) {
           <div className="field-grid">
             <div className="field">
               <label htmlFor="product-hsn">{fieldLabel('HSN code', isCreate)}</label>
-              <input id="product-hsn" required={isCreate} minLength={isCreate ? 4 : undefined} maxLength={8} value={form.hsn_code} onChange={(e) => setField('hsn_code', e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="Enter 4–8 digit HSN" inputMode="numeric" />
-              <small>Enter the HSN code manually. HSN lookup has been removed; the backend validates the code format.</small>
+              <div className="hsn-suggest-wrap">
+                <input id="product-hsn" required={isCreate} minLength={isCreate ? 4 : undefined} maxLength={8} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\\D/g, '').slice(0, 8)); setHsnSuggestions([]); }} placeholder="Enter 4–8 digit HSN" inputMode="numeric" autoComplete="off" />
+                {(hsnSuggesting || hsnSuggestions.length > 0) && form.name.trim().length >= 2 && <div className="hsn-suggestions" role="listbox" aria-label="HSN suggestions">
+                  {hsnSuggesting && <div className="hsn-suggestion-status">Finding matching HSN codes…</div>}
+                  {!hsnSuggesting && hsnSuggestions.map((item) => <button type="button" className="hsn-suggestion" key={item.hsn_code} onClick={() => selectHsnSuggestion(item)} role="option">
+                    <strong>{item.hsn_code}</strong><span>{item.description}</span>
+                  </button>)}
+                  {!hsnSuggesting && hsnSuggestions.length === 0 && <div className="hsn-suggestion-status">No HSN suggestions found. Enter the code manually.</div>}
+                </div>}
+              </div>
+              <small>Type the product name above to get HSN suggestions. Select one explicitly; GST remains a separate manual choice.</small>
             </div>
             <div className="field">
               <label htmlFor="product-gst">{fieldLabel('GST rate', isCreate)}</label>
