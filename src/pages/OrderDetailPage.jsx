@@ -6,7 +6,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { RiArrowLeftLine, RiFileTextLine, RiCloseCircleLine } from '@remixicon/react';
 import { orderService } from '../services/orders';
 import { paymentService } from '../services/payments';
-import { STRIPE_PK } from '../config/env';
+import { getStripePromise } from '../services/stripeConfig';
 import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import { orderStatusLabel, orderStatusTone, canCancelOrder, canDownloadInvoice } from '../utils/order';
@@ -15,7 +15,7 @@ import { Spinner, ErrorState } from '../components/ui/States';
 import { useToast } from '../context/ToastContext';
 import ShipmentTimeline from '../components/orders/ShipmentTimeline';
 
-const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
+const stripePromise = getStripePromise();
 
 export default function OrderDetailPage() {
   const { id: orderNumber } = useParams();
