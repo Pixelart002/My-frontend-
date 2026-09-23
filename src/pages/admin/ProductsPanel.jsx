@@ -59,14 +59,10 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
-  const [hsnQuery, setHsnQuery] = useState('');
-  const [hsnResults, setHsnResults] = useState([]);
-  const [hsnLoading, setHsnLoading] = useState(false);
-  const [hsnError, setHsnError] = useState('');
-  const [gstRates, setGstRates] = useState([]);
 
   const isCreate = !editingId;
   const measurementTypes = measurementCatalog.types || [];
+  const gstRates = [0, 5, 12, 18, 28];
   const measurementUnits = (measurementCatalog.units || []).filter((unit) => String(unit.measurement_type) === String(form.measurement_type));
 
   const load = useCallback(async () => {
@@ -99,7 +95,6 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (!canCreate) return;
     setEditingId(null);
     setForm({ ...blank, images: [] });
-    setHsnQuery(''); setHsnResults([]); setGstRates([]); setHsnError('');
     setSelectedFiles([]);
     setEditing(true);
   };
@@ -108,7 +103,6 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (!canUpdate) return;
     setEditingId(p.id);
     setForm(toForm(p));
-    setHsnQuery(p.hsn_code || ''); setHsnResults([]); setGstRates(p.gst_percentage != null ? [Number(p.gst_percentage)] : []); setHsnError('');
     setSelectedFiles([]);
     setEditing(true);
   };
@@ -129,72 +123,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     return raw.replace(/%/g, '').replace(/,/g, '/').split('/').map((v) => Number(v.trim())).filter((v) => Number.isFinite(v) && v >= 0 && v <= 100);
   }))].sort((a, b) => a - b);
 
-  const applyHsnResult = (item) => {
-    const code = String(item?.hsn_sac || item?.hsn || item?.code || '').trim();
-    const rates = extractGstRates([item]);
-    if (code) setField('hsn_code', code);
-    if (rates.length) {
-      setGstRates(rates);
-      setField('gst_percentage', String(rates[0]));
-    }
-    setHsnResults([]);
-    setHsnError('');
-  };
-
-  const searchHsn = async () => {
-    const query = (hsnQuery.trim() || form.name.trim()).trim();
-    if (query.length < 2) {
-      return toast.error('Enter at least 2 characters in HSN search or product name.');
-    }
-    setHsnLoading(true);
-    setHsnError('');
-    try {
-      const response = await adminService.taxonomyHsnSearch(query, 8);
-      const results = Array.isArray(response?.results) ? response.results : [];
-      setHsnResults(results);
-      if (!results.length) setHsnError('No HSN matches found. You can still enter the HSN manually.');
-    } catch (e) {
-      setHsnResults([]);
-      setHsnError(e.message || 'HSN provider is temporarily unavailable.');
-    } finally {
-      setHsnLoading(false);
-    }
-  };
-
-  const lookupHsn = async (code = form.hsn_code) => {
-    const value = String(code || '').trim();
-    if (!/^\d{4,8}$/.test(value)) return;
-    setHsnLoading(true);
-    setHsnError('');
-    try {
-      const response = await adminService.taxonomyHsnLookup(value);
-      const results = Array.isArray(response?.results) ? response.results : [];
-      const rates = extractGstRates(results);
-      setGstRates(rates);
-      if (rates.length && !rates.includes(Number(form.gst_percentage))) {
-        setField('gst_percentage', String(rates[0]));
-      }
-      setHsnResults(results);
-      if (!results.length) setHsnError('HSN code was not found by the configured provider.');
-    } catch (e) {
-      setGstRates([]);
-      setHsnResults([]);
-      setHsnError(e.message || 'Unable to verify this HSN code right now.');
-    } finally {
-      setHsnLoading(false);
-    }
-  };
-
-
-  const selectFiles = (e) => {
-    if (!canManageImages) return;
-    const incoming = Array.from(e.target.files || []);
-    if (!incoming.length) return;
-    if (incoming.some((f) => !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(f.type))) {
-      return toast.error('Please choose PNG, JPG, WebP or GIF image files only.');
-    }
-    if (incoming.some((f) => f.size > MAX_IMAGE_BYTES)) {
-      return toast.error('Each image must be 5 MB or smaller.');
+  const applyHsnResult = (item) r('Each image must be 5 MB or smaller.');
     }
     if (form.images.length + selectedFiles.length + incoming.length > MAX_IMAGES) {
       return toast.error(`Maximum ${MAX_IMAGES} images per product.`);
@@ -256,8 +185,8 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (hsn && !/^\d{4,8}$/.test(hsn)) return 'HSN code must contain 4-8 digits.';
     if (!isCreate && form.hsn_code !== '' && !hsn) return 'HSN code cannot be empty.';
     const gst = Number(form.gst_percentage);
-    if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
-    if (!isCreate && form.gst_percentage !== '' && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
+    if (isCreate && !gstRates.includes(gst)) return 'GST rate must be one of 0%, 5%, 12%, 18% or 28%.';
+    if (!isCreate && form.gst_percentage !== '' && !gstRates.includes(gst)) return 'GST rate must be one of 0%, 5%, 12%, 18% or 28%.';
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
     if (form.measurement_type) {
       if (measurementValue === null || !Number.isFinite(measurementValue) || measurementValue < 0) return 'Measurement value must be 0 or more.';
@@ -390,30 +319,15 @@ export default function ProductsPanel({ capabilities = {} }) {
           <div className="field-grid">
             <div className="field">
               <label htmlFor="product-hsn">{fieldLabel('HSN code', isCreate)}</label>
-              <div className="field-inline">
-                <input id="product-hsn" required={isCreate} minLength={isCreate ? 1 : undefined} maxLength={20} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\D/g, '').slice(0, 8)); setHsnQuery(e.target.value); }} onBlur={() => lookupHsn()} placeholder="Search or enter HSN" inputMode="numeric" />
-                <button type="button" className="btn btn-quiet btn-sm" onClick={searchHsn} disabled={hsnLoading}>{hsnLoading ? 'Searching…' : 'Find HSN'}</button>
-              </div>
-              <small>Search uses the configured live HSN/GST taxonomy provider. You can also enter a code manually.</small>
-              {hsnError && <small className="td-dim">{hsnError}</small>}
-              {hsnResults.length > 0 && <div className="hsn-results" role="listbox" aria-label="HSN suggestions">
-                {hsnResults.map((item, index) => {
-                  const code = String(item?.hsn_sac || item?.hsn || item?.code || '').trim();
-                  const description = item?.description || item?.name || 'HSN match';
-                  const rate = item?.gst_rate ?? '—';
-                  return <button type="button" className="hsn-result" key={code || index} onClick={() => applyHsnResult(item)}>
-                    <strong>{code || '—'}</strong><span>{description}</span><em>{rate}%</em>
-                  </button>;
-                })}
-              </div>}
+              <input id="product-hsn" required={isCreate} minLength={isCreate ? 4 : undefined} maxLength={8} value={form.hsn_code} onChange={(e) => setField('hsn_code', e.target.value.replace(/\D/g, '').slice(0, 8))} placeholder="Enter 4–8 digit HSN" inputMode="numeric" />
+              <small>Enter the HSN code manually. HSN lookup has been removed; the backend validates the code format.</small>
             </div>
             <div className="field">
               <label htmlFor="product-gst">{fieldLabel('GST rate', isCreate)}</label>
               <select id="product-gst" required={isCreate} value={form.gst_percentage} onChange={(e) => setField('gst_percentage', e.target.value)}>
-                {!gstRates.length && form.gst_percentage !== '' && <option value={form.gst_percentage}>{form.gst_percentage}% · manual</option>}
                 {gstRates.map((rate) => <option key={rate} value={rate}>{rate}%</option>)}
               </select>
-              <small>{gstRates.length ? 'Select from the rate(s) returned for this HSN.' : 'Enter/select a rate; the backend validates it against the provider before saving.'}</small>
+              <small>Select the applicable GST slab: 0%, 5%, 12%, 18% or 28%.</small>
             </div>
           </div>
           <div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div>
