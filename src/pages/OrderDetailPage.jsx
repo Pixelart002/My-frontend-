@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { RiArrowLeftLine, RiFileTextLine, RiCloseCircleLine } from '@remixicon/react';
 import { orderService } from '../services/orders';
