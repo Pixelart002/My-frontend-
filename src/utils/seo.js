@@ -1,5 +1,5 @@
 const SITE = 'https://www.luviio.in';
-const DEFAULT_IMAGE = `${SITE}/og-default.svg`;
+const DEFAULT_IMAGE = `${SITE}/icon-512.png`;
 const DEFAULT_TITLE = 'Luviio — Beautiful essentials for everyday living';
 const DEFAULT_DESCRIPTION = 'Considered essentials for a more beautiful everyday.';
 
