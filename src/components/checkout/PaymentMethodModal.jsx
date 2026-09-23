@@ -46,8 +46,24 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
       </header>
       <div className="payment-modal-body">
         {isCodSuccess ? <div className="payment-success-state"><RiCheckboxCircleFill size={54} className="order-result-icon" style={{ display: 'block', margin: '0 auto' }} /><strong>Your COD order is confirmed.</strong><p>Order <b>#{activeOrder.orderNumber}</b> has been placed successfully. You’ll pay when the order arrives.</p></div> : !review ? <div className="payment-modal-options" role="radiogroup" aria-label="Payment method">
-          <label className={`payment-option ${value === 'stripe' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="stripe" checked={value === 'stripe'} onChange={() => onChange('stripe')} /><span className="payment-option-icon"><RiBankCardLine aria-hidden="true" style={iconStyle} /></span><span className="payment-option-copy"><strong>Stripe</strong><small>Secure online payment by card and supported Stripe methods.</small></span></label>
-          <label className={`payment-option ${value === 'cod' ? 'is-selected' : ''}`}><input type="radio" name="payment-method" value="cod" checked={value === 'cod'} onChange={() => onChange('cod')} /><span className="payment-option-icon"><RiCashLine aria-hidden="true" style={iconStyle} /></span><span className="payment-option-copy"><strong>Cash on Delivery</strong><small>Pay when your order arrives.</small></span></label>
+          <label className={`payment-option ${value === 'stripe' ? 'is-selected' : ''}`}>
+            <input type="radio" name="payment-method" value="stripe" checked={value === 'stripe'} onChange={() => onChange('stripe')} />
+            <span className="payment-option-icon"><RiBankCardLine aria-hidden="true" style={iconStyle} /></span>
+            <span className="payment-option-copy">
+              <span className="payment-option-topline"><strong>Online payment</strong>{value === 'stripe' && <span className="payment-option-check"><RiCheckboxCircleFill size={15} aria-hidden="true" /></span>}</span>
+              <small>Pay securely with card, UPI and other Stripe-supported methods.</small>
+              <span className="payment-option-meta"><span>Secure checkout</span><span>Stripe</span></span>
+            </span>
+          </label>
+          <label className={`payment-option ${value === 'cod' ? 'is-selected' : ''}`}>
+            <input type="radio" name="payment-method" value="cod" checked={value === 'cod'} onChange={() => onChange('cod')} />
+            <span className="payment-option-icon"><RiCashLine aria-hidden="true" style={iconStyle} /></span>
+            <span className="payment-option-copy">
+              <span className="payment-option-topline"><strong>Cash on Delivery</strong>{value === 'cod' && <span className="payment-option-check"><RiCheckboxCircleFill size={15} aria-hidden="true" /></span>}</span>
+              <small>Pay when your order arrives.</small>
+              <span className="payment-option-meta"><span>Pay on delivery</span><span>Order confirmation required</span></span>
+            </span>
+          </label>
         </div> : hasPaymentContent ? <div className="payment-modal-payment">{children}</div> : <div className="payment-review">
           <div className="payment-review-card"><div className="payment-review-heading"><RiMapPinLine aria-hidden="true" style={iconStyle} /><strong>Deliver to</strong></div>{address && <div className="payment-review-address"><strong>{address.full_name || 'Delivery address'}</strong><p>{address.line1}{address.line2 ? `, ${address.line2}` : ''}</p><p>{address.city}{address.state ? `, ${address.state}` : ''} — {address.postal_code}, {address.country}</p>{address.email && <p>{address.email}</p>}{address.phone && <p>{address.phone}</p>}</div>}</div>
           <div className="payment-review-card payment-review-total"><span>Payment method</span><strong>{value === 'cod' ? 'Cash on Delivery' : 'Stripe'}</strong><span>Total</span><strong>{total}</strong></div>
