@@ -102,7 +102,7 @@ export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
   const token = readToken();
   const normalizedMethod = method.toUpperCase();
-  const publicRequest = isPublicRequest(normalizedMethod, path);
+  const publicRequest = isPublicRequest(normalizedMethod, path) && path !== '/products/hsn-suggestions';
   const protectedPath = !publicRequest && !path.startsWith('/auth/');
   if (token && protectedPath) headers.Authorization = `Bearer ${token}`;
   const canRetry = IDEMPOTENT.has(normalizedMethod);
