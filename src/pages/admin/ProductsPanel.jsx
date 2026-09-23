@@ -13,7 +13,7 @@ const MAX_IMAGES = 10;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const blank = {
   name: '', slug: '', sku: '', category_id: '', price: '', compare_price: '', stock: '0',
-  weight: '', weight_unit: 'g', volume: '', volume_unit: 'ml', length: '', width: '', height: '', dimension_unit: 'mm', quantity: '', quantity_unit: 'piece', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
+  measurement_type: '', measurement_value: '', measurement_unit: '', length: '', width: '', height: '', dimension_unit: 'mm', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
   image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
   part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
   specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
@@ -21,29 +21,20 @@ const blank = {
 
 const toForm = (p) => {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : (p.image_url ? [p.image_url] : []);
-  const specs = p.specifications && typeof p.specifications === 'object' ? p.specifications : {};
   return {
     ...blank,
     name: p.name || '', slug: p.slug || '', sku: p.sku || '', category_id: p.category_id || '',
     price: p.price != null ? String(p.price) : '', compare_price: p.compare_price != null ? String(p.compare_price) : '',
-    stock: p.stock != null ? String(p.stock) : '0', weight: p.weight != null ? String(p.weight) : '', weight_unit: p.weight_unit || 'g', volume: p.volume != null ? String(p.volume) : '', volume_unit: p.volume_unit || 'ml', length: p.length != null ? String(p.length) : '', width: p.width != null ? String(p.width) : '', height: p.height != null ? String(p.height) : '', dimension_unit: p.dimension_unit || 'mm', quantity: p.quantity != null ? String(p.quantity) : '', quantity_unit: p.quantity_unit || 'piece',
+    stock: p.stock != null ? String(p.stock) : '0', measurement_type: p.measurement_type || '', measurement_value: p.measurement_value != null ? String(p.measurement_value) : '', measurement_unit: p.measurement_unit || '', length: p.length != null ? String(p.length) : '', width: p.width != null ? String(p.width) : '', height: p.height != null ? String(p.height) : '', dimension_unit: p.dimension_unit || 'mm',
     hsn_code: p.hsn_code || '', gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18',
     short_description: p.short_description || '', description: p.description || '', image_url: images[0] || '', images,
     brand: p.brand || '', manufacturer: p.manufacturer || '', model_number: p.model_number || '',
     gtin: p.gtin || '', ean: p.ean || '', part_number: p.part_number || '',
     key_features: Array.isArray(p.key_features) ? p.key_features.join('\n') : '',
     material: p.material || '', finish: p.finish || '', color: p.color || '', size: p.size || '',
-    dimensions: p.dimensions || '', specifications: JSON.stringify(specs, null, 2),
+    dimensions: p.dimensions || '',
     warranty: p.warranty || '', country_of_origin: p.country_of_origin || '', is_active: p.is_active !== false,
   };
-};
-
-const parseAttributes = (value) => {
-  if (!value.trim()) return {};
-  let parsed;
-  try { parsed = JSON.parse(value); } catch { throw new Error('Attributes must contain valid JSON.'); }
-  if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') throw new Error('Attributes must be a JSON object.');
-  return parsed;
 };
 
 const fieldLabel = (label, required) => <>{label}{required ? ' *' : ''}</>;
@@ -56,6 +47,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const { toast } = useToast();
   const [items, setItems] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [measurementCatalog, setMeasurementCatalog] = useState({ types: [], units: [] });
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('');
@@ -74,16 +66,20 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [gstRates, setGstRates] = useState([]);
 
   const isCreate = !editingId;
+  const measurementTypes = measurementCatalog.types || [];
+  const measurementUnits = (measurementCatalog.units || []).filter((unit) => String(unit.measurement_type) === String(form.measurement_type));
 
   const load = useCallback(async () => {
     setError('');
     try {
-      const [p, c] = await Promise.all([
+      const [p, c, m] = await Promise.all([
         adminService.listProducts({ page: 1, page_size: PAGE_SIZE }),
         adminService.categories(),
+        adminService.measurementCatalog(),
       ]);
       setItems(itemsOfList(p));
       setCategories(itemsOfList(c));
+      setMeasurementCatalog({ types: Array.isArray(m?.types) ? m.types : [], units: Array.isArray(m?.units) ? m.units : [] });
     } catch (e) {
       setError(e.message || 'Unable to load products.');
     }
@@ -249,7 +245,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     const price = Number(form.price);
     const compare = form.compare_price === '' ? null : Number(form.compare_price);
     const stock = Number(form.stock);
-    const weight = form.weight === '' ? null : Number(form.weight);
+    const measurementValue = form.measurement_value === '' ? null : Number(form.measurement_value);
 
     if (isCreate && name.length < 2) return 'Name must be at least 2 characters.';
     if (!isCreate && form.name.trim() && name.length < 2) return 'Name must be at least 2 characters.';
@@ -263,8 +259,12 @@ export default function ProductsPanel({ capabilities = {} }) {
     if (isCreate && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!isCreate && form.gst_percentage !== '' && (!Number.isFinite(gst) || gst < 0 || gst > 100)) return 'Enter a valid GST percentage.';
     if (!Number.isInteger(stock) || stock < 0) return 'Stock must be a whole number of 0 or more.';
-    if (weight !== null && (!Number.isFinite(weight) || weight < 0)) return 'Weight must be 0 or more.';
-    if (!['g', 'kg'].includes(form.weight_unit)) return 'Weight unit must be g or kg.';
+    if (form.measurement_type) {
+      if (measurementValue === null || !Number.isFinite(measurementValue) || measurementValue < 0) return 'Measurement value must be 0 or more.';
+      if (!form.measurement_unit) return 'Select a measurement unit.';
+    } else if (form.measurement_value !== '' || form.measurement_unit) {
+      return 'Select a measurement type before entering a measurement.';
+    }
     if (form.name.length > 255) return 'Name must be 255 characters or fewer.';
     if (form.sku.length > 100) return 'SKU must be 100 characters or fewer.';
     if (form.short_description.length > 500) return 'Short description must be 500 characters or fewer.';
@@ -279,13 +279,6 @@ export default function ProductsPanel({ capabilities = {} }) {
 
     const problem = validate();
     if (problem) return toast.error(problem);
-
-    let specifications;
-    try {
-      specifications = parseAttributes(form.specifications);
-    } catch (err) {
-      return toast.error(err.message.replace('Attributes', 'Specifications'));
-    }
 
     setSaving(true);
     try {
@@ -310,20 +303,16 @@ export default function ProductsPanel({ capabilities = {} }) {
         color: form.color.trim() || undefined,
         size: form.size.trim() || undefined,
         dimensions: form.dimensions.trim() || undefined,
-        specifications,
         warranty: form.warranty.trim() || undefined,
         hsn_code: form.hsn_code.trim() || undefined,
         gst_percentage: Number(form.gst_percentage),
-        weight: form.weight === '' ? undefined : Number(form.weight),
-        weight_unit: form.weight === '' ? undefined : form.weight_unit,
-        volume: form.volume === '' ? undefined : Number(form.volume),
-        volume_unit: form.volume === '' ? undefined : form.volume_unit,
+        measurement_type: form.measurement_type || undefined,
+        measurement_value: form.measurement_type && form.measurement_value !== '' ? Number(form.measurement_value) : undefined,
+        measurement_unit: form.measurement_type ? form.measurement_unit || undefined : undefined,
         length: form.length === '' ? undefined : Number(form.length),
         width: form.width === '' ? undefined : Number(form.width),
         height: form.height === '' ? undefined : Number(form.height),
         dimension_unit: [form.length, form.width, form.height].some((v) => v !== '') ? form.dimension_unit : undefined,
-        quantity: form.quantity === '' ? undefined : Number(form.quantity),
-        quantity_unit: form.quantity === '' ? undefined : form.quantity_unit,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
@@ -432,12 +421,39 @@ export default function ProductsPanel({ capabilities = {} }) {
             </div>
           </div>
           <div className="field"><label htmlFor="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" value={form.stock} onChange={(e) => setField('stock', e.target.value)} /></div>
-          <div className="field-grid">
-            <div className="field"><label htmlFor="product-weight">Weight</label><div className="field-inline"><input id="product-weight" type="number" min="0" step="0.001" value={form.weight} onChange={(e) => setField('weight', e.target.value)} placeholder="e.g. 250" /><select aria-label="Weight unit" value={form.weight_unit} onChange={(e) => setField('weight_unit', e.target.value)}><option value="g">g</option><option value="kg">kg</option></select></div></div>
-            <div className="field"><label htmlFor="product-volume">Volume / Capacity</label><div className="field-inline"><input id="product-volume" type="number" min="0" step="0.001" value={form.volume} onChange={(e) => setField('volume', e.target.value)} placeholder="e.g. 1" /><select aria-label="Volume unit" value={form.volume_unit} onChange={(e) => setField('volume_unit', e.target.value)}><option value="ml">ml</option><option value="L">L</option></select></div></div>
+          <div className="field">
+            <label htmlFor="product-measurement-type">Product measurement</label>
+            <div className="field-inline">
+              <select
+                id="product-measurement-type"
+                value={form.measurement_type}
+                onChange={(e) => setForm((v) => ({ ...v, measurement_type: e.target.value, measurement_value: '', measurement_unit: '' }))}
+              >
+                <option value="">No measurement</option>
+                {measurementTypes.map((type) => <option key={type.code} value={type.code}>{type.name}</option>)}
+              </select>
+              {form.measurement_type && <input
+                id="product-measurement-value"
+                type="number"
+                min="0"
+                step="0.000001"
+                value={form.measurement_value}
+                onChange={(e) => setField('measurement_value', e.target.value)}
+                placeholder="Value"
+                aria-label="Measurement value"
+              />}
+              {form.measurement_type && <select
+                aria-label="Measurement unit"
+                value={form.measurement_unit}
+                onChange={(e) => setField('measurement_unit', e.target.value)}
+              >
+                <option value="">Select unit</option>
+                {measurementUnits.map((unit) => <option key={unit.code} value={unit.code}>{unit.name}{unit.symbol ? ' (' + unit.symbol + ')' : ''}</option>)}
+              </select>}
+            </div>
+            <small>Only the selected measurement type is stored and shown to customers. Units are loaded from the database measurement master.</small>
           </div>
           <div className="field-grid">
-            <div className="field"><label htmlFor="product-quantity">Selling quantity</label><div className="field-inline"><input id="product-quantity" type="number" min="0" step="0.001" value={form.quantity} onChange={(e) => setField('quantity', e.target.value)} placeholder="e.g. 1" /><select aria-label="Quantity unit" value={form.quantity_unit} onChange={(e) => setField('quantity_unit', e.target.value)}><option value="piece">piece</option><option value="pack">pack</option><option value="set">set</option><option value="pair">pair</option><option value="box">box</option></select></div></div>
             <div className="field"><label htmlFor="product-origin">Country of origin</label><input id="product-origin" maxLength="100" value={form.country_of_origin} onChange={(e) => setField('country_of_origin', e.target.value)} placeholder="e.g. India" /></div>
           </div>
         </div>
@@ -450,7 +466,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
         <div className="editor-section"><div className="editor-section-head"><div><h3>Descriptions</h3><p>Customer-facing product copy.</p></div></div><div className="field"><label htmlFor="product-short">Short description</label><input id="product-short" maxLength="500" value={form.short_description} onChange={(e) => setField('short_description', e.target.value)} /></div><div className="field"><label htmlFor="product-description">Description</label><textarea id="product-description" rows="6" value={form.description} onChange={(e) => setField('description', e.target.value)} /></div></div>
 
-        <div className="editor-section"><div className="editor-section-head"><div><h3>Hardware details</h3><p>Common hardware catalogue fields. Category-specific details go into Specifications.</p></div></div>
+        <div className="editor-section"><div className="editor-section-head"><div><h3>Hardware details</h3><p>Common hardware catalogue fields and technical dimensions.</p></div></div>
           <div className="field-grid">
             <div className="field"><label htmlFor="product-brand">Brand</label><input id="product-brand" maxLength="120" value={form.brand} onChange={(e) => setField('brand', e.target.value)} /></div>
             <div className="field"><label htmlFor="product-manufacturer">Manufacturer</label><input id="product-manufacturer" maxLength="160" value={form.manufacturer} onChange={(e) => setField('manufacturer', e.target.value)} /></div>
@@ -477,7 +493,6 @@ export default function ProductsPanel({ capabilities = {} }) {
           </div>
           <div className="field"><label htmlFor="product-warranty">Warranty</label><input id="product-warranty" maxLength="500" value={form.warranty} onChange={(e) => setField('warranty', e.target.value)} /></div>
           <div className="field"><label htmlFor="product-features">Key features <span className="td-dim">one per line</span></label><textarea id="product-features" rows="4" value={form.key_features} onChange={(e) => setField('key_features', e.target.value)} placeholder={'304 grade\nAnti-rust\nEasy installation'} /></div>
-          <div className="field"><label htmlFor="product-specifications">Specifications JSON</label><textarea id="product-specifications" rows="7" value={form.specifications} onChange={(e) => setField('specifications', e.target.value)} placeholder={'{\n  "outlet_size": "110 mm",\n  "installation_type": "Floor"\n}'} spellCheck="false" /></div>
         </div>
 
         <div className="editor-footer"><label className="check-line"><input type="checkbox" checked={form.is_active} onChange={(e) => setField('is_active', e.target.checked)} /> <span><strong>Active listing</strong><small>Visible to customers when published.</small></span></label><div className="btn-row"><button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button><button className="btn" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Create product'}</button></div></div>
