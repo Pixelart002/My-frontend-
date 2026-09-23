@@ -59,7 +59,7 @@ input[aria-invalid='true'],select[aria-invalid='true'],textarea[aria-invalid='tr
 .product-card:focus-within { border-color:rgba(217,170,91,.42); }
 .product-media { aspect-ratio:1/1; overflow:hidden; }
 .product-media-link { display:block; height:100%; }
-.product-media-link img { width:100%; height:100%; object-fit:contain; }
+.product-media-link img { width:100%; height:100%; object-fit:cover; }
 .product-meta { min-width:0; }
 .product-meta h3,.product-meta h3 a { overflow-wrap:anywhere; }
 .product-price-row { min-height:26px; }
