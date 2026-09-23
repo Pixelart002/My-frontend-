@@ -40,10 +40,25 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
+      "destination": "https://koyeb.app*"
     },
     {
-      "source": "/((?!api|assets|static|.*\\..*).*)",
+      "source": "/product/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot|ahrefsbot|semrushbot|duckduckbot)"
+        }
+      ],
+      "destination": "/api/product?slug=:slug"
+    },
+    {
+      "source": "/share/products/:slug",
+      "destination": "/api/product?slug=:slug"
+    },
+    {
+      "source": "/((?!api|assets|static|favicon).*)",
       "destination": "/index.html"
     }
   ],
