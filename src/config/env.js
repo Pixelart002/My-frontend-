@@ -9,7 +9,7 @@
 
 const LIVE_API_BASE = 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1';
 const DEV_API_BASE = LIVE_API_BASE;
-const PROD_API_BASE = '/api/v1';
+const PROD_API_BASE = LIVE_API_BASE;
 
 const stripTrailingSlash = (value) => (value || '').replace(/\/+$/, '');
 const normalizeApiBase = (value) => {
