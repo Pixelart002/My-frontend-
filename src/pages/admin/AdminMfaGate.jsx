@@ -114,7 +114,7 @@ export default function AdminMfaGate({ role, onVerified }) {
     setBusy(true);
     setError('');
     try {
-      const data = await adminService.mfaVerify(factorId, code);
+      const data = await adminService.mfaVerify(code);
       const access = data?.access_token;
       if (!access) throw new Error('MFA verification succeeded but no access session was returned.');
       setAccessToken(access);
