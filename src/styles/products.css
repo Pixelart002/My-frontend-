@@ -64,9 +64,9 @@
 .product-actions { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
 .product-actions .btn { flex: 1; min-width: 180px; }
 .attributes { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 22px; display: flex; flex-direction: column; gap: 10px; }
-.attribute-row { display: flex; gap: 14px; font-size: 14px; }
-.attribute-row dt { width: 130px; color: var(--dim); text-transform: capitalize; }
-.attribute-row dd { margin: 0; color: var(--muted); }
+.attribute-row { display: grid; grid-template-columns: minmax(120px, 0.42fr) minmax(0, 1fr); align-items: start; gap: 14px; font-size: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.attribute-row dt { min-width: 0; width: auto; color: var(--dim); text-transform: capitalize; overflow-wrap: anywhere; }
+.attribute-row dd { margin: 0; color: var(--muted); min-width: 0; overflow-wrap: anywhere; word-break: break-word; white-space: normal; line-height: 1.5; }
 .description-block { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 26px; color: var(--muted); }
 .description-block h3 { color: var(--text); margin-bottom: 12px; font-size: 17px; }
 .description-block p { white-space: pre-line; }
@@ -103,6 +103,7 @@
   .product-carousel-arrow { opacity: 1; }
   .admin-image-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+@media (max-width: 560px) { .attribute-row { grid-template-columns: 1fr; gap: 4px; } .attribute-row dt { font-size: 12px; } .attribute-row dd { font-size: 14px; } }
 @media (max-width: 430px) {
   .products-grid, .products-grid-3 { grid-template-columns: 1fr; }
   .product-actions { flex-direction: column; }
