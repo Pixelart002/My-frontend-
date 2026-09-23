@@ -43,71 +43,7 @@
       "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/:path*"
     },
     {
-      "source": "/shop",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/cart",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/checkout",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/register",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/forgot-password",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/product/:slug",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/product",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/reviews",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/privacy",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/privacy/dpdp",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/terms",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/shipping",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/refund",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/returns",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/about",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api|assets|static|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],
