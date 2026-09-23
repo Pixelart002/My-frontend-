@@ -150,11 +150,21 @@ export default function ProductsPanel({ capabilities = {} }) {
   }, [form.name]);
 
   const selectHsnSuggestion = (item) => {
-    setField('hsn_code', String(item?.hsn_code || '').replace(/\\D/g, '').slice(0, 8));
+    setField('hsn_code', String(item?.hsn_code || '').replace(/\D/g, '').slice(0, 8));
     setHsnSuggestions([]);
   };
 
-  const applyHsnResult = (item) r('Each image must be 5 MB or smaller.');
+  const applyHsnResult = (item) => {
+    const code = String(item?.hsn_code || '').replace(/\D/g, '').slice(0, 8);
+    if (!code) return;
+    setField('hsn_code', code);
+    setHsnSuggestions([]);
+  };
+
+  const selectFiles = (e) => {
+    const incoming = Array.from(e.target.files || []);
+    if (incoming.some((file) => file.size > MAX_IMAGE_BYTES)) {
+      return toast.error('Each image must be 5 MB or smaller.');
     }
     if (form.images.length + selectedFiles.length + incoming.length > MAX_IMAGES) {
       return toast.error(`Maximum ${MAX_IMAGES} images per product.`);
