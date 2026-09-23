@@ -3,7 +3,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RiAddLine, RiAlertLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiCoupon3Line, RiLockLine, RiErrorWarningLine } from '@remixicon/react';
-import { STRIPE_PK } from '../config/env';
+import { getStripePromise } from '../services/stripeConfig';
 import { useCart } from '../context/CartContext';
 import { userService } from '../services/users';
 import { couponService } from '../services/coupons';
@@ -15,7 +15,7 @@ import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
-const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
+const stripePromise = getStripePromise();
 
 const normalizeDeliveryMode = (value) => {
   const raw = String(value || '').trim().toLowerCase().replace(/[-_]+/g, ' ');
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
 
   const startPayment = async () => {
     if (!selected || creating || !paymentMethod || activeOrder) return;
-    if (paymentMethod === 'stripe' && !stripePromise) {
+    if (paymentMethod === 'stripe' && !(await stripePromise)) {
       setIntentError('Online payment is temporarily unavailable. Please use another payment method.');
       return;
     }
