@@ -13,7 +13,7 @@ const MAX_IMAGES = 10;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const blank = {
   name: '', slug: '', sku: '', category_id: '', price: '', compare_price: '', stock: '0',
-  measurement_type: '', measurement_value: '', measurement_unit: '', length: '', width: '', height: '', dimension_unit: 'mm', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
+  measurement_type: '', measurement_value: '', measurement_unit: '', hsn_code: '', gst_percentage: '18', short_description: '', description: '',
   image_url: '', images: [], brand: '', manufacturer: '', model_number: '', gtin: '', ean: '',
   part_number: '', key_features: '', material: '', finish: '', color: '', size: '', dimensions: '',
   specifications: '{}', warranty: '', country_of_origin: '', is_active: true,
@@ -25,7 +25,7 @@ const toForm = (p) => {
     ...blank,
     name: p.name || '', slug: p.slug || '', sku: p.sku || '', category_id: p.category_id || '',
     price: p.price != null ? String(p.price) : '', compare_price: p.compare_price != null ? String(p.compare_price) : '',
-    stock: p.stock != null ? String(p.stock) : '0', measurement_type: p.measurement_type || '', measurement_value: p.measurement_value != null ? String(p.measurement_value) : '', measurement_unit: p.measurement_unit || '', length: p.length != null ? String(p.length) : '', width: p.width != null ? String(p.width) : '', height: p.height != null ? String(p.height) : '', dimension_unit: p.dimension_unit || 'mm',
+    stock: p.stock != null ? String(p.stock) : '0', measurement_type: p.measurement_type || '', measurement_value: p.measurement_value != null ? String(p.measurement_value) : '', measurement_unit: p.measurement_unit || '',
     hsn_code: p.hsn_code || '', gst_percentage: p.gst_percentage != null ? String(p.gst_percentage) : '18',
     short_description: p.short_description || '', description: p.description || '', image_url: images[0] || '', images,
     brand: p.brand || '', manufacturer: p.manufacturer || '', model_number: p.model_number || '',
@@ -309,10 +309,6 @@ export default function ProductsPanel({ capabilities = {} }) {
         measurement_type: form.measurement_type || undefined,
         measurement_value: form.measurement_type && form.measurement_value !== '' ? Number(form.measurement_value) : undefined,
         measurement_unit: form.measurement_type ? form.measurement_unit || undefined : undefined,
-        length: form.length === '' ? undefined : Number(form.length),
-        width: form.width === '' ? undefined : Number(form.width),
-        height: form.height === '' ? undefined : Number(form.height),
-        dimension_unit: [form.length, form.width, form.height].some((v) => v !== '') ? form.dimension_unit : undefined,
         country_of_origin: form.country_of_origin.trim() || undefined,
         is_active: form.is_active,
         price: form.price === '' ? undefined : Number(form.price),
@@ -487,9 +483,10 @@ export default function ProductsPanel({ capabilities = {} }) {
             <div className="field"><label htmlFor="product-color">Color</label><input id="product-color" maxLength="80" value={form.color} onChange={(e) => setField('color', e.target.value)} /></div>
             <div className="field"><label htmlFor="product-size">Size</label><input id="product-size" maxLength="120" value={form.size} onChange={(e) => setField('size', e.target.value)} /></div>
           </div>
-          <div className="field-grid">
-            <div className="field"><label>Dimensions</label><div className="field-inline"><input aria-label="Length" type="number" min="0" step="0.001" value={form.length} onChange={(e) => setField('length', e.target.value)} placeholder="Length" /><input aria-label="Width" type="number" min="0" step="0.001" value={form.width} onChange={(e) => setField('width', e.target.value)} placeholder="Width" /><input aria-label="Height" type="number" min="0" step="0.001" value={form.height} onChange={(e) => setField('height', e.target.value)} placeholder="Height" /><select aria-label="Dimension unit" value={form.dimension_unit} onChange={(e) => setField('dimension_unit', e.target.value)}><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="in">in</option><option value="ft">ft</option></select></div><small>L × W × H</small></div>
-            <div className="field"><label htmlFor="product-dimensions-text">Legacy/display dimensions</label><input id="product-dimensions-text" maxLength="160" value={form.dimensions} onChange={(e) => setField('dimensions', e.target.value)} placeholder="Optional display text, e.g. 150 x 150 x 50 mm" /></div>
+          <div className="field">
+            <label htmlFor="product-dimensions">Dimensions</label>
+            <input id="product-dimensions" maxLength="160" value={form.dimensions} onChange={(e) => setField('dimensions', e.target.value)} placeholder="e.g. 150 × 150 × 50 mm" />
+            <small>Single hardware dimension field. Enter the complete product dimension in one value.</small>
           </div>
           <div className="field"><label htmlFor="product-warranty">Warranty</label><input id="product-warranty" maxLength="500" value={form.warranty} onChange={(e) => setField('warranty', e.target.value)} /></div>
           <div className="field"><label htmlFor="product-features">Key features <span className="td-dim">one per line</span></label><textarea id="product-features" rows="4" value={form.key_features} onChange={(e) => setField('key_features', e.target.value)} placeholder={'304 grade\nAnti-rust\nEasy installation'} /></div>
