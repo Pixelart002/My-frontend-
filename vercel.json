@@ -6,49 +6,21 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    {
-      "source": "/shop.html",
-      "destination": "/shop",
-      "permanent": true
-    },
-    {
-      "source": "/cart.html",
-      "destination": "/cart",
-      "permanent": true
-    },
-    {
-      "source": "/checkout.html",
-      "destination": "/checkout",
-      "permanent": true
-    },
-    {
-      "source": "/login.html",
-      "destination": "/login",
-      "permanent": true
-    },
-    {
-      "source": "/register.html",
-      "destination": "/register",
-      "permanent": true
-    },
-    {
-      "source": "/admin.html",
-      "destination": "/admin",
-      "permanent": true
-    }
+    {"source": "/shop.html", "destination": "/shop", "permanent": true},
+    {"source": "/cart.html", "destination": "/cart", "permanent": true},
+    {"source": "/checkout.html", "destination": "/checkout", "permanent": true},
+    {"source": "/login.html", "destination": "/login", "permanent": true},
+    {"source": "/register.html", "destination": "/register", "permanent": true},
+    {"source": "/admin.html", "destination": "/admin", "permanent": true}
   ],
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://koyeb.app*"
-    },
     {
       "source": "/product/:slug",
       "has": [
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot|ahrefsbot|semrushbot|duckduckbot)"
+          "value": ".*(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot).*"
         }
       ],
       "destination": "/api/product?slug=:slug"
@@ -58,45 +30,12 @@
       "destination": "/api/product?slug=:slug"
     },
     {
-      "source": "/((?!api|assets|static|favicon).*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
+      "source": "/api/:path*",
+      "destination": "https://koyeb.app*"
+    },
     {
       "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000"
-        }
-      ]
-    },
-    {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
+      "destination": "/index.html"
     }
   ]
 }
