@@ -13,8 +13,6 @@ export function getStripePublishableKey() {
 }
 
 async function resolveStripePublishableKey() {
-  // Prefer the backend's public Stripe configuration so the browser always
-  // uses the same Stripe account configured for PaymentIntent creation.
   try {
     const response = await fetch(`${API_BASE}/payments/public-config`, {
       method: 'GET',
@@ -31,10 +29,8 @@ async function resolveStripePublishableKey() {
       if (runtimeKey) return runtimeKey;
     }
   } catch {
-    // Fall back to the browser-configured public key when the runtime
-    // configuration endpoint is temporarily unavailable.
+    // Fall back to the build-time browser-safe key.
   }
-
   return getStripePublishableKey();
 }
 
