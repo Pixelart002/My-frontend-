@@ -6,7 +6,7 @@ export function Spinner({ label = 'Getting things ready…', inline = false }) {
   return (
     <div className="state spinner" role="status" aria-live="polite">
       <div className="spinner-orbit" aria-hidden="true"><RiLoader4Line className="spin spinner-core" size={18} /></div>
-      <div className="spinner-copy"><strong>LUVIIO</strong><span>{label}</span></div>
+      <div className="spinner-copy"><span>{label}</span></div>
     </div>
   );
 }
