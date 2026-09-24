@@ -53,7 +53,7 @@ const ADMIN_NAV = [
   ['categories', 'Categories', RiFolder2Line],
   ['orders', 'Orders', RiShoppingCart2Line],
   ['coupons', 'Coupons', RiCoupon3Line],
-  ['inventory', 'Inventory', RiStack3Line],
+  ['inventory', 'Inventory', RiStackLine],
   ['shipping', 'Shipping', RiTruckLine],
   ['fulfillment', 'Fulfillment', RiTruckLine],
   ['subscriptions', 'Subscriptions', RiVipCrownLine],
@@ -163,6 +163,10 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isCompact, setIsCompact] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(max-width: 980px)').matches
+  );
 
   const mobileNavRef = useRef(null);
   const mobileCloseRef = useRef(null);
@@ -197,6 +201,18 @@ export default function Header() {
     setMobileOpen(false);
     setMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 980px)');
+    const syncCompact = () => setIsCompact(mediaQuery.matches);
+
+    syncCompact();
+    mediaQuery.addEventListener?.('change', syncCompact);
+
+    return () => {
+      mediaQuery.removeEventListener?.('change', syncCompact);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -543,7 +559,10 @@ export default function Header() {
           {/* DESKTOP NAV */}
           <nav
             aria-label="Primary navigation"
-            style={styles.desktopNav}
+            style={{
+              ...styles.desktopNav,
+              display: isCompact ? 'none' : 'flex',
+            }}
           >
             <NavLink
               end
@@ -580,7 +599,10 @@ export default function Header() {
             <form
               onSubmit={onSearch}
               role="search"
-              style={styles.desktopSearch}
+              style={{
+                ...styles.desktopSearch,
+                display: isCompact ? 'none' : 'flex',
+              }}
             >
               <RiSearchLine
                 size={17}
@@ -802,7 +824,7 @@ export default function Header() {
               }
               style={{
                 ...iconButton,
-                display: 'none',
+                display: isCompact ? 'inline-flex' : 'none',
               }}
             >
               {mobileOpen ? (
@@ -1236,7 +1258,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding:
-      '0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right))',
+      '0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',
     boxSizing: 'border-box',
     borderBottom:
       '1px solid rgba(15,23,42,.07)',
