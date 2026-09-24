@@ -586,7 +586,7 @@ export default function Header() {
 
             <a
               href="mailto:support@luviio.in"
-              style={desktopNavLink}
+              style={desktopNavLink({ isActive: false })}
             >
               Contact
             </a>
