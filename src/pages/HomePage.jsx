@@ -160,8 +160,8 @@ export default function HomePage() {
               <Link className="btn btn-quiet btn-sm" to="/shop">Browse shop</Link>
             </div>
           ) : (
-            <div className="products-grid products-grid-4">
-              {products.slice(0, 4).map((product) => (
+            <div className="home-product-rail" role="region" aria-label="Featured products">
+              {products.slice(0, 8).map((product) => (
                 <ProductCard key={product.id || product.slug} product={product} />
               ))}
             </div>
