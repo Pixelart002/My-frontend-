@@ -1,83 +1,216 @@
 import React from 'react';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
-import { 
-  RiNotification3Fill, 
-  RiNotificationOffLine, 
-  RiErrorWarningFill, 
-  RiLoader4Line 
+import {
+  RiNotification3Fill,
+  RiNotification3Line,
+  RiNotificationOffLine,
+  RiErrorWarningFill,
+  RiLoader4Line,
 } from '@remixicon/react';
 
 export default function PushNotificationsCard() {
-  const { supported, permission, subscribed, loading, error, subscribe, unsubscribe } = usePushNotifications();
-
+  const {
+    supported,
+    permission,
+    subscribed,
+    loading,
+    error,
+    subscribe,
+    unsubscribe,
+  } = usePushNotifications();
+  
   if (!supported) return null;
-
+  
   return (
-    <section 
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:shadow-md" 
+    <section
       aria-labelledby="push-notifications-title"
+      className="
+        w-full
+        rounded-2xl
+        border border-gray-200/80
+        bg-white
+        p-5 sm:p-6
+        shadow-[0_1px_2px_rgba(0,0,0,0.04)]
+        transition-shadow duration-200
+        hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]
+      "
     >
-      <div className="flex items-start gap-4 flex-1">
-        {/* Remix Icon Container */}
-        <div className={`p-3 rounded-full flex-shrink-0 mt-1 ${subscribed ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}>
-          {subscribed ? (
-            <RiNotification3Fill size={24} />
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+        {/* Content */}
+        <div className="flex min-w-0 items-start gap-4">
+
+          {/* Icon */}
+          <div
+            className={`
+              flex h-11 w-11 shrink-0 items-center justify-center
+              rounded-xl
+              ${
+                subscribed
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-gray-50 text-gray-400'
+              }
+            `}
+            aria-hidden="true"
+          >
+            {subscribed ? (
+              <RiNotification3Fill size={21} />
+            ) : (
+              <RiNotificationOffLine size={21} />
+            )}
+          </div>
+
+          {/* Text */}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h2
+                id="push-notifications-title"
+                className="m-0 text-[15px] font-semibold tracking-[-0.01em] text-gray-900"
+              >
+                Push Notifications
+              </h2>
+
+              {subscribed && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-700">
+                  <span
+                    className="h-1.5 w-1.5 rounded-full bg-green-500"
+                    aria-hidden="true"
+                  />
+                  Enabled
+                </span>
+              )}
+            </div>
+
+            <p className="m-0 mt-1 text-sm leading-5 text-gray-500">
+              Get important updates from LUVIIO.
+            </p>
+
+            {/* Permission warning */}
+            {permission === 'denied' && (
+              <div
+                role="alert"
+                className="
+                  mt-3 flex items-start gap-2.5
+                  rounded-lg
+                  border border-amber-100
+                  bg-amber-50
+                  px-3 py-2.5
+                  text-xs leading-5 text-amber-700
+                "
+              >
+                <RiErrorWarningFill
+                  size={17}
+                  className="mt-0.5 shrink-0"
+                  aria-hidden="true"
+                />
+
+                <span>
+                  Notifications are blocked. Allow them in your browser
+                  settings and try again.
+                </span>
+              </div>
+            )}
+
+            {/* Generic error */}
+            {error && permission !== 'denied' && (
+              <div
+                role="alert"
+                className="
+                  mt-3 flex items-start gap-2.5
+                  rounded-lg
+                  border border-red-100
+                  bg-red-50
+                  px-3 py-2.5
+                  text-xs leading-5 text-red-700
+                "
+              >
+                <RiErrorWarningFill
+                  size={17}
+                  className="mt-0.5 shrink-0"
+                  aria-hidden="true"
+                />
+
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action */}
+        <button
+          type="button"
+          disabled={loading || permission === 'denied'}
+          onClick={subscribed ? unsubscribe : subscribe}
+          className={`
+            inline-flex
+            min-h-10
+            w-full sm:w-auto
+            shrink-0
+            items-center
+            justify-center
+            rounded-lg
+            px-4
+            text-sm
+            font-medium
+            transition-all
+            duration-200
+            focus:outline-none
+            focus:ring-2
+            focus:ring-offset-2
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+
+            ${
+              subscribed
+                ? `
+                  border border-gray-200
+                  bg-white
+                  text-gray-700
+                  hover:border-gray-300
+                  hover:bg-gray-50
+                  focus:ring-gray-200
+                `
+                : `
+                  bg-gray-900
+                  text-white
+                  shadow-sm
+                  hover:bg-gray-800
+                  hover:shadow-md
+                  focus:ring-gray-900
+                `
+            }
+          `}
+        >
+          {loading ? (
+            <>
+              <RiLoader4Line
+                className="mr-2 animate-spin"
+                size={17}
+                aria-hidden="true"
+              />
+              Please wait...
+            </>
+          ) : subscribed ? (
+            <>
+              <RiNotificationOffLine
+                className="mr-2"
+                size={17}
+                aria-hidden="true"
+              />
+              Disable notifications
+            </>
           ) : (
-            <RiNotificationOffLine size={24} />
+            <>
+              <RiNotification3Line
+                className="mr-2"
+                size={17}
+                aria-hidden="true"
+              />
+              Enable notifications
+            </>
           )}
-        </div>
-
-        {/* Text Content */}
-        <div className="flex-1">
-          <h2 id="push-notifications-title" className="text-lg font-semibold text-gray-900 m-0">
-            Push Notifications
-          </h2>
-          <p className="text-sm text-gray-500 mt-1 mb-0">
-            Get important Luviio order and account updates directly on this device.
-          </p>
-
-          {/* Error / Warning States */}
-          {permission === 'denied' && (
-            <div className="flex items-center gap-2 mt-3 text-sm text-amber-600 bg-amber-50 p-2.5 rounded-lg border border-amber-100" role="alert">
-              <RiErrorWarningFill size={18} className="flex-shrink-0" />
-              <span>Notifications are blocked. Allow them in your browser settings and try again.</span>
-            </div>
-          )}
-          {error && permission !== 'denied' && (
-            <div className="flex items-center gap-2 mt-3 text-sm text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100" role="alert">
-              <RiErrorWarningFill size={18} className="flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-        </div>
+        </button>
       </div>
-
-      {/* Action Button */}
-      <button
-        type="button"
-        disabled={loading || permission === 'denied'}
-        onClick={subscribed ? unsubscribe : subscribe}
-        className={`
-          flex items-center justify-center min-w-[160px] px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:ring-2 focus:outline-none focus:ring-offset-2
-          ${loading || permission === 'denied' 
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-            : subscribed
-              ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-200'
-              : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md focus:ring-blue-500'
-          }
-        `}
-      >
-        {loading ? (
-          <>
-            <RiLoader4Line className="animate-spin mr-2" size={18} />
-            Please wait...
-          </>
-        ) : subscribed ? (
-          'Disable notifications'
-        ) : (
-          'Enable notifications'
-        )}
-      </button>
     </section>
   );
 }
