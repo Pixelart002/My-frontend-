@@ -2,10 +2,31 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import registerServiceWorker from './registerServiceWorker';
 import { installLocationAutocomplete } from './services/locationAutocomplete';
+import './styles/tokens.css';
+import './styles/viewport-fix.css';
+import './styles/pages.css';
+import './styles/products.css';
+import './styles/final-ui.css';
+import './styles/product-primary.css';
+import './styles/forms.css';
+import './styles/app.css';
+import './styles/header.css';
+import './styles/polish.css';
+import './styles/cart-page.css';
+import './styles/payment-modal.css';
+import './styles/checkout-polish.css';
+import './styles/checkout-reference.css';
+import './styles/loading-polish.css';
+import './styles/menu-loading-polish.css';
+import './styles/settings.css';
+import './styles/profile.css';
+import './styles/change-password.css';
+import './styles/footer-layout.css';
+import './styles/mockup-ui.css';
+import './styles/luviio-pro-max.css';
+import './styles/location-autocomplete.css';
+import './styles/luviio-real-world.css';
 
-// Storefront CSS is intentionally owned by LuviioInlineTheme.
-// Do not load legacy/global storefront styles here; they override inline
-// component styles and create cascade conflicts on mobile.
 registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(<App />);
