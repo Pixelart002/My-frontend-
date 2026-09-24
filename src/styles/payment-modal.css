@@ -11,3 +11,12 @@
 .payment-success-state{text-align:center;padding:24px 12px 8px;display:grid;justify-items:center;gap:10px}.payment-success-icon{display:grid;place-items:center;width:86px;height:86px;border:1px solid rgba(111,191,138,.38);border-radius:50%;background:var(--success-dim);color:var(--success);box-shadow:0 0 0 10px rgba(111,191,138,.035)}.payment-success-state .eyebrow{margin:8px 0 0}.payment-success-state strong{font-family:var(--font-display);font-size:27px;font-weight:500}.payment-success-state>p:last-child{max-width:42ch;margin:0;color:var(--muted);font-size:13px;line-height:1.55}
 @media(max-width:600px){.payment-modal-backdrop{align-items:end;padding:0}.payment-modal{width:100%;max-height:96dvh;padding:19px 15px;border-radius:18px 18px 0 0}.payment-modal-header{margin-bottom:15px}.payment-modal-header h3{font-size:29px}.payment-modal-subtitle{font-size:12px}.payment-option{grid-template-columns:40px minmax(0,1fr) 22px;padding:13px 12px}.payment-option-icon{width:40px;height:40px}.payment-option-copy strong{font-size:13px}.payment-option-copy small{font-size:11px}.payment-modal-actions{flex-direction:column-reverse}.payment-modal-actions .btn{width:100%}.payment-modal-primary{min-width:0}}
 @media(prefers-reduced-motion:reduce){.payment-option,.payment-modal{transition:none}}
+
+
+.checkout-payment-selector{width:100%;min-width:0;box-sizing:border-box;border-color:rgba(216,173,106,.22);background:linear-gradient(135deg,rgba(216,173,106,.075),rgba(255,255,255,.018) 58%),var(--surface);box-shadow:0 12px 30px rgba(0,0,0,.16)}
+.checkout-payment-selector .payment-selector-copy{flex:1 1 240px}
+.checkout-payment-selector .payment-selector-label{display:inline-flex;align-items:center;gap:7px;color:var(--gold);font-weight:700}
+.checkout-payment-selector .payment-selector-copy strong{display:block;min-width:0;color:var(--text);font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.checkout-payment-selector .payment-selector-copy small{display:block;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.checkout-payment-selector .payment-selector-action{flex:1 1 190px;width:100%;min-width:0;min-height:48px;justify-content:center;white-space:nowrap;padding-inline:16px}
+@media(max-width:560px){.checkout-payment-selector .payment-selector-action{width:100%;flex-basis:100%}}
