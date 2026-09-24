@@ -166,6 +166,49 @@ img { max-width:100%; }
   html { scroll-behavior:auto !important; }
 }
 
+/* Final page-edge spacing: the home page owns its full-bleed sections. */
+.store-page-frame:has(.home-landing) {
+  width:100%;
+  max-width:none;
+  padding:0;
+}
+.home-landing {
+  width:100%;
+  margin:0;
+  overflow:hidden;
+}
+.home-landing > section { margin-inline:0; }
+.home-content-width,
+.home-trust-grid,
+.home-category-grid {
+  width:min(100% - clamp(28px, 6vw, 96px), 1240px);
+  margin-inline:auto;
+}
+.hero-reference-inner {
+  width:min(100%, 1240px);
+  margin-inline:auto;
+  padding-inline:clamp(20px, 4vw, 48px);
+}
+
+/* Keep the header balanced with the page gutters at every viewport. */
+.header-reference-inner {
+  padding-inline:clamp(16px, 5vw, 80px);
+}
+@media (max-width:900px) {
+  .header-reference-inner { padding-inline:20px; }
+  .home-content-width,
+  .home-trust-grid,
+  .home-category-grid { width:calc(100% - 32px); }
+  .hero-reference-inner { padding-inline:20px; }
+}
+@media (max-width:480px) {
+  .header-reference-inner { padding-inline:14px; }
+  .home-content-width,
+  .home-trust-grid,
+  .home-category-grid { width:calc(100% - 24px); }
+  .hero-reference-inner { padding-inline:16px; }
+}
+
 
 /* Responsive + breathing correction pass
    Keeps layouts fluid without changing components, data flow, or routes. */
