@@ -3,7 +3,6 @@ import Header from './Header';
 import Footer from './Footer';
 import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import LuviioInlineTheme from '../components/ui/LuviioInlineTheme';
 
 const FOOTER_PATHS = new Set([
   '/',
@@ -32,8 +31,7 @@ export default function StoreLayout() {
   }, [token, refreshProfile]);
 
   return (
-    <div data-luviio-app style={{ minHeight: '100vh', background: '#080808' }}>
-      <LuviioInlineTheme />
+    <>
       <Header />
       <main className="store-main" data-route={pathname}>
         <div className="store-page-frame">
@@ -41,6 +39,6 @@ export default function StoreLayout() {
         </div>
       </main>
       {shouldShowFooter(pathname) && <Footer />}
-    </div>
+    </>
   );
 }
