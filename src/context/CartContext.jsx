@@ -22,12 +22,21 @@ const EMPTY_CART = {
   currency: 'INR',
 };
 
+const normalizeCart = (value) => {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    ...EMPTY_CART,
+    ...source,
+    items: Array.isArray(source.items) ? source.items : [],
+  };
+};
+
 const getItemCount = (cart) => {
   if (!cart) return 0;
   // The UI badge is a unit count: one product with quantity 3 shows 3.
   // Deriving it from item quantities also stays correct if an older backend
   // response omits or misreports the aggregate item_count field.
-  return (cart.items || []).reduce(
+  return (Array.isArray(cart.items) ? cart.items : []).reduce(
     (total, item) => total + Math.max(0, Number(item.quantity) || 0),
     0,
   );
@@ -54,7 +63,7 @@ export function CartProvider({ children }) {
       const data = await cartService.get();
       const next = data || EMPTY_CART;
       if (version !== sessionVersion.current) return EMPTY_CART;
-      setCart({ ...EMPTY_CART, ...next, items: next.items || [] });
+      setCart(normalizeCart(next));
       return next;
     } catch (err) {
       if (version !== sessionVersion.current) return EMPTY_CART;
@@ -83,7 +92,7 @@ export function CartProvider({ children }) {
       try {
         const data = await cartService.addItem(productId, quantity);
         if (version !== sessionVersion.current) return EMPTY_CART;
-        setCart({ ...EMPTY_CART, ...(data || EMPTY_CART), items: (data?.items || EMPTY_CART.items) });
+        setCart(normalizeCart(data));
         return data;
       } finally {
         if (version === sessionVersion.current) {
@@ -155,7 +164,7 @@ export function CartProvider({ children }) {
       }
 
       if (verifiedCart?.items?.length) {
-        setCart(verifiedCart);
+        setCart(normalizeCart(verifiedCart));
         throw new Error('Unable to clear the cart completely. Please try again.');
       }
       throw lastError || new Error('Unable to clear the cart. Please try again.');
