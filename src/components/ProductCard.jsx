@@ -197,6 +197,9 @@ export default function ProductCard({ product }) {
   const styles = {
     card: {
       position: 'relative',
+      isolation: 'isolate',
+      zIndex: 0,
+      boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
@@ -219,6 +222,7 @@ export default function ProductCard({ product }) {
 
     media: {
       position: 'relative',
+      isolation: 'isolate',
       width: '100%',
       aspectRatio: '1 / 1',
       overflow: 'hidden',
@@ -420,6 +424,7 @@ export default function ProductCard({ product }) {
       flexDirection: 'column',
       gap: 10,
       padding: '15px 15px 12px',
+      boxSizing: 'border-box',
       minWidth: 0,
     },
 
@@ -480,6 +485,7 @@ export default function ProductCard({ product }) {
       alignItems: 'center',
       gap: 9,
       padding: '0 15px 15px',
+      boxSizing: 'border-box',
     },
 
     cta: {
