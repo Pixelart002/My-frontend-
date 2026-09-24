@@ -1,49 +1,87 @@
 import { Link } from 'react-router-dom';
 import PolicyLayout from '../../components/PolicyLayout';
 
-/**
- * Story / about page. Motion is handled by PolicyLayout via the
- * global [data-rise] reveal. Presentational — no API data.
- */
-export default function AboutPage() {
-  const pillars = [
-    { n: '01', t: 'Curated craft', d: 'Every piece is chosen with intent — considered materials, timeless design, and a finish that holds up to daily life.' },
-    { n: '02', t: 'Made to last', d: 'We favour quality over clutter. Fewer, better things that keep their character wear after wear.' },
-    { n: '03', t: 'Considered service', d: 'Clear pricing, honest shipping, and support that actually responds when you need it.' },
-  ];
+const pillars = [
+  {
+    n: '01',
+    t: 'Built for everyday use',
+    d: 'We focus on practical hardware, sanitary and drainage products selected for real homes, shops and everyday spaces.',
+  },
+  {
+    n: '02',
+    t: 'Clear and dependable',
+    d: 'Product details, pricing and essential information should be straightforward, so you can choose with confidence.',
+  },
+  {
+    n: '03',
+    t: 'Local service',
+    d: 'Luviio combines online ordering with local store and supply support, helping customers get the products they actually need.',
+  },
+];
 
+export default function AboutPage() {
   return (
     <PolicyLayout
       eyebrow="Our story"
       title="About Luviio"
-      lead="Luviio is a home for thoughtfully chosen goods — pieces with a point of view, made to be lived with."
+      lead="Welcome to Luviio — a practical destination for hardware, sanitary and drainage products for everyday spaces."
     >
       <div className="po-lead-body" data-rise>
         <p>
-          Luviio began with a simple idea: shopping should feel considered, not cluttered. We bring
-          together a tight, well-chosen collection of goods — each one selected for how it looks, how
-          it's made, and how it earns a place in your everyday.
+          Luviio started with a simple idea: finding everyday hardware and
+          sanitary products should be straightforward. Instead of making
+          customers search through an overwhelming range of products, we aim
+          to bring useful, relevant products together in one place.
         </p>
+
         <p>
-          We believe in fewer, better things. That means working with people who take care with craft,
-          being honest about materials and pricing, and treating every order as if it were our own.
+          From drainage systems and floor drainers to sanitary and general
+          hardware, our focus is on products that have a clear purpose in
+          homes, shops, offices and other everyday spaces.
+        </p>
+
+        <p>
+          We operate with a local-first approach, combining our physical
+          store and supply experience with online ordering. Our goal is to
+          keep product information clear, pricing transparent and service
+          dependable from selection to delivery.
         </p>
       </div>
 
       <div className="about-pillars" data-rise>
-        {pillars.map((p) => (
-          <div className="about-pillar" key={p.n}>
-            <span className="about-num">{p.n}</span>
-            <h3>{p.t}</h3>
-            <p>{p.d}</p>
-          </div>
+        {pillars.map((pillar) => (
+          <article
+            className="about-pillar"
+            key={pillar.n}
+          >
+            <span
+              className="about-num"
+              aria-hidden="true"
+            >
+              {pillar.n}
+            </span>
+
+            <h3>{pillar.t}</h3>
+
+            <p>{pillar.d}</p>
+          </article>
         ))}
       </div>
 
       <div className="po-cta" data-rise>
-        <h3>Shop the collection</h3>
-        <p>Browse the latest arrivals and find something you'll keep for years.</p>
-        <Link className="btn" to="/shop">Visit the shop</Link>
+        <h3>Find what you need</h3>
+
+        <p>
+          Explore hardware, sanitary and drainage products
+          selected for everyday use.
+        </p>
+
+        <Link
+          className="btn"
+          to="/shop"
+        >
+          Visit the shop
+        </Link>
       </div>
     </PolicyLayout>
   );

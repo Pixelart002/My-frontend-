@@ -4,21 +4,59 @@ import { RiArrowRightLine } from '@remixicon/react';
 export default function NotFoundPage() {
   return (
     <div className="page container">
-      <div className="error-page">
-        <div className="error-code">404</div>
-        <h1 className="error-title">Page Not Found</h1>
-        <div className="divider-line" />
-        <p className="error-sub">
-          The page you're looking for seems to have wandered off. Perhaps it was too
-          exclusive even for us.
-        </p>
-        <div className="error-actions">
-          <Link className="btn" to="/">Back to Home</Link>
-          <Link className="btn btn-quiet" to="/shop">
-            Browse Shop <RiArrowRightLine size={16} />
-          </Link>
+      <section
+        className="error-page"
+        aria-labelledby="not-found-title"
+        role="status"
+      >
+        <div
+          className="error-code"
+          aria-hidden="true"
+        >
+          404
         </div>
-      </div>
+
+        <h1
+          id="not-found-title"
+          className="error-title"
+        >
+          Page Not Found
+        </h1>
+
+        <div
+          className="divider-line"
+          aria-hidden="true"
+        />
+
+        <p className="error-sub">
+          The page you’re looking for doesn’t exist or may have
+          moved. You can return home or continue browsing the
+          Luviio catalogue.
+        </p>
+
+        <nav
+          className="error-actions"
+          aria-label="Page recovery options"
+        >
+          <Link
+            className="btn"
+            to="/"
+          >
+            Back to Home
+          </Link>
+
+          <Link
+            className="btn btn-quiet"
+            to="/shop"
+          >
+            Browse Shop
+            <RiArrowRightLine
+              size={16}
+              aria-hidden="true"
+            />
+          </Link>
+        </nav>
+      </section>
     </div>
   );
 }

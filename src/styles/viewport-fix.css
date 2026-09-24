@@ -1,31 +1,56 @@
-/* Global viewport + overflow containment.
-   Layout containers must never force the document wider than the viewport.
-   Horizontal scrolling is allowed only inside components that explicitly need it. */
+/* ============================================================
+   LUVIIO — GLOBAL VIEWPORT / OVERFLOW CONTAINMENT
+   Document stays viewport-safe.
+   Horizontal scrolling is allowed only in explicit data/table
+   containers.
+   ============================================================ */
+
+/* ---------- Global box model ---------- */
+
 *,
 *::before,
-*::after { box-sizing: border-box; }
+*::after {
+  box-sizing: border-box;
+}
 
 html,
 body,
 #root {
   width: 100%;
-  max-width: none;
   min-width: 0;
+  max-width: none;
 }
 
 html,
-body { min-height: 100%; }
-body { overflow-x: clip; }
+body {
+  min-height: 100%;
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+}
 
 #root {
   min-height: 100dvh;
   overflow-x: clip;
 }
 
+
+/* ---------- Media safety ---------- */
+
 img,
 svg,
 video,
-canvas { max-width: 100%; }
+canvas {
+  max-width: 100%;
+}
+
+
+/* ---------- Structural containment ---------- */
 
 main,
 section,
@@ -46,14 +71,21 @@ nav,
   max-width: 100%;
 }
 
+
+/* ---------- Admin table: intentional horizontal scroll ---------- */
+
 .admin-table-wrap {
   width: 100%;
   max-width: 100%;
   min-width: 0;
+
   overflow-x: auto;
   overflow-y: hidden;
+
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: thin;
 }
 
 .admin-table-wrap .admin-table {
@@ -62,8 +94,17 @@ nav,
   max-width: none;
 }
 
+
+/* Prevent accidental page-width expansion from admin surfaces. */
+
 .admin-card,
-.admin-panel { overflow-x: clip; }
+.admin-panel {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+
+/* ---------- Admin text safety ---------- */
 
 .admin-card,
 .admin-panel,
@@ -75,20 +116,35 @@ nav,
 .admin-order-items,
 .admin-drawer,
 .admin-drawer-scroll {
+  min-width: 0;
   overflow-wrap: anywhere;
-  word-break: break-word;
 }
+
+
+/* Long controls / toolbar groups must stay inside their parent. */
 
 .admin-head-title,
 .admin-toolbar,
-.btn-row { max-width: 100%; }
+.btn-row {
+  max-width: 100%;
+  min-width: 0;
+}
+
+
+/* ---------- Mobile containment ---------- */
 
 @media (max-width: 900px) {
   .admin-shell,
   .admin-main,
   .admin-card,
-  .admin-panel { width: 100%; }
+  .admin-panel {
+    width: 100%;
+    max-width: 100%;
+  }
 }
+
+
+/* ---------- Small viewport hardening ---------- */
 
 @media (max-width: 760px) {
   html,
@@ -96,5 +152,18 @@ nav,
   #root {
     width: 100%;
     min-width: 0;
+  }
+
+  .admin-table-wrap {
+    max-width: 100%;
+  }
+}
+
+
+/* ---------- Reduced-motion-safe scrolling ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

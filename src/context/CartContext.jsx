@@ -1,9 +1,24 @@
 /**
- * CartContext — holds the live cart returned by the backend and exposes
- * actions that call the real cart endpoints. Totals are always taken from the
- * backend response (source of truth); the UI never re-computes pricing.
+ * CartContext
+ *
+ * Owns the live cart returned by the backend.
+ *
+ * Important:
+ * - Backend is the source of truth for pricing.
+ * - Frontend never calculates subtotal, tax, shipping or total.
+ * - Stale requests cannot overwrite a newer auth session.
+ * - Concurrent cart operations are tracked safely.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { cartService } from '../services/cart';
 import { useAuth } from './AuthContext';
@@ -23,160 +38,522 @@ const EMPTY_CART = {
 };
 
 const getItemCount = (cart) => {
-  if (!cart) return 0;
-  // The UI badge is a unit count: one product with quantity 3 shows 3.
-  // Deriving it from item quantities also stays correct if an older backend
-  // response omits or misreports the aggregate item_count field.
-  return (cart.items || []).reduce(
-    (total, item) => total + Math.max(0, Number(item.quantity) || 0),
+  if (!cart?.items?.length) {
+    return 0;
+  }
+
+  return cart.items.reduce(
+    (total, item) =>
+      total + Math.max(0, Number(item?.quantity) || 0),
     0,
   );
+};
+
+const normalizeCart = (data) => {
+  if (!data || typeof data !== 'object') {
+    return EMPTY_CART;
+  }
+
+  return {
+    ...EMPTY_CART,
+    ...data,
+    items: Array.isArray(data.items)
+      ? data.items
+      : [],
+  };
+};
+
+const getErrorMessage = (
+  error,
+  fallback,
+) => {
+  if (
+    error &&
+    typeof error.message === 'string' &&
+    error.message.trim()
+  ) {
+    return error.message;
+  }
+
+  return fallback;
 };
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const { isAuthenticated, token } = useAuth();
+  const {
+    isAuthenticated,
+    token,
+  } = useAuth();
+
   const [cart, setCart] = useState(EMPTY_CART);
-  const [loading, setLoading] = useState(false);
+  const [loadingCount, setLoadingCount] =
+    useState(0);
   const [error, setError] = useState(null);
+
   const sessionVersion = useRef(0);
 
+  const loading = loadingCount > 0;
+
+  /**
+   * Track async cart operations without allowing
+   * one completed request to hide another active request.
+   */
+  const startOperation = useCallback(() => {
+    setLoadingCount((count) => count + 1);
+
+    return () => {
+      setLoadingCount((count) =>
+        Math.max(0, count - 1),
+      );
+    };
+  }, []);
+
+  /**
+   * Load the authoritative cart from the backend.
+   */
   const load = useCallback(async () => {
     if (!isAuthenticated) {
       setCart(EMPTY_CART);
+      setError(null);
       return EMPTY_CART;
     }
-    const version = sessionVersion.current;
-    setLoading(true);
+
+    const version =
+      sessionVersion.current;
+
+    const stopLoading = startOperation();
+
     setError(null);
+
     try {
-      const data = await cartService.get();
-      const next = data || EMPTY_CART;
-      if (version !== sessionVersion.current) return EMPTY_CART;
+      const data =
+        await cartService.get();
+
+      /*
+       * The user may have logged out or changed
+       * session while the request was in flight.
+       */
+      if (
+        version !==
+        sessionVersion.current
+      ) {
+        return EMPTY_CART;
+      }
+
+      const next =
+        normalizeCart(data);
+
       setCart(next);
+
       return next;
     } catch (err) {
-      setError(err.message || 'Unable to load your cart.');
+      if (
+        version ===
+        sessionVersion.current
+      ) {
+        setError(
+          getErrorMessage(
+            err,
+            'Unable to load your cart.',
+          ),
+        );
+      }
+
       return EMPTY_CART;
     } finally {
-      setLoading(false);
+      stopLoading();
     }
-  }, [isAuthenticated]);
+  }, [
+    isAuthenticated,
+    startOperation,
+  ]);
 
+  /**
+   * Reset cart whenever the authenticated session changes.
+   *
+   * Token is intentionally included because the API client
+   * can receive a refreshed access token for the same user.
+   */
   useEffect(() => {
     sessionVersion.current += 1;
+
     setCart(EMPTY_CART);
     setError(null);
-    if (isAuthenticated) load();
-  }, [isAuthenticated, token, load]);
 
+    if (isAuthenticated) {
+      load();
+    }
+  }, [
+    isAuthenticated,
+    token,
+    load,
+  ]);
+
+  /**
+   * Add product to cart.
+   */
   const addItem = useCallback(
-    async (productId, quantity = 1) => {
-      if (!isAuthenticated) throw new Error('Please sign in to add items to your bag.');
-      const version = sessionVersion.current;
-      setLoading(true);
-      try {
-        const data = await cartService.addItem(productId, quantity);
-        if (version !== sessionVersion.current) return EMPTY_CART;
-        setCart(data || EMPTY_CART);
-        return data;
-      } finally {
-        setLoading(false);
+    async (
+      productId,
+      quantity = 1,
+    ) => {
+      if (!isAuthenticated) {
+        throw new Error(
+          'Please sign in to add items to your bag.',
+        );
       }
-    },
-    [isAuthenticated],
-  );
 
-  const updateItem = useCallback(
-    async (productId, quantity) => {
-      if (!isAuthenticated) throw new Error('Please sign in to update your bag.');
-      const version = sessionVersion.current;
-      setLoading(true);
-      try {
-        const data = await cartService.updateItem(productId, quantity);
-        if (version !== sessionVersion.current) return EMPTY_CART;
-        setCart(data || EMPTY_CART);
-        return data;
-      } finally {
-        setLoading(false);
+      if (!productId) {
+        throw new Error(
+          'A valid product is required.',
+        );
       }
-    },
-    [isAuthenticated],
-  );
 
-  const removeItem = useCallback(async (productId) => {
-    if (!isAuthenticated) throw new Error('Please sign in to update your bag.');
-    const version = sessionVersion.current;
-    setLoading(true);
-    try {
-      const data = await cartService.removeItem(productId);
-      if (version !== sessionVersion.current) return EMPTY_CART;
-      setCart(data || EMPTY_CART);
-      return data;
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+      const version =
+        sessionVersion.current;
 
-  const clearCart = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // DELETE /cart is intentionally followed by a fresh GET. This prevents
-      // the UI from claiming the cart is empty when a transient request or
-      // backend write leaves stale line items behind.
-      const version = sessionVersion.current;
-      let verifiedCart = null;
-      let lastError = null;
+      const stopLoading =
+        startOperation();
 
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        try {
-          await cartService.clear();
-          verifiedCart = await cartService.get();
-          if (version !== sessionVersion.current) return EMPTY_CART;
-          if (!verifiedCart?.items?.length) {
-            setCart(EMPTY_CART);
-            return EMPTY_CART;
-          }
-        } catch (err) {
-          lastError = err;
+      setError(null);
+
+      try {
+        const data =
+          await cartService.addItem(
+            productId,
+            quantity,
+          );
+
+        if (
+          version !==
+          sessionVersion.current
+        ) {
+          return EMPTY_CART;
         }
+
+        const next =
+          normalizeCart(data);
+
+        setCart(next);
+
+        return next;
+      } catch (err) {
+        if (
+          version ===
+          sessionVersion.current
+        ) {
+          setError(
+            getErrorMessage(
+              err,
+              'Unable to add this item to your cart.',
+            ),
+          );
+        }
+
+        throw err;
+      } finally {
+        stopLoading();
+      }
+    },
+    [
+      isAuthenticated,
+      startOperation,
+    ],
+  );
+
+  /**
+   * Update product quantity.
+   */
+  const updateItem = useCallback(
+    async (
+      productId,
+      quantity,
+    ) => {
+      if (!isAuthenticated) {
+        throw new Error(
+          'Please sign in to update your bag.',
+        );
       }
 
-      if (verifiedCart?.items?.length) {
-        setCart(verifiedCart);
-        throw new Error('Unable to clear the cart completely. Please try again.');
+      if (!productId) {
+        throw new Error(
+          'A valid product is required.',
+        );
       }
-      throw lastError || new Error('Unable to clear the cart. Please try again.');
-    } catch (err) {
-      setError(err.message || 'Unable to clear the cart.');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+
+      const version =
+        sessionVersion.current;
+
+      const stopLoading =
+        startOperation();
+
+      setError(null);
+
+      try {
+        const data =
+          await cartService.updateItem(
+            productId,
+            quantity,
+          );
+
+        if (
+          version !==
+          sessionVersion.current
+        ) {
+          return EMPTY_CART;
+        }
+
+        const next =
+          normalizeCart(data);
+
+        setCart(next);
+
+        return next;
+      } catch (err) {
+        if (
+          version ===
+          sessionVersion.current
+        ) {
+          setError(
+            getErrorMessage(
+              err,
+              'Unable to update your bag.',
+            ),
+          );
+        }
+
+        throw err;
+      } finally {
+        stopLoading();
+      }
+    },
+    [
+      isAuthenticated,
+      startOperation,
+    ],
+  );
+
+  /**
+   * Remove product from cart.
+   */
+  const removeItem = useCallback(
+    async (productId) => {
+      if (!isAuthenticated) {
+        throw new Error(
+          'Please sign in to update your bag.',
+        );
+      }
+
+      if (!productId) {
+        throw new Error(
+          'A valid product is required.',
+        );
+      }
+
+      const version =
+        sessionVersion.current;
+
+      const stopLoading =
+        startOperation();
+
+      setError(null);
+
+      try {
+        const data =
+          await cartService.removeItem(
+            productId,
+          );
+
+        if (
+          version !==
+          sessionVersion.current
+        ) {
+          return EMPTY_CART;
+        }
+
+        const next =
+          normalizeCart(data);
+
+        setCart(next);
+
+        return next;
+      } catch (err) {
+        if (
+          version ===
+          sessionVersion.current
+        ) {
+          setError(
+            getErrorMessage(
+              err,
+              'Unable to remove this item.',
+            ),
+          );
+        }
+
+        throw err;
+      } finally {
+        stopLoading();
+      }
+    },
+    [
+      isAuthenticated,
+      startOperation,
+    ],
+  );
+
+  /**
+   * Clear cart and verify the backend state.
+   *
+   * DELETE alone is not treated as proof that the cart
+   * is empty. A fresh GET confirms the final state.
+   */
+  const clearCart = useCallback(
+    async () => {
+      if (!isAuthenticated) {
+        throw new Error(
+          'Please sign in to clear your bag.',
+        );
+      }
+
+      const version =
+        sessionVersion.current;
+
+      const stopLoading =
+        startOperation();
+
+      setError(null);
+
+      let lastError = null;
+      let verifiedCart = null;
+
+      try {
+        for (
+          let attempt = 0;
+          attempt < 2;
+          attempt += 1
+        ) {
+          try {
+            await cartService.clear();
+
+            verifiedCart =
+              normalizeCart(
+                await cartService.get(),
+              );
+
+            if (
+              version !==
+              sessionVersion.current
+            ) {
+              return EMPTY_CART;
+            }
+
+            if (
+              verifiedCart.items.length ===
+              0
+            ) {
+              setCart(EMPTY_CART);
+              return EMPTY_CART;
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+
+        /*
+         * Backend still reports items after both
+         * clear attempts. Keep the actual backend
+         * response visible rather than pretending
+         * the cart is empty.
+         */
+        if (
+          verifiedCart?.items?.length
+        ) {
+          setCart(verifiedCart);
+
+          throw new Error(
+            'Unable to clear the cart completely. Please try again.',
+          );
+        }
+
+        throw (
+          lastError ||
+          new Error(
+            'Unable to clear the cart. Please try again.',
+          )
+        );
+      } catch (err) {
+        if (
+          version ===
+          sessionVersion.current
+        ) {
+          setError(
+            getErrorMessage(
+              err,
+              'Unable to clear the cart.',
+            ),
+          );
+        }
+
+        throw err;
+      } finally {
+        stopLoading();
+      }
+    },
+    [
+      isAuthenticated,
+      startOperation,
+    ],
+  );
+
+  const itemCount = useMemo(
+    () => getItemCount(cart),
+    [cart],
+  );
 
   const value = useMemo(
     () => ({
       cart,
       loading,
       error,
-      itemCount: getItemCount(cart),
+      itemCount,
+
       addItem,
       updateItem,
       removeItem,
       clearCart,
+
       reload: load,
     }),
-    [cart, loading, error, addItem, updateItem, removeItem, clearCart, load],
+    [
+      cart,
+      loading,
+      error,
+      itemCount,
+      addItem,
+      updateItem,
+      removeItem,
+      clearCart,
+      load,
+    ],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider.');
-  return ctx;
+  const context =
+    useContext(CartContext);
+
+  if (!context) {
+    throw new Error(
+      'useCart must be used within CartProvider.',
+    );
+  }
+
+  return context;
 }

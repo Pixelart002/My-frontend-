@@ -1,51 +1,93 @@
 /* ============================================================
-   LUVIIO — Design system
-   Mobile-first, dark premium. Single source of truth for tokens.
+   LUVIIO — DESIGN SYSTEM / FOUNDATION
+   Mobile-first dark ecommerce UI.
+   Tokens + primitives + global interaction foundation only.
+   Component/page behavior intentionally untouched.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap');
 
+
+/* ============================================================
+   TOKENS — SINGLE SOURCE OF TRUTH
+   ============================================================ */
+
 :root {
+  /* Surfaces */
   --bg: #11100f;
   --surface: #1b1917;
   --surface-2: #24211e;
   --surface-3: #2c2823;
 
+  /* Borders */
   --line: #3a3530;
   --line-soft: #2a2622;
 
+  /* Typography */
   --text: #f5efe7;
   --muted: #a59b91;
   --dim: #6d655c;
 
+  /* Brand */
   --gold: #d8ad6a;
   --gold-soft: #f0cf97;
   --gold-ink: #17130e;
-  --gold-dim: rgba(216, 173, 106, 0.12);
+  --gold-dim: rgba(216, 173, 106, .12);
 
+  /* Semantic */
   --success: #6fbf8a;
-  --success-dim: rgba(111, 191, 138, 0.12);
-  --danger: #e0735f;
-  --danger-dim: rgba(224, 115, 95, 0.12);
-  --warn: #e0a952;
-  --info: #7fa8c9;
-  --info-dim: rgba(127, 168, 201, 0.12);
+  --success-dim: rgba(111, 191, 138, .12);
 
+  --danger: #e0735f;
+  --danger-dim: rgba(224, 115, 95, .12);
+
+  --warn: #e0a952;
+
+  --info: #7fa8c9;
+  --info-dim: rgba(127, 168, 201, .12);
+
+  /* Layout */
   --header-h: 72px;
+  --pad: clamp(20px, 8vw, 120px);
+  --maxw: 1440px;
+  --space-section: clamp(40px, 7vw, 96px);
+
+  /* Shape */
   --radius-sm: 4px;
   --radius: 8px;
   --radius-lg: 14px;
-  --pad: clamp(20px, 8vw, 120px);
-  --maxw: 1440px;
 
-  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  /* Typography */
+  --font-body: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Playfair Display', Georgia, serif;
-  --shadow-card: 0 18px 44px rgba(0, 0, 0, 0.22);
-  --transition-fast: 160ms ease;
-  --ease-standard: cubic-bezier(.22,.61,.36,1);
-  --space-section: clamp(40px, 7vw, 96px);
   --text-measure: 68ch;
+
+  /* Depth */
+  --shadow-card: 0 18px 44px rgba(0, 0, 0, .22);
+
+  /* Motion */
+  --transition-fast: 160ms ease;
+  --ease-standard: cubic-bezier(.22, .61, .36, 1);
+
+  /* Controls */
+  --ui-control-h: 44px;
+  --ui-control-h-lg: 48px;
+
+  /* Layering */
+  --ui-z-base: 0;
+  --ui-z-content: 1;
+  --ui-z-sticky: 20;
+  --ui-z-header: 100;
+  --ui-z-dropdown: 300;
+  --ui-z-overlay: 500;
+  --ui-z-modal: 600;
+  --ui-z-toast: 700;
 }
+
+
+/* ============================================================
+   GLOBAL BOX MODEL / MEDIA
+   ============================================================ */
 
 *,
 *::before,
@@ -54,11 +96,13 @@
 }
 
 html {
+  min-width: 0;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
+  min-width: 0;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -66,10 +110,21 @@ body {
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-width: 0;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 img {
-  max-width: 100%;
   display: block;
 }
 
@@ -84,53 +139,43 @@ button {
   cursor: pointer;
 }
 
-h1,
-h2,
-h3,
-h4 {
-  line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  margin: 0;
-}
-
 input,
 select,
 textarea {
+  min-width: 0;
+  max-width: 100%;
   font: inherit;
   color: inherit;
 }
 
-:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-}
 
-/* ---------- Layout primitives ---------- */
-.container {
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding-left: var(--pad);
-  padding-right: var(--pad);
-}
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
 
-.page {
-  padding-top: clamp(48px, 7vw, 96px);
-  padding-bottom: clamp(64px, 9vw, 120px);
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -.03em;
 }
 
 .eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 11px;
-  color: var(--gold);
   margin: 0 0 16px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: .2em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .page-heading h1 {
   font-size: clamp(38px, 6vw, 78px);
-  line-height: 0.98;
-  letter-spacing: -0.05em;
+  line-height: .98;
+  letter-spacing: -.05em;
 }
 
 .page-heading em {
@@ -140,41 +185,144 @@ textarea {
 
 .page-heading > p:last-of-type {
   max-width: 46ch;
+  margin-top: 20px;
   color: var(--muted);
   font-size: 16px;
-  margin-top: 20px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .section-title {
   font-size: clamp(28px, 4vw, 46px);
 }
 
-/* ---------- Buttons ---------- */
+
+/* ============================================================
+   ACCESSIBILITY / FOCUS
+   ============================================================ */
+
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"]
+):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+a {
+  touch-action: manipulation;
+}
+
+
+/* ============================================================
+   LAYOUT PRIMITIVES
+   ============================================================ */
+
+.container {
+  width: min(100%, var(--maxw));
+  max-width: var(--maxw);
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: var(--pad);
+}
+
+.page {
+  min-width: 0;
+  padding-top: clamp(48px, 7vw, 96px);
+  padding-bottom: clamp(64px, 9vw, 120px);
+  overflow-x: clip;
+}
+
+.section {
+  min-width: 0;
+}
+
+
+/* Keep common structural layouts shrink-safe without
+   globally forcing every element to min-width:0. */
+
+.store-page-frame,
+.store-page-frame > *,
+.page > *,
+.products-grid,
+.product-detail,
+.product-info,
+.cart-layout,
+.checkout-layout,
+.order-layout,
+.shop-toolbar,
+.filter-panel,
+.summary {
+  min-width: 0;
+}
+
+
+/* ============================================================
+   BUTTON SYSTEM
+   ============================================================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 13px 22px;
-  border: 1px solid var(--gold);
+  gap: 8px;
+
+  min-height: var(--ui-control-h);
+  padding: 10px 18px;
+
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
+
   background: var(--gold);
   color: var(--gold-ink);
+
+  font: inherit;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: .04em;
+  text-decoration: none;
   text-transform: uppercase;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
-    transform 0.2s ease, opacity 0.2s ease;
+
+  cursor: pointer;
+
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease,
+    opacity .18s ease;
 }
 
 .btn:hover:not(:disabled) {
   background: var(--gold-soft);
+  color: var(--gold-ink);
   transform: translateY(-1px);
 }
 
-.btn:disabled {
-  opacity: 0.45;
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled,
+button:disabled,
+a.btn[aria-disabled="true"] {
+  opacity: .48;
   cursor: not-allowed;
   transform: none;
 }
@@ -182,12 +330,12 @@ textarea {
 .btn-quiet {
   background: transparent;
   border-color: var(--line);
-  color: var(--muted);
+  color: var(--text);
 }
 
 .btn-quiet:hover:not(:disabled) {
-  background: transparent;
-  border-color: var(--gold);
+  background: var(--surface-2);
+  border-color: var(--gold-dim);
   color: var(--gold-soft);
 }
 
@@ -199,17 +347,19 @@ textarea {
 
 .btn-danger:hover:not(:disabled) {
   background: var(--danger-dim);
+  border-color: var(--danger);
   color: var(--danger);
 }
 
 .btn-ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--muted);
+  min-height: 38px;
   padding: 8px 12px;
-  text-transform: none;
-  letter-spacing: 0;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
   font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .btn-ghost:hover:not(:disabled) {
@@ -219,7 +369,8 @@ textarea {
 }
 
 .btn-sm {
-  padding: 9px 16px;
+  min-height: 38px;
+  padding: 8px 13px;
   font-size: 12px;
 }
 
@@ -229,38 +380,59 @@ textarea {
 
 .btn-row {
   display: flex;
-  gap: 12px;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
 }
 
-/* ---------- Header ---------- */
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
 .header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--ui-z-header);
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   min-height: var(--header-h);
-  padding: 0 var(--pad);
-  background: rgba(17, 16, 15, 0.92);
+  padding-inline: var(--pad);
+
+  background: rgba(17, 16, 15, .92);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(16px);
+
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
 }
 
 .brand {
+  min-width: 0;
+  color: var(--text);
   font-size: 19px;
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: .28em;
+  line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 32px;
+  min-width: 0;
   color: var(--muted);
   font-size: 14px;
+}
+
+.nav-links a {
+  min-width: 0;
+  transition: color var(--transition-fast);
 }
 
 .nav-links a:hover,
@@ -272,72 +444,123 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
+
+
+/* ============================================================
+   ICON BUTTON
+   ============================================================ */
 
 .icon-btn {
   position: relative;
+
+  flex: 0 0 auto;
+
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+
+  padding: 0;
+
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
+
   background: transparent;
   color: var(--muted);
-  transition: color 0.2s ease, border-color 0.2s ease;
+
+  cursor: pointer;
+
+  transition:
+    color .18s ease,
+    border-color .18s ease,
+    background-color .18s ease;
 }
 
 .icon-btn:hover {
   color: var(--gold-soft);
   border-color: var(--line);
+  background: var(--surface-2);
+}
+
+.icon-btn:disabled {
+  opacity: .48;
+  cursor: not-allowed;
 }
 
 .cart-count {
   position: absolute;
   top: 2px;
   right: 0;
+
   min-width: 17px;
   height: 17px;
-  padding: 0 4px;
+  padding-inline: 4px;
+
   border-radius: 9px;
+
   background: var(--gold);
   color: var(--gold-ink);
+
   font-size: 10px;
   font-weight: 700;
   line-height: 17px;
   text-align: center;
 }
 
+
+/* ============================================================
+   MOBILE NAV
+   ============================================================ */
+
 .menu-button {
   display: none;
 }
 
-/* Mobile nav panel */
 .mobile-nav {
   display: none;
 }
 
 .mobile-nav.is-open {
-  display: block;
   position: fixed;
-  inset: var(--header-h) 0 0 0;
-  z-index: 49;
+  inset: var(--header-h) 0 0;
+
+  z-index: calc(var(--ui-z-overlay) + 1);
+
+  display: block;
+
+  min-width: 0;
   padding: 20px var(--pad) 40px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
   background: var(--bg);
   border-top: 1px solid var(--line);
-  overflow-y: auto;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-nav a,
 .mobile-nav button {
   display: block;
+
   width: 100%;
-  padding: 15px 0;
+  min-height: 44px;
+  padding: 13px 0;
+
   border: 0;
   border-bottom: 1px solid var(--line-soft);
+
   background: transparent;
   color: var(--muted);
+
   font-size: 15px;
   text-align: left;
 }
@@ -352,26 +575,43 @@ textarea {
   margin: 28px 0 6px;
   color: var(--gold);
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: .18em;
   text-transform: uppercase;
 }
 
-/* Account menu */
+
+/* ============================================================
+   ACCOUNT MENU
+   ============================================================ */
+
 .account-menu-wrap {
   position: relative;
+  z-index: var(--ui-z-dropdown);
 }
 
 .account-menu {
   position: absolute;
-  right: 0;
   top: calc(100% + 8px);
-  z-index: 60;
+  right: 0;
+
+  z-index: var(--ui-z-dropdown);
+
+  width: max-content;
   min-width: 210px;
+  max-width: min(320px, calc(100vw - 24px));
+
   padding: 8px;
+
+  overflow: hidden;
+
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
 }
 
 .account-menu a,
@@ -379,12 +619,17 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
+
   width: 100%;
+  min-height: 42px;
   padding: 10px 12px;
+
   border: 0;
   border-radius: var(--radius-sm);
+
   background: transparent;
   color: var(--muted);
+
   font-size: 14px;
   text-align: left;
 }
@@ -396,140 +641,31 @@ textarea {
 }
 
 .account-menu .menu-user {
+  margin-bottom: 6px;
   padding: 10px 12px 12px;
   border-bottom: 1px solid var(--line-soft);
-  margin-bottom: 6px;
 }
 
 .account-menu .menu-user strong {
   display: block;
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
-  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .account-menu .menu-user span {
   display: block;
-  font-size: 12px;
   color: var(--dim);
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 
-/* ---------- UI stability layer ---------- */
-:root {
-  --ui-z-base: 0;
-  --ui-z-content: 1;
-  --ui-z-sticky: 20;
-  --ui-z-header: 100;
-  --ui-z-dropdown: 300;
-  --ui-z-overlay: 500;
-  --ui-z-modal: 600;
-  --ui-z-toast: 700;
-}
-
-/* Prevent flex/grid children from creating accidental horizontal overflow. */
-*, *::before, *::after { box-sizing: border-box; }
-html, body, #root { min-width: 0; }
-img, svg, video, canvas { max-width: 100%; }
-
-/* Buttons: one consistent visual language. */
-button, .btn, a.btn {
-  font: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 10px 18px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: var(--gold);
-  color: var(--gold-ink);
-  font-weight: 650;
-  line-height: 1.1;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-}
-.btn:hover:not(:disabled) {
-  background: var(--gold-soft);
-  color: var(--gold-ink);
-  transform: translateY(-1px);
-}
-.btn:active:not(:disabled) { transform: translateY(0); }
-.btn:disabled,
-button:disabled,
-a.btn[aria-disabled="true"] {
-  cursor: not-allowed;
-  opacity: .48;
-  transform: none;
-}
-.btn.btn-quiet {
-  background: transparent;
-  color: var(--text);
-  border-color: var(--line);
-}
-.btn.btn-quiet:hover:not(:disabled) {
-  background: var(--surface-2);
-  color: var(--gold-soft);
-  border-color: var(--gold-dim);
-}
-.btn.btn-sm {
-  min-height: 38px;
-  padding: 8px 13px;
-  font-size: 12px;
-}
-.btn:focus-visible,
-button:focus-visible,
-a.btn:focus-visible {
-  outline: 2px solid var(--gold-soft);
-  outline-offset: 2px;
-}
-
-/* Don't let text/controls force their parent grid wider than the viewport. */
-.page, .container, .card, .section, .shop-toolbar, .filter-panel,
-.product-detail, .cart-layout, .checkout-layout, .order-layout,
-.products-grid, .product-info, .summary { min-width: 0; }
-
-/* Layering contract: header and overlays always sit above page content. */
-.header { position: relative; z-index: var(--ui-z-header); }
-.account-menu-wrap { position: relative; z-index: var(--ui-z-dropdown); }
-.account-menu { z-index: var(--ui-z-dropdown) !important; }
-.mobile-menu-backdrop { z-index: var(--ui-z-overlay) !important; }
-.mobile-nav { z-index: calc(var(--ui-z-overlay) + 1) !important; }
-.modal-backdrop, .dialog-backdrop, [role="dialog"]::before { z-index: var(--ui-z-overlay); }
-.modal, .dialog, [role="dialog"] { z-index: var(--ui-z-modal); }
-
-/* Sticky cards must never cover menus or dialogs. */
-.gallery, .summary, .checkout-summary, .order-summary { z-index: var(--ui-z-sticky); }
-.header .gallery, .header .summary { z-index: auto; }
-
-/* Decorative/3D layers stay behind interactive content. */
-.hero-reference-image,
-.hero-reference::after,
-.hero::after { pointer-events: none; }
-.hero-reference-image { z-index: -2; }
-.hero-reference { isolation: isolate; }
-
-
 /* ============================================================
-   FINAL UI FOUNDATION — div, borders, surfaces, glass & depth
+   SURFACE PRIMITIVES
    ============================================================ */
 
-/* Every structural wrapper must remain measurable and bounded. */
-div, section, main, article, aside, nav, header, footer, form {
-  max-width: 100%;
-}
-.store-page-frame,
-.store-page-frame > * {
-  min-width: 0;
-}
-
-/* Consistent surface hierarchy — avoid random opaque/glass mixtures. */
 .surface,
 .card,
 .panel,
@@ -538,17 +674,23 @@ div, section, main, article, aside, nav, header, footer, form {
 .summary,
 .checkout-summary,
 .order-summary {
-  background: var(--surface);
+  min-width: 0;
   border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--text);
 }
 
-/* Borders: single-pixel, low-contrast, no doubled nested borders. */
+.card {
+  padding: 24px;
+}
+
 .card > .card,
 .panel > .panel,
 .surface > .surface {
-  border-color: var(--line-soft, var(--line));
+  border-color: var(--line-soft);
 }
+
 hr {
   height: 1px;
   margin: 0;
@@ -556,70 +698,43 @@ hr {
   background: var(--line);
 }
 
-/* Radius hierarchy. */
-.card, .panel, .surface, .filter-panel { border-radius: var(--radius); }
-.btn, input, select, textarea { border-radius: var(--radius-sm); }
 
-/* Inputs must never inherit decorative backdrop effects. */
-input, select, textarea, button {
-  backdrop-filter: none;
+/* ============================================================
+   FORM CONTROL FOUNDATION
+   ============================================================ */
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  background: var(--surface);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+textarea {
+  overflow-wrap: anywhere;
+}
+
+
+/* Inputs never receive glass effects. */
+input,
+select,
+textarea,
+button {
   -webkit-backdrop-filter: none;
-}
-
-/* Controlled glass: only floating navigation/overlays use blur. */
-.header,
-.mobile-nav,
-.account-menu,
-.modal,
-.dialog,
-.toast,
-[role="dialog"] {
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
-  backdrop-filter: blur(18px) saturate(120%);
-}
-
-/* Give glass layers a real fallback surface so blur never becomes transparent soup. */
-.header {
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  border-bottom: 1px solid var(--line);
-}
-.account-menu,
-.modal,
-.dialog,
-[role="dialog"] {
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  border: 1px solid var(--line);
-  box-shadow: 0 18px 60px rgba(0,0,0,.34);
-}
-.mobile-nav {
-  background: color-mix(in srgb, var(--surface) 96%, transparent);
-  border-left: 1px solid var(--line);
-}
-
-/* Never blur the actual page content behind ordinary cards. */
-.store-main,
-.store-page-frame,
-.page,
-.products-grid,
-.product-detail,
-.cart-layout,
-.checkout-layout,
-.order-layout {
   backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
-/* Avoid accidental stacking contexts from transforms on structural wrappers. */
-.store-page-frame,
-.store-page-frame .page,
-.products-grid,
-.cart-layout,
-.checkout-layout,
-.order-layout {
-  isolation: auto;
-}
 
-/* Images stay inside their media boxes. */
+/* ============================================================
+   MEDIA / CONTENT SAFETY
+   ============================================================ */
+
 .product-media,
 .product-media-link,
 .gallery-main,
@@ -629,6 +744,7 @@ input, select, textarea, button {
   min-width: 0;
   overflow: hidden;
 }
+
 .product-media img,
 .product-media-link img,
 .gallery-main img {
@@ -636,33 +752,135 @@ input, select, textarea, button {
   max-width: 100%;
 }
 
-/* Decorative overlays cannot intercept clicks. */
-::before,
-::after {
-  box-sizing: border-box;
+
+/* ============================================================
+   STACKING / OVERLAY CONTRACT
+   ============================================================ */
+
+.mobile-menu-backdrop {
+  z-index: var(--ui-z-overlay);
 }
-.hero::before,
-.hero::after,
-.hero-reference::before,
+
+.modal-backdrop,
+.dialog-backdrop {
+  z-index: var(--ui-z-overlay);
+}
+
+.modal,
+.dialog {
+  z-index: var(--ui-z-modal);
+}
+
+/* Do not give generic dialog pseudo-elements their own stacking
+   contract; modal implementations should control their backdrop. */
+
+.toast {
+  z-index: var(--ui-z-toast);
+}
+
+/* Sticky commerce elements stay below navigation/overlays. */
+.gallery,
+.summary,
+.checkout-summary,
+.order-summary {
+  z-index: var(--ui-z-sticky);
+}
+
+
+/* ============================================================
+   HERO / DECORATIVE LAYERS
+   ============================================================ */
+
+.hero,
+.hero-reference {
+  isolation: isolate;
+}
+
+.hero-reference-image,
 .hero-reference::after,
-.product-media::before,
-.product-media::after {
+.hero::after,
+.hero::before,
+.hero-reference::before {
   pointer-events: none;
 }
 
-/* Stronger fallback for browsers without color-mix. */
+
+/* ============================================================
+   FALLBACK FOR BROWSERS WITHOUT color-mix()
+   ============================================================ */
+
 @supports not (background: color-mix(in srgb, black 50%, transparent)) {
-  .header { background: var(--bg); }
-  .account-menu, .modal, .dialog, [role="dialog"] { background: var(--surface); }
-  .mobile-nav { background: var(--surface); }
+  .header {
+    background: var(--bg);
+  }
+
+  .account-menu,
+  .modal,
+  .dialog {
+    background: var(--surface);
+  }
+
+  .mobile-nav {
+    background: var(--surface);
+  }
 }
 
-/* Reduced motion also disables expensive glass transition effects. */
+
+/* ============================================================
+   RESPONSIVE FOUNDATION
+   ============================================================ */
+
+@media (max-width: 760px) {
+  .container {
+    padding-inline: 18px;
+  }
+
+  .page {
+    padding-top: 40px;
+    padding-bottom: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-inline: 16px;
+  }
+
+  .page {
+    padding-top: 32px;
+    padding-bottom: 52px;
+  }
+
+  .btn {
+    min-height: 44px;
+  }
+
+  .btn-row {
+    gap: 9px;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  .btn:hover:not(:disabled),
+  .icon-btn:hover {
+    transform: none;
   }
 }

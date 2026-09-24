@@ -1,35 +1,51 @@
+/* ============================================================
+   LUVIIO — Inventory adjustment modal
+   Production-safe • responsive • accessible
+   ============================================================ */
+
 .inventory-modal {
-  width: min(500px, 94vw);
+  width: min(500px, calc(100vw - 28px));
+  max-width: 100%;
+  max-height: min(860px, calc(100dvh - 28px));
   padding: 0;
   overflow: hidden;
   border-radius: 18px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+  box-sizing: border-box;
 }
 
 .inventory-modal > h2,
 .inventory-modal > .modal-sub {
   margin-left: 24px;
   margin-right: 24px;
+  min-width: 0;
 }
 
 .inventory-modal > h2 {
   padding-top: 24px;
   padding-right: 42px;
+  margin-bottom: 8px;
   font-size: 21px;
+  line-height: 1.25;
   letter-spacing: -.01em;
+  overflow-wrap: anywhere;
 }
 
 .inventory-modal > .modal-sub {
   margin-bottom: 16px;
+  line-height: 1.45;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* ---------- Current inventory status ---------- */
+
 .inventory-modal-status {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   margin: 0 24px 16px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -49,20 +65,34 @@
   color: var(--gold-soft);
 }
 
-.inventory-modal-status div {
+.inventory-modal-status > div {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.inventory-modal-status strong { color: var(--text); font-size: 13px; }
-.inventory-modal-status span:not(.inventory-modal-status-icon) { color: var(--dim); font-size: 11px; }
+.inventory-modal-status strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.inventory-modal-status span:not(.inventory-modal-status-icon) {
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Summary ---------- */
 
 .inventory-editor-summary {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  min-width: 0;
   margin: 0 24px 20px;
 }
 
@@ -77,7 +107,11 @@
 .inventory-editor-summary .stat-label {
   display: block;
   margin-bottom: 6px;
+  color: var(--dim);
   font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
 
 .inventory-editor-summary strong {
@@ -85,12 +119,20 @@
   color: var(--text);
   font-size: 24px;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
-.inventory-editor-form { padding: 0 24px 24px; }
+/* ---------- Form ---------- */
+
+.inventory-editor-form {
+  min-width: 0;
+  padding: 0 24px 24px;
+}
 
 .inventory-editor-form .admin-field {
   display: block;
+  min-width: 0;
   margin-bottom: 17px;
 }
 
@@ -100,28 +142,61 @@
   color: var(--text);
   font-size: 12px;
   font-weight: 650;
+  line-height: 1.35;
 }
+
+/* ---------- Quantity controls ---------- */
 
 .inventory-adjust-controls {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 42px;
   align-items: stretch;
   gap: 8px;
+  min-width: 0;
 }
 
 .inventory-step-btn {
   width: 42px;
   height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    transform .18s ease;
 }
 
-.inventory-step-btn:hover { background: var(--gold-dim); }
+.inventory-step-btn:hover:not(:disabled) {
+  background: var(--gold-dim);
+  border-color: rgba(216, 173, 106, .42);
+  color: var(--gold-soft);
+}
+
+.inventory-step-btn:active:not(:disabled) {
+  transform: scale(.96);
+}
+
+.inventory-step-btn:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
 
 .inventory-adjust-controls input {
   width: 100%;
   min-width: 0;
   height: 42px;
+  min-height: 42px;
   padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -130,6 +205,8 @@
   text-align: center;
   font-size: 16px;
   font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
 }
 
 .inventory-adjust-controls input:focus {
@@ -138,17 +215,42 @@
   box-shadow: 0 0 0 3px var(--gold-dim);
 }
 
+/* Remove browser number-input arrows where supported.
+   The step buttons remain the explicit quantity controls. */
+.inventory-adjust-controls input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.inventory-adjust-controls input[type="number"]::-webkit-inner-spin-button,
+.inventory-adjust-controls input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* ---------- Helper text ---------- */
+
 .inventory-editor-form .admin-field small {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 5px;
+  min-width: 0;
   margin-top: 7px;
   color: var(--dim);
   font-size: 11px;
+  line-height: 1.45;
 }
+
+.inventory-editor-form .admin-field small svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ---------- Reason ---------- */
 
 .inventory-editor-form textarea {
   width: 100%;
+  min-width: 0;
   min-height: 82px;
   resize: vertical;
   padding: 11px 12px;
@@ -159,29 +261,45 @@
   font: inherit;
   font-size: 13px;
   line-height: 1.45;
+  box-sizing: border-box;
 }
 
-.inventory-editor-form textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+.inventory-editor-form textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+/* ---------- Operational note ---------- */
 
 .inventory-modal-note {
   display: flex;
   align-items: flex-start;
   gap: 7px;
+  min-width: 0;
   margin: 0 0 20px;
   padding: 10px 11px;
   border: 1px solid var(--line-soft);
   border-radius: 9px;
+  background: var(--surface-2);
   color: var(--dim);
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-.inventory-modal-note svg { flex: 0 0 auto; margin-top: 1px; }
+.inventory-modal-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+/* ---------- Footer ---------- */
 
 .inventory-modal-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  min-width: 0;
   margin: 0;
   padding: 14px 0 0;
   border-top: 1px solid var(--line);
@@ -195,15 +313,128 @@
   gap: 7px;
 }
 
+/* ---------- Focus ---------- */
+
+.inventory-modal button:focus-visible,
+.inventory-modal input:focus-visible,
+.inventory-modal textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.inventory-modal-footer .btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---------- Tablet / mobile ---------- */
+
 @media (max-width: 520px) {
-  .inventory-modal { width: 100%; border-radius: 14px; }
+  .inventory-modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 14px;
+  }
+
   .inventory-modal > h2,
   .inventory-modal > .modal-sub,
   .inventory-modal-status,
-  .inventory-editor-summary { margin-left: 16px; margin-right: 16px; }
-  .inventory-modal > h2 { padding-top: 20px; }
-  .inventory-editor-form { padding: 0 16px 16px; }
-  .inventory-editor-summary { gap: 8px; }
-  .inventory-editor-summary > div { padding: 11px 12px; }
-  .inventory-editor-summary strong { font-size: 21px; }
+  .inventory-editor-summary {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .inventory-modal > h2 {
+    padding-top: 20px;
+    padding-right: 38px;
+    font-size: 20px;
+  }
+
+  .inventory-editor-form {
+    padding: 0 16px 16px;
+  }
+
+  .inventory-editor-summary {
+    gap: 8px;
+  }
+
+  .inventory-editor-summary > div {
+    padding: 11px 12px;
+  }
+
+  .inventory-editor-summary strong {
+    font-size: 21px;
+  }
+
+  .inventory-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .inventory-modal-footer .btn {
+    flex: 1 1 140px;
+  }
+}
+
+@media (max-width: 360px) {
+  .inventory-modal {
+    width: calc(100vw - 14px);
+    max-height: calc(100dvh - 14px);
+  }
+
+  .inventory-modal > h2,
+  .inventory-modal > .modal-sub,
+  .inventory-modal-status,
+  .inventory-editor-summary {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .inventory-modal > h2 {
+    padding-top: 18px;
+    font-size: 19px;
+  }
+
+  .inventory-editor-form {
+    padding: 0 12px 12px;
+  }
+
+  .inventory-editor-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-modal-status {
+    padding: 10px;
+  }
+
+  .inventory-adjust-controls {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    gap: 7px;
+  }
+
+  .inventory-step-btn {
+    width: 40px;
+    min-width: 40px;
+  }
+
+  .inventory-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .inventory-modal-footer .btn {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-step-btn {
+    transition: none;
+  }
+
+  .inventory-step-btn:active:not(:disabled) {
+    transform: none;
+  }
 }

@@ -1,8 +1,8 @@
+import { Outlet, useLocation } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import Footer from './Footer';
-import { Outlet, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
 
 const FOOTER_PATHS = new Set([
   '/',
@@ -16,38 +16,60 @@ const FOOTER_PATHS = new Set([
 ]);
 
 function shouldShowFooter(pathname) {
-  if (FOOTER_PATHS.has(pathname)) return true;
-  return pathname.startsWith('/product/');
+  return (
+    FOOTER_PATHS.has(pathname) ||
+    pathname.startsWith('/product/')
+  );
+}
+
+function BootScreen() {
+  return (
+    <div
+      className="boot-screen"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <div className="boot-brand">
+        LUVIIO
+      </div>
+
+      <div
+        className="spin boot-spinner"
+        aria-hidden="true"
+      />
+
+      <span className="sr-only">
+        Loading Luviio…
+      </span>
+    </div>
+  );
 }
 
 export default function StoreLayout() {
-  const { token, initializing, refreshProfile } = useAuth();
+  const { initializing } = useAuth();
   const { pathname } = useLocation();
-
-  // Refresh profile once a session token becomes available (e.g. after login
-  // navigates) so the header reflects the current user.
-  useEffect(() => {
-    if (token) refreshProfile();
-  }, [token, refreshProfile]);
-
+  
   if (initializing) {
-    return (
-      <div className="boot-screen">
-        <div className="boot-brand">LUVIIO</div>
-        <div className="spin boot-spinner" />
-      </div>
-    );
+    return <BootScreen />;
   }
-
+  
   return (
-    <>
+    <div className="store-layout">
       <Header />
-      <main className="store-main" data-route={pathname}>
+
+      <main
+        className="store-main"
+        data-route={pathname}
+      >
         <div className="store-page-frame">
           <Outlet />
         </div>
       </main>
-      {shouldShowFooter(pathname) && <Footer />}
-    </>
+
+      {shouldShowFooter(pathname) && (
+        <Footer />
+      )}
+    </div>
   );
 }

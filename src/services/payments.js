@@ -1,86 +1,288 @@
 /**
- * Payments service — real Stripe-backed backend flow.
+ * Payments service — real backend payment flow.
+ *
+ * Backend authority:
+ * - payment amount
+ * - tax
+ * - shipping
+ * - discount
+ * - order state
+ * - Stripe payment state
+ * - stock reservation/release
  *
  * Public contract:
- *   create-intent -> { client_secret, payment_intent_id, order_number }
- *   confirm      -> { status, order_number, message }
- *   retry        -> uses the customer-facing order_number in its URL.
- * Internal database order UUIDs never enter browser URLs or public references.
+ * - create-intent -> { client_secret, payment_intent_id, order_number }
+ * - confirm      -> { status, order_number, message }
+ * - retry/switch/cancel use customer-facing order_number.
+ *
+ * Internal database order UUIDs never enter browser URLs.
  */
 import { request } from '../api/client';
-import { asId, asTrimmedString } from '../utils/dataTypes';
+import {
+  asId,
+  asTrimmedString,
+} from '../utils/dataTypes';
 
-function requireId(value, field) {
+const PAYMENT_METHODS = new Set([
+  'stripe',
+  'cod',
+]);
+
+function requireId(
+  value,
+  field,
+) {
   const id = asId(value);
-  if (!id) throw new TypeError(`A valid ${field} is required.`);
+
+  if (!id) {
+    throw new TypeError(
+      `A valid ${field} is required.`,
+    );
+  }
+
   return id;
 }
 
+function requirePublicOrderNumber(
+  value,
+) {
+  const number =
+    asTrimmedString(value);
+
+  if (!number) {
+    throw new TypeError(
+      'A valid public order number is required.',
+    );
+  }
+
+  return number;
+}
+
 function optionalString(value) {
-  const clean = asTrimmedString(value);
+  const clean =
+    asTrimmedString(value);
+
   return clean || null;
 }
 
+function optionalPositiveInteger(
+  value,
+) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ''
+  ) {
+    return null;
+  }
+
+  const number = Number(value);
+
+  if (
+    !Number.isInteger(number) ||
+    number <= 0
+  ) {
+    return null;
+  }
+
+  return number;
+}
+
+function buildPaymentPayload(
+  shippingAddressId,
+  idempotencyKey,
+  billingAddressId,
+  couponCode,
+  shippingCourierId,
+) {
+  const payload = {
+    shipping_address_id:
+      requireId(
+        shippingAddressId,
+        'shipping address id',
+      ),
+
+    idempotency_key:
+      requireId(
+        idempotencyKey,
+        'idempotency key',
+      ),
+  };
+
+  const billingId =
+    asId(billingAddressId);
+
+  if (billingId) {
+    payload.billing_address_id =
+      billingId;
+  }
+
+  const coupon =
+    optionalString(couponCode);
+
+  if (coupon) {
+    payload.coupon_code =
+      coupon;
+  }
+
+  const courierId =
+    optionalPositiveInteger(
+      shippingCourierId,
+    );
+
+  if (courierId !== null) {
+    payload.shipping_courier_id =
+      courierId;
+  }
+
+  return payload;
+}
+
 export const paymentService = {
-  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null, shippingCourierId = null) => {
-    const payload = {
-      shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
-      idempotency_key: requireId(idempotencyKey, 'idempotency key'),
-    };
-    const billingId = asId(billingAddressId);
-    const coupon = optionalString(couponCode);
-    if (billingId) payload.billing_address_id = billingId;
-    if (coupon) payload.coupon_code = coupon;
-    if (Number.isInteger(Number(shippingCourierId)) && Number(shippingCourierId) > 0) payload.shipping_courier_id = Number(shippingCourierId);
-    return request('POST', '/payments/create-intent', payload);
+  createIntent: (
+    shippingAddressId,
+    idempotencyKey,
+    billingAddressId = null,
+    couponCode = null,
+    shippingCourierId = null,
+  ) =>
+    request(
+      'POST',
+      '/payments/create-intent',
+      buildPaymentPayload(
+        shippingAddressId,
+        idempotencyKey,
+        billingAddressId,
+        couponCode,
+        shippingCourierId,
+      ),
+    ),
+
+  confirm: (
+    paymentIntentId,
+  ) =>
+    request(
+      'POST',
+      '/payments/confirm',
+      {
+        payment_intent_id:
+          requireId(
+            paymentIntentId,
+            'payment intent id',
+          ),
+      },
+    ),
+
+  notifyFailed: (
+    paymentIntentId,
+    errorMessage = '',
+  ) =>
+    request(
+      'POST',
+      '/payments/notify-failed',
+      {
+        payment_intent_id:
+          requireId(
+            paymentIntentId,
+            'payment intent id',
+          ),
+
+        error_message:
+          asTrimmedString(
+            errorMessage,
+          ),
+      },
+    ),
+
+  createCodOrder: (
+    shippingAddressId,
+    idempotencyKey,
+    billingAddressId = null,
+    couponCode = null,
+    shippingCourierId = null,
+  ) =>
+    request(
+      'POST',
+      '/orders/cod',
+      {
+        ...buildPaymentPayload(
+          shippingAddressId,
+          idempotencyKey,
+          billingAddressId,
+          couponCode,
+          shippingCourierId,
+        ),
+
+        payment_method: 'cod',
+      },
+    ),
+
+  retry: (
+    orderNumber,
+  ) => {
+    const number =
+      requirePublicOrderNumber(
+        orderNumber,
+      );
+
+    return request(
+      'POST',
+      `/payments/retry/${encodeURIComponent(
+        number,
+      )}`,
+      {},
+    );
   },
 
-  confirm: (paymentIntentId) =>
-    request('POST', '/payments/confirm', {
-      payment_intent_id: requireId(paymentIntentId, 'payment intent id'),
-    }),
+  switchMethod: (
+    orderNumber,
+    method,
+  ) => {
+    const number =
+      requirePublicOrderNumber(
+        orderNumber,
+      );
 
-  notifyFailed: (paymentIntentId, errorMessage = '') =>
-    request('POST', '/payments/notify-failed', {
-      payment_intent_id: requireId(paymentIntentId, 'payment intent id'),
-      error_message: asTrimmedString(errorMessage),
-    }),
+    const target =
+      asTrimmedString(method)
+        .toLowerCase();
 
-  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null, shippingCourierId = null) => {
-    const payload = {
-      shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
-      payment_method: 'cod',
-      idempotency_key: requireId(idempotencyKey, 'idempotency key'),
-    };
-    const billingId = asId(billingAddressId);
-    const coupon = optionalString(couponCode);
-    if (billingId) payload.billing_address_id = billingId;
-    if (coupon) payload.coupon_code = coupon;
-    if (Number.isInteger(Number(shippingCourierId)) && Number(shippingCourierId) > 0) payload.shipping_courier_id = Number(shippingCourierId);
-    return request('POST', '/orders/cod', payload);
+    if (
+      !PAYMENT_METHODS.has(target)
+    ) {
+      throw new TypeError(
+        'A supported payment method is required.',
+      );
+    }
+
+    const params =
+      new URLSearchParams({
+        method: target,
+      });
+
+    return request(
+      'POST',
+      `/payments/switch-method/${encodeURIComponent(
+        number,
+      )}?${params.toString()}`,
+      {},
+    );
   },
 
-  retry: (orderNumber) => {
-    const number = asTrimmedString(orderNumber);
-    if (!number) throw new TypeError('A valid public order number is required.');
-    return request('POST', `/payments/retry/${encodeURIComponent(number)}`, {});
-  },
+  cancelCheckout: (
+    orderNumber,
+  ) => {
+    const number =
+      requirePublicOrderNumber(
+        orderNumber,
+      );
 
-  switchMethod: (orderNumber, method) => {
-    const number = asTrimmedString(orderNumber);
-    const target = asTrimmedString(method).toLowerCase();
-    if (!number) throw new TypeError('A valid public order number is required.');
-    if (!['stripe', 'cod'].includes(target)) throw new TypeError('A supported payment method is required.');
-    return request('POST', `/payments/switch-method/${encodeURIComponent(number)}?method=${encodeURIComponent(target)}`, {});
-  },
-
-  cancelCheckout: (orderNumber) => {
-    const number = asTrimmedString(orderNumber);
-    if (!number) throw new TypeError('A valid public order number is required.');
-
-    // The backend cancellation RPC is the single source of truth. It cancels
-    // the pending checkout and releases reserved stock. Cancelled order items
-    // are intentionally not restored to the customer's cart.
-    return request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
+    return request(
+      'POST',
+      `/payments/cancel/${encodeURIComponent(
+        number,
+      )}`,
+      {},
+    );
   },
 };

@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+
 import registerServiceWorker from './registerServiceWorker';
 import { installLocationAutocomplete } from './services/locationAutocomplete';
+
 import './styles/tokens.css';
 import './styles/viewport-fix.css';
 import './styles/pages.css';
@@ -31,7 +33,25 @@ import './styles/admin-business-profile.css';
 import './styles/location-autocomplete.css';
 import './styles/luviio-real-world.css';
 
-registerServiceWorker();
+const rootElement = document.getElementById('root');
 
-createRoot(document.getElementById('root')).render(<App />);
-installLocationAutocomplete();
+if (!rootElement) {
+ throw new Error('[Luviio] Root element #root was not found.');
+}
+
+createRoot(rootElement).render(<App />);
+
+/*
+ * Optional browser enhancements.
+ * Neither should block the React application from rendering.
+ */
+void registerServiceWorker();
+
+try {
+ installLocationAutocomplete();
+} catch (error) {
+ console.error(
+  '[Luviio] Location autocomplete initialization failed:',
+  error
+ );
+}

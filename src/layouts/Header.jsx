@@ -1,11 +1,65 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { RiArchive2Line, RiCloseLine, RiGridLine, RiHomeLine, RiInformationLine, RiLogoutBoxRLine, RiMailLine, RiMapPin2Line, RiMenuLine, RiSearchLine, RiSettings3Line, RiShieldStarLine, RiShoppingBagLine, RiStore2Line, RiUser3Line, RiUserLine, RiCoupon3Line, RiStackLine, RiTruckLine, RiVipCrownLine, RiUserSettingsLine, RiShieldKeyholeLine, RiNotification3Line, RiBankCardLine, RiBarChart2Line, RiFileList3Line, RiPriceTag3Line, RiFolder2Line, RiShoppingCart2Line, RiDashboardLine, RiStarLine, RiBuilding4Line } from '@remixicon/react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Link,
+  NavLink,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
+
+import {
+  RiArchive2Line,
+  RiArrowRightSLine,
+  RiBankCardLine,
+  RiBarChart2Line,
+  RiBuilding4Line,
+  RiCloseLine,
+  RiCoupon3Line,
+  RiDashboardLine,
+  RiFileList3Line,
+  RiFolder2Line,
+  RiGridLine,
+  RiHomeLine,
+  RiInformationLine,
+  RiLogoutBoxRLine,
+  RiMailLine,
+  RiMapPin2Line,
+  RiMenuLine,
+  RiNotification3Line,
+  RiPriceTag3Line,
+  RiSearchLine,
+  RiSettings3Line,
+  RiShieldKeyholeLine,
+  RiShieldStarLine,
+  RiShoppingBagLine,
+  RiShoppingCart2Line,
+  RiStackLine,
+  RiStore2Line,
+  RiTruckLine,
+  RiUser3Line,
+  RiUserLine,
+  RiUserSettingsLine,
+  RiVipCrownLine,
+  RiStarLine,
+} from '@remixicon/react';
+
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import '../styles/desktop-menu.css';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+
+import '../styles/desktop-menu.css';
+
+const ADMIN_ROLES = new Set([
+  'admin',
+  'super_admin',
+  'owner',
+]);
 
 const ADMIN_NAV = [
   ['dashboard', 'Dashboard', RiDashboardLine],
@@ -32,51 +86,287 @@ const ADMIN_NAV = [
 const ADMIN_GROUPS = [
   ['Overview', ['dashboard']],
   ['Catalogue', ['products', 'categories']],
-  ['Commerce', ['orders', 'coupons', 'inventory', 'shipping', 'fulfillment', 'subscriptions', 'payments']],
-  ['Customers', ['users', 'user-actions', 'reviews']],
+  [
+    'Commerce',
+    [
+      'orders',
+      'coupons',
+      'inventory',
+      'shipping',
+      'fulfillment',
+      'subscriptions',
+      'payments',
+    ],
+  ],
+  [
+    'Customers',
+    ['users', 'user-actions', 'reviews'],
+  ],
   ['Business', ['business-profile']],
-  ['Operations', ['rbac', 'notifications', 'reports', 'audit', 'settings']],
+  [
+    'Operations',
+    [
+      'rbac',
+      'notifications',
+      'reports',
+      'audit',
+      'settings',
+    ],
+  ],
 ];
 
+const ADMIN_ITEM_MAP = new Map(
+  ADMIN_NAV.map(
+    ([key, label, Icon]) => [
+      key,
+      { label, Icon },
+    ],
+  ),
+);
+
+function getUserDisplayName(user) {
+  return (
+    user?.full_name ||
+    user?.name ||
+    'Welcome'
+  );
+}
+
+function getUserRole(user) {
+  return String(
+    user?.role || '',
+  ).toLowerCase();
+}
+
+function isAdminUser(user) {
+  return (
+    ADMIN_ROLES.has(getUserRole(user)) ||
+    user?.is_admin === true
+  );
+}
+
+function MenuLink({
+  to,
+  label,
+  Icon,
+  onClick,
+  className = '',
+}) {
+  return (
+    <Link
+      to={to}
+      className={className || undefined}
+      onClick={onClick}
+    >
+      {Icon && (
+        <Icon
+          size={18}
+          aria-hidden="true"
+        />
+      )}
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function AdminMenuLink({
+  item,
+  active,
+  onClick,
+}) {
+  const { label, Icon } = item;
+
+  return (
+    <Link
+      to={`/admin?panel=${encodeURIComponent(
+        item.key,
+      )}`}
+      onClick={onClick}
+      className={
+        active
+          ? 'is-active'
+          : undefined
+      }
+      aria-current={
+        active ? 'page' : undefined
+      }
+    >
+      <Icon
+        size={18}
+        aria-hidden="true"
+      />
+      <span>{label}</span>
+      <RiArrowRightSLine
+        className="admin-menu-arrow"
+        size={16}
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
 export default function Header() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const {
+    isAuthenticated,
+    user,
+    logout,
+  } = useAuth();
+
   const { itemCount } = useCart();
   const { toast } = useToast();
+
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const mobileNavRef = useRef(null);
-  const mobileCloseRef = useRef(null);
-  const path = location.pathname;
-  const isAdminPage = path === '/admin' || path.startsWith('/admin/');
-  const isAdmin = ['admin','super_admin','owner'].includes(String(user?.role || '').toLowerCase()) || user?.is_admin === true;
 
-  useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [location.pathname, location.search]);
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
+
+  const [menuOpen, setMenuOpen] =
+    useState(false);
+
+  const mobileNavRef =
+    useRef(null);
+
+  const mobileCloseRef =
+    useRef(null);
+
+  const accountTriggerRef =
+    useRef(null);
+
+  const path = location.pathname;
+
+  const isAdminPage =
+    path === '/admin' ||
+    path.startsWith('/admin/');
+
+  const isAdmin =
+    isAdminUser(user);
+
+  const activeAdminPanel =
+    isAdminPage
+      ? new URLSearchParams(
+          location.search,
+        ).get('panel')
+      : null;
+
+  const cartLabel =
+    itemCount > 0
+      ? `Shopping bag, ${itemCount} ${
+          itemCount === 1
+            ? 'item'
+            : 'items'
+        }`
+      : 'Shopping bag, empty';
+
+  /*
+   * Route changes should always close
+   * transient navigation UI.
+   */
   useEffect(() => {
-    if (!mobileOpen) return undefined;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previous; };
+    setMobileOpen(false);
+    setMenuOpen(false);
+  }, [
+    location.pathname,
+    location.search,
+    location.hash,
+  ]);
+
+  /*
+   * Prevent page scroll while the mobile
+   * navigation drawer is open.
+   */
+  useEffect(() => {
+    if (!mobileOpen) {
+      return undefined;
+    }
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    const previousPaddingRight =
+      document.body.style.paddingRight;
+
+    document.body.style.overflow =
+      'hidden';
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+
+      document.body.style.paddingRight =
+        previousPaddingRight;
+    };
   }, [mobileOpen]);
 
-  const closeAll = () => { setMobileOpen(false); setMenuOpen(false); };
-
+  /*
+   * Close account dropdown when clicking
+   * outside it or pressing Escape.
+   */
   useEffect(() => {
-    if (!menuOpen) return undefined;
-    const onPointerDown = (event) => {
-      if (!event.target.closest('.account-menu-wrap')) setMenuOpen(false);
+    if (!menuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (
+      event,
+    ) => {
+      const target = event.target;
+
+      if (
+        target instanceof Node &&
+        !target.closest?.(
+          '.account-menu-wrap',
+        )
+      ) {
+        setMenuOpen(false);
+      }
     };
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+
+    const handleKeyDown = (
+      event,
+    ) => {
+      if (
+        event.key !== 'Escape' ||
+        event.defaultPrevented
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      setMenuOpen(false);
+
+      requestAnimationFrame(() => {
+        accountTriggerRef.current?.focus();
+      });
     };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
+
+    document.addEventListener(
+      'pointerdown',
+      handlePointerDown,
+    );
+
+    document.addEventListener(
+      'keydown',
+      handleKeyDown,
+    );
+
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener(
+        'pointerdown',
+        handlePointerDown,
+      );
+
+      document.removeEventListener(
+        'keydown',
+        handleKeyDown,
+      );
     };
   }, [menuOpen]);
+
+  const closeAll = useCallback(() => {
+    setMobileOpen(false);
+    setMenuOpen(false);
+  }, []);
 
   useFocusTrap({
     enabled: mobileOpen,
@@ -84,63 +374,606 @@ export default function Header() {
     initialFocusRef: mobileCloseRef,
     onEscape: closeAll,
   });
-  const onSearch = (e) => { e.preventDefault(); const q = e.currentTarget.query.value.trim(); navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop'); closeAll(); };
-  const onLogout = async () => { closeAll(); await logout(); toast.success('You have been signed out.'); navigate('/'); };
-  const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
-  const adminMenuLink = (key, label, Icon = null) => {
-    const active = isAdminPage && new URLSearchParams(location.search).get('panel') === key;
-    return <Link to={`/admin?panel=${key}`} onClick={closeAll} className={active ? 'is-active' : undefined} aria-current={active ? 'page' : undefined}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
-  };
-  const adminItemMap = new Map(ADMIN_NAV.map(([key, label, Icon]) => [key, [label, Icon]]));
 
-  const mobileContent = isAdminPage && isAdmin
-    ? <>
-        <div className="mobile-nav-section mobile-admin-nav">
-          {ADMIN_GROUPS.map(([group, keys]) => <div key={group} className="mobile-admin-group"><div className="mobile-admin-label">{group}</div>{keys.map((key) => { const [label, Icon] = adminItemMap.get(key); return adminMenuLink(key, label, Icon); })}</div>)}
+  const onSearch = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      const form =
+        event.currentTarget;
+
+      const input =
+        form.elements.namedItem(
+          'query',
+        );
+
+      const query =
+        input?.value
+          ?.trim() || '';
+
+      navigate(
+        query
+          ? `/shop?q=${encodeURIComponent(
+              query,
+            )}`
+          : '/shop',
+      );
+
+      closeAll();
+    },
+    [navigate, closeAll],
+  );
+
+  const onLogout = useCallback(
+    async () => {
+      closeAll();
+
+      try {
+        await logout();
+        toast.success(
+          'You have been signed out.',
+        );
+        navigate('/');
+      } catch (error) {
+        toast.error(
+          error?.message ||
+            'Unable to sign out.',
+        );
+      }
+    },
+    [
+      closeAll,
+      logout,
+      navigate,
+      toast,
+    ],
+  );
+
+  const adminMenuItems = useMemo(
+    () =>
+      ADMIN_GROUPS.map(
+        ([group, keys]) => ({
+          group,
+          items: keys
+            .map((key) => {
+              const item =
+                ADMIN_ITEM_MAP.get(
+                  key,
+                );
+
+              if (!item) {
+                return null;
+              }
+
+              return {
+                key,
+                ...item,
+              };
+            })
+            .filter(Boolean),
+        }),
+      ),
+    [],
+  );
+
+  const mobileContent =
+    isAdminPage && isAdmin ? (
+      <>
+        <div
+          className="mobile-nav-section mobile-admin-nav"
+          aria-label="Admin navigation"
+        >
+          {adminMenuItems.map(
+            ({
+              group,
+              items,
+            }) => (
+              <section
+                key={group}
+                className="mobile-admin-group"
+                aria-labelledby={`mobile-admin-${group
+                  .toLowerCase()
+                  .replace(/\s+/g, '-')}`}
+              >
+                <h2
+                  id={`mobile-admin-${group
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')}`}
+                  className="mobile-admin-label"
+                >
+                  {group}
+                </h2>
+
+                {items.map(
+                  (item) => (
+                    <AdminMenuLink
+                      key={item.key}
+                      item={item}
+                      active={
+                        activeAdminPanel ===
+                        item.key
+                      }
+                      onClick={
+                        closeAll
+                      }
+                    />
+                  ),
+                )}
+              </section>
+            ),
+          )}
         </div>
-        {menuLink('/', 'View storefront', RiHomeLine)}
-      </>
-    : <>
-        <form className="mobile-search" onSubmit={onSearch} role="search"><RiSearchLine size={19}/><input name="query" placeholder="Search for products..." aria-label="Search for products" autoComplete="off"/></form>
-        <div className="mobile-nav-section mobile-primary-nav">
-          {menuLink('/', 'Home', RiHomeLine)}
-          {menuLink('/shop', 'Shop', RiStore2Line)}
-          {menuLink('/shop', 'Categories', RiGridLine)}
-        </div>
-        <div className="mobile-nav-section mobile-shopping-nav">
-          {menuLink('/cart', `Shopping bag${itemCount ? ` (${itemCount})` : ''}`, RiShoppingBagLine)}
-          {menuLink('/orders', 'Orders', RiArchive2Line)}
-          {menuLink('/account', 'Account', RiUser3Line)}
-        </div>
-        <div className="mobile-nav-section mobile-info-nav">
-          {menuLink('/about', 'About', RiInformationLine)}
-          <a href="mailto:support@luviio.in" onClick={closeAll}><RiMailLine size={18} aria-hidden="true"/><span>Contact</span></a>
-        </div>
+
         <div className="mobile-nav-section mobile-account-actions">
-          {isAdmin && menuLink('/admin', 'Admin dashboard', RiShieldStarLine)}
-          {isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={18}/><span>Sign out</span></button>}
+          <MenuLink
+            to="/"
+            label="View storefront"
+            Icon={RiHomeLine}
+            onClick={closeAll}
+          />
         </div>
-      </>;
+      </>
+    ) : (
+      <>
+        <form
+          className="mobile-search"
+          onSubmit={onSearch}
+          role="search"
+        >
+          <RiSearchLine
+            size={19}
+            aria-hidden="true"
+          />
 
-  return <header className="header">
-    <div className="header-reference-inner">
-      <Link className="brand" to="/" onClick={closeAll}>luviio</Link>
-      <nav className="nav-links" aria-label="Primary navigation">
-        <NavLink end to="/">Home</NavLink>
-        <NavLink end to="/shop">Shop</NavLink>
-        <NavLink end to="/about">About</NavLink>
-        <a href="mailto:support@luviio.in">Contact</a>
-      </nav>
-      <div className="header-actions">
-        <form className="search-form" onSubmit={onSearch} role="search"><RiSearchLine className="search-icon" size={18}/><input name="query" placeholder="Search for products..." aria-label="Search for products..." autoComplete="off"/></form>
-        {!isAuthenticated && <Link className="icon-btn header-account-icon" to="/account" aria-label="Account"><RiUserLine size={20}/></Link>}
-        
-        <Link className="icon-btn header-cart-icon" to="/cart" aria-label={`Shopping bag, ${itemCount} items`}><RiShoppingBagLine size={21}/>{itemCount > 0 && <span className="cart-count">{itemCount > 99 ? '99+' : itemCount}</span>}</Link>
-        {isAuthenticated && <div className="account-menu-wrap"><button type="button" className="icon-btn account-trigger" onClick={() => setMenuOpen(v => !v)} aria-label="Account menu" aria-expanded={menuOpen} aria-controls="account-menu"><RiUserLine size={20}/></button>{menuOpen && <div id="account-menu" className="account-menu"><div className="menu-user"><strong>{user?.full_name || user?.name || 'Welcome'}</strong><span>{user?.email || ''}</span></div><Link to="/account" onClick={closeAll}><RiUser3Line size={16}/> Profile</Link><Link to="/orders" onClick={closeAll}><RiArchive2Line size={16}/> Orders</Link><Link to="/account/addresses" onClick={closeAll}><RiMapPin2Line size={16}/> Addresses</Link><Link to="/account/settings" onClick={closeAll}><RiSettings3Line size={16}/> Settings</Link>{isAdmin && <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={16}/> Admin dashboard</Link>}<button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16}/> Sign out</button></div>}</div>}
-        <button type="button" className="menu-button" onClick={(e) => { e.preventDefault(); setMobileOpen(v => !v); setMenuOpen(false); }} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? 'Close menu' : 'Open menu'}>{mobileOpen ? <RiCloseLine size={22}/> : <RiMenuLine size={22}/>}</button>
+          <input
+            name="query"
+            type="search"
+            placeholder="Search for products..."
+            aria-label="Search for products"
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+        </form>
+
+        <nav
+          className="mobile-nav-section mobile-primary-nav"
+          aria-label="Main navigation"
+        >
+          <MenuLink
+            to="/"
+            label="Home"
+            Icon={RiHomeLine}
+            onClick={closeAll}
+          />
+
+          <MenuLink
+            to="/shop"
+            label="Shop"
+            Icon={RiStore2Line}
+            onClick={closeAll}
+          />
+
+          <MenuLink
+            to="/shop"
+            label="Categories"
+            Icon={RiGridLine}
+            onClick={closeAll}
+          />
+        </nav>
+
+        <nav
+          className="mobile-nav-section mobile-shopping-nav"
+          aria-label="Shopping navigation"
+        >
+          <MenuLink
+            to="/cart"
+            label={
+              itemCount
+                ? `Shopping bag (${itemCount})`
+                : 'Shopping bag'
+            }
+            Icon={RiShoppingBagLine}
+            onClick={closeAll}
+          />
+
+          <MenuLink
+            to="/orders"
+            label="Orders"
+            Icon={RiArchive2Line}
+            onClick={closeAll}
+          />
+
+          <MenuLink
+            to="/account"
+            label="Account"
+            Icon={RiUser3Line}
+            onClick={closeAll}
+          />
+        </nav>
+
+        <nav
+          className="mobile-nav-section mobile-info-nav"
+          aria-label="Information"
+        >
+          <MenuLink
+            to="/about"
+            label="About"
+            Icon={RiInformationLine}
+            onClick={closeAll}
+          />
+
+          <a
+            href="mailto:support@luviio.in"
+            onClick={closeAll}
+          >
+            <RiMailLine
+              size={18}
+              aria-hidden="true"
+            />
+            <span>
+              Contact
+            </span>
+          </a>
+        </nav>
+
+        <div className="mobile-nav-section mobile-account-actions">
+          {isAdmin && (
+            <MenuLink
+              to="/admin"
+              label="Admin dashboard"
+              Icon={RiShieldStarLine}
+              onClick={closeAll}
+            />
+          )}
+
+          {isAuthenticated && (
+            <button
+              type="button"
+              onClick={onLogout}
+            >
+              <RiLogoutBoxRLine
+                size={18}
+                aria-hidden="true"
+              />
+              <span>
+                Sign out
+              </span>
+            </button>
+          )}
+        </div>
+      </>
+    );
+
+  return (
+    <header className="header">
+      <div className="header-reference-inner">
+        <Link
+          className="brand"
+          to="/"
+          onClick={closeAll}
+          aria-label="Luviio home"
+        >
+          luviio
+        </Link>
+
+        <nav
+          className="nav-links"
+          aria-label="Primary navigation"
+        >
+          <NavLink
+            end
+            to="/"
+          >
+            Home
+          </NavLink>
+
+          <NavLink
+            end
+            to="/shop"
+          >
+            Shop
+          </NavLink>
+
+          <NavLink
+            end
+            to="/about"
+          >
+            About
+          </NavLink>
+
+          <a href="mailto:support@luviio.in">
+            Contact
+          </a>
+        </nav>
+
+        <div className="header-actions">
+          <form
+            className="search-form"
+            onSubmit={onSearch}
+            role="search"
+          >
+            <RiSearchLine
+              className="search-icon"
+              size={18}
+              aria-hidden="true"
+            />
+
+            <input
+              name="query"
+              type="search"
+              placeholder="Search for products..."
+              aria-label="Search for products"
+              autoComplete="off"
+              enterKeyHint="search"
+            />
+          </form>
+
+          {!isAuthenticated && (
+            <Link
+              className="icon-btn header-account-icon"
+              to="/account"
+              aria-label="Account"
+            >
+              <RiUserLine
+                size={20}
+                aria-hidden="true"
+              />
+            </Link>
+          )}
+
+          <Link
+            className="icon-btn header-cart-icon"
+            to="/cart"
+            aria-label={cartLabel}
+          >
+            <RiShoppingBagLine
+              size={21}
+              aria-hidden="true"
+            />
+
+            {itemCount > 0 && (
+              <span
+                className="cart-count"
+                aria-hidden="true"
+              >
+                {itemCount > 99
+                  ? '99+'
+                  : itemCount}
+              </span>
+            )}
+          </Link>
+
+          {isAuthenticated && (
+            <div className="account-menu-wrap">
+              <button
+                ref={accountTriggerRef}
+                type="button"
+                className="icon-btn account-trigger"
+                onClick={() =>
+                  setMenuOpen(
+                    (current) =>
+                      !current,
+                  )
+                }
+                aria-label="Account menu"
+                aria-expanded={
+                  menuOpen
+                }
+                aria-controls="account-menu"
+              >
+                <RiUserLine
+                  size={20}
+                  aria-hidden="true"
+                />
+              </button>
+
+              {menuOpen && (
+                <div
+                  id="account-menu"
+                  className="account-menu"
+                  role="menu"
+                  aria-label="Account menu"
+                >
+                  <div
+                    className="menu-user"
+                    role="presentation"
+                  >
+                    <strong>
+                      {getUserDisplayName(
+                        user,
+                      )}
+                    </strong>
+
+                    {user?.email && (
+                      <span>
+                        {user.email}
+                      </span>
+                    )}
+                  </div>
+
+                  <Link
+                    to="/account"
+                    onClick={closeAll}
+                    role="menuitem"
+                  >
+                    <RiUser3Line
+                      size={16}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Profile
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/orders"
+                    onClick={closeAll}
+                    role="menuitem"
+                  >
+                    <RiArchive2Line
+                      size={16}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Orders
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/account/addresses"
+                    onClick={closeAll}
+                    role="menuitem"
+                  >
+                    <RiMapPin2Line
+                      size={16}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Addresses
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/account/settings"
+                    onClick={closeAll}
+                    role="menuitem"
+                  >
+                    <RiSettings3Line
+                      size={16}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Settings
+                    </span>
+                  </Link>
+
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      onClick={closeAll}
+                      role="menuitem"
+                    >
+                      <RiShieldStarLine
+                        size={16}
+                        aria-hidden="true"
+                      />
+                      <span>
+                        Admin dashboard
+                      </span>
+                    </Link>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    role="menuitem"
+                  >
+                    <RiLogoutBoxRLine
+                      size={16}
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Sign out
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="menu-button"
+            onClick={() => {
+              setMobileOpen(
+                (current) =>
+                  !current,
+              );
+              setMenuOpen(false);
+            }}
+            aria-expanded={
+              mobileOpen
+            }
+            aria-controls="mobile-navigation"
+            aria-label={
+              mobileOpen
+                ? 'Close menu'
+                : 'Open menu'
+            }
+          >
+            {mobileOpen ? (
+              <RiCloseLine
+                size={22}
+                aria-hidden="true"
+              />
+            ) : (
+              <RiMenuLine
+                size={22}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+        </div>
       </div>
-    </div>
-    <div className={`mobile-menu-backdrop${mobileOpen ? ' is-open' : ''}`} aria-hidden={!mobileOpen} onClick={closeAll}/>
-    <aside ref={mobileNavRef} id="mobile-navigation" className={`mobile-nav${mobileOpen ? ' is-open' : ''}`} aria-label="Navigation menu" aria-hidden={!mobileOpen}><div className="mobile-nav-head"><Link className="mobile-nav-brand" to="/" onClick={closeAll}>luviio</Link><button ref={mobileCloseRef} type="button" className="mobile-nav-close" onClick={closeAll} aria-label="Close menu"><RiCloseLine size={20}/></button></div><div className="mobile-nav-inner">{mobileContent}</div></aside>
-  </header>;
+
+      <div
+        className={`mobile-menu-backdrop${
+          mobileOpen
+            ? ' is-open'
+            : ''
+        }`}
+        aria-hidden="true"
+        onClick={closeAll}
+      />
+
+      <aside
+        ref={mobileNavRef}
+        id="mobile-navigation"
+        className={`mobile-nav${
+          mobileOpen
+            ? ' is-open'
+            : ''
+        }`}
+        aria-label="Navigation menu"
+        aria-hidden={!mobileOpen}
+      >
+        <div className="mobile-nav-head">
+          <Link
+            className="mobile-nav-brand"
+            to="/"
+            onClick={closeAll}
+            tabIndex={
+              mobileOpen
+                ? 0
+                : -1
+            }
+          >
+            luviio
+          </Link>
+
+          <button
+            ref={mobileCloseRef}
+            type="button"
+            className="mobile-nav-close"
+            onClick={closeAll}
+            aria-label="Close menu"
+            tabIndex={
+              mobileOpen
+                ? 0
+                : -1
+            }
+          >
+            <RiCloseLine
+              size={20}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div className="mobile-nav-inner">
+          {mobileContent}
+        </div>
+      </aside>
+    </header>
+  );
 }

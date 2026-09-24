@@ -1,12 +1,24 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import {
-  RiErrorWarningLine,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
+import {
   RiCheckboxCircleFill,
-  RiInformationLine,
   RiCloseLine,
+  RiErrorWarningLine,
+  RiInformationLine,
 } from '@remixicon/react';
 
 const ToastContext = createContext(null);
+
+const DEFAULT_DURATION = 4200;
+const MAX_VISIBLE_TOASTS = 5;
 
 const ICONS = {
   success: RiCheckboxCircleFill,
@@ -14,44 +26,183 @@ const ICONS = {
   info: RiInformationLine,
 };
 
+const TONES = new Set([
+  'success',
+  'error',
+  'info',
+]);
+
+const normalizeTone = (tone) => {
+  return TONES.has(tone) ? tone : 'info';
+};
+
+const normalizeMessage = (message) => {
+  if (message == null) return '';
+  
+  if (typeof message === 'string') {
+    return message.trim();
+  }
+  
+  if (
+    typeof message === 'number' ||
+    typeof message === 'boolean'
+  ) {
+    return String(message);
+  }
+  
+  return String(message);
+};
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  
   const timers = useRef(new Map());
-
-  const dismiss = useCallback((id) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-    const timer = timers.current.get(id);
-    if (timer) {
-      clearTimeout(timer);
-      timers.current.delete(id);
-    }
+  const idCounter = useRef(0);
+  
+  /**
+   * Generate stable IDs without relying on Math.random().
+   */
+  const createId = useCallback(() => {
+    idCounter.current += 1;
+    
+    return `toast-${Date.now()}-${idCounter.current}`;
   }, []);
-
+  
+  const clearTimer = useCallback((id) => {
+    const timer = timers.current.get(id);
+    
+    if (!timer) return;
+    
+    window.clearTimeout(timer);
+    timers.current.delete(id);
+  }, []);
+  
+  const dismiss = useCallback(
+    (id) => {
+      clearTimer(id);
+      
+      setToasts((current) =>
+        current.filter(
+          (toast) => toast.id !== id,
+        ),
+      );
+    },
+    [clearTimer],
+  );
+  
   const push = useCallback(
-    (message, tone = 'info', duration = 4200) => {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      setToasts((current) => [...current.slice(-2), { id, message, tone }]);
-      if (duration > 0) {
-        const timer = setTimeout(() => dismiss(id), duration);
+    (
+      message,
+      tone = 'info',
+      duration = DEFAULT_DURATION,
+    ) => {
+      const normalizedMessage =
+        normalizeMessage(message);
+      
+      if (!normalizedMessage) {
+        return null;
+      }
+      
+      const normalizedTone =
+        normalizeTone(tone);
+      
+      const id = createId();
+      
+      setToasts((current) => [
+        ...current.slice(
+          -(MAX_VISIBLE_TOASTS - 1),
+        ),
+        {
+          id,
+          message: normalizedMessage,
+          tone: normalizedTone,
+        },
+      ]);
+      
+      if (
+        Number.isFinite(duration) &&
+        duration > 0
+      ) {
+        const timer = window.setTimeout(() => {
+          dismiss(id);
+        }, duration);
+        
         timers.current.set(id, timer);
       }
+      
       return id;
     },
-    [dismiss],
+    [createId, dismiss],
   );
-
-  // Support both common call styles used throughout the app:
-  // const toast = useToast(); toast.success('...')
-  // const { success } = useToast(); success('...')
+  
+  /**
+   * Clear every active timer when the provider unmounts.
+   */
+  useEffect(() => {
+    return () => {
+      timers.current.forEach((timer) => {
+        window.clearTimeout(timer);
+      });
+      
+      timers.current.clear();
+    };
+  }, []);
+  
+  /**
+   * Supports both:
+   *
+   * toast.success('Added')
+   * const { success } = useToast()
+   * success('Added')
+   */
   const toast = useMemo(() => {
-    const notify = (message, tone = 'info', duration = 4200) => push(message, tone, duration);
-    notify.success = (message, duration) => push(message, 'success', duration);
-    notify.error = (message, duration) => push(message, 'error', duration);
-    notify.info = (message, duration) => push(message, 'info', duration);
+    const notify = (
+      message,
+      tone = 'info',
+      duration = DEFAULT_DURATION,
+    ) => {
+      return push(
+        message,
+        tone,
+        duration,
+      );
+    };
+    
+    notify.success = (
+        message,
+        duration = DEFAULT_DURATION,
+      ) =>
+      push(
+        message,
+        'success',
+        duration,
+      );
+    
+    notify.error = (
+        message,
+        duration = DEFAULT_DURATION,
+      ) =>
+      push(
+        message,
+        'error',
+        duration,
+      );
+    
+    notify.info = (
+        message,
+        duration = DEFAULT_DURATION,
+      ) =>
+      push(
+        message,
+        'info',
+        duration,
+      );
+    
     notify.dismiss = dismiss;
+    
     return notify;
   }, [push, dismiss]);
-
+  
   const value = useMemo(
     () => ({
       toast,
@@ -60,25 +211,63 @@ export function ToastProvider({ children }) {
       info: toast.info,
       dismiss,
     }),
-    [toast, dismiss],
+    [
+      toast,
+      dismiss,
+    ],
   );
-
+  
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-stack" aria-label="Notifications">
+
+      <div
+        className="toast-stack"
+        aria-label="Notifications"
+        aria-live="polite"
+      >
         {toasts.map((item) => {
-          const Icon = ICONS[item.tone] || RiInformationLine;
+          const Icon =
+            ICONS[item.tone] ||
+            RiInformationLine;
+
+          const isError =
+            item.tone === 'error';
+
           return (
-            <div key={item.id} className={`toast toast-${item.tone}`} role={item.tone === 'error' ? 'alert' : 'status'} aria-live={item.tone === 'error' ? 'assertive' : 'polite'}>
-              <Icon size={17} />
-              <span>{item.message}</span>
+            <div
+              key={item.id}
+              className={`toast toast-${item.tone}`}
+              role={
+                isError
+                  ? 'alert'
+                  : 'status'
+              }
+              aria-atomic="true"
+            >
+              <span
+                className="toast-icon"
+                aria-hidden="true"
+              >
+                <Icon size={18} />
+              </span>
+
+              <p className="toast-message">
+                {item.message}
+              </p>
+
               <button
                 type="button"
-                onClick={() => dismiss(item.id)}
+                className="toast-dismiss"
+                onClick={() =>
+                  dismiss(item.id)
+                }
                 aria-label="Dismiss notification"
               >
-                <RiCloseLine size={15} />
+                <RiCloseLine
+                  size={17}
+                  aria-hidden="true"
+                />
               </button>
             </div>
           );
@@ -89,7 +278,14 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used inside ToastProvider');
+  const context =
+    useContext(ToastContext);
+  
+  if (!context) {
+    throw new Error(
+      'useToast must be used inside ToastProvider.',
+    );
+  }
+  
   return context;
 }

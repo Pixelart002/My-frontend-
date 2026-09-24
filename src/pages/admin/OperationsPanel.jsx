@@ -1,112 +1,275 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  RiCheckLine,
+  RiCloseLine,
+  RiDeleteBinLine,
+  RiRefreshLine,
+  RiSaveLine,
+  RiSendPlaneLine,
+  RiShieldCheckLine,
+} from '@remixicon/react';
+
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import { RiRefreshLine, RiSaveLine, RiDeleteBinLine, RiSendPlaneLine, RiShieldCheckLine, RiCheckLine, RiCloseLine } from '@remixicon/react';
+import AdminModal from './Modal';
+
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { formatMoney } from '../../utils/format';
+
 import './operations-panel.css';
-import AdminModal from './Modal';
 
-const pretty = (value) => value === null || value === undefined || value === '' ? '—' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+const pretty = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
 
-function Toolbar({ title, description, onRefresh, children }) {
-  return <div className="admin-toolbar ops-toolbar"><div><h2>{title}</h2><p>{description}</p></div><div className="btn-row">{children}<button type="button" className="btn btn-quiet btn-sm" onClick={onRefresh}><RiRefreshLine size={16}/>Refresh</button></div></div>;
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '—';
+    }
+  }
+
+  return String(value);
+};
+
+const text = (value) => String(value ?? '').trim();
+
+const errorMessage = (error, fallback) => {
+  const message = text(error?.message);
+  return message || fallback;
+};
+
+function useAsyncGuard() {
+  const mountedRef = useRef(true);
+  const requestRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const startRequest = useCallback(() => {
+    requestRef.current += 1;
+    return requestRef.current;
+  }, []);
+
+  const isCurrent = useCallback(
+    (requestId) => mountedRef.current && requestRef.current === requestId,
+    [],
+  );
+
+  return {
+    mountedRef,
+    startRequest,
+    isCurrent,
+  };
+}
+
+function Toolbar({ title, description, onRefresh, children, refreshing = false }) {
+  return (
+    <div className="admin-toolbar ops-toolbar">
+      <div className="ops-toolbar-copy">
+        <h2>{title}</h2>
+        {description && <p>{description}</p>}
+      </div>
+
+      <div className="btn-row">
+        {children}
+
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          onClick={onRefresh}
+          disabled={refreshing}
+          aria-label={`Refresh ${title}`}
+        >
+          <RiRefreshLine
+            size={16}
+            className={refreshing ? 'ops-spin' : undefined}
+            aria-hidden="true"
+          />
+          {refreshing ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default function OperationsPanel({ section }) {
-  if (section === 'inventory') return <InventoryPanel/>;
-  if (section === 'shipping') return <ShippingPanel/>;
-  if (section === 'subscriptions') return <SubscriptionPanel/>;
-  if (section === 'user-actions') return <UserActionsPanel/>;
-  if (section === 'rbac') return <RbacPanel/>;
-  if (section === 'notifications') return <NotificationsPanel/>;
-  if (section === 'settings') return <SettingsPanel/>;
-  if (section === 'payments') return <PaymentsPanel/>;
-  if (section === 'reports') return <ReportsPanel/>;
-  if (section === 'audit') return <AuditPanel/>;
-  if (section === 'reviews') return <ReviewsModerationPanel/>;
-  return null;
+  switch (section) {
+    case 'inventory':
+      return <InventoryPanel />;
+
+    case 'shipping':
+      return <ShippingPanel />;
+
+    case 'subscriptions':
+      return <SubscriptionPanel />;
+
+    case 'user-actions':
+      return <UserActionsPanel />;
+
+    case 'rbac':
+      return <RbacPanel />;
+
+    case 'notifications':
+      return <NotificationsPanel />;
+
+    case 'settings':
+      return <SettingsPanel />;
+
+    case 'payments':
+      return <PaymentsPanel />;
+
+    case 'reports':
+      return <ReportsPanel />;
+
+    case 'audit':
+      return <AuditPanel />;
+
+    case 'reviews':
+      return <ReviewsModerationPanel />;
+
+    default:
+      return null;
+  }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Inventory                                                                  */
+/* -------------------------------------------------------------------------- */
 
 function InventoryPanel() {
-  const { toast } = useToast(); const [lowStock,setLowStock]=useState([]); const [loading,setLoading]=useState(true); const [scanning,setScanning]=useState(false);
-  const load=useCallback(async()=>{setLoading(true);try{setLowStock(itemsOfList(await adminService.lowStock()));}catch(e){toast.error(e.message||'Unable to load inventory.')}finally{setLoading(false)}},[toast]); useEffect(()=>{load()},[load]);
-  const scan=async()=>{setScanning(true);try{const r=await adminService.scanLowStock();toast.success(`${r?.alerts_published??0} low-stock alert(s) published.`);await load()}catch(e){toast.error(e.message||'Low-stock scan failed.')}finally{setScanning(false)}};
-  return <section className="admin-panel"><div className="admin-card"><Toolbar title="Inventory" description="Monitor stock risk and release abandoned checkout reservations." onRefresh={load}><button className="btn btn-sm" disabled={scanning} onClick={scan}>{scanning?'Scanning…':'Scan low stock'}</button></Toolbar><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Low-stock products</div><div className="stat-value">{loading?'…':lowStock.length}</div></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Threshold</th></tr></thead><tbody>{lowStock.length?lowStock.map((p,i)=><tr key={p.id||i}><td className="td-strong">{pretty(p.name||p.product_name)}</td><td className="td-gold">{pretty(p.stock??p.quantity)}</td><td>{pretty(p.low_stock_threshold??p.threshold)}</td></tr>):<tr><td colSpan="3"><div className="admin-empty">{loading?'Loading inventory…':'No low-stock products.'}</div></td></tr>}</tbody></table></div></div></section>;
-}
-
-function ShippingPanel() {
   const { toast } = useToast();
-  const [methods, setMethods] = useState([]);
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setMethods(itemsOfList(await adminService.shippingMethods(false)));
-    } catch (e) {
-      toast.error(e.message || 'Unable to load shipping history.');
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+    const requestId = startRequest();
 
-  useEffect(() => { load(); }, [load]);
+    setLoading(true);
+
+    try {
+      const result = await adminService.lowStock();
+
+      if (!isCurrent(requestId)) return;
+
+      setLowStock(itemsOfList(result));
+    } catch (error) {
+      if (!mountedRef.current) return;
+      toast.error(errorMessage(error, 'Unable to load inventory.'));
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const scan = async () => {
+    if (scanning) return;
+
+    setScanning(true);
+
+    try {
+      const result = await adminService.scanLowStock();
+
+      if (!mountedRef.current) return;
+
+      toast.success(
+        `${Number(result?.alerts_published) || 0} low-stock alert(s) published.`,
+      );
+
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Low-stock scan failed.'));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setScanning(false);
+      }
+    }
+  };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel" aria-labelledby="ops-inventory-title">
       <div className="admin-card">
         <Toolbar
-          title="Shipping"
-          description="Customer checkout uses live Shiprocket courier pricing. Legacy flat/free-threshold methods are inactive and are not used for new orders."
+          title="Inventory"
+          description="Monitor stock risk and release abandoned checkout reservations."
           onRefresh={load}
-        />
+          refreshing={loading}
+        >
+          <button
+            type="button"
+            className="btn btn-sm"
+            disabled={scanning}
+            onClick={scan}
+          >
+            <RiRefreshLine
+              size={16}
+              className={scanning ? 'ops-spin' : undefined}
+              aria-hidden="true"
+            />
+            {scanning ? 'Scanning…' : 'Scan low stock'}
+          </button>
+        </Toolbar>
+
         <div className="admin-stats">
           <div className="admin-stat">
-            <div className="stat-label">Checkout provider</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>Shiprocket</div>
-          </div>
-          <div className="admin-stat">
-            <div className="stat-label">Customer rate</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>Live courier</div>
-          </div>
-          <div className="admin-stat">
-            <div className="stat-label">Legacy methods</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>{loading ? '…' : methods.length}</div>
+            <div className="stat-label">Low-stock products</div>
+            <div className="stat-value">
+              {loading ? '…' : lowStock.length}
+            </div>
           </div>
         </div>
-        <div className="admin-page-note">
-          Rate is calculated server-side from delivery PIN, parcel weight, payment method and Shiprocket serviceability.
-          No admin-entered flat shipping amount is applied to customer checkout.
-        </div>
-      </div>
 
-      <div className="admin-card">
-        <div className="admin-toolbar">
-          <div>
-            <h2>Legacy shipping methods</h2>
-            <p>Historical records retained for audit/admin visibility. They should remain inactive.</p>
-          </div>
-        </div>
         <div className="admin-table-wrap">
           <table className="admin-table">
+            <caption className="sr-only">
+              Products currently below their configured stock threshold
+            </caption>
+
             <thead>
-              <tr><th>Name</th><th>Type</th><th>Status</th></tr>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Threshold</th>
+              </tr>
             </thead>
+
             <tbody>
-              {methods.length ? methods.map((method) => (
-                <tr key={method.id}>
-                  <td className="td-strong">{method.name}</td>
-                  <td>{method.type}</td>
-                  <td>
-                    <span className="admin-pill pill-muted">Archived / ignored</span>
-                  </td>
-                </tr>
-              )) : (
+              {lowStock.length ? (
+                lowStock.map((product, index) => (
+                  <tr key={product.id || index}>
+                    <td className="td-strong">
+                      {pretty(product.name || product.product_name)}
+                    </td>
+                    <td className="td-gold">
+                      {pretty(product.stock ?? product.quantity)}
+                    </td>
+                    <td>
+                      {pretty(
+                        product.low_stock_threshold ?? product.threshold,
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="3">
                     <div className="admin-empty">
-                      {loading ? 'Loading shipping history…' : 'No legacy shipping methods found.'}
+                      {loading
+                        ? 'Loading inventory…'
+                        : 'No low-stock products.'}
                     </div>
                   </td>
                 </tr>
@@ -119,16 +282,973 @@ function ShippingPanel() {
   );
 }
 
-function SubscriptionPanel(){const {toast}=useToast();const [plans,setPlans]=useState([]);const [loading,setLoading]=useState(true);const [editing,setEditing]=useState(null);const empty={tier:'premium',name:'',price_inr:'',duration_days:30,description:'',is_active:true};const [form,setForm]=useState(empty);const load=useCallback(async()=>{setLoading(true);try{setPlans(itemsOfList(await adminService.subscriptionPlans(true)))}catch(e){toast.error(e.message||'Unable to load subscription plans.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);const save=async(e)=>{e.preventDefault();try{const payload={...form,price_inr:Number(form.price_inr),duration_days:Number(form.duration_days)};if(editing)await adminService.updateSubscription(editing,payload);else await adminService.createSubscription(payload);toast.success(editing?'Plan updated.':'Plan created.');setEditing(null);setForm(empty);await load()}catch(e){toast.error(e.message||'Unable to save plan.')}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="Subscription plans" description="Manage membership plans and customer entitlements." onRefresh={load}/><form onSubmit={save}><div className="field-grid"><label>Tier<select value={form.tier} onChange={e=>setForm({...form,tier:e.target.value})}><option value="free">Free</option><option value="premium">Premium</option><option value="platinum">Platinum</option></select></label><label>Name<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Price (INR)<input required type="number" min="0" step="0.01" value={form.price_inr} onChange={e=>setForm({...form,price_inr:e.target.value})}/></label><label>Duration (days)<input required type="number" min="1" value={form.duration_days} onChange={e=>setForm({...form,duration_days:e.target.value})}/></label><label className="ops-full">Description<textarea value={form.description||''} onChange={e=>setForm({...form,description:e.target.value})}/></label><label className="checkbox-field"><input type="checkbox" checked={!!form.is_active} onChange={e=>setForm({...form,is_active:e.target.checked})}/> Active</label></div><div className="btn-row ops-form-actions"><button className="btn btn-sm"><RiSaveLine size={16}/>{editing?'Update plan':'Create plan'}</button></div></form></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Tier</th><th>Name</th><th>Price</th><th>Duration</th><th>Status</th><th/></tr></thead><tbody>{plans.length?plans.map(p=><tr key={p.id}><td>{p.tier}</td><td className="td-strong">{p.name}</td><td className="td-gold">{formatMoney(Number(p.price_inr)||0)}</td><td>{p.duration_days} days</td><td>{p.is_active?'Active':'Inactive'}</td><td><button className="icon-btn" onClick={()=>{setEditing(p.id);setForm({...empty,...p})}}><RiSaveLine size={15}/></button></td></tr>):<tr><td colSpan="6"><div className="admin-empty">{loading?'Loading plans…':'No subscription plans.'}</div></td></tr>}</tbody></table></div></section>}
+/* -------------------------------------------------------------------------- */
+/* Shipping                                                                   */
+/* -------------------------------------------------------------------------- */
 
-function UserActionsPanel(){const {toast}=useToast();const [userId,setUserId]=useState('');const [data,setData]=useState(null);const [loading,setLoading]=useState(false);const [busy,setBusy]=useState('');const load=useCallback(async()=>{if(!userId.trim())return;setLoading(true);try{setData(await adminService.userActions(userId.trim()))}catch(e){toast.error(e.message||'Unable to load user actions.')}finally{setLoading(false)}},[toast,userId]);const toggle=async(action,blocked)=>{setBusy(action);try{if(blocked)await adminService.removeUserAction(userId.trim(),action);else await adminService.setUserAction(userId.trim(),action,false,'Disabled by administrator');await load()}catch(e){toast.error(e.message||'Unable to update user action.')}finally{setBusy('')}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="User actions" description="Per-customer controls for checkout and commerce capabilities." onRefresh={load}><RiShieldCheckLine size={18}/></Toolbar><div className="ops-inline"><input placeholder="Enter customer UUID" value={userId} onChange={e=>setUserId(e.target.value)}/><button className="btn btn-sm" onClick={load}>Load controls</button></div>{loading?<div className="admin-empty">Loading controls…</div>:data&&<div className="admin-stats">{(data.all_actions||[]).map(action=>{const row=(data.controls||[]).find(c=>c.action===action);const blocked=row?.enabled===false;return <div className="admin-stat" key={action}><div className="stat-label">{action.replaceAll('_',' ')}</div><div className="stat-value" style={{fontSize:22}}>{blocked?'Blocked':'Enabled'}</div><button className="btn btn-quiet btn-sm" disabled={busy===action} onClick={()=>toggle(action,blocked)}>{busy===action?'Saving…':blocked?'Restore':'Disable'}</button></div>})}</div>}</div></section>}
-
-function RbacPanel(){const {toast}=useToast();const [matrix,setMatrix]=useState(null);const [loading,setLoading]=useState(true);const load=useCallback(async()=>{setLoading(true);try{setMatrix(await adminService.permissions())}catch(e){toast.error(e.message||'Unable to load permissions.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);const rows=useMemo(()=>Object.entries(matrix?.effective||{}).flatMap(([role,perms])=>Object.entries(perms||{}).map(([permission,enabled])=>({role,permission,enabled}))),[matrix]);const toggle=async(row)=>{try{await adminService.togglePermission(row.role,row.permission,!row.enabled);toast.success('Permission updated.');await load()}catch(e){toast.error(e.message||'Unable to update permission.')}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="Roles & permissions" description="Effective policy after static defaults and database overrides." onRefresh={load}/><div className="admin-page-note">{loading?'Loading…':`${rows.length} permission entries loaded.`}</div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Role</th><th>Permission</th><th>State</th><th/></tr></thead><tbody>{rows.map(r=><tr key={`${r.role}:${r.permission}`}><td className="td-strong">{r.role}</td><td>{r.permission}</td><td><span className={`admin-pill ${r.enabled?'pill-success':'pill-danger'}`}>{r.enabled?'Allowed':'Denied'}</span></td><td><button className="btn btn-quiet btn-sm" onClick={()=>toggle(r)} disabled={r.role==='super_admin'}>{r.role==='super_admin'?'Absolute':r.enabled?'Deny':'Allow'}</button></td></tr>)}</tbody></table></div></section>}
-
-function NotificationsPanel(){const {toast}=useToast();const [stats,setStats]=useState(null);const [loading,setLoading]=useState(true);const [title,setTitle]=useState('');const [body,setBody]=useState('');const [url,setUrl]=useState('/');const [sending,setSending]=useState(false);const load=useCallback(async()=>{setLoading(true);try{setStats(await adminService.pushStats())}catch(e){toast.error(e.message||'Unable to load notification stats.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);const send=async(e)=>{e.preventDefault();setSending(true);try{const r=await adminService.sendPush({user_ids:null,title:title.trim(),body:body.trim(),url:url.trim()||'/'});toast.success(r?.message||'Notification dispatched.');setTitle('');setBody('');await load()}catch(e){toast.error(e.message||'Unable to send notification.')}finally{setSending(false)}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="Notifications" description="Send controlled customer messaging and monitor Web Push subscriptions." onRefresh={load}/><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Subscribed devices</div><div className="stat-value">{loading?'…':pretty(stats?.subscriptions??stats?.total??0)}</div></div><div className="admin-stat"><div className="stat-label">Delivery health</div><div className="stat-value" style={{fontSize:22}}>Server-side</div></div></div><form onSubmit={send} className="ops-form"><label>Title<input required maxLength="80" value={title} onChange={e=>setTitle(e.target.value)}/></label><label>Message<textarea required maxLength="240" rows="4" value={body} onChange={e=>setBody(e.target.value)}/></label><label>Destination URL<input value={url} onChange={e=>setUrl(e.target.value)} /></label><button className="btn" disabled={sending}><RiSendPlaneLine size={16}/>{sending?'Sending…':'Send notification'}</button></form></div></section>}
-
-function SettingsPanel(){
+function ShippingPanel() {
   const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [methods, setMethods] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.shippingMethods(false);
+
+      if (!isCurrent(requestId)) return;
+
+      setMethods(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load shipping history.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <section className="admin-panel" aria-labelledby="ops-shipping-title">
+      <div className="admin-card">
+        <Toolbar
+          title="Shipping"
+          description="Customer checkout uses live Shiprocket courier pricing. Legacy flat/free-threshold methods are inactive and are not used for new orders."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-stats">
+          <div className="admin-stat">
+            <div className="stat-label">Checkout provider</div>
+            <div className="stat-value ops-stat-value-sm">Shiprocket</div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Customer rate</div>
+            <div className="stat-value ops-stat-value-sm">
+              Live courier
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Legacy methods</div>
+            <div className="stat-value ops-stat-value-sm">
+              {loading ? '…' : methods.length}
+            </div>
+          </div>
+        </div>
+
+        <div className="admin-page-note">
+          Rate is calculated server-side from delivery PIN, parcel weight,
+          payment method and Shiprocket serviceability. No admin-entered flat
+          shipping amount is applied to customer checkout.
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-toolbar">
+          <div className="ops-toolbar-copy">
+            <h2>Legacy shipping methods</h2>
+            <p>
+              Historical records retained for audit/admin visibility. They
+              should remain inactive.
+            </p>
+          </div>
+        </div>
+
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Historical shipping methods
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {methods.length ? (
+                methods.map((method) => (
+                  <tr key={method.id}>
+                    <td className="td-strong">{pretty(method.name)}</td>
+                    <td>{pretty(method.type)}</td>
+                    <td>
+                      <span className="admin-pill pill-muted">
+                        Archived / ignored
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading shipping history…'
+                        : 'No legacy shipping methods found.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Subscriptions                                                              */
+/* -------------------------------------------------------------------------- */
+
+const EMPTY_SUBSCRIPTION = {
+  tier: 'premium',
+  name: '',
+  price_inr: '',
+  duration_days: 30,
+  description: '',
+  is_active: true,
+};
+
+function SubscriptionPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(EMPTY_SUBSCRIPTION);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.subscriptionPlans(true);
+
+      if (!isCurrent(requestId)) return;
+
+      setPlans(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          errorMessage(error, 'Unable to load subscription plans.'),
+        );
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const resetForm = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_SUBSCRIPTION });
+  };
+
+  const editPlan = (plan) => {
+    setEditing(plan.id);
+    setForm({
+      ...EMPTY_SUBSCRIPTION,
+      ...plan,
+      price_inr: plan.price_inr ?? '',
+      duration_days: plan.duration_days ?? 30,
+      description: plan.description ?? '',
+      is_active: plan.is_active !== false,
+    });
+  };
+
+  const save = async (event) => {
+    event.preventDefault();
+
+    if (saving) return;
+
+    const name = text(form.name);
+    const price = Number(form.price_inr);
+    const duration = Number(form.duration_days);
+
+    if (!name) {
+      toast.error('Plan name is required.');
+      return;
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      toast.error('Enter a valid plan price.');
+      return;
+    }
+
+    if (!Number.isInteger(duration) || duration < 1) {
+      toast.error('Duration must be at least 1 day.');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        ...form,
+        name,
+        price_inr: price,
+        duration_days: duration,
+        description: text(form.description),
+        is_active: Boolean(form.is_active),
+      };
+
+      if (editing) {
+        await adminService.updateSubscription(editing, payload);
+      } else {
+        await adminService.createSubscription(payload);
+      }
+
+      if (!mountedRef.current) return;
+
+      toast.success(editing ? 'Plan updated.' : 'Plan created.');
+      resetForm();
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to save plan.'));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setSaving(false);
+      }
+    }
+  };
+
+  return (
+    <section className="admin-panel" aria-labelledby="ops-subscriptions-title">
+      <div className="admin-card">
+        <Toolbar
+          title="Subscription plans"
+          description="Manage membership plans and customer entitlements."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <form onSubmit={save} noValidate>
+          <div className="field-grid">
+            <label>
+              Tier
+              <select
+                value={form.tier}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    tier: event.target.value,
+                  }))
+                }
+              >
+                <option value="free">Free</option>
+                <option value="premium">Premium</option>
+                <option value="platinum">Platinum</option>
+              </select>
+            </label>
+
+            <label>
+              Name
+              <input
+                required
+                maxLength={120}
+                value={form.name}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+              />
+            </label>
+
+            <label>
+              Price (INR)
+              <input
+                required
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.price_inr}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    price_inr: event.target.value,
+                  }))
+                }
+              />
+            </label>
+
+            <label>
+              Duration (days)
+              <input
+                required
+                type="number"
+                min="1"
+                step="1"
+                value={form.duration_days}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    duration_days: event.target.value,
+                  }))
+                }
+              />
+            </label>
+
+            <label className="ops-full">
+              Description
+              <textarea
+                maxLength={1000}
+                value={form.description || ''}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
+                }
+              />
+            </label>
+
+            <label className="checkbox-field">
+              <input
+                type="checkbox"
+                checked={Boolean(form.is_active)}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    is_active: event.target.checked,
+                  }))
+                }
+              />
+              Active
+            </label>
+          </div>
+
+          <div className="btn-row ops-form-actions">
+            <button className="btn btn-sm" type="submit" disabled={saving}>
+              <RiSaveLine size={16} aria-hidden="true" />
+              {saving
+                ? 'Saving…'
+                : editing
+                  ? 'Update plan'
+                  : 'Create plan'}
+            </button>
+
+            {editing && (
+              <button
+                className="btn btn-quiet btn-sm"
+                type="button"
+                onClick={resetForm}
+                disabled={saving}
+              >
+                Cancel edit
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Subscription plans
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Tier</th>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {plans.length ? (
+                plans.map((plan) => (
+                  <tr key={plan.id}>
+                    <td>{pretty(plan.tier)}</td>
+                    <td className="td-strong">{pretty(plan.name)}</td>
+                    <td className="td-gold">
+                      {formatMoney(Number(plan.price_inr) || 0)}
+                    </td>
+                    <td>{pretty(plan.duration_days)} days</td>
+                    <td>
+                      <span
+                        className={`admin-pill ${
+                          plan.is_active
+                            ? 'pill-success'
+                            : 'pill-muted'
+                        }`}
+                      >
+                        {plan.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => editPlan(plan)}
+                        title={`Edit ${plan.name || 'plan'}`}
+                        aria-label={`Edit ${plan.name || 'plan'}`}
+                      >
+                        <RiSaveLine size={15} aria-hidden="true" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading plans…'
+                        : 'No subscription plans.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* User actions                                                               */
+/* -------------------------------------------------------------------------- */
+
+function UserActionsPanel() {
+  const { toast } = useToast();
+  const { mountedRef } = useAsyncGuard();
+
+  const [userId, setUserId] = useState('');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState('');
+
+  const load = useCallback(async () => {
+    const normalizedUserId = text(userId);
+
+    if (!normalizedUserId) {
+      toast.error('Enter a customer UUID.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.userActions(normalizedUserId);
+
+      if (!mountedRef.current) return;
+
+      setData(result);
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load user actions.'));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [mountedRef, toast, userId]);
+
+  const toggle = async (action, blocked) => {
+    if (busy) return;
+
+    const normalizedUserId = text(userId);
+
+    if (!normalizedUserId) {
+      toast.error('Enter a customer UUID.');
+      return;
+    }
+
+    setBusy(action);
+
+    try {
+      if (blocked) {
+        await adminService.removeUserAction(normalizedUserId, action);
+      } else {
+        await adminService.setUserAction(
+          normalizedUserId,
+          action,
+          false,
+          'Disabled by administrator',
+        );
+      }
+
+      if (!mountedRef.current) return;
+
+      toast.success(blocked ? 'User action restored.' : 'User action disabled.');
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to update user action.'));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setBusy('');
+      }
+    }
+  };
+
+  const actions = Array.isArray(data?.all_actions)
+    ? data.all_actions
+    : [];
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="User actions"
+          description="Per-customer controls for checkout and commerce capabilities."
+          onRefresh={load}
+          refreshing={loading}
+        >
+          <RiShieldCheckLine size={18} aria-hidden="true" />
+        </Toolbar>
+
+        <div className="ops-inline">
+          <label className="sr-only" htmlFor="admin-user-action-id">
+            Customer UUID
+          </label>
+
+          <input
+            id="admin-user-action-id"
+            placeholder="Enter customer UUID"
+            value={userId}
+            onChange={(event) => setUserId(event.target.value)}
+            autoComplete="off"
+          />
+
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={load}
+            disabled={loading}
+          >
+            {loading ? 'Loading…' : 'Load controls'}
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="admin-empty">Loading controls…</div>
+        ) : data ? (
+          <div className="admin-stats">
+            {actions.map((action) => {
+              const row = (data.controls || []).find(
+                (control) => control.action === action,
+              );
+
+              const blocked = row?.enabled === false;
+
+              return (
+                <div className="admin-stat" key={action}>
+                  <div className="stat-label">
+                    {String(action).replaceAll('_', ' ')}
+                  </div>
+
+                  <div className="stat-value ops-stat-value-sm">
+                    {blocked ? 'Blocked' : 'Enabled'}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-quiet btn-sm"
+                    disabled={Boolean(busy)}
+                    onClick={() => toggle(action, blocked)}
+                  >
+                    {busy === action
+                      ? 'Saving…'
+                      : blocked
+                        ? 'Restore'
+                        : 'Disable'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="admin-empty">
+            Enter a customer UUID to inspect controls.
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* RBAC                                                                       */
+/* -------------------------------------------------------------------------- */
+
+function RbacPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [matrix, setMatrix] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busyKey, setBusyKey] = useState('');
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.permissions();
+
+      if (!isCurrent(requestId)) return;
+
+      setMatrix(result);
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load permissions.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const rows = useMemo(
+    () =>
+      Object.entries(matrix?.effective || {}).flatMap(
+        ([role, permissions]) =>
+          Object.entries(permissions || {}).map(
+            ([permission, enabled]) => ({
+              role,
+              permission,
+              enabled: Boolean(enabled),
+            }),
+          ),
+      ),
+    [matrix],
+  );
+
+  const toggle = async (row) => {
+    const key = `${row.role}:${row.permission}`;
+
+    if (busyKey) return;
+
+    setBusyKey(key);
+
+    try {
+      await adminService.togglePermission(
+        row.role,
+        row.permission,
+        !row.enabled,
+      );
+
+      if (!mountedRef.current) return;
+
+      toast.success('Permission updated.');
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to update permission.'));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setBusyKey('');
+      }
+    }
+  };
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Roles & permissions"
+          description="Effective policy after static defaults and database overrides."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-page-note">
+          {loading
+            ? 'Loading…'
+            : `${rows.length} permission entries loaded.`}
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Effective role permissions
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Role</th>
+                <th scope="col">Permission</th>
+                <th scope="col">State</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.length ? (
+                rows.map((row) => {
+                  const key = `${row.role}:${row.permission}`;
+                  const immutable = row.role === 'super_admin';
+
+                  return (
+                    <tr key={key}>
+                      <td className="td-strong">{row.role}</td>
+                      <td>{row.permission}</td>
+
+                      <td>
+                        <span
+                          className={`admin-pill ${
+                            row.enabled
+                              ? 'pill-success'
+                              : 'pill-danger'
+                          }`}
+                        >
+                          {row.enabled ? 'Allowed' : 'Denied'}
+                        </span>
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-quiet btn-sm"
+                          onClick={() => toggle(row)}
+                          disabled={immutable || Boolean(busyKey)}
+                        >
+                          {immutable
+                            ? 'Absolute'
+                            : busyKey === key
+                              ? 'Saving…'
+                              : row.enabled
+                                ? 'Deny'
+                                : 'Allow'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="4">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading permissions…'
+                        : 'No permission entries found.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Notifications                                                              */
+/* -------------------------------------------------------------------------- */
+
+function NotificationsPanel() {
+  const { toast } = useToast();
+  const { mountedRef } = useAsyncGuard();
+
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [url, setUrl] = useState('/');
+
+  const [sending, setSending] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const result = await adminService.pushStats();
+
+      if (!mountedRef.current) return;
+
+      setStats(result);
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          errorMessage(error, 'Unable to load notification stats.'),
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [mountedRef, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const send = async (event) => {
+    event.preventDefault();
+
+    if (sending) return;
+
+    const normalizedTitle = text(title);
+    const normalizedBody = text(body);
+    const normalizedUrl = text(url) || '/';
+
+    if (!normalizedTitle || !normalizedBody) {
+      toast.error('Title and message are required.');
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      const result = await adminService.sendPush({
+        user_ids: null,
+        title: normalizedTitle,
+        body: normalizedBody,
+        url: normalizedUrl,
+      });
+
+      if (!mountedRef.current) return;
+
+      toast.success(result?.message || 'Notification dispatched.');
+
+      setTitle('');
+      setBody('');
+
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          errorMessage(error, 'Unable to send notification.'),
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setSending(false);
+      }
+    }
+  };
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Notifications"
+          description="Send controlled customer messaging and monitor Web Push subscriptions."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-stats">
+          <div className="admin-stat">
+            <div className="stat-label">Subscribed devices</div>
+            <div className="stat-value">
+              {loading
+                ? '…'
+                : pretty(stats?.subscriptions ?? stats?.total ?? 0)}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Delivery health</div>
+            <div className="stat-value ops-stat-value-sm">
+              Server-side
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={send} className="ops-form" noValidate>
+          <label>
+            Title
+            <input
+              required
+              maxLength={80}
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+          </label>
+
+          <label>
+            Message
+            <textarea
+              required
+              maxLength={240}
+              rows="4"
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+            />
+          </label>
+
+          <label>
+            Destination URL
+            <input
+              value={url}
+              maxLength={500}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="/shop"
+            />
+          </label>
+
+          <button className="btn" type="submit" disabled={sending}>
+            <RiSendPlaneLine size={16} aria-hidden="true" />
+            {sending ? 'Sending…' : 'Send notification'}
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Settings                                                                   */
+/* -------------------------------------------------------------------------- */
+
+function SettingsPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -136,116 +1256,896 @@ function SettingsPanel(){
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setSettings(itemsOfList(await adminService.settings()));
-    } catch (e) {
-      toast.error(e.message || 'Unable to load settings.');
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+    const requestId = startRequest();
 
-  useEffect(() => { load(); }, [load]);
+    setLoading(true);
+
+    try {
+      const result = await adminService.settings();
+
+      if (!isCurrent(requestId)) return;
+
+      setSettings(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load settings.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const openEditor = (setting) => {
+    if (!setting || setting.is_system_locked) return;
+
     setEditing(setting);
-    setDraft(typeof setting.value === 'string' ? setting.value : JSON.stringify(setting.value, null, 2));
+
+    if (typeof setting.value === 'string') {
+      setDraft(setting.value);
+      return;
+    }
+
+    try {
+      setDraft(JSON.stringify(setting.value, null, 2));
+    } catch {
+      setDraft(String(setting.value ?? ''));
+    }
   };
 
   const closeEditor = () => {
-    if (!saving) {
-      setEditing(null);
-      setDraft('');
-    }
+    if (saving) return;
+
+    setEditing(null);
+    setDraft('');
   };
 
   const parseDraft = (setting) => {
     const raw = draft.trim();
-    if (setting?.data_type === 'string') return draft;
-    if (setting?.data_type === 'number' || setting?.data_type === 'integer') {
+
+    if (setting?.data_type === 'string') {
+      return draft;
+    }
+
+    if (
+      setting?.data_type === 'number' ||
+      setting?.data_type === 'integer'
+    ) {
       const value = Number(raw);
-      if (!Number.isFinite(value)) throw new Error('Enter a valid numeric value.');
+
+      if (!Number.isFinite(value)) {
+        throw new Error('Enter a valid numeric value.');
+      }
+
+      if (
+        setting.data_type === 'integer' &&
+        !Number.isInteger(value)
+      ) {
+        throw new Error('Enter a whole number.');
+      }
+
       return value;
     }
+
     if (setting?.data_type === 'boolean') {
-      if (!['true', 'false'].includes(raw.toLowerCase())) throw new Error('Enter true or false.');
+      if (!['true', 'false'].includes(raw.toLowerCase())) {
+        throw new Error('Enter true or false.');
+      }
+
       return raw.toLowerCase() === 'true';
     }
+
     try {
       return JSON.parse(raw);
     } catch {
-      return draft;
+      throw new Error('Enter valid JSON for this setting.');
     }
   };
 
   const save = async (event) => {
     event.preventDefault();
+
     if (!editing || saving) return;
+
     setSaving(true);
+
     try {
-      await adminService.updateSetting(editing.key, parseDraft(editing), 'Updated from admin console');
+      const value = parseDraft(editing);
+
+      await adminService.updateSetting(
+        editing.key,
+        value,
+        'Updated from admin console',
+      );
+
+      if (!mountedRef.current) return;
+
       toast.success('Setting updated.');
-      closeEditor();
+
+      setEditing(null);
+      setDraft('');
+
       await load();
-    } catch (e) {
-      toast.error(e.message || 'Unable to update setting.');
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to update setting.'));
+      }
     } finally {
-      setSaving(false);
+      if (mountedRef.current) {
+        setSaving(false);
+      }
     }
   };
 
-  return <section className="admin-panel">
-    <div className="admin-card">
-      <Toolbar title="System settings" description="Operational, financial and UI configuration with server-side validation." onRefresh={load}/>
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead><tr><th>Key</th><th>Category</th><th>Type</th><th>Value</th><th/></tr></thead>
-          <tbody>
-            {settings.length ? settings.map((setting) => (
-              <tr key={setting.key}>
-                <td className="td-strong">{setting.key}</td>
-                <td>{setting.category}</td>
-                <td>{setting.data_type}</td>
-                <td className="td-dim">{pretty(setting.value)}</td>
-                <td>{setting.is_system_locked
-                  ? <span className="admin-pill pill-muted">Locked</span>
-                  : <button type="button" className="btn btn-quiet btn-sm" onClick={() => openEditor(setting)}>Edit</button>}</td>
-              </tr>
-            )) : <tr><td colSpan="5"><div className="admin-empty">{loading ? 'Loading settings…' : 'No settings found.'}</div></td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </div>
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="System settings"
+          description="Operational, financial and UI configuration with server-side validation."
+          onRefresh={load}
+          refreshing={loading}
+        />
 
-    {editing && <AdminModal title={`Edit setting · ${editing.key}`} sub={`Type: ${editing.data_type || 'auto'} · Changes are validated server-side.`} onClose={closeEditor}>
-      <form onSubmit={save}>
-        <div className="field">
-          <label htmlFor="admin-setting-value">Value</label>
-          <textarea
-            id="admin-setting-value"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            rows={editing.data_type === 'json' || typeof editing.value === 'object' ? 9 : 5}
-            spellCheck="false"
-            autoFocus
-            aria-describedby="admin-setting-help"
-          />
-          <small id="admin-setting-help">For JSON values, enter valid JSON. String values are preserved as typed.</small>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              System configuration settings
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Category</th>
+                <th scope="col">Type</th>
+                <th scope="col">Value</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {settings.length ? (
+                settings.map((setting) => (
+                  <tr key={setting.key}>
+                    <td className="td-strong">{setting.key}</td>
+                    <td>{pretty(setting.category)}</td>
+                    <td>{pretty(setting.data_type)}</td>
+                    <td className="td-dim">
+                      <span title={pretty(setting.value)}>
+                        {pretty(setting.value)}
+                      </span>
+                    </td>
+                    <td>
+                      {setting.is_system_locked ? (
+                        <span className="admin-pill pill-muted">
+                          Locked
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn btn-quiet btn-sm"
+                          onClick={() => openEditor(setting)}
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading settings…'
+                        : 'No settings found.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-        <div className="btn-row">
-          <button type="button" className="btn btn-quiet" onClick={closeEditor} disabled={saving}>Cancel</button>
-          <button type="submit" className="btn" disabled={saving}>{saving ? 'Saving…' : 'Save setting'}</button>
-        </div>
-      </form>
-    </AdminModal>}
-  </section>;
+      </div>
+
+      {editing && (
+        <AdminModal
+          title={`Edit setting · ${editing.key}`}
+          sub={`Type: ${
+            editing.data_type || 'auto'
+          } · Changes are validated server-side.`}
+          onClose={closeEditor}
+        >
+          <form onSubmit={save} noValidate>
+            <div className="field">
+              <label htmlFor="admin-setting-value">
+                Value
+              </label>
+
+              <textarea
+                id="admin-setting-value"
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                rows={
+                  editing.data_type === 'json' ||
+                  typeof editing.value === 'object'
+                    ? 9
+                    : 5
+                }
+                spellCheck="false"
+                autoFocus
+                aria-describedby="admin-setting-help"
+              />
+
+              <small id="admin-setting-help">
+                JSON settings must contain valid JSON. String values are
+                preserved as typed.
+              </small>
+            </div>
+
+            <div className="btn-row">
+              <button
+                type="button"
+                className="btn btn-quiet"
+                onClick={closeEditor}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="btn"
+                disabled={saving}
+              >
+                <RiSaveLine size={16} aria-hidden="true" />
+                {saving ? 'Saving…' : 'Save setting'}
+              </button>
+            </div>
+          </form>
+        </AdminModal>
+      )}
+    </section>
+  );
 }
 
-function PaymentsPanel(){const {toast}=useToast();const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);const load=useCallback(async()=>{setLoading(true);try{setRows(itemsOfList(await adminService.paymentsReport()))}catch(e){toast.error(e.message||'Unable to load payment telemetry.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);return <section className="admin-panel"><div className="admin-card"><Toolbar title="Payments" description="Gateway attempts, payment state and order reconciliation. No card data is exposed." onRefresh={load}/><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Attempts</div><div className="stat-value">{loading?'…':rows.length}</div></div><div className="admin-stat"><div className="stat-label">Successful</div><div className="stat-value">{rows.filter(r=>['succeeded','paid'].includes(r.status)).length}</div></div><div className="admin-stat"><div className="stat-label">Needs attention</div><div className="stat-value">{rows.filter(r=>!['succeeded','paid'].includes(r.status)).length}</div></div></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Order</th><th>Amount</th><th>Status</th><th>Attempts</th><th>Intent</th><th>Created</th></tr></thead><tbody>{rows.map(r=><tr key={r.id}><td className="td-strong">{r.orders?.order_number||'—'}</td><td className="td-gold">{formatMoney(Number(r.amount)||0)}</td><td><span className={`admin-pill ${['succeeded','paid'].includes(r.status)?'pill-success':'pill-muted'}`}>{r.status}</span></td><td>{r.attempt_number||1}/{r.total_attempts||1}</td><td className="td-dim">{r.latest_payment_intent_id?`${String(r.latest_payment_intent_id).slice(0,10)}…`:'—'}</td><td className="td-dim">{r.created_at?new Date(r.created_at).toLocaleString('en-IN'):''}</td></tr>)}</tbody></table></div></section>}
+/* -------------------------------------------------------------------------- */
+/* Payments                                                                   */
+/* -------------------------------------------------------------------------- */
 
-function ReportsPanel(){const {toast}=useToast();const [report,setReport]=useState(null);const [loading,setLoading]=useState(true);const load=useCallback(async()=>{setLoading(true);try{setReport(await adminService.reports())}catch(e){toast.error(e.message||'Unable to load reports.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);return <section className="admin-panel"><div className="admin-card"><Toolbar title="Reports" description="Business signals for stock, order volume, revenue and product performance." onRefresh={load}/><div className="admin-stats"><div className="admin-stat"><div className="stat-label">Orders analysed</div><div className="stat-value">{loading?'…':report?.orders??0}</div></div><div className="admin-stat"><div className="stat-label">Revenue</div><div className="stat-value">{loading?'…':formatMoney(Number(report?.revenue)||0)}</div></div><div className="admin-stat"><div className="stat-label">Low stock</div><div className="stat-value">{loading?'…':report?.low_stock_products??0}</div></div></div></div><div className="admin-card"><h3>Order status</h3><div className="ops-report-grid">{Object.entries(report?.status_counts||{}).map(([key,value])=><div className="ops-report-item" key={key}><span>{key}</span><strong>{value}</strong></div>)}</div><h3>Top products</h3><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Product</th><th>Units</th><th>Sales</th></tr></thead><tbody>{(report?.top_products||[]).map((p,i)=><tr key={p.product_id||i}><td className="td-strong">{p.product_name}</td><td>{p.quantity}</td><td className="td-gold">{formatMoney(Number(p.sales)||0)}</td></tr>)}</tbody></table></div></div></section>}
+function PaymentsPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
 
-function AuditPanel(){const {toast}=useToast();const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);const load=useCallback(async()=>{setLoading(true);try{setRows(itemsOfList(await adminService.auditLogs(200)))}catch(e){toast.error(e.message||'Unable to load audit logs.')}finally{setLoading(false)}},[toast]);useEffect(()=>{load()},[load]);return <section className="admin-panel"><div className="admin-card"><Toolbar title="Audit logs" description="Server-generated mutation telemetry with actor, request, route and outcome. Sensitive payloads are never stored." onRefresh={load}/><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Time</th><th>Actor</th><th>Method</th><th>Route</th><th>Status</th><th>Duration</th></tr></thead><tbody>{rows.length?rows.map(r=><tr key={r.id}><td>{r.created_at?new Date(r.created_at).toLocaleString('en-IN'):''}</td><td className="td-dim">{r.actor_user_id?`${String(r.actor_user_id).slice(0,8)}…`:'System/guest'}</td><td>{r.method}</td><td className="td-dim">{r.path}</td><td><span className={`admin-pill ${r.status_code<400?'pill-success':'pill-danger'}`}>{r.status_code}</span></td><td>{pretty(r.duration_ms)} ms</td></tr>):<tr><td colSpan="6"><div className="admin-empty">{loading?'Loading audit logs…':'No mutation audit entries yet.'}</div></td></tr>}</tbody></table></div></div></section>}
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-function ReviewsModerationPanel(){const {toast}=useToast();const [status,setStatus]=useState('pending');const [rows,setRows]=useState([]);const [loading,setLoading]=useState(true);const load=useCallback(async()=>{setLoading(true);try{setRows(itemsOfList(await adminService.reviewList(status)))}catch(e){toast.error(e.message||'Unable to load reviews.')}finally{setLoading(false)}},[toast,status]);useEffect(()=>{load()},[load]);const moderate=async(id,next)=>{try{await adminService.moderateReview(id,next);toast.success(`Review ${next}.`);await load()}catch(e){toast.error(e.message||'Unable to update review.')}};return <section className="admin-panel"><div className="admin-card"><Toolbar title="Review moderation" description="Approve genuine customer feedback and reject abuse before publication." onRefresh={load}><select className="admin-select" value={status} onChange={e=>setStatus(e.target.value)}><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></Toolbar></div><div className="review-admin-grid">{rows.map(r=><article className="admin-card" key={r.id}><div className="review-admin-head"><div><strong>{r.products?.name||'Product'}</strong><div className="td-dim">{r.users?.full_name||'Customer'} · {r.rating}/5</div></div><span className="admin-pill">{r.status}</span></div><h3>{r.title||'Customer review'}</h3><p>{r.body}</p><div className="btn-row">{status!=='approved'&&<button className="btn btn-sm" onClick={()=>moderate(r.id,'approved')}><RiCheckLine size={15}/>Approve</button>}{status!=='rejected'&&<button className="btn btn-quiet btn-sm" onClick={()=>moderate(r.id,'rejected')}><RiCloseLine size={15}/>Reject</button>}</div></article>)}</div>{!rows.length&&!loading&&<div className="admin-empty">No {status} reviews.</div>}</section>}
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.paymentsReport();
+
+      if (!isCurrent(requestId)) return;
+
+      setRows(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          errorMessage(error, 'Unable to load payment telemetry.'),
+        );
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const successfulCount = useMemo(
+    () =>
+      rows.filter((row) =>
+        ['succeeded', 'paid'].includes(
+          text(row.status).toLowerCase(),
+        ),
+      ).length,
+    [rows],
+  );
+
+  const attentionCount = Math.max(0, rows.length - successfulCount);
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Payments"
+          description="Gateway attempts, payment state and order reconciliation. No card data is exposed."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-stats">
+          <div className="admin-stat">
+            <div className="stat-label">Attempts</div>
+            <div className="stat-value">
+              {loading ? '…' : rows.length}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Successful</div>
+            <div className="stat-value">
+              {loading ? '…' : successfulCount}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Needs attention</div>
+            <div className="stat-value">
+              {loading ? '…' : attentionCount}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Payment gateway telemetry
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Order</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Status</th>
+                <th scope="col">Attempts</th>
+                <th scope="col">Intent</th>
+                <th scope="col">Created</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.length ? (
+                rows.map((row) => {
+                  const statusValue = text(row.status).toLowerCase();
+                  const successful = ['succeeded', 'paid'].includes(
+                    statusValue,
+                  );
+
+                  return (
+                    <tr key={row.id}>
+                      <td className="td-strong">
+                        {pretty(row.orders?.order_number)}
+                      </td>
+
+                      <td className="td-gold">
+                        {formatMoney(Number(row.amount) || 0)}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`admin-pill ${
+                            successful
+                              ? 'pill-success'
+                              : 'pill-muted'
+                          }`}
+                        >
+                          {pretty(row.status)}
+                        </span>
+                      </td>
+
+                      <td>
+                        {row.attempt_number || 1}/
+                        {row.total_attempts || 1}
+                      </td>
+
+                      <td className="td-dim">
+                        {row.latest_payment_intent_id
+                          ? `${String(
+                              row.latest_payment_intent_id,
+                            ).slice(0, 10)}…`
+                          : '—'}
+                      </td>
+
+                      <td className="td-dim">
+                        {row.created_at
+                          ? new Date(
+                              row.created_at,
+                            ).toLocaleString('en-IN')
+                          : '—'}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="6">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading payment telemetry…'
+                        : 'No payment attempts found.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reports                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function ReportsPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.reports();
+
+      if (!isCurrent(requestId)) return;
+
+      setReport(result);
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load reports.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const statusCounts = useMemo(
+    () => Object.entries(report?.status_counts || {}),
+    [report],
+  );
+
+  const topProducts = Array.isArray(report?.top_products)
+    ? report.top_products
+    : [];
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Reports"
+          description="Business signals for stock, order volume, revenue and product performance."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-stats">
+          <div className="admin-stat">
+            <div className="stat-label">Orders analysed</div>
+            <div className="stat-value">
+              {loading ? '…' : report?.orders ?? 0}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Revenue</div>
+            <div className="stat-value">
+              {loading
+                ? '…'
+                : formatMoney(Number(report?.revenue) || 0)}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Low stock</div>
+            <div className="stat-value">
+              {loading
+                ? '…'
+                : report?.low_stock_products ?? 0}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3>Order status</h3>
+
+        {statusCounts.length ? (
+          <div className="ops-report-grid">
+            {statusCounts.map(([key, value]) => (
+              <div className="ops-report-item" key={key}>
+                <span>{key}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="admin-empty">
+            {loading ? 'Loading report…' : 'No order status data.'}
+          </div>
+        )}
+
+        <h3>Top products</h3>
+
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Top products by sales
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Units</th>
+                <th scope="col">Sales</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {topProducts.length ? (
+                topProducts.map((product, index) => (
+                  <tr
+                    key={product.product_id || index}
+                  >
+                    <td className="td-strong">
+                      {pretty(product.product_name)}
+                    </td>
+                    <td>{pretty(product.quantity)}</td>
+                    <td className="td-gold">
+                      {formatMoney(Number(product.sales) || 0)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading products…'
+                        : 'No product sales data.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Audit                                                                      */
+/* -------------------------------------------------------------------------- */
+
+function AuditPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.auditLogs(200);
+
+      if (!isCurrent(requestId)) return;
+
+      setRows(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load audit logs.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Audit logs"
+          description="Server-generated mutation telemetry with actor, request, route and outcome. Sensitive payloads are never stored."
+          onRefresh={load}
+          refreshing={loading}
+        />
+
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <caption className="sr-only">
+              Administrative audit logs
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Method</th>
+                <th scope="col">Route</th>
+                <th scope="col">Status</th>
+                <th scope="col">Duration</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {rows.length ? (
+                rows.map((row) => {
+                  const statusCode = Number(row.status_code);
+
+                  return (
+                    <tr key={row.id}>
+                      <td>
+                        {row.created_at
+                          ? new Date(
+                              row.created_at,
+                            ).toLocaleString('en-IN')
+                          : '—'}
+                      </td>
+
+                      <td className="td-dim">
+                        {row.actor_user_id
+                          ? `${String(
+                              row.actor_user_id,
+                            ).slice(0, 8)}…`
+                          : 'System/guest'}
+                      </td>
+
+                      <td>{pretty(row.method)}</td>
+
+                      <td className="td-dim">
+                        {pretty(row.path)}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`admin-pill ${
+                            Number.isFinite(statusCode) &&
+                            statusCode < 400
+                              ? 'pill-success'
+                              : 'pill-danger'
+                          }`}
+                        >
+                          {pretty(row.status_code)}
+                        </span>
+                      </td>
+
+                      <td>
+                        {pretty(row.duration_ms)} ms
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan="6">
+                    <div className="admin-empty">
+                      {loading
+                        ? 'Loading audit logs…'
+                        : 'No mutation audit entries yet.'}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reviews                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const REVIEW_STATUSES = [
+  'pending',
+  'approved',
+  'rejected',
+];
+
+function ReviewsModerationPanel() {
+  const { toast } = useToast();
+  const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
+
+  const [status, setStatus] = useState('pending');
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState('');
+
+  const load = useCallback(async () => {
+    const requestId = startRequest();
+
+    setLoading(true);
+
+    try {
+      const result = await adminService.reviewList(status);
+
+      if (!isCurrent(requestId)) return;
+
+      setRows(itemsOfList(result));
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to load reviews.'));
+      }
+    } finally {
+      if (mountedRef.current && isCurrent(requestId)) {
+        setLoading(false);
+      }
+    }
+  }, [isCurrent, mountedRef, startRequest, status, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const moderate = async (id, nextStatus) => {
+    if (!id || busyId) return;
+
+    setBusyId(id);
+
+    try {
+      await adminService.moderateReview(id, nextStatus);
+
+      if (!mountedRef.current) return;
+
+      toast.success(`Review ${nextStatus}.`);
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(
+          errorMessage(error, 'Unable to update review.'),
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setBusyId('');
+      }
+    }
+  };
+
+  return (
+    <section className="admin-panel">
+      <div className="admin-card">
+        <Toolbar
+          title="Review moderation"
+          description="Approve genuine customer feedback and reject abuse before publication."
+          onRefresh={load}
+          refreshing={loading}
+        >
+          <label className="sr-only" htmlFor="review-status-filter">
+            Review status
+          </label>
+
+          <select
+            id="review-status-filter"
+            className="admin-select"
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+          >
+            {REVIEW_STATUSES.map((value) => (
+              <option value={value} key={value}>
+                {value.charAt(0).toUpperCase() + value.slice(1)}
+              </option>
+            ))}
+          </select>
+        </Toolbar>
+      </div>
+
+      {rows.length ? (
+        <div className="review-admin-grid">
+          {rows.map((review) => {
+            const busy = busyId === review.id;
+
+            return (
+              <article className="admin-card" key={review.id}>
+                <div className="review-admin-head">
+                  <div>
+                    <strong>
+                      {review.products?.name || 'Product'}
+                    </strong>
+
+                    <div className="td-dim">
+                      {review.users?.full_name || 'Customer'} ·{' '}
+                      {pretty(review.rating)}/5
+                    </div>
+                  </div>
+
+                  <span className="admin-pill pill-muted">
+                    {pretty(review.status)}
+                  </span>
+                </div>
+
+                <h3>{review.title || 'Customer review'}</h3>
+
+                <p className="ops-review-body">
+                  {pretty(review.body)}
+                </p>
+
+                <div className="btn-row">
+                  {status !== 'approved' && (
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      disabled={Boolean(busyId)}
+                      onClick={() =>
+                        moderate(review.id, 'approved')
+                      }
+                    >
+                      <RiCheckLine
+                        size={15}
+                        aria-hidden="true"
+                      />
+                      {busy ? 'Saving…' : 'Approve'}
+                    </button>
+                  )}
+
+                  {status !== 'rejected' && (
+                    <button
+                      type="button"
+                      className="btn btn-quiet btn-sm"
+                      disabled={Boolean(busyId)}
+                      onClick={() =>
+                        moderate(review.id, 'rejected')
+                      }
+                    >
+                      <RiCloseLine
+                        size={15}
+                        aria-hidden="true"
+                      />
+                      {busy ? 'Saving…' : 'Reject'}
+                    </button>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="admin-empty">
+          {loading
+            ? 'Loading reviews…'
+            : `No ${status} reviews.`}
+        </div>
+      )}
+    </section>
+  );
+}

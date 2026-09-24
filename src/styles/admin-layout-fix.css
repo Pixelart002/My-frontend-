@@ -1,6 +1,6 @@
 /* Luviio admin console — structural UI polish.
-   Preserve the existing admin header. Desktop uses the full sidebar;
-   mobile switches to the existing drawer. */
+   Preserve the existing admin header.
+   Desktop uses the full sidebar; mobile uses the existing drawer. */
 
 .admin-shell {
   display: grid;
@@ -8,6 +8,7 @@
   gap: 28px;
   align-items: start;
   width: min(1480px, 100%);
+  min-width: 0;
   min-height: calc(100vh - 48px);
   margin: 0 auto;
   padding: 24px var(--pad) 64px;
@@ -15,6 +16,7 @@
 
 .admin-sidebar {
   display: flex !important;
+  min-width: 0;
 }
 
 .admin-main {
@@ -24,41 +26,48 @@
 }
 
 .admin-head {
-  min-height: 64px;
-  margin: 0 0 28px;
-  padding: 0 0 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   flex-wrap: nowrap;
+  min-width: 0;
+  min-height: 64px;
+  margin: 0 0 28px;
+  padding: 0 0 18px;
   border-bottom: 1px solid var(--line);
 }
 
 .admin-head-title {
-  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
-.admin-head-title > div:last-child { min-width: 0; }
+.admin-head-title > div:last-child {
+  min-width: 0;
+}
+
 .admin-head h1 {
   margin: 0;
   font-size: clamp(24px, 2.5vw, 32px);
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
-.admin-head .admin-sub { margin: 5px 0 0; }
 
-/* The admin header keeps its original desktop behavior. */
+.admin-head .admin-sub {
+  margin: 5px 0 0;
+}
+
 .admin-menu-trigger {
   display: none !important;
 }
 
 .admin-head-context {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 10px;
   min-width: 0;
   padding-left: 16px;
@@ -75,14 +84,21 @@
   display: none;
 }
 
-/* Keep dashboard hierarchy clean: metrics → actions → recent orders. */
+/* Dashboard hierarchy:
+   metrics → actions → recent orders. */
+
 .admin-stats {
   margin-top: 0 !important;
   margin-bottom: 30px;
 }
 
-.admin-section-label { margin-top: 30px; }
-.admin-section-label:first-of-type { margin-top: 0; }
+.admin-section-label {
+  margin-top: 30px;
+}
+
+.admin-section-label:first-of-type {
+  margin-top: 0;
+}
 
 .admin-recent-orders .admin-table th:last-child,
 .admin-recent-orders .admin-table td:last-child {
@@ -94,10 +110,15 @@
   text-align: right;
 }
 
+/* Tablet desktop */
 @media (max-width: 1100px) and (min-width: 901px) {
-  .admin-shell { grid-template-columns: 220px minmax(0, 1fr); gap: 18px; }
+  .admin-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 18px;
+  }
 }
 
+/* Mobile / drawer layout */
 @media (max-width: 900px) {
   .admin-shell {
     display: block;
@@ -105,7 +126,9 @@
     padding: 16px var(--pad) 48px;
   }
 
-  .admin-sidebar { display: none !important; }
+  .admin-sidebar {
+    display: none !important;
+  }
 
   .admin-menu-trigger {
     display: inline-flex !important;
@@ -120,10 +143,14 @@
     inset: 0;
     z-index: 200;
     display: block;
-    border: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
     padding: 0;
-    background: rgba(0,0,0,.58);
+    border: 0;
+    background: rgba(0, 0, 0, 0.58);
     backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     cursor: default;
   }
 
@@ -134,18 +161,24 @@
     display: flex !important;
     flex-direction: column;
     width: min(340px, 88vw);
+    min-width: 0;
     max-width: 100%;
     height: 100dvh;
-    transform: translateX(-105%);
+    min-height: 100vh;
+    overflow: hidden;
+    transform: translate3d(-105%, 0, 0);
     visibility: hidden;
     background: var(--surface);
     border-right: 1px solid var(--line);
-    box-shadow: 16px 0 48px rgba(0,0,0,.28);
-    transition: transform .22s ease, visibility .22s ease;
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.28);
+    transition:
+      transform 0.22s ease,
+      visibility 0.22s ease;
+    will-change: transform;
   }
 
   .admin-drawer.is-open {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
     visibility: visible;
   }
 
@@ -155,31 +188,72 @@
     justify-content: space-between;
     gap: 12px;
     flex: 0 0 auto;
-    padding: 16px;
+    min-width: 0;
+    padding:
+      max(16px, env(safe-area-inset-top))
+      16px
+      16px;
     border-bottom: 1px solid var(--line);
   }
 
   .admin-drawer-head > div {
-    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
   }
 
-  .admin-drawer-head strong { font-size: 18px; color: var(--text); }
-  .admin-drawer-head span { font-size: 11px; color: var(--dim); }
+  .admin-drawer-head strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-drawer-head span {
+    overflow: hidden;
+    color: var(--dim);
+    font-size: 11px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   .admin-drawer-scroll {
+    flex: 1 1 auto;
     min-height: 0;
-    flex: 1;
+    overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 12px 14px 24px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    padding:
+      12px
+      14px
+      max(24px, env(safe-area-inset-bottom));
   }
 
-  .admin-drawer .admin-sb-label { margin-top: 17px; }
-  .admin-drawer .admin-sb-btn { min-height: 42px; padding: 10px 12px; }
-  .admin-drawer .admin-account { margin-top: 22px; }
+  .admin-drawer .admin-sb-label {
+    margin-top: 17px;
+  }
+
+  .admin-drawer .admin-sb-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .admin-drawer .admin-account {
+    margin-top: 22px;
+    padding-bottom: 8px;
+  }
+
+  .admin-drawer button:focus-visible,
+  .admin-drawer a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
 
   .admin-head {
     min-height: 56px;
@@ -188,13 +262,55 @@
     gap: 12px;
   }
 
-  .admin-head-context { display: none; }
+  .admin-head-context {
+    display: none;
+  }
 }
 
+/* Small phones */
 @media (max-width: 520px) {
-  .admin-shell { padding-inline: 10px; }
-  .admin-head-title { gap: 9px; }
-  .admin-head h1 { font-size: 24px; }
-  .admin-drawer { width: min(320px, 92vw); }
-  .admin-drawer-scroll { padding-inline: 10px; }
+  .admin-shell {
+    padding-inline: 10px;
+  }
+
+  .admin-head-title {
+    gap: 9px;
+  }
+
+  .admin-head h1 {
+    font-size: 24px;
+  }
+
+  .admin-drawer {
+    width: min(320px, 92vw);
+  }
+
+  .admin-drawer-scroll {
+    padding-inline: 10px;
+  }
+}
+
+/* Short screens */
+@media (max-height: 600px) and (max-width: 900px) {
+  .admin-drawer-head {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .admin-drawer-scroll {
+    padding-top: 8px;
+    padding-bottom: 16px;
+  }
+
+  .admin-drawer .admin-account {
+    margin-top: 14px;
+  }
+}
+
+/* Respect OS reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  .admin-drawer {
+    transition: none;
+    will-change: auto;
+  }
 }

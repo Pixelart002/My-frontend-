@@ -1,1 +1,149 @@
-.luviio-marketing{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:28px;align-items:stretch}.luviio-marketing-copy{border:1px solid var(--line);border-radius:16px;padding:28px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}.luviio-marketing-copy p:not(.eyebrow){max-width:620px;line-height:1.7;color:var(--muted,#aaa)}.luviio-marketing-points{display:grid;gap:10px}.luviio-marketing-points>div{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:17px}.luviio-marketing-points span{display:grid;gap:4px}.luviio-marketing-points small{color:var(--muted,#999);line-height:1.4}@media(max-width:800px){.luviio-marketing{grid-template-columns:1fr}.luviio-marketing-copy{padding:22px}}
+/* ============================================================
+   LUVIIO — MARKETING / VALUE SECTION
+   ============================================================ */
+
+.luviio-marketing {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.2fr)
+    minmax(280px, .8fr);
+  gap: clamp(18px, 3vw, 28px);
+  align-items: stretch;
+  min-width: 0;
+}
+
+.luviio-marketing-copy {
+  min-width: 0;
+  padding: clamp(22px, 3vw, 30px);
+  overflow: hidden;
+  border: 1px solid var(--lm-border);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.012)
+    ),
+    var(--lm-surface-1);
+  box-shadow: 0 1px 0 rgba(255,255,255,.025);
+}
+
+.luviio-marketing-copy .eyebrow {
+  margin-bottom: 8px;
+}
+
+.luviio-marketing-copy h2,
+.luviio-marketing-copy h3 {
+  margin: 0;
+  max-width: 18ch;
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+
+.luviio-marketing-copy p:not(.eyebrow) {
+  max-width: 620px;
+  margin-block: 12px 0;
+  color: var(--lm-text-muted);
+  line-height: 1.7;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.luviio-marketing-points {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.luviio-marketing-points > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+  padding: 15px 17px;
+  border: 1px solid var(--lm-border);
+  border-radius: 12px;
+  background: var(--lm-surface-1);
+  transition:
+    border-color var(--lm-base) ease,
+    background-color var(--lm-base) ease,
+    transform var(--lm-base) var(--lm-ease);
+}
+
+.luviio-marketing-points > div:hover {
+  border-color: rgba(217,170,91,.30);
+  background: var(--lm-surface-2);
+  transform: translateY(-1px);
+}
+
+.luviio-marketing-points > div > svg,
+.luviio-marketing-points > div > i {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--lm-brand-400);
+}
+
+.luviio-marketing-points span {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.luviio-marketing-points strong {
+  color: var(--lm-text);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.luviio-marketing-points small {
+  color: var(--lm-text-muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+  .luviio-marketing {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .luviio-marketing-copy {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .luviio-marketing-copy {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .luviio-marketing-copy h2,
+  .luviio-marketing-copy h3 {
+    max-width: none;
+    font-size: clamp(22px, 7vw, 30px);
+  }
+
+  .luviio-marketing-copy p:not(.eyebrow) {
+    line-height: 1.6;
+  }
+
+  .luviio-marketing-points {
+    gap: 8px;
+  }
+
+  .luviio-marketing-points > div {
+    gap: 10px;
+    padding: 13px;
+    border-radius: 10px;
+  }
+}
+
+@media (hover: none) {
+  .luviio-marketing-points > div:hover {
+    transform: none;
+    border-color: var(--lm-border);
+    background: var(--lm-surface-1);
+  }
+}

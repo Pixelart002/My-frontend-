@@ -1,31 +1,104 @@
 /**
  * Users / profile / addresses service — real backend endpoints.
+ *
+ * Backend remains authoritative for:
+ * - user identity
+ * - profile permissions
+ * - address ownership
+ * - delivery eligibility
+ * - checkout eligibility
+ * - address validation
  */
 import { request } from '../api/client';
+import { asId } from '../utils/dataTypes';
 
 const INDIA_COUNTRY = 'IN';
 
+function normalizeCountry(value) {
+  return String(value ?? '')
+    .trim()
+    .toUpperCase();
+}
+
 function assertIndiaAddress(data) {
-  const country = String(data?.country || INDIA_COUNTRY).trim().toUpperCase();
-  if (country !== INDIA_COUNTRY) {
-    throw new Error('Luviio currently delivers only within India. Please select an Indian address.');
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    Array.isArray(data)
+  ) {
+    throw new TypeError(
+      'Address data is required.',
+    );
   }
-  return { ...data, country: INDIA_COUNTRY };
+  
+  const country = normalizeCountry(
+    data.country || INDIA_COUNTRY,
+  );
+  
+  if (country !== INDIA_COUNTRY) {
+    throw new TypeError(
+      'Luviio currently delivers only within India. Please select an Indian address.',
+    );
+  }
+  
+  return {
+    ...data,
+    country: INDIA_COUNTRY,
+  };
+}
+
+function requireAddressId(value) {
+  const id = asId(value);
+  
+  if (!id) {
+    throw new TypeError(
+      'A valid address id is required.',
+    );
+  }
+  
+  return id;
 }
 
 export const userService = {
-  getMe: () => request('GET', '/users/me'),
-  updateMe: (data) => request('PATCH', '/users/me', data),
-
-  // India-only storefront: foreign saved addresses must never become checkout options.
-  getAddresses: async () => {
-    const list = await request('GET', '/users/me/addresses');
-    return Array.isArray(list)
-      ? list.filter((address) => String(address?.country || '').trim().toUpperCase() === INDIA_COUNTRY)
-      : [];
+  getMe: () =>
+    request('GET', '/users/me'),
+  
+  updateMe: (data) => {
+    if (
+      !data ||
+      typeof data !== 'object' ||
+      Array.isArray(data)
+    ) {
+      throw new TypeError(
+        'Profile data is required.',
+      );
+    }
+    
+    return request(
+      'PATCH',
+      '/users/me',
+      data,
+    );
   },
-
-  // Keep the client-side address contract India-only; backend remains authoritative.
-  addAddress: (data) => request('POST', '/users/me/addresses', assertIndiaAddress(data)),
-  deleteAddress: (id) => request('DELETE', `/users/me/addresses/${encodeURIComponent(id)}`),
+  
+  getAddresses: () =>
+    request(
+      'GET',
+      '/users/me/addresses',
+    ),
+  
+  addAddress: (data) =>
+    request(
+      'POST',
+      '/users/me/addresses',
+      assertIndiaAddress(data),
+    ),
+  
+  deleteAddress: (id) =>
+    request(
+      'DELETE',
+      `/users/me/addresses/${encodeURIComponent(
+        requireAddressId(id),
+      )}`,
+    ),
 };
