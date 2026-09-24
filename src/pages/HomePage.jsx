@@ -41,8 +41,20 @@ export default function HomePage() {
         productService.list({ page: 1, page_size: 8 }),
         productService.categories(),
       ]);
-      setProducts(Array.isArray(data) ? data : data?.items || []);
-      setCategories(Array.isArray(categoryData) ? categoryData : []);
+      const productItems = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+          ? data.items
+          : Array.isArray(data?.data?.items)
+            ? data.data.items
+            : [];
+
+      const categoryItems = Array.isArray(categoryData)
+        ? categoryData.filter(Boolean)
+        : [];
+
+      setProducts(productItems.filter(Boolean));
+      setCategories(categoryItems);
     } catch (err) {
       setError(err.message || 'Unable to load the store.');
     }
@@ -56,7 +68,9 @@ export default function HomePage() {
     const root = document.querySelector('.home-landing');
     if (!root) return undefined;
 
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return undefined;
 
     let cancelled = false;
@@ -225,15 +239,18 @@ export default function HomePage() {
 
             <div className="home-category-grid">
               {categories.map((category) => {
-                const Icon = categoryIcon(category.name);
+                const categoryName = String(category?.name || '').trim();
+                const categorySlug = String(category?.slug || '').trim();
+                if (!categoryName || !categorySlug) return null;
+                const Icon = categoryIcon(categoryName);
                 return (
                   <Link
                     key={category.id || category.slug}
                     className="home-category-card"
-                    to={`/shop?category=${encodeURIComponent(category.slug)}`}
+                    to={`/shop?category=${encodeURIComponent(categorySlug)}`}
                   >
                     <Icon className="home-category-icon" size={34} strokeWidth={1.25} />
-                    <span>{category.name}</span>
+                    <span>{categoryName}</span>
                     <RiArrowRightLine className="home-category-arrow" size={17} />
                   </Link>
                 );
