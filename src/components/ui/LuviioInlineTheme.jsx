@@ -724,6 +724,303 @@ button,input,select,textarea{font:inherit}
 @media(max-width:1080px){[data-luviio-app] .checkout-layout-refined{display:flex!important;flex-direction:column!important;width:100%!important;gap:18px!important}[data-luviio-app] .checkout-main,[data-luviio-app] .checkout-section,[data-luviio-app] .checkout-summary{width:100%;max-width:100%}[data-luviio-app] .checkout-summary{position:static;order:2}}
 @media(max-width:700px){[data-luviio-app] .checkout{padding-top:24px}[data-luviio-app] .checkout-section{padding:16px}[data-luviio-app] .checkout-section-heading{gap:10px}[data-luviio-app] .checkout-live-badge{font-size:9px;padding:5px 8px}[data-luviio-app] .payment-selector{align-items:stretch;flex-direction:column;gap:12px}[data-luviio-app] .payment-selector .btn{width:100%;justify-content:center}[data-luviio-app] .coupon-input-row{width:100%}[data-luviio-app] .checkout-summary{padding:18px}[data-luviio-app] .address-card{grid-template-columns:auto minmax(0,1fr);padding:13px}[data-luviio-app] .address-form .field-grid{grid-template-columns:1fr}[data-luviio-app] .checkout-cancel-modal{padding:20px}[data-luviio-app] .checkout-cancel-modal-actions{grid-template-columns:1fr}}
 @media(max-width:480px){[data-luviio-app] .checkout-steps{width:100%;font-size:9px}[data-luviio-app] .checkout-steps i{margin-inline:5px;min-width:10px}[data-luviio-app] .checkout-steps span{flex-direction:column;gap:3px;text-align:center}[data-luviio-app] .checkout-steps b{width:24px;height:24px}[data-luviio-app] .checkout-section{padding:14px}[data-luviio-app] .checkout-summary{padding:16px}[data-luviio-app] .coupon-input-row{flex-direction:column}[data-luviio-app] .coupon-input-row .btn{width:100%}[data-luviio-app] .checkout-shipping-detail{align-items:flex-start}}
+
+/* Payment method modal — fully owned by the inline Luviio storefront theme. */
+[data-luviio-app] .payment-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10060;
+  display:grid;
+  place-items:center;
+  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(12px) saturate(.82);
+  -webkit-backdrop-filter:blur(12px) saturate(.82);
+  box-sizing:border-box;
+  overflow:auto;
+}
+[data-luviio-app] .payment-modal{
+  position:relative;
+  width:min(600px,100%);
+  max-width:600px;
+  max-height:min(820px,calc(100dvh - 24px));
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  overflow:hidden auto;
+  padding:22px;
+  border:1px solid var(--lv-border-gold);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(216,173,106,.055),rgba(255,255,255,.012) 45%),#101010;
+  color:var(--lv-text);
+  box-shadow:0 30px 100px rgba(0,0,0,.72);
+  box-sizing:border-box;
+  overscroll-behavior:contain;
+}
+[data-luviio-app] .payment-modal-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  min-width:0;
+  padding:0 0 16px;
+  border-bottom:1px solid var(--lv-border-soft);
+}
+[data-luviio-app] .payment-modal-title-wrap{
+  min-width:0;
+  display:grid;
+  gap:5px;
+}
+[data-luviio-app] .payment-modal-header h3{
+  margin:0;
+  min-width:0;
+  color:var(--lv-text);
+  font-family:"Playfair Display",Georgia,serif;
+  font-size:clamp(24px,5vw,34px);
+  line-height:1.08;
+  font-weight:600;
+  overflow-wrap:anywhere;
+}
+[data-luviio-app] .payment-modal-close{
+  flex:0 0 46px;
+  width:46px!important;
+  min-width:46px;
+  height:46px;
+  min-height:46px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid var(--lv-border);
+  border-radius:14px;
+  background:#151515;
+  color:var(--lv-muted);
+}
+[data-luviio-app] .payment-modal-close:hover{border-color:rgba(216,173,106,.45);background:#1a1814;color:var(--lv-text)}
+[data-luviio-app] .payment-modal-body{
+  min-width:0;
+  padding:18px 2px 8px;
+}
+[data-luviio-app] .payment-modal-options{
+  display:grid;
+  gap:12px;
+  min-width:0;
+}
+[data-luviio-app] .payment-option{
+  position:relative;
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  align-items:center;
+  gap:14px;
+  min-width:0;
+  width:100%;
+  padding:15px;
+  border:1px solid var(--lv-border);
+  border-radius:16px;
+  background:#0b0b0a;
+  color:var(--lv-text);
+  cursor:pointer;
+  box-sizing:border-box;
+  transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+[data-luviio-app] .payment-option:hover,
+[data-luviio-app] .payment-option.is-selected{
+  border-color:var(--lv-gold);
+  background:rgba(216,173,106,.065);
+  box-shadow:0 0 0 1px rgba(216,173,106,.12);
+}
+[data-luviio-app] .payment-option:active{transform:translateY(1px)}
+[data-luviio-app] .payment-option input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  margin:-1px;
+  padding:0;
+  border:0;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+[data-luviio-app] .payment-option:focus-within{
+  outline:2px solid var(--lv-gold);
+  outline-offset:2px;
+}
+[data-luviio-app] .payment-option-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(216,173,106,.14);
+  border-radius:14px;
+  background:#151515;
+  color:var(--lv-gold);
+}
+[data-luviio-app] .payment-option-copy{
+  min-width:0;
+  display:grid;
+  gap:6px;
+}
+[data-luviio-app] .payment-option-topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+[data-luviio-app] .payment-option-topline strong{
+  min-width:0;
+  color:var(--lv-text);
+  font-size:16px;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+[data-luviio-app] .payment-option-copy small{
+  display:block;
+  min-width:0;
+  color:var(--lv-muted);
+  font-size:12px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+[data-luviio-app] .payment-option-check{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  color:var(--lv-gold);
+}
+[data-luviio-app] .payment-option-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  min-width:0;
+}
+[data-luviio-app] .payment-option-meta span{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 8px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
+  color:var(--lv-dim);
+  font-size:10px;
+  line-height:1.2;
+}
+[data-luviio-app] .payment-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  min-width:0;
+  margin-top:8px;
+  padding-top:16px;
+  border-top:1px solid var(--lv-border-soft);
+}
+[data-luviio-app] .payment-modal-actions .btn{
+  min-height:48px;
+  min-width:120px;
+  justify-content:center;
+}
+[data-luviio-app] .payment-modal-primary{
+  min-height:48px;
+}
+[data-luviio-app] .payment-modal-review,
+[data-luviio-app] .payment-modal-active{
+  min-width:0;
+}
+[data-luviio-app] .payment-modal-payment{
+  min-width:0;
+  padding:2px 0;
+}
+[data-luviio-app] .payment-modal-payment #payment-element{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+[data-luviio-app] .payment-review{
+  display:grid;
+  gap:12px;
+  min-width:0;
+}
+[data-luviio-app] .payment-review-card{
+  min-width:0;
+  padding:14px;
+  border:1px solid var(--lv-border);
+  border-radius:14px;
+  background:#0b0b0a;
+}
+[data-luviio-app] .payment-review-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--lv-text);
+}
+[data-luviio-app] .payment-review-address{
+  display:grid;
+  gap:3px;
+  margin-top:10px;
+  color:var(--lv-muted);
+  font-size:12px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+[data-luviio-app] .payment-review-address strong{color:var(--lv-text);font-size:13px}
+[data-luviio-app] .payment-review-address p{margin:0}
+[data-luviio-app] .payment-review-total{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px 14px;
+  align-items:center;
+}
+[data-luviio-app] .payment-review-total span{color:var(--lv-muted);font-size:12px}
+[data-luviio-app] .payment-review-total strong{color:var(--lv-text);font-size:13px;text-align:right;overflow-wrap:anywhere}
+[data-luviio-app] .payment-review-secure{
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  min-width:0;
+  color:var(--lv-muted);
+  font-size:11px;
+  line-height:1.5;
+}
+[data-luviio-app] .payment-success-state{
+  display:grid;
+  justify-items:center;
+  gap:10px;
+  padding:22px 10px;
+  text-align:center;
+}
+[data-luviio-app] .payment-success-state strong{font-size:18px;color:var(--lv-text)}
+[data-luviio-app] .payment-success-state p{max-width:460px;margin:0;color:var(--lv-muted);font-size:13px;line-height:1.6}
+@media(max-width:640px){
+  [data-luviio-app] .payment-modal-backdrop{place-items:end center;padding:8px}
+  [data-luviio-app] .payment-modal{
+    width:100%;
+    max-width:100%;
+    max-height:calc(100dvh - 16px);
+    padding:18px;
+    border-radius:20px;
+  }
+  [data-luviio-app] .payment-modal-header h3{font-size:26px}
+  [data-luviio-app] .payment-modal-body{padding-inline:0}
+  [data-luviio-app] .payment-option{grid-template-columns:44px minmax(0,1fr);gap:12px;padding:13px}
+  [data-luviio-app] .payment-option-icon{width:44px;height:44px;border-radius:12px}
+  [data-luviio-app] .payment-modal-actions{display:grid;grid-template-columns:1fr 1fr}
+  [data-luviio-app] .payment-modal-actions .btn{width:100%;min-width:0}
+}
+@media(max-width:420px){
+  [data-luviio-app] .payment-modal{padding:15px;border-radius:18px}
+  [data-luviio-app] .payment-modal-close{flex-basis:42px;width:42px!important;min-width:42px;height:42px;min-height:42px}
+  [data-luviio-app] .payment-option{grid-template-columns:40px minmax(0,1fr);gap:10px;padding:12px}
+  [data-luviio-app] .payment-option-icon{width:40px;height:40px}
+  [data-luviio-app] .payment-option-topline strong{font-size:15px}
+  [data-luviio-app] .payment-option-copy small{font-size:11px}
+  [data-luviio-app] .payment-modal-actions{grid-template-columns:1fr}
+}
+
+
 `;
 
 export default function LuviioInlineTheme() {
