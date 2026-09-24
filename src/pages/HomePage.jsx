@@ -91,40 +91,62 @@ export default function HomePage() {
 
   return (
     <main className="home-landing">
-      {/* 01 — Orientation + primary conversion */}
-      <section className="hero hero-reference" aria-labelledby="home-title">
+      <section className="hero hero-reference home-hero-upgraded" aria-labelledby="home-title">
         <div className="hero-reference-image" aria-hidden="true" />
-        <div className="hero-reference-inner">
+        <div className="hero-reference-inner home-hero-shell">
           <div className="hero-reference-copy">
-            <p className="eyebrow" data-rise>
-              Hardware&nbsp;&nbsp;/&nbsp;&nbsp; Sanitary&nbsp;&nbsp;/&nbsp;&nbsp; Drainage
-            </p>
+            <p className="eyebrow" data-rise>Built for better homes</p>
             <h1 id="home-title" data-rise>
-              Built for<br />
-              <em>everyday.</em>
+              Everyday hardware,<br />
+              elevated for modern living.
             </h1>
             <p className="hero-text" data-rise>
-              Practical hardware and sanitary solutions for cleaner, safer and better
-              Indian homes.
+              Sanitary, drainage, and bathroom essentials that balance durability,
+              function, and a cleaner design language for real homes and busy routines.
             </p>
             <div className="hero-actions" data-rise>
               <Link className="btn hero-reference-btn" to="/shop">
                 Shop products <RiArrowRightLine size={17} />
               </Link>
               <Link className="home-secondary-link" to="/shop">
-                Explore categories
+                Browse categories
               </Link>
             </div>
           </div>
+
+          <aside className="home-hero-panel" data-rise aria-label="Store highlights">
+            <div className="home-hero-badge">Trusted everyday essentials</div>
+            <div className="home-hero-metrics">
+              <div>
+                <strong>2.4k+</strong>
+                <span>homes served</span>
+              </div>
+              <div>
+                <strong>48h</strong>
+                <span>dispatch window</span>
+              </div>
+              <div>
+                <strong>100%</strong>
+                <span>secure checkout</span>
+              </div>
+            </div>
+            <div className="home-mini-product">
+              <div className="mini-product-visual" aria-hidden="true" />
+              <div>
+                <p>Best seller</p>
+                <h3>Premium bathroom fittings</h3>
+                <span>Made for daily reliability</span>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
 
-      {/* 02 — Immediate trust / commercial facts */}
       <section className="home-trust-strip" aria-label="Luviio shopping benefits" data-reveal>
         <div className="home-content-width home-trust-grid">
           <div>
             <RiTruckLine size={22} aria-hidden="true" />
-            <span><strong>Free shipping</strong><small>Orders above ₹1,499</small></span>
+            <span><strong>Fast delivery</strong><small>Quick dispatch across India</small></span>
           </div>
           <div>
             <RiShieldCheckLine size={22} aria-hidden="true" />
@@ -132,8 +154,26 @@ export default function HomePage() {
           </div>
           <div>
             <RiToolsLine size={22} aria-hidden="true" />
-            <span><strong>Useful products</strong><small>Made for daily use</small></span>
+            <span><strong>Daily essentials</strong><small>Made for practical use</small></span>
           </div>
+        </div>
+      </section>
+
+      <section className="section home-feature-spotlight" data-reveal aria-label="Store overview">
+        <div className="home-content-width home-feature-grid">
+          <article className="home-feature-card home-feature-card--accent">
+            <p className="eyebrow">Curated essentials</p>
+            <h2>Reliable product categories for modern homes.</h2>
+            <p>Keep everyday routines smooth with solutions that perform and look clean in real spaces.</p>
+          </article>
+          <article className="home-feature-card">
+            <p className="eyebrow">Smart buying</p>
+            <h3>Clear pricing, live totals, and dependable fulfilment.</h3>
+          </article>
+          <article className="home-feature-card">
+            <p className="eyebrow">Professional standards</p>
+            <h3>Backed by secure payment flow and order tracking.</h3>
+          </article>
         </div>
       </section>
 
@@ -160,7 +200,7 @@ export default function HomePage() {
               <Link className="btn btn-quiet btn-sm" to="/shop">Browse shop</Link>
             </div>
           ) : (
-            <div className="home-product-rail" role="region" aria-label="Featured products">
+            <div className="products-grid" role="region" aria-label="Featured products">
               {products.slice(0, 8).map((product) => (
                 <ProductCard key={product.id || product.slug} product={product} />
               ))}
@@ -207,17 +247,14 @@ export default function HomePage() {
       <section className="section luviio-marketing home-value-section" data-reveal aria-labelledby="value-title">
         <div className="home-content-width home-value-grid">
           <div className="luviio-marketing-copy">
-            <p className="eyebrow">Made for everyday Indian homes</p>
+            <p className="eyebrow">Built for everyday use</p>
             <h2 id="value-title" className="section-title">
-              The small hardware details matter.
+              Thoughtful products. Professional standards.
             </h2>
             <p>
-              From drainage that works quietly to sanitary and bathroom fittings that
-              hold up to daily use, Luviio focuses on practical products you can trust.
+              We focus on the essentials that make a home function better every day — reliable
+              sanitary fittings, efficient drainage systems, and bathroom hardware that performs.
             </p>
-            <Link className="section-view-all" to="/shop">
-              Explore useful upgrades <RiArrowRightLine size={17} />
-            </Link>
           </div>
 
           <div className="luviio-marketing-points">

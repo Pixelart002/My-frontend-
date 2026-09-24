@@ -17,7 +17,7 @@ export default function PolicyLayout({ eyebrow, title, lead, updated, children }
       tween = gsap.fromTo(
         els,
         { y: 24, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out' }
+        { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power2.out' },
       );
     }).catch(() => {});
 
@@ -33,7 +33,7 @@ export default function PolicyLayout({ eyebrow, title, lead, updated, children }
 
   return (
     <div className="page">
-      <div className="container">
+      <div className="container policy-layout-shell">
         <nav className="breadcrumbs" aria-label="Breadcrumb">
           <Link to="/">Home</Link>
           <span>/</span>
@@ -44,7 +44,10 @@ export default function PolicyLayout({ eyebrow, title, lead, updated, children }
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h1 className="po-title">{title}</h1>
           {lead && <p className="po-lead">{lead}</p>}
-          {updatedAt && <p className="po-updated">Last updated — {updatedAt}</p>}
+          <div className="policy-meta-row">
+            {updatedAt && <span className="po-updated">Last updated — {updatedAt}</span>}
+            <Link className="inline-link" to="/shop">Browse products</Link>
+          </div>
         </header>
 
         <div className="po-body" data-rise>{children}</div>

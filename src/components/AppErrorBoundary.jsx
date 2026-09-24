@@ -20,9 +20,12 @@ export default class AppErrorBoundary extends Component {
 
     return (
       <main className="page container">
-        <div className="state" role="alert">
+        <div className="state state-critical" role="alert">
+          <div className="state-icon state-icon-alert" aria-hidden="true">!</div>
           <div className="state-title">We could not render this page</div>
-          <p style={{ margin: 0 }}>The page hit an unexpected UI error. Your cart and account data are kept on the server.</p>
+          <p className="state-message">
+            The page hit an unexpected UI error. Your cart and account data remain safe on the server.
+          </p>
           <div className="btn-row" style={{ justifyContent: 'center' }}>
             <button className="btn" type="button" onClick={this.handleReset}>Try again</button>
             <button className="btn btn-quiet" type="button" onClick={() => window.location.assign('/')}>Go home</button>

@@ -180,6 +180,24 @@ export default function OrderDetailPage() {
           </div>
           <span className={`status-pill tone-${orderStatusTone(status)}`}>{orderStatusLabel(status)}</span>
         </header>
+
+        <div className="account-overview-grid order-detail-metrics">
+          <div className="account-stat-card">
+            <p className="eyebrow">Delivery</p>
+            <h3>{hasShippingSnapshot ? shippingSnapshot.full_name || 'Delivery contact' : 'Address pending'}</h3>
+            <small>
+              {hasShippingSnapshot
+                ? `${shippingSnapshot.city || ''}${shippingSnapshot.state ? `, ${shippingSnapshot.state}` : ''}${shippingSnapshot.postal_code ? ` ${shippingSnapshot.postal_code}` : ''}`
+                : 'Shipping destination is being prepared.'}
+            </small>
+          </div>
+          <div className="account-stat-card">
+            <p className="eyebrow">Payment</p>
+            <h3>{order.payment_method || 'Not set'}</h3>
+            <small>{formatMoney(order.total_amount ?? order.grand_total)}</small>
+          </div>
+        </div>
+
         <div className="order-detail-actions">
           {isRetryable && <button className="btn btn-sm" onClick={openRetry} disabled={busy || retryLoading}>Retry payment</button>}
           {canDownloadInvoice(status) && <button className="btn btn-quiet btn-sm" onClick={onInvoice} disabled={busy}><RiFileTextLine size={15} /> Download invoice</button>}

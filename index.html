@@ -123,6 +123,7 @@
         font-family: inherit;
         font-size: 16px;
         line-height: 1.5;
+        letter-spacing: -0.01em;
         overflow-x: clip;
       }
 
@@ -145,6 +146,16 @@
       article,
       aside {
         min-width: 0;
+        width: 100%;
+      }
+
+      main {
+        display: block;
+      }
+
+      section {
+        position: relative;
+        overflow: clip;
       }
 
       img,
@@ -154,6 +165,16 @@
       svg {
         display: block;
         max-width: 100%;
+      }
+
+      p,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin-top: 0;
       }
 
       img,

@@ -68,6 +68,16 @@ function StoreRoutes() {
   );
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
+
+  return null;
+}
+
 function RouteSeo() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -85,6 +95,7 @@ function RouteSeo() {
 function AppRoutes() {
   return (
     <Suspense fallback={<div className="page container"><div className="state spinner" role="status" aria-live="polite"><span className="spin">●</span><span>Loading…</span></div></div>}>
+      <ScrollToTop />
       <RouteSeo />
       <Routes>
       {StoreRoutes()}

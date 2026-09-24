@@ -1,1 +1,256 @@
-.luviio-marketing{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:28px;align-items:stretch}.luviio-marketing-copy{border:1px solid var(--line);border-radius:16px;padding:28px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}.luviio-marketing-copy p:not(.eyebrow){max-width:620px;line-height:1.7;color:var(--muted,#aaa)}.luviio-marketing-points{display:grid;gap:10px}.luviio-marketing-points>div{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:17px}.luviio-marketing-points span{display:grid;gap:4px}.luviio-marketing-points small{color:var(--muted,#999);line-height:1.4}@media(max-width:800px){.luviio-marketing{grid-template-columns:1fr}.luviio-marketing-copy{padding:22px}}
+.home-hero-upgraded .home-hero-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 420px);
+  gap: clamp(22px, 4vw, 52px);
+  align-items: end;
+}
+
+.home-hero-panel {
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 3vw, 30px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(17,17,15,0.82), rgba(15,15,13,0.7));
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  backdrop-filter: blur(16px);
+}
+
+.home-hero-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px solid rgba(216,173,106,0.35);
+  border-radius: 999px;
+  background: rgba(216,173,106,0.08);
+  color: var(--gold-soft, #d8ad6a);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.home-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-hero-metrics div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+}
+
+.home-hero-metrics strong {
+  font-size: clamp(1.1rem, 2vw, 1.7rem);
+  color: var(--text, #f5efe8);
+}
+
+.home-hero-metrics span {
+  color: var(--muted, #b7b0a8);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.home-mini-product {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+}
+
+.mini-product-visual {
+  height: 82px;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(216,173,106,0.2), rgba(216,173,106,0.02)),
+    url('/luviio-hero-background.webp') center/cover no-repeat;
+  border: 1px solid rgba(216,173,106,0.18);
+}
+
+.home-mini-product p,
+.home-mini-product span {
+  margin: 0;
+  color: var(--muted, #b7b0a8);
+}
+
+.home-mini-product p {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-mini-product h3 {
+  margin: 6px 0 4px;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.home-trust-strip {
+  padding-top: 8px;
+}
+
+.home-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-trust-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 74px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.home-trust-grid svg {
+  color: var(--gold-soft, #d8ad6a);
+  flex-shrink: 0;
+}
+
+.home-trust-grid strong,
+.home-trust-grid small {
+  display: block;
+}
+
+.home-trust-grid strong {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: var(--text, #f5efe8);
+}
+
+.home-trust-grid small {
+  margin-top: 2px;
+  color: var(--muted, #b7b0a8);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.home-landing main > section {
+  padding-top: clamp(28px, 4vw, 52px);
+  padding-bottom: clamp(28px, 4vw, 52px);
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 18px;
+}
+
+.home-feature-card {
+  display: grid;
+  gap: 10px;
+  min-height: 170px;
+  padding: clamp(22px, 3vw, 28px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+
+.home-feature-card--accent {
+  background: linear-gradient(135deg, rgba(216,173,106,0.12), rgba(255,255,255,0.02));
+  border-color: rgba(216,173,106,0.22);
+}
+
+.home-feature-card h2,
+.home-feature-card h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.home-feature-card p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted, #b7b0a8);
+  line-height: 1.7;
+}
+
+.luviio-marketing {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.luviio-marketing-copy {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+  box-shadow: 0 20px 50px rgba(0,0,0,.08);
+}
+
+.luviio-marketing-copy p:not(.eyebrow) {
+  max-width: 620px;
+  line-height: 1.7;
+  color: var(--muted, #aaa);
+}
+
+.luviio-marketing-points {
+  display: grid;
+  gap: 12px;
+}
+
+.luviio-marketing-points > div {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255,255,255,.02);
+}
+
+.luviio-marketing-points > div svg {
+  color: var(--gold-soft, #d8ad6a);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.luviio-marketing-points span {
+  display: grid;
+  gap: 4px;
+}
+
+.luviio-marketing-points small {
+  color: var(--muted, #999);
+  line-height: 1.4;
+}
+
+@media (max-width: 980px) {
+  .home-hero-upgraded .home-hero-shell,
+  .home-feature-grid,
+  .home-trust-grid,
+  .luviio-marketing {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .home-mini-product {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .home-trust-grid > div {
+    min-height: 68px;
+    padding: 14px 16px;
+  }
+}
+
+@media(max-width:800px){.luviio-marketing-copy{padding:22px}}

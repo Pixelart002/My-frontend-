@@ -151,6 +151,8 @@ export default function AddressesPage() {
 
   const confirmDelete = async () => { if (!deleteId) return; await onDelete(deleteId); setDeleteId(null); };
 
+  const defaultAddress = addresses?.find((addr) => addr.is_default) || addresses?.[0] || null;
+
   return (
     <div className="page container">
       <Link className="back-link" to="/account"><RiArrowLeftLine size={15} /> Back to profile</Link>
@@ -164,32 +166,47 @@ export default function AddressesPage() {
       ) : addresses === null ? (
         <Spinner label="Loading addresses…" />
       ) : (
-        <div className="address-list manage">
-          {addresses.length === 0 && !showForm && (
-            <EmptyState title="No addresses yet" message="Add a delivery address for checkout." />
-          )}
-          {addresses.map((addr) => (
-            <div className="address-card-manage" key={addr.id}>
-              <div>
-                <strong>{addr.full_name || 'Delivery'}</strong>
-                {addr.is_default && <span className="chip chip-sm">Default</span>}
-                <p>
-                  {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}
-                  {addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}
-                </p>
-                {addr.email && <small className="address-email">{addr.email}</small>}
-              </div>
-              <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(addr.id)} aria-label={`Delete ${addr.full_name || 'address'}`}>
-                <RiDeleteBinLine size={15} />
-              </button>
+        <>
+          <div className="account-overview-grid">
+            <div className="account-stat-card">
+              <p className="eyebrow">Default delivery</p>
+              <h3>{defaultAddress ? (defaultAddress.full_name || 'Delivery address') : 'No saved address'}</h3>
+              <small>{defaultAddress ? `${defaultAddress.city}${defaultAddress.state ? `, ${defaultAddress.state}` : ''}` : 'Add a shipping address to unlock faster checkout.'}</small>
             </div>
-          ))}
-          {showForm ? (
-            <AddressForm onSaved={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} isDefault={addresses.length === 0} />
-          ) : (
-            <button className="btn btn-quiet" onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add address</button>
-          )}
-        </div>
+            <div className="account-stat-card">
+              <p className="eyebrow">Saved</p>
+              <h3>{addresses.length} address{addresses.length === 1 ? '' : 'es'}</h3>
+              <small>Use these for home, office, or holiday delivery.</small>
+            </div>
+          </div>
+
+          <div className="address-list manage">
+            {addresses.length === 0 && !showForm && (
+              <EmptyState title="No addresses yet" message="Add a delivery address for checkout." />
+            )}
+            {addresses.map((addr) => (
+              <div className="address-card-manage" key={addr.id}>
+                <div>
+                  <strong>{addr.full_name || 'Delivery'}</strong>
+                  {addr.is_default && <span className="chip chip-sm">Default</span>}
+                  <p>
+                    {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}
+                    {addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}
+                  </p>
+                  {addr.email && <small className="address-email">{addr.email}</small>}
+                </div>
+                <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(addr.id)} aria-label={`Delete ${addr.full_name || 'address'}`}>
+                  <RiDeleteBinLine size={15} />
+                </button>
+              </div>
+            ))}
+            {showForm ? (
+              <AddressForm onSaved={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} isDefault={addresses.length === 0} />
+            ) : (
+              <button className="btn btn-quiet" onClick={() => setShowForm(true)}><RiAddLine size={15} /> Add address</button>
+            )}
+          </div>
+        </>
       )}
       <ConfirmDialog open={Boolean(deleteId)} title="Remove address?" message="This saved delivery address will be removed from your account." confirmLabel="Remove address" danger busy={false} onCancel={() => setDeleteId(null)} onConfirm={confirmDelete} />
     </div>

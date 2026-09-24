@@ -46,6 +46,7 @@ export default function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const mobileNavRef = useRef(null);
   const mobileCloseRef = useRef(null);
   const path = location.pathname;
@@ -53,6 +54,12 @@ export default function Header() {
   const isAdmin = ['admin','super_admin','owner'].includes(String(user?.role || '').toLowerCase()) || user?.is_admin === true;
 
   useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [location.pathname, location.search]);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   useEffect(() => {
     if (!mobileOpen) return undefined;
     const previous = document.body.style.overflow;
@@ -86,6 +93,8 @@ export default function Header() {
   });
   const onSearch = (e) => { e.preventDefault(); const q = e.currentTarget.query.value.trim(); navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop'); closeAll(); };
   const onLogout = async () => { closeAll(); await logout(); toast.success('You have been signed out.'); navigate('/'); };
+  const accountTarget = isAuthenticated ? '/account' : '/login';
+  const accountLabel = isAuthenticated ? 'Account' : 'Sign in';
   const menuLink = (to, label, Icon = null) => <Link to={to} onClick={closeAll}>{Icon && <Icon size={18} aria-hidden="true" />}<span>{label}</span></Link>;
   const adminMenuLink = (key, label, Icon = null) => {
     const active = isAdminPage && new URLSearchParams(location.search).get('panel') === key;
@@ -110,19 +119,21 @@ export default function Header() {
         <div className="mobile-nav-section mobile-shopping-nav">
           {menuLink('/cart', `Shopping bag${itemCount ? ` (${itemCount})` : ''}`, RiShoppingBagLine)}
           {menuLink('/orders', 'Orders', RiArchive2Line)}
-          {menuLink('/account', 'Account', RiUser3Line)}
+          {menuLink(accountTarget, accountLabel, RiUser3Line)}
         </div>
         <div className="mobile-nav-section mobile-info-nav">
           {menuLink('/about', 'About', RiInformationLine)}
           <a href="mailto:support@luviio.in" onClick={closeAll}><RiMailLine size={18} aria-hidden="true"/><span>Contact</span></a>
         </div>
         <div className="mobile-nav-section mobile-account-actions">
+          {!isAuthenticated && menuLink('/register', 'Create account', RiUserLine)}
+          {!isAuthenticated && menuLink('/login', 'Sign in', RiUser3Line)}
           {isAdmin && menuLink('/admin', 'Admin dashboard', RiShieldStarLine)}
           {isAuthenticated && <button type="button" onClick={onLogout}><RiLogoutBoxRLine size={18}/><span>Sign out</span></button>}
         </div>
       </>;
 
-  return <header className="header">
+  return <header className={`header ${scrolled ? 'is-scrolled' : ''}`}>
     <div className="header-reference-inner">
       <Link className="brand" to="/" onClick={closeAll}>luviio</Link>
       <nav className="nav-links" aria-label="Primary navigation">
@@ -132,10 +143,16 @@ export default function Header() {
         <a href="mailto:support@luviio.in">Contact</a>
       </nav>
       <div className="header-actions">
-        <form className="search-form" onSubmit={onSearch} role="search"><RiSearchLine className="search-icon" size={18}/><input name="query" placeholder="Search for products..." aria-label="Search for products..." autoComplete="off"/></form>
-        {!isAuthenticated && <Link className="icon-btn header-account-icon" to="/account" aria-label="Account"><RiUserLine size={20}/></Link>}
-        
-        <Link className="icon-btn header-cart-icon" to="/cart" aria-label={`Shopping bag, ${itemCount} items`}><RiShoppingBagLine size={21}/>{itemCount > 0 && <span className="cart-count">{itemCount > 99 ? '99+' : itemCount}</span>}</Link>
+        <form className="search-form" onSubmit={onSearch} role="search">
+          <RiSearchLine className="search-icon" size={18}/>
+          <input name="query" placeholder="Search for products..." aria-label="Search for products" autoComplete="off"/>
+        </form>
+        {!isAuthenticated && <Link className="icon-btn header-account-icon" to="/login" aria-label="Sign in"><RiUserLine size={20}/></Link>}
+        {isAuthenticated && <Link className="icon-btn header-account-icon" to="/account" aria-label="Account"><RiUserLine size={20}/></Link>}
+        <Link className="icon-btn header-cart-icon" to="/cart" aria-label={`Shopping bag, ${itemCount} items`}>
+          <RiShoppingBagLine size={21}/>
+          {itemCount > 0 && <span className="cart-count">{itemCount > 99 ? '99+' : itemCount}</span>}
+        </Link>
         {isAuthenticated && <div className="account-menu-wrap"><button type="button" className="icon-btn account-trigger" onClick={() => setMenuOpen(v => !v)} aria-label="Account menu" aria-expanded={menuOpen} aria-controls="account-menu"><RiUserLine size={20}/></button>{menuOpen && <div id="account-menu" className="account-menu"><div className="menu-user"><strong>{user?.full_name || user?.name || 'Welcome'}</strong><span>{user?.email || ''}</span></div><Link to="/account" onClick={closeAll}><RiUser3Line size={16}/> Profile</Link><Link to="/orders" onClick={closeAll}><RiArchive2Line size={16}/> Orders</Link><Link to="/account/addresses" onClick={closeAll}><RiMapPin2Line size={16}/> Addresses</Link><Link to="/account/settings" onClick={closeAll}><RiSettings3Line size={16}/> Settings</Link>{isAdmin && <Link to="/admin" onClick={closeAll}><RiShieldStarLine size={16}/> Admin dashboard</Link>}<button type="button" onClick={onLogout}><RiLogoutBoxRLine size={16}/> Sign out</button></div>}</div>}
         <button type="button" className="menu-button" onClick={(e) => { e.preventDefault(); setMobileOpen(v => !v); setMenuOpen(false); }} aria-expanded={mobileOpen} aria-controls="mobile-navigation" aria-label={mobileOpen ? 'Close menu' : 'Open menu'}>{mobileOpen ? <RiCloseLine size={22}/> : <RiMenuLine size={22}/>}</button>
       </div>

@@ -1078,16 +1078,16 @@ tbody tr:hover td{background:rgba(255,255,255,.018)}
    HOME — polished 21st/shadcn-inspired composition
    ============================================================ */
 .home-landing{
-  --home-content:min(1240px,calc(100% - 40px));
+  --home-content:min(100%, 1440px);
   --home-line:rgba(255,255,255,.09);
   --home-muted:#aaa59d;
   --home-gold:#d7aa5f;
 }
-.home-landing .home-content-width{width:var(--home-content);margin-inline:auto}
+.home-landing .home-content-width{width:var(--home-content);margin-inline:auto;padding-inline:clamp(12px,2vw,24px)}
 .home-landing .hero-reference{
   min-height:clamp(560px,calc(100svh - var(--header-h)),700px);
   max-height:none;
-  padding-inline:max(20px,calc((100% - 1240px)/2));
+  padding-inline:clamp(12px,2vw,24px);
 }
 .home-landing .hero-reference-copy{max-width:620px}
 .home-landing .hero-reference-copy h1{

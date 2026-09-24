@@ -2,31 +2,50 @@ import { useState } from 'react';
 import { RiCheckLine, RiLinkM, RiShareLine } from '@remixicon/react';
 import { useToast } from '../context/ToastContext';
 
-export default function ShareButton({ title = 'Luviio', text = '', url = window.location.href }) {
+export default function ShareButton({ title = 'Luviio', text = '', url }) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
 
   const share = async () => {
-    const shareData = { title, text, url };
+    if (!shareUrl) {
+      toast.error('Nothing to share yet.');
+      return;
+    }
+
+    const shareData = { title, text, url: shareUrl };
+
     try {
-      if (navigator.share) {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
         return;
       }
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      toast.success('Product link copied.');
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch (error) {
-      if (error?.name === 'AbortError') return;
-      try {
-        await navigator.clipboard.writeText(url);
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
         setCopied(true);
         toast.success('Product link copied.');
         window.setTimeout(() => setCopied(false), 1800);
-      } catch {
-        toast.error('Unable to share this link.');
+        return;
       }
+
+      throw new Error('Clipboard unavailable');
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+          setCopied(true);
+          toast.success('Product link copied.');
+          window.setTimeout(() => setCopied(false), 1800);
+          return;
+        }
+      } catch {
+        // fallback empty
+      }
+
+      toast.error('Unable to share this link.');
     }
   };
 

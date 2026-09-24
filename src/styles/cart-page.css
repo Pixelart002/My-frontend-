@@ -19,17 +19,69 @@
 .cart-card:hover .cart-card-thumb img { transform:scale(1.025); }
 .cart-card-main { min-width:0; display:flex; flex-direction:column; justify-content:space-between; gap:24px; padding:3px 0; }
 .cart-card-copy { min-width:0; padding-right:18px; }
-.cart-card-copy .product-category { margin-bottom:8px; }
+.cart-card-copy .product-category {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-soft, #d8ad6a);
+}
 .cart-card-copy h2 { margin:0; font-size:clamp(18px,2vw,22px); line-height:1.25; font-weight:600; overflow-wrap:anywhere; }
 .cart-card-copy h2 a { color:var(--text); }
 .cart-card-copy h2 a:hover { color:var(--gold-soft); }
-.cart-card-copy .cart-unit { margin-top:9px; }
+.cart-card-copy .cart-unit { margin-top:9px; color: var(--muted); font-size: 13px; }
 .cart-card-controls { display:flex; align-items:center; justify-content:space-between; gap:20px; }
-.cart-qty { flex:0 0 auto; position:relative; }
-.cart-qty-value { width:44px; min-width:44px; text-align:center; font-variant-numeric:tabular-nums; transition:color .18s ease,transform .18s ease; }
+.cart-qty {
+  flex: 0 0 auto;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.02);
+}
+.cart-qty button {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.cart-qty button:hover:not(:disabled) {
+  background: rgba(216,173,106,0.08);
+  color: var(--gold-soft);
+}
+.cart-qty button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.cart-qty-value {
+  width: 44px;
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition:color .18s ease,transform .18s ease;
+  color: var(--text);
+  font-weight: 600;
+}
 .cart-qty.is-updating .cart-qty-value { color:var(--gold-soft); transform:scale(1.08); }
 .cart-qty-spinner { position:absolute; right:-20px; color:var(--gold); opacity:.9; }
-.cart-line-total { flex:0 0 auto; min-width:70px; text-align:right; font-size:18px; white-space:nowrap; animation:cart-total-in .22s ease; }
+.cart-line-total {
+  flex: 0 0 auto;
+  min-width: 70px;
+  text-align: right;
+  font-size: 18px;
+  color: var(--gold-soft, #d8ad6a);
+  white-space: nowrap;
+  animation:cart-total-in .22s ease;
+}
 @keyframes cart-total-in { from { opacity:.45; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
 .cart-remove { align-self:start; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid transparent; border-radius:50%; background:transparent; color:var(--dim); padding:0; transition:color .2s ease,background .2s ease,border-color .2s ease,transform .2s ease; }
 .cart-remove:hover { background:var(--danger-dim); border-color:rgba(224,115,95,.25); color:var(--danger); transform:rotate(6deg); }
@@ -43,7 +95,19 @@
 .cart-summary .summary-lines .total { margin-top:8px; padding-top:18px; font-size:20px; }
 .cart-summary .summary-lines .total dd { font-size:22px; color:var(--gold-soft); transition:transform .2s ease; }
 .cart-summary .summary-lines .total dd:not(:empty) { animation:cart-total-in .22s ease; }
-.free-ship-note { line-height:1.45; }
+.cart-summary .summary-lines dt { color: var(--muted); }
+.cart-summary .summary-lines dd { color: var(--text); }
+.free-ship-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(111, 191, 138, 0.22);
+  border-radius: 12px;
+  background: rgba(111, 191, 138, 0.08);
+  color: var(--success);
+  line-height: 1.45;
+}
 .free-ship-note svg { flex:0 0 auto; }
 .cart-checkout { min-height:56px; justify-content:center; gap:9px; font-size:14px; letter-spacing:.025em; }
 .cart-checkout svg:last-child { margin-left:3px; transition:transform .2s ease; }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { RiMapPinLine, RiLoader4Line } from '@remixicon/react';
+import { RiMapPinLine, RiLoader4Line, RiArrowRightLine } from '@remixicon/react';
 import { locationService } from '../../services/locations';
 
 export default function LocationAutocomplete({ value, onChange, onSelect, placeholder = 'Search your address' }) {
@@ -18,6 +18,7 @@ export default function LocationAutocomplete({ value, onChange, onSelect, placeh
       setLoading(false);
       return undefined;
     }
+
     const id = ++requestId.current;
     const timer = setTimeout(async () => {
       setLoading(true);
@@ -33,6 +34,7 @@ export default function LocationAutocomplete({ value, onChange, onSelect, placeh
         if (id === requestId.current) setLoading(false);
       }
     }, 350);
+
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -45,12 +47,15 @@ export default function LocationAutocomplete({ value, onChange, onSelect, placeh
     setSuggestions([]);
     setOpen(false);
     onChange?.(text);
+
     try {
       const id = placeId(item);
       if (id) {
         const details = await locationService.details(id);
         onSelect?.(details?.data || details?.result || details || item);
-      } else onSelect?.(item);
+      } else {
+        onSelect?.(item);
+      }
     } catch {
       onSelect?.(item);
     }
@@ -62,7 +67,11 @@ export default function LocationAutocomplete({ value, onChange, onSelect, placeh
         <RiMapPinLine size={17} aria-hidden="true" />
         <input
           value={query}
-          onChange={(e) => { setQuery(e.target.value); onChange?.(e.target.value); setOpen(true); }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            onChange?.(event.target.value);
+            setOpen(true);
+          }}
           onFocus={() => suggestions.length && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 160)}
           placeholder={placeholder}
@@ -70,16 +79,29 @@ export default function LocationAutocomplete({ value, onChange, onSelect, placeh
           aria-autocomplete="list"
           aria-expanded={open}
         />
-        {loading && <RiLoader4Line className="location-spinner" size={16} aria-label="Loading suggestions" />}
+        {loading ? (
+          <RiLoader4Line className="location-spinner" size={16} aria-label="Loading suggestions" />
+        ) : (
+          <span className="location-can-search" aria-hidden="true"><RiArrowRightLine size={14} /></span>
+        )}
       </div>
+
       {open && suggestions.length > 0 && (
         <div className="location-suggestions" role="listbox">
           {suggestions.map((item, index) => {
             const text = label(item);
-            return <button type="button" role="option" key={`${placeId(item) || text}-${index}`} onMouseDown={(e) => e.preventDefault()} onClick={() => choose(item)}>
-              <RiMapPinLine size={16} />
-              <span>{text}</span>
-            </button>;
+            return (
+              <button
+                type="button"
+                role="option"
+                key={`${placeId(item) || text}-${index}`}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => choose(item)}
+              >
+                <RiMapPinLine size={16} />
+                <span>{text}</span>
+              </button>
+            );
           })}
         </div>
       )}

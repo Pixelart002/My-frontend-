@@ -49,14 +49,26 @@ export default function OrderSuccessPage() {
         <h1>{isCod ? 'Your order is placed.' : 'Thank you.'}</h1>
         <p>{isCod ? `Your COD order${orderNumber ? ` #${orderNumber}` : ''} has been confirmed. You’ll pay when it arrives.` : `Your order${orderNumber ? ` #${orderNumber}` : ''} has been placed and is being prepared.`}</p>
         {orderNumber && (
-          <div className="order-result-order-id">
-            <span>Order number</span>
-            <strong>#{orderNumber}</strong>
-            {hasServerTotal && <><span>Order total</span><strong>{formatMoney(serverTotal)}</strong></>}
+          <div className="order-result-order-id" aria-live="polite">
+            <div>
+              <span>Order number</span>
+              <strong>#{orderNumber}</strong>
+            </div>
+            {hasServerTotal && (
+              <div>
+                <span>Order total</span>
+                <strong>{formatMoney(serverTotal)}</strong>
+              </div>
+            )}
           </div>
         )}
         {orderError && <p className="form-error" role="status">{orderError}</p>}
-        {orderNumber && <div className="order-result-actions"><Link className="btn" to={`/orders/${encodeURIComponent(orderNumber)}`}>View order <RiArrowRightLine size={17} /></Link><Link className="btn btn-quiet" to="/orders">All orders</Link></div>}
+        {orderNumber && (
+          <div className="order-result-actions">
+            <Link className="btn" to={`/orders/${encodeURIComponent(orderNumber)}`}>View order <RiArrowRightLine size={17} /></Link>
+            <Link className="btn btn-quiet" to="/orders">All orders</Link>
+          </div>
+        )}
         <Link className="btn btn-ghost" to="/shop">Continue shopping</Link>
         <div className="order-result-meta">
           <div><RiMailLine size={21} /><span>Order confirmation<br />available in your account</span></div>

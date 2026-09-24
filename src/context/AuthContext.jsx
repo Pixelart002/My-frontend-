@@ -64,6 +64,22 @@ export function AuthProvider({ children }) {
     }
   }, [persistToken]);
 
+  const syncSessionState = useCallback(async (access) => {
+    if (!access) {
+      clearSession();
+      return null;
+    }
+
+    persistToken(access);
+    try {
+      sessionStorage.setItem(SESSION_HINT, '1');
+    } catch {
+      /* noop */
+    }
+
+    return loadProfile(access);
+  }, [clearSession, loadProfile, persistToken]);
+
   // Expose token hooks to the API client (used for the 401 refresh path).
   useEffect(() => {
     window.__getLuviioToken = () => token;
@@ -91,13 +107,7 @@ export function AuthProvider({ children }) {
         const access = payload?.access_token || null;
         if (!active) return;
         if (access) {
-          persistToken(access);
-          try {
-            sessionStorage.setItem(SESSION_HINT, '1');
-          } catch {
-            /* noop */
-          }
-          await loadProfile(access);
+          await syncSessionState(access);
         } else if (active) {
           clearSession();
         }
@@ -111,23 +121,17 @@ export function AuthProvider({ children }) {
       active = false;
     };
     // Run once on mount.
-  }, []);
+  }, [clearSession, syncSessionState]);
 
   const login = useCallback(
     async (email, password) => {
       const data = await authService.login(email, password);
       const access = data?.access_token;
       if (!access) throw new Error('Login did not return an access token.');
-      persistToken(access);
-      try {
-        sessionStorage.setItem(SESSION_HINT, '1');
-      } catch {
-        /* noop */
-      }
-      await loadProfile(access);
+      await syncSessionState(access);
       return data;
     },
-    [persistToken, loadProfile],
+    [syncSessionState],
   );
 
   const register = useCallback((email, password, fullName) => authService.register(email, password, fullName), []);

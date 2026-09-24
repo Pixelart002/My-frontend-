@@ -57,6 +57,8 @@ export default function ProfilePage() {
   const displayName = user?.full_name || user?.name || 'Not set';
   const displayPhone = user?.phone || 'Not set';
   const displayEmail = user?.email || 'Not available';
+  const accountSince = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'Ready to shop';
+  const hasPhone = Boolean(user?.phone && String(user.phone).trim());
 
   return (
     <div className="page container profile-page">
@@ -69,6 +71,24 @@ export default function ProfilePage() {
         <Link to="/orders">Order history</Link>
         <Link to="/account/addresses">Addresses</Link>
         <Link to="/account/settings">Settings</Link>
+      </div>
+
+      <div className="account-overview-grid">
+        <div className="account-stat-card">
+          <p className="eyebrow">Customer</p>
+          <h3>{displayName}</h3>
+          <small>Member since {accountSince}</small>
+        </div>
+        <div className="account-stat-card">
+          <p className="eyebrow">Contact</p>
+          <h3>{hasPhone ? 'Verified' : 'Add phone'}</h3>
+          <small>{displayPhone}</small>
+        </div>
+        <div className="account-stat-card">
+          <p className="eyebrow">Delivery</p>
+          <h3>Ready</h3>
+          <small><Link to="/account/addresses">Manage saved addresses</Link></small>
+        </div>
       </div>
 
       <section className="profile-card card" aria-labelledby="profile-details-heading">

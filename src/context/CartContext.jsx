@@ -54,13 +54,17 @@ export function CartProvider({ children }) {
       const data = await cartService.get();
       const next = data || EMPTY_CART;
       if (version !== sessionVersion.current) return EMPTY_CART;
-      setCart(next);
+      setCart({ ...EMPTY_CART, ...next, items: next.items || [] });
       return next;
     } catch (err) {
+      if (version !== sessionVersion.current) return EMPTY_CART;
       setError(err.message || 'Unable to load your cart.');
+      setCart(EMPTY_CART);
       return EMPTY_CART;
     } finally {
-      setLoading(false);
+      if (version === sessionVersion.current) {
+        setLoading(false);
+      }
     }
   }, [isAuthenticated]);
 
@@ -79,10 +83,12 @@ export function CartProvider({ children }) {
       try {
         const data = await cartService.addItem(productId, quantity);
         if (version !== sessionVersion.current) return EMPTY_CART;
-        setCart(data || EMPTY_CART);
+        setCart({ ...EMPTY_CART, ...(data || EMPTY_CART), items: (data?.items || EMPTY_CART.items) });
         return data;
       } finally {
-        setLoading(false);
+        if (version === sessionVersion.current) {
+          setLoading(false);
+        }
       }
     },
     [isAuthenticated],
@@ -96,10 +102,12 @@ export function CartProvider({ children }) {
       try {
         const data = await cartService.updateItem(productId, quantity);
         if (version !== sessionVersion.current) return EMPTY_CART;
-        setCart(data || EMPTY_CART);
+        setCart({ ...EMPTY_CART, ...(data || EMPTY_CART), items: (data?.items || EMPTY_CART.items) });
         return data;
       } finally {
-        setLoading(false);
+        if (version === sessionVersion.current) {
+          setLoading(false);
+        }
       }
     },
     [isAuthenticated],
@@ -112,10 +120,12 @@ export function CartProvider({ children }) {
     try {
       const data = await cartService.removeItem(productId);
       if (version !== sessionVersion.current) return EMPTY_CART;
-      setCart(data || EMPTY_CART);
+      setCart({ ...EMPTY_CART, ...(data || EMPTY_CART), items: (data?.items || EMPTY_CART.items) });
       return data;
     } finally {
-      setLoading(false);
+      if (version === sessionVersion.current) {
+        setLoading(false);
+      }
     }
   }, [isAuthenticated]);
 
