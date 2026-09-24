@@ -361,7 +361,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             <div className="field">
               <label htmlFor="product-hsn">{fieldLabel('HSN code', isCreate)}</label>
               <div className="hsn-suggest-wrap">
-                <input id="product-hsn" required={isCreate} minLength={isCreate ? 4 : undefined} maxLength={8} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\\D/g, '').slice(0, 8)); setHsnSuggestions([]); }} placeholder="Enter 4–8 digit HSN" inputMode="numeric" autoComplete="off" />
+                <input id="product-hsn" required={isCreate} minLength={isCreate ? 4 : undefined} maxLength={8} value={form.hsn_code} onChange={(e) => { setField('hsn_code', e.target.value.replace(/\D/g, '').slice(0, 8)); setHsnSuggestions([]); }} placeholder="Enter 4–8 digit HSN" inputMode="numeric" autoComplete="off" />
                 {(hsnSuggesting || hsnSuggestions.length > 0) && form.name.trim().length >= 2 && <div className="hsn-suggestions" role="listbox" aria-label="HSN suggestions">
                   {hsnSuggesting && <div className="hsn-suggestion-status">Finding matching HSN codes…</div>}
                   {!hsnSuggesting && hsnSuggestions.map((item) => <button type="button" className="hsn-suggestion" key={item.hsn_code} onClick={() => selectHsnSuggestion(item)} role="option">
