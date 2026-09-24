@@ -163,10 +163,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isCompact, setIsCompact] = useState(() =>
-    typeof window !== 'undefined' &&
-    window.matchMedia('(max-width: 980px)').matches
-  );
+  const [isCompact, setIsCompact] = useState(false);
 
   const mobileNavRef = useRef(null);
   const mobileCloseRef = useRef(null);
@@ -203,14 +200,15 @@ export default function Header() {
   }, [location.pathname, location.search]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 980px)');
-    const syncCompact = () => setIsCompact(mediaQuery.matches);
+    const syncCompact = () => {
+      setIsCompact(window.innerWidth <= 980);
+    };
 
     syncCompact();
-    mediaQuery.addEventListener?.('change', syncCompact);
+    window.addEventListener('resize', syncCompact, { passive: true });
 
     return () => {
-      mediaQuery.removeEventListener?.('change', syncCompact);
+      window.removeEventListener('resize', syncCompact);
     };
   }, []);
 
