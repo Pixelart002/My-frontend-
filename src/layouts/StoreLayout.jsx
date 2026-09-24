@@ -22,7 +22,7 @@ function shouldShowFooter(pathname) {
 }
 
 export default function StoreLayout() {
-  const { token, initializing, refreshProfile } = useAuth();
+  const { token, refreshProfile } = useAuth();
   const { pathname } = useLocation();
 
   // Refresh profile once a session token becomes available (e.g. after login
