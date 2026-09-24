@@ -1,5 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
-import { STRIPE_PK } from '../config/env';
+import { API_BASE, STRIPE_PK } from '../config/env';
 
 let stripePromise = null;
 
@@ -12,10 +12,38 @@ export function getStripePublishableKey() {
   return normalizeKey(STRIPE_PK);
 }
 
+async function resolveStripePublishableKey() {
+  // Prefer the backend's public Stripe configuration so the browser always
+  // uses the same Stripe account configured for PaymentIntent creation.
+  try {
+    const response = await fetch(`${API_BASE}/payments/public-config`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      const runtimeKey = normalizeKey(
+        payload?.data?.stripe?.publishable_key ||
+        payload?.stripe?.publishable_key ||
+        payload?.data?.publishable_key,
+      );
+      if (runtimeKey) return runtimeKey;
+    }
+  } catch {
+    // Fall back to the browser-configured public key when the runtime
+    // configuration endpoint is temporarily unavailable.
+  }
+
+  return getStripePublishableKey();
+}
+
 export function getStripePromise() {
   if (!stripePromise) {
-    const key = getStripePublishableKey();
-    stripePromise = key ? loadStripe(key) : Promise.resolve(null);
+    stripePromise = resolveStripePublishableKey().then((key) => {
+      if (!key) return null;
+      return loadStripe(key);
+    });
   }
   return stripePromise;
 }
