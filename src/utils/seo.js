@@ -1,7 +1,7 @@
 const SITE = 'https://www.luviio.in';
 const DEFAULT_IMAGE = `${SITE}/icon-512.png`;
-const DEFAULT_TITLE = 'Luviio — Beautiful essentials for everyday living';
-const DEFAULT_DESCRIPTION = 'Considered essentials for a more beautiful everyday.';
+const DEFAULT_TITLE = 'Luviio — Hardware, sanitary & drainage essentials';
+const DEFAULT_DESCRIPTION = 'Hardware, sanitary, drainage and bathroom essentials for everyday homes.';
 
 const upsertMeta = (selector, attrs, content) => {
   if (!content) {
