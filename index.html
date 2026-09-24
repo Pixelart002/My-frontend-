@@ -2,28 +2,276 @@
 <html lang="en-IN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101010" />
-    <meta name="description" content="Luviio — considered essentials for a more beautiful everyday." />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#080808" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Luviio — considered essentials for a more beautiful everyday."
+    />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="canonical" href="https://www.luviio.in/" />
+
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Luviio" />
-    <meta property="og:title" content="Luviio — Beautiful essentials for everyday living" />
-    <meta property="og:description" content="Considered essentials for a more beautiful everyday." />
+    <meta
+      property="og:title"
+      content="Luviio — Beautiful essentials for everyday living"
+    />
+    <meta
+      property="og:description"
+      content="Considered essentials for a more beautiful everyday."
+    />
     <meta property="og:url" content="https://www.luviio.in/" />
-    <meta property="og:image" content="https://www.luviio.in/icon-512.png" />
+    <meta
+      property="og:image"
+      content="https://www.luviio.in/icon-512.png"
+    />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Luviio — Beautiful essentials for everyday living" />
+    <meta
+      property="og:image:alt"
+      content="Luviio — Beautiful essentials for everyday living"
+    />
+
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luviio — Beautiful essentials for everyday living" />
-    <meta name="twitter:description" content="Considered essentials for a more beautiful everyday." />
-    <meta name="twitter:image" content="https://www.luviio.in/icon-512.png" />
+    <meta
+      name="twitter:title"
+      content="Luviio — Beautiful essentials for everyday living"
+    />
+    <meta
+      name="twitter:description"
+      content="Considered essentials for a more beautiful everyday."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.luviio.in/icon-512.png"
+    />
+
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <title>Luviio — Beautiful essentials for everyday living</title>
+
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        --luviio-bg: #080808;
+        --luviio-surface: #101010;
+        --luviio-surface-raised: #151515;
+        --luviio-text: #f5f5f0;
+        --luviio-text-muted: #a6a6a0;
+        --luviio-border: rgba(255, 255, 255, 0.12);
+        --luviio-border-strong: rgba(255, 255, 255, 0.2);
+        --luviio-gold: #c8a45d;
+        --luviio-gold-strong: #e0bc70;
+
+        --luviio-page-gutter: clamp(1rem, 3vw, 2rem);
+        --luviio-content-width: min(100% - (2 * var(--luviio-page-gutter)), 1280px);
+        --luviio-control-height: 44px;
+        --luviio-radius-sm: 10px;
+        --luviio-radius-md: 14px;
+        --luviio-radius-lg: 20px;
+        --luviio-motion-fast: 140ms;
+        --luviio-motion-base: 220ms;
+        --luviio-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 320px;
+        min-height: 100%;
+        background: var(--luviio-bg);
+        scroll-behavior: smooth;
+        scroll-padding-top: 5rem;
+        overflow-x: clip;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100dvh;
+        margin: 0;
+        background: var(--luviio-bg);
+        color: var(--luviio-text);
+        font-family: inherit;
+        font-size: 16px;
+        line-height: 1.5;
+        overflow-x: clip;
+      }
+
+      #root {
+        width: 100%;
+        min-width: 0;
+        min-height: 100dvh;
+        isolation: isolate;
+      }
+
+      #root > * {
+        min-width: 0;
+      }
+
+      main,
+      header,
+      footer,
+      nav,
+      section,
+      article,
+      aside {
+        min-width: 0;
+      }
+
+      img,
+      picture,
+      video,
+      canvas,
+      svg {
+        display: block;
+        max-width: 100%;
+      }
+
+      img,
+      video {
+        height: auto;
+      }
+
+      svg {
+        flex: 0 0 auto;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+        text-underline-offset: 0.18em;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        margin: 0;
+        font: inherit;
+      }
+
+      button {
+        min-height: var(--luviio-control-height);
+        border: 1px solid transparent;
+        border-radius: var(--luviio-radius-sm);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          transform var(--luviio-motion-fast) var(--luviio-ease),
+          background-color var(--luviio-motion-base) var(--luviio-ease),
+          border-color var(--luviio-motion-base) var(--luviio-ease),
+          color var(--luviio-motion-base) var(--luviio-ease),
+          box-shadow var(--luviio-motion-base) var(--luviio-ease),
+          opacity var(--luviio-motion-base) var(--luviio-ease);
+      }
+
+      button:not(:disabled) {
+        cursor: pointer;
+      }
+
+      button:not(:disabled):active {
+        transform: translateY(1px);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.56;
+      }
+
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--luviio-gold);
+        outline-offset: 3px;
+      }
+
+      ::selection {
+        background: rgba(200, 164, 93, 0.3);
+        color: #fff;
+      }
+
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--luviio-bg);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border: 2px solid var(--luviio-bg);
+        border-radius: 999px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.28);
+      }
+
+      @media (max-width: 768px) {
+        :root {
+          --luviio-page-gutter: 1rem;
+          --luviio-control-height: 46px;
+        }
+
+        html {
+          scroll-padding-top: 4rem;
+        }
+
+        body {
+          font-size: 15px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
   </head>
+
   <body>
     <div id="root"></div>
     <noscript>Luviio requires JavaScript for shopping, cart and checkout.</noscript>
