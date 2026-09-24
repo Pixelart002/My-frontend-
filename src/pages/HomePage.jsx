@@ -213,6 +213,7 @@ export default function HomePage() {
       >
         <div style={{ ...styles.width, position: 'relative', zIndex: 2 }}>
           <div
+            className="home-hero-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'minmax(0, 1.25fr) minmax(280px, .75fr)',
@@ -338,6 +339,7 @@ export default function HomePage() {
               </span>
 
               <div
+                className="home-highlight-stats"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
@@ -455,6 +457,7 @@ export default function HomePage() {
 
       <section style={styles.section} data-reveal aria-label="Store overview">
         <div
+          className="home-overview-grid"
           style={{
             ...styles.width,
             display: 'grid',
@@ -681,6 +684,7 @@ export default function HomePage() {
         aria-labelledby="value-title"
       >
         <div
+          className="home-value-grid"
           style={{
             ...styles.width,
             display: 'grid',
