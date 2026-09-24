@@ -943,12 +943,14 @@ function desktopNavLink({
 }
 
 const styles = {
+  /* Header styles are intentionally isolated; do not move them to global selectors. */
   header: {
     position: 'sticky',
     top: 0,
     zIndex: UI.headerZ,
     width: '100%',
     boxSizing: 'border-box',
+    isolation: 'isolate',
     background: 'rgba(255,255,255,.96)',
     borderBottom:
       '1px solid rgba(15,23,42,.07)',
