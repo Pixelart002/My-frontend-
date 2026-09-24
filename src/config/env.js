@@ -28,18 +28,7 @@ export const API_BASE = normalizeApiBase(
  * Stripe publishable key. All supported names are public/browser-safe values.
  * Prefer VITE_STRIPE_PK; aliases keep existing Vercel configurations working.
  */
-const DEFAULT_STRIPE_PUBLISHABLE_KEY = 'pk_test_51LQQdRSDXqp6jmyTe96SuttCSgDD91Yu90PsGPLuw9liYziNa1TT0Yhi01fRdNuh5k656lM93wRYTjJZK7vzJBzL00FQaIQXYa';
-
-export const STRIPE_PK = String(
-  import.meta.env.VITE_STRIPE_PK ||
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_STRIPE_PUBLIC_KEY ||
-  import.meta.env.NEXT_PUBLIC_STRIPE_PK ||
-  import.meta.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-  import.meta.env.STRIPE_PK ||
-  import.meta.env.STRIPE_PUBLISHABLE_KEY ||
-  DEFAULT_STRIPE_PUBLISHABLE_KEY,
-).trim();
+export const STRIPE_PK = String(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '').trim();
 
 export const APP_NAME = 'Luviio';
 export const CURRENCY = 'INR';
