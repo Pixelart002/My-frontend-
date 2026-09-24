@@ -39,7 +39,7 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
   return <div className="payment-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !loading && (isCodSuccess || !locked)) handleClose(); }}>
     <div ref={modalRef} tabIndex={-1} className={`payment-modal ${review ? 'payment-modal-review' : ''} ${hasPaymentContent ? 'payment-modal-active' : ''}`} role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
       <header className="payment-modal-header">
-        <div className="payment-modal-title-wrap"><p className="eyebrow">Secure checkout</p><h3 id="payment-modal-title">{title}</h3></div>
+        <div className="payment-modal-title-wrap"><h3 id="payment-modal-title">{title}</h3></div>
         <button ref={closeRef} type="button" className="btn btn-quiet btn-icon payment-modal-close" aria-label={isCodSuccess ? 'View order confirmation' : locked ? 'Cancel order' : 'Close payment dialog'} onClick={handleClose} disabled={loading || cancellingOrder}>
           <RiCloseLine aria-hidden="true" style={iconStyle} />
         </button>
@@ -52,7 +52,7 @@ export default function PaymentMethodModal({ open, value, onChange, onClose, onC
             <span className="payment-option-copy">
               <span className="payment-option-topline"><strong>Online payment</strong>{value === 'stripe' && <span className="payment-option-check"><RiCheckboxCircleFill size={15} aria-hidden="true" /></span>}</span>
               <small>Pay securely with card, UPI and other Stripe-supported methods.</small>
-              <span className="payment-option-meta"><span>Secure checkout</span><span>Stripe</span></span>
+              <span className="payment-option-meta"><span>Stripe payment</span><span>Card / UPI</span></span>
             </span>
           </label>
           <label className={`payment-option ${value === 'cod' ? 'is-selected' : ''}`}>
