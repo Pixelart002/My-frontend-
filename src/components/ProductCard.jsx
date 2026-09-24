@@ -18,5 +18,78 @@ export default function ProductCard({ product }) {
   const onTouchStart=(event)=>{if(gallery.length<2)return;touchStart.current=event.changedTouches?.[0]?.clientX??null};
   const onTouchEnd=(event)=>{if(touchStart.current===null)return;const end=event.changedTouches?.[0]?.clientX??touchStart.current;const delta=end-touchStart.current;touchStart.current=null;if(Math.abs(delta)>36)moveImage(event,delta<0?1:-1)};
   const handleAdd=async(e)=>{e.preventDefault();e.stopPropagation();if(!isAuthenticated){toast.info('Please sign in to add this product to your cart.');navigate('/login',{state:{from:`/product/${slug}`}});return}if(outOfStock||adding)return;setAdding(true);try{await addItem(product.id,1);setAdded(true);toast.success('Product added to your cart.');if(addedTimer.current)window.clearTimeout(addedTimer.current);addedTimer.current=window.setTimeout(()=>setAdded(false),1600)}catch(err){toast.error(err?.message||'Unable to add this item.')}finally{setAdding(false)}};
-  return <article className="product-card" aria-label={name}>{discount>0&&<span className="badge">{Math.round(discount)}% off</span>}<div className="product-media" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}><Link to={`/product/${slug}`} className="product-media-link" aria-label={`View ${name}`} onKeyDown={e=>{if(e.key==='ArrowLeft')moveImage(e,-1);if(e.key==='ArrowRight')moveImage(e,1)}}>{gallery[safeIndex]&&!imageFailed?<img src={gallery[safeIndex]} alt={`${name} image ${safeIndex+1}`} loading="lazy" decoding="async" draggable="false" onError={()=>setImageFailed(true)}/>:<span className="placeholder" aria-hidden="true">{name.trim().slice(0,1).toUpperCase()||'L'}</span>}</Link>{gallery.length>1&&<><button type="button" className="product-carousel-arrow product-carousel-prev" onClick={e=>moveImage(e,-1)} aria-label="Previous product image"><RiArrowLeftSLine size={18}/></button><button type="button" className="product-carousel-arrow product-carousel-next" onClick={e=>moveImage(e,1)} aria-label="Next product image"><RiArrowRightLine size={18}/></button><span className="product-carousel-count" aria-live="polite">{safeIndex+1}/{gallery.length}</span><span className="product-carousel-dots" aria-label="Select product image">{gallery.map((_,index)=><button key={index} type="button" className={index===safeIndex?'is-active':''} onClick={e=>selectImage(e,index)} aria-label={`View image ${index+1}`} />)}</span></>}</div><div className="product-meta"><div className="product-copy"><p className="product-category">{category}</p><h3 title={name}>{name}</h3></div><div className="product-price-row" aria-label={`Price ${formatMoney(price)}`}>{compare>price&&price>0&&<span className="product-price">{formatMoney(price)}</span>}{compare>price&&price>0&&<span className="was" aria-label={`Previous price ${formatMoney(compare)}`}>{formatMoney(compare)}</span></div></div><button type="button" className={`add-button ${added?'done':''}`} onClick={handleAdd} aria-label={outOfStock ? `${name} is currently unavailable` : added ? `${name} added to cart` : `Add ${name} to cart`} disabled={outOfStock||adding} aria-busy={adding}><span>{outOfStock?'Unavailable':adding?'Adding…':added?'Added to cart':'Add to cart'}</span>{!outOfStock&&(added?<RiCheckLine size={15}/>:<RiArrowRightLine size={15}/>)}</button></article>;
+  return (
+    <article className="product-card" aria-label={name}>
+      {discount > 0 && <span className="badge">{discount}% off</span>}
+      <div className="product-media" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <Link
+          to={`/product/${slug}`}
+          className="product-media-link"
+          aria-label={`View ${name}`}
+          onKeyDown={e => {
+            if (e.key === 'ArrowLeft') moveImage(e, -1);
+            if (e.key === 'ArrowRight') moveImage(e, 1);
+          }}
+        >
+          {gallery[safeIndex] && !imageFailed ? (
+            <img
+              src={gallery[safeIndex]}
+              alt={`${name} image ${safeIndex + 1}`}
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <span className="placeholder" aria-hidden="true">
+              {name.trim().slice(0, 1).toUpperCase() || 'L'}
+            </span>
+          )}
+        </Link>
+        {gallery.length > 1 && (
+          <>
+            <button type="button" className="product-carousel-arrow product-carousel-prev" onClick={e => moveImage(e, -1)} aria-label="Previous product image">
+              <RiArrowLeftSLine size={18} />
+            </button>
+            <button type="button" className="product-carousel-arrow product-carousel-next" onClick={e => moveImage(e, 1)} aria-label="Next product image">
+              <RiArrowRightLine size={18} />
+            </button>
+            <span className="product-carousel-count" aria-live="polite">{safeIndex + 1}/{gallery.length}</span>
+            <span className="product-carousel-dots" aria-label="Select product image">
+              {gallery.map((_, index) => (
+                <button key={index} type="button" className={index === safeIndex ? 'is-active' : ''} onClick={e => selectImage(e, index)} aria-label={`View image ${index + 1}`} />
+              ))}
+            </span>
+          </>
+        )}
+      </div>
+
+      <div className="product-meta">
+        <div className="product-copy">
+          <p className="product-category">{category}</p>
+          <h3 title={name}>{name}</h3>
+        </div>
+        <div className="product-price-row" aria-label={`Price ${formatMoney(price)}`}>
+          <span className="product-price">{formatMoney(price)}</span>
+          {compare > price && price > 0 && (
+            <span className="was" aria-label={`Previous price ${formatMoney(compare)}`}>
+              {formatMoney(compare)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className={`add-button ${added ? 'done' : ''}`}
+        onClick={handleAdd}
+        aria-label={outOfStock ? `${name} is currently unavailable` : added ? `${name} added to cart` : `Add ${name} to cart`}
+        disabled={outOfStock || adding}
+        aria-busy={adding}
+      >
+        <span>{outOfStock ? 'Unavailable' : adding ? 'Adding…' : added ? 'Added to cart' : 'Add to cart'}</span>
+        {!outOfStock && (added ? <RiCheckLine size={15} /> : <RiArrowRightLine size={15} />)}
+      </button>
+    </article>
+  );
 }
