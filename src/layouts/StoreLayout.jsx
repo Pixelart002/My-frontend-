@@ -31,15 +31,6 @@ export default function StoreLayout() {
     if (token) refreshProfile();
   }, [token, refreshProfile]);
 
-  if (initializing) {
-    return (
-      <div className="boot-screen">
-        <div className="boot-brand">LUVIIO</div>
-        <div className="spin boot-spinner" />
-      </div>
-    );
-  }
-
   return (
     <div data-luviio-app style={{ minHeight: '100vh', background: '#080808' }}>
       <LuviioInlineTheme />
