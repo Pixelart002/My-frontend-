@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   RiArchive2Line,
-  RiArrowDownSLine,
   RiBarChart2Line,
   RiBankCardLine,
   RiBuilding4Line,
@@ -36,7 +35,13 @@ import {
   RiVipCrownLine,
 } from '@remixicon/react';
 
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Link,
+  NavLink,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -48,7 +53,7 @@ const ADMIN_NAV = [
   ['categories', 'Categories', RiFolder2Line],
   ['orders', 'Orders', RiShoppingCart2Line],
   ['coupons', 'Coupons', RiCoupon3Line],
-  ['inventory', 'Inventory', RiStackLine],
+  ['inventory', 'Inventory', RiStack3Line],
   ['shipping', 'Shipping', RiTruckLine],
   ['fulfillment', 'Fulfillment', RiTruckLine],
   ['subscriptions', 'Subscriptions', RiVipCrownLine],
@@ -87,38 +92,64 @@ const ADMIN_GROUPS = [
   ],
 ];
 
-const navItemStyle = {
+const UI = {
+  headerZ: 1000,
+  dropdownZ: 1020,
+  backdropZ: 1090,
+  drawerZ: 1100,
+
+  text: '#111827',
+  muted: '#64748b',
+  border: 'rgba(15,23,42,.09)',
+  gold: '#b89143',
+  surface: '#ffffff',
+  soft: '#f8fafc',
+};
+
+const resetButton = {
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  margin: 0,
+  padding: 0,
+  border: 0,
+  outline: 'none',
+  font: 'inherit',
+  lineHeight: 'normal',
+  textTransform: 'none',
+  textDecoration: 'none',
+  boxSizing: 'border-box',
+};
+
+const resetInput = {
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  margin: 0,
+  padding: 0,
+  border: 0,
+  outline: 'none',
+  boxSizing: 'border-box',
+  font: 'inherit',
+};
+
+const iconButton = {
+  ...resetButton,
+  position: 'relative',
+  width: 42,
+  height: 42,
+  minWidth: 42,
+  minHeight: 42,
+  flex: '0 0 42px',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: 6,
-  minHeight: 40,
-  padding: '0 12px',
-  borderRadius: 10,
-  color: '#64748b',
-  textDecoration: 'none',
-  fontSize: 13,
-  fontWeight: 650,
-  letterSpacing: '-0.01em',
-  transition:
-    'color 160ms ease, background 160ms ease',
-};
-
-const iconButtonStyle = {
-  position: 'relative',
-  width: 40,
-  height: 40,
-  display: 'grid',
-  placeItems: 'center',
-  flexShrink: 0,
-  padding: 0,
-  border: '1px solid rgba(15,23,42,.09)',
-  borderRadius: 11,
+  border: `1px solid ${UI.border}`,
+  borderRadius: 12,
   color: '#334155',
-  background: '#fff',
+  background: UI.surface,
   cursor: 'pointer',
+  overflow: 'visible',
   transition:
-    'background 160ms ease, border-color 160ms ease, transform 160ms ease',
+    'background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease',
 };
 
 export default function Header() {
@@ -178,32 +209,42 @@ export default function Header() {
       passive: true,
     });
 
-    return () =>
-      window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener(
+        'scroll',
+        onScroll
+      );
+    };
   }, []);
 
   useEffect(() => {
     if (!mobileOpen) return undefined;
 
-    const previous = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
 
     document.body.style.overflow = 'hidden';
 
     return () => {
-      document.body.style.overflow = previous;
+      document.body.style.overflow =
+        previousOverflow;
     };
   }, [mobileOpen]);
 
   useEffect(() => {
     if (!menuOpen) return undefined;
 
-    const onPointerDown = (event) => {
-      if (!event.target.closest('[data-account-menu]')) {
+    const handlePointerDown = (event) => {
+      if (
+        !event.target.closest(
+          '[data-account-menu]'
+        )
+      ) {
         setMenuOpen(false);
       }
     };
 
-    const onKeyDown = (event) => {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setMenuOpen(false);
       }
@@ -211,23 +252,23 @@ export default function Header() {
 
     document.addEventListener(
       'pointerdown',
-      onPointerDown
+      handlePointerDown
     );
 
     document.addEventListener(
       'keydown',
-      onKeyDown
+      handleKeyDown
     );
 
     return () => {
       document.removeEventListener(
         'pointerdown',
-        onPointerDown
+        handlePointerDown
       );
 
       document.removeEventListener(
         'keydown',
-        onKeyDown
+        handleKeyDown
       );
     };
   }, [menuOpen]);
@@ -236,9 +277,7 @@ export default function Header() {
     enabled: mobileOpen,
     containerRef: mobileNavRef,
     initialFocusRef: mobileCloseRef,
-    onEscape: () => {
-      setMobileOpen(false);
-    },
+    onEscape: () => setMobileOpen(false),
   });
 
   const closeAll = () => {
@@ -266,25 +305,14 @@ export default function Header() {
 
     try {
       await logout();
-      toast.success(
-        'You have been signed out.'
-      );
+      toast.success('You have been signed out.');
       navigate('/');
     } catch (error) {
       toast.error(
-        error?.message ||
-          'Unable to sign out right now.'
+        error?.message || 'Unable to sign out right now.'
       );
     }
   };
-
-  const accountTarget = isAuthenticated
-    ? '/account'
-    : '/login';
-
-  const accountLabel = isAuthenticated
-    ? 'Account'
-    : 'Sign in';
 
   const menuLink = (
     to,
@@ -296,13 +324,7 @@ export default function Header() {
       onClick={closeAll}
       style={styles.mobileLink}
     >
-      {Icon && (
-        <Icon
-          size={19}
-          aria-hidden="true"
-        />
-      )}
-
+      {Icon && <Icon size={19} aria-hidden="true" />}
       <span>{label}</span>
     </Link>
   );
@@ -310,7 +332,7 @@ export default function Header() {
   const adminMenuLink = (
     key,
     label,
-    Icon = null
+    Icon
   ) => {
     const active =
       isAdminPage &&
@@ -320,24 +342,17 @@ export default function Header() {
       <Link
         to={`/admin?panel=${key}`}
         onClick={closeAll}
-        className={active ? 'is-active' : undefined}
         aria-current={
           active ? 'page' : undefined
         }
         style={{
-          ...styles.adminMobileLink,
+          ...styles.adminLink,
           ...(active
-            ? styles.adminMobileLinkActive
+            ? styles.adminLinkActive
             : {}),
         }}
       >
-        {Icon && (
-          <Icon
-            size={18}
-            aria-hidden="true"
-          />
-        )}
-
+        <Icon size={18} aria-hidden="true" />
         <span>{label}</span>
       </Link>
     );
@@ -346,16 +361,16 @@ export default function Header() {
   const mobileContent =
     isAdminPage && isAdmin ? (
       <>
-        <div style={styles.mobileAdminContainer}>
+        <div style={styles.adminGroups}>
           {ADMIN_GROUPS.map(
             ([group, keys]) => (
-              <div
+              <section
                 key={group}
-                style={styles.mobileAdminGroup}
+                style={styles.adminGroup}
               >
                 <div
                   style={
-                    styles.mobileAdminLabel
+                    styles.adminGroupLabel
                   }
                 >
                   {group}
@@ -367,8 +382,7 @@ export default function Header() {
 
                   if (!item) return null;
 
-                  const [label, Icon] =
-                    item;
+                  const [label, Icon] = item;
 
                   return (
                     <div key={key}>
@@ -380,7 +394,7 @@ export default function Header() {
                     </div>
                   );
                 })}
-              </div>
+              </section>
             )
           )}
         </div>
@@ -400,7 +414,8 @@ export default function Header() {
         >
           <RiSearchLine
             size={19}
-            color="#64748b"
+            color={UI.muted}
+            aria-hidden="true"
           />
 
           <input
@@ -412,27 +427,17 @@ export default function Header() {
           />
         </form>
 
-        <div style={styles.mobileSection}>
-          {menuLink(
-            '/',
-            'Home',
-            RiHomeLine
-          )}
-
-          {menuLink(
-            '/shop',
-            'Shop',
-            RiStore2Line
-          )}
-
+        <section style={styles.mobileSection}>
+          {menuLink('/', 'Home', RiHomeLine)}
+          {menuLink('/shop', 'Shop', RiStore2Line)}
           {menuLink(
             '/shop',
             'Categories',
             RiGridLine
           )}
-        </div>
+        </section>
 
-        <div style={styles.mobileSection}>
+        <section style={styles.mobileSection}>
           {menuLink(
             '/cart',
             `Shopping bag${
@@ -450,13 +455,17 @@ export default function Header() {
           )}
 
           {menuLink(
-            accountTarget,
-            accountLabel,
+            isAuthenticated
+              ? '/account'
+              : '/login',
+            isAuthenticated
+              ? 'Account'
+              : 'Sign in',
             RiUser3Line
           )}
-        </div>
+        </section>
 
-        <div style={styles.mobileSection}>
+        <section style={styles.mobileSection}>
           {menuLink(
             '/about',
             'About',
@@ -471,9 +480,9 @@ export default function Header() {
             <RiMailLine size={19} />
             <span>Contact</span>
           </a>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
             ...styles.mobileSection,
             borderBottom: 0,
@@ -484,13 +493,6 @@ export default function Header() {
               '/register',
               'Create account',
               RiUserLine
-            )}
-
-          {!isAuthenticated &&
-            menuLink(
-              '/login',
-              'Sign in',
-              RiUser3Line
             )}
 
           {isAdmin &&
@@ -504,18 +506,13 @@ export default function Header() {
             <button
               type="button"
               onClick={onLogout}
-              style={
-                styles.mobileAction
-              }
+              style={styles.mobileLogout}
             >
-              <RiLogoutBoxRLine
-                size={19}
-              />
-
+              <RiLogoutBoxRLine size={19} />
               <span>Sign out</span>
             </button>
           )}
-        </div>
+        </section>
       </>
     );
 
@@ -540,7 +537,6 @@ export default function Header() {
             <span style={styles.brandMark}>
               l
             </span>
-
             <span>luviio</span>
           </Link>
 
@@ -552,36 +548,34 @@ export default function Header() {
             <NavLink
               end
               to="/"
-              style={navLinkStyle}
+              style={desktopNavLink}
             >
               Home
             </NavLink>
 
             <NavLink
-              end
               to="/shop"
-              style={navLinkStyle}
+              style={desktopNavLink}
             >
               Shop
             </NavLink>
 
             <NavLink
-              end
               to="/about"
-              style={navLinkStyle}
+              style={desktopNavLink}
             >
               About
             </NavLink>
 
             <a
               href="mailto:support@luviio.in"
-              style={navLinkStyle}
+              style={desktopNavLink}
             >
               Contact
             </a>
           </nav>
 
-          {/* HEADER ACTIONS */}
+          {/* ACTION AREA */}
           <div style={styles.actions}>
             <form
               onSubmit={onSearch}
@@ -590,7 +584,8 @@ export default function Header() {
             >
               <RiSearchLine
                 size={17}
-                color="#64748b"
+                color={UI.muted}
+                aria-hidden="true"
               />
 
               <input
@@ -601,7 +596,7 @@ export default function Header() {
                 style={styles.searchInput}
               />
 
-              <kbd style={styles.searchHint}>
+              <kbd style={styles.searchKey}>
                 /
               </kbd>
             </form>
@@ -609,9 +604,7 @@ export default function Header() {
             {/* ACCOUNT */}
             <div
               data-account-menu
-              style={
-                styles.accountContainer
-              }
+              style={styles.accountWrap}
             >
               <button
                 type="button"
@@ -621,9 +614,15 @@ export default function Header() {
                     : 'Sign in'
                 }
                 aria-expanded={
-                  menuOpen
+                  isAuthenticated
+                    ? menuOpen
+                    : undefined
                 }
-                aria-controls="account-menu"
+                aria-haspopup={
+                  isAuthenticated
+                    ? 'menu'
+                    : undefined
+                }
                 onClick={() => {
                   if (!isAuthenticated) {
                     navigate('/login');
@@ -635,7 +634,7 @@ export default function Header() {
                   );
                 }}
                 style={{
-                  ...iconButtonStyle,
+                  ...iconButton,
                   ...(menuOpen
                     ? styles.iconButtonActive
                     : {}),
@@ -645,9 +644,8 @@ export default function Header() {
 
                 {isAuthenticated && (
                   <span
-                    style={
-                      styles.accountStatus
-                    }
+                    aria-hidden="true"
+                    style={styles.onlineDot}
                   />
                 )}
               </button>
@@ -657,13 +655,11 @@ export default function Header() {
                   <div
                     id="account-menu"
                     role="menu"
-                    style={
-                      styles.accountMenu
-                    }
+                    style={styles.accountMenu}
                   >
                     <div
                       style={
-                        styles.menuIdentity
+                        styles.identity
                       }
                     >
                       <div
@@ -683,7 +679,7 @@ export default function Header() {
 
                       <div
                         style={
-                          styles.identityText
+                          styles.identityCopy
                         }
                       >
                         <strong>
@@ -699,74 +695,67 @@ export default function Header() {
                     </div>
 
                     <div
-                      style={
-                        styles.menuDivider
-                      }
+                      style={styles.divider}
                     />
 
-                    <AccountMenuLink
+                    <AccountLink
                       to="/account"
-                      icon={RiUser3Line}
                       label="Profile"
-                      close={closeAll}
+                      Icon={RiUser3Line}
+                      onClick={closeAll}
                     />
 
-                    <AccountMenuLink
+                    <AccountLink
                       to="/orders"
-                      icon={RiArchive2Line}
                       label="Orders"
-                      close={closeAll}
+                      Icon={RiArchive2Line}
+                      onClick={closeAll}
                     />
 
-                    <AccountMenuLink
+                    <AccountLink
                       to="/account/addresses"
-                      icon={RiMapPin2Line}
                       label="Addresses"
-                      close={closeAll}
+                      Icon={RiMapPin2Line}
+                      onClick={closeAll}
                     />
 
-                    <AccountMenuLink
+                    <AccountLink
                       to="/account/settings"
-                      icon={RiSettings3Line}
                       label="Settings"
-                      close={closeAll}
-                    />
-
-                    <div
-                      style={
-                        styles.menuDivider
-                      }
+                      Icon={RiSettings3Line}
+                      onClick={closeAll}
                     />
 
                     {isAdmin && (
-                      <AccountMenuLink
-                        to="/admin"
-                        icon={
-                          RiShieldStarLine
-                        }
-                        label="Admin dashboard"
-                        close={closeAll}
-                        accent
-                      />
+                      <>
+                        <div
+                          style={
+                            styles.divider
+                          }
+                        />
+
+                        <AccountLink
+                          to="/admin"
+                          label="Admin dashboard"
+                          Icon={
+                            RiShieldStarLine
+                          }
+                          onClick={closeAll}
+                          accent
+                        />
+                      </>
                     )}
 
                     <button
                       type="button"
                       role="menuitem"
-                      onClick={
-                        onLogout
-                      }
-                      style={
-                        styles.menuLogout
-                      }
+                      onClick={onLogout}
+                      style={styles.logout}
                     >
                       <RiLogoutBoxRLine
                         size={17}
                       />
-
-                      <span>
-                        Sign out
-                      </span>
+                      <span>Sign out</span>
                     </button>
                   </div>
                 )}
@@ -776,10 +765,7 @@ export default function Header() {
             <Link
               to="/cart"
               aria-label={`Shopping bag, ${itemCount} items`}
-              style={{
-                ...iconButtonStyle,
-                textDecoration: 'none',
-              }}
+              style={iconButton}
             >
               <RiShoppingBagLine
                 size={21}
@@ -787,9 +773,7 @@ export default function Header() {
 
               {itemCount > 0 && (
                 <span
-                  style={
-                    styles.cartCount
-                  }
+                  style={styles.cartBadge}
                 >
                   {itemCount > 99
                     ? '99+'
@@ -805,7 +789,6 @@ export default function Header() {
                 setMobileOpen(
                   (value) => !value
                 );
-
                 setMenuOpen(false);
               }}
               aria-expanded={
@@ -817,9 +800,10 @@ export default function Header() {
                   ? 'Close menu'
                   : 'Open menu'
               }
-              style={
-                styles.mobileMenuButton
-              }
+              style={{
+                ...iconButton,
+                display: 'none',
+              }}
             >
               {mobileOpen ? (
                 <RiCloseLine
@@ -854,23 +838,17 @@ export default function Header() {
         aria-label="Navigation menu"
         aria-hidden={!mobileOpen}
         style={{
-          ...styles.mobileDrawer,
+          ...styles.drawer,
           ...(mobileOpen
-            ? styles.mobileDrawerOpen
+            ? styles.drawerOpen
             : {}),
         }}
       >
-        <div
-          style={
-            styles.mobileDrawerHeader
-          }
-        >
+        <div style={styles.drawerHeader}>
           <Link
             to="/"
             onClick={closeAll}
-            style={
-              styles.mobileBrand
-            }
+            style={styles.mobileBrand}
           >
             luviio
           </Link>
@@ -880,21 +858,13 @@ export default function Header() {
             type="button"
             onClick={closeAll}
             aria-label="Close menu"
-            style={
-              styles.mobileCloseButton
-            }
+            style={iconButton}
           >
-            <RiCloseLine
-              size={21}
-            />
+            <RiCloseLine size={21} />
           </button>
         </div>
 
-        <div
-          style={
-            styles.mobileDrawerContent
-          }
-        >
+        <div style={styles.drawerContent}>
           {mobileContent}
         </div>
       </aside>
@@ -902,22 +872,22 @@ export default function Header() {
   );
 }
 
-function AccountMenuLink({
+function AccountLink({
   to,
-  icon: Icon,
   label,
-  close,
+  Icon,
+  onClick,
   accent = false,
 }) {
   return (
     <Link
       to={to}
       role="menuitem"
-      onClick={close}
+      onClick={onClick}
       style={{
-        ...styles.menuLink,
+        ...styles.accountLink,
         ...(accent
-          ? styles.menuLinkAccent
+          ? styles.accountLinkAccent
           : {}),
       }}
     >
@@ -927,17 +897,28 @@ function AccountMenuLink({
   );
 }
 
-function navLinkStyle({
+function desktopNavLink({
   isActive,
 }) {
   return {
-    ...navItemStyle,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
+    padding: '0 11px',
+    borderRadius: 10,
     color: isActive
-      ? '#111827'
-      : '#64748b',
+      ? UI.text
+      : UI.muted,
     background: isActive
       ? '#f5f3ee'
       : 'transparent',
+    textDecoration: 'none',
+    fontSize: 13,
+    fontWeight: isActive ? 750 : 650,
+    whiteSpace: 'nowrap',
+    transition:
+      'color 160ms ease, background-color 160ms ease',
   };
 }
 
@@ -945,19 +926,20 @@ const styles = {
   header: {
     position: 'sticky',
     top: 0,
-    zIndex: 1000,
+    zIndex: UI.headerZ,
     width: '100%',
-    background: 'rgba(255,255,255,.94)',
+    boxSizing: 'border-box',
+    background: 'rgba(255,255,255,.96)',
     borderBottom:
       '1px solid rgba(15,23,42,.07)',
     backdropFilter: 'blur(18px)',
     WebkitBackdropFilter: 'blur(18px)',
     transition:
-      'box-shadow 200ms ease, background 200ms ease',
+      'box-shadow 180ms ease, background-color 180ms ease',
   },
 
   headerScrolled: {
-    background: 'rgba(255,255,255,.88)',
+    background: 'rgba(255,255,255,.91)',
     boxShadow:
       '0 8px 30px rgba(15,23,42,.07)',
   },
@@ -967,40 +949,43 @@ const styles = {
     maxWidth: 1440,
     minHeight: 70,
     margin: '0 auto',
-    padding: '0 24px',
+    padding:
+      '0 clamp(14px, 3vw, 32px)',
+    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
-    gap: 28,
+    gap: 'clamp(12px, 2vw, 28px)',
   },
 
   brand: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 7,
-    flexShrink: 0,
-    color: '#111827',
+    flex: '0 0 auto',
+    color: UI.text,
     textDecoration: 'none',
     fontSize: 24,
     lineHeight: 1,
     fontWeight: 850,
-    letterSpacing: '-0.055em',
+    letterSpacing: '-.055em',
   },
 
   brandMark: {
-    display: 'grid',
-    placeItems: 'center',
     width: 28,
     height: 28,
-    borderRadius: 9,
+    flex: '0 0 28px',
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: 8,
     color: '#fff',
     background:
-      'linear-gradient(135deg,#111827,#374151)',
+      'linear-gradient(135deg,#111827,#475569)',
     fontSize: 17,
     fontWeight: 850,
-    letterSpacing: '-.04em',
   },
 
   desktopNav: {
+    minWidth: 0,
     display: 'flex',
     alignItems: 'center',
     gap: 2,
@@ -1008,45 +993,48 @@ const styles = {
   },
 
   actions: {
+    minWidth: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 8,
+    gap: 7,
+    flex: '0 0 auto',
     marginLeft: 'auto',
   },
 
   desktopSearch: {
-    width: 'min(280px, 25vw)',
-    height: 40,
+    width: 'clamp(180px, 22vw, 290px)',
+    height: 42,
+    minWidth: 0,
     display: 'flex',
     alignItems: 'center',
     gap: 8,
     padding: '0 10px 0 13px',
+    boxSizing: 'border-box',
     border:
       '1px solid rgba(15,23,42,.09)',
-    borderRadius: 11,
+    borderRadius: 12,
     background: '#f8fafc',
   },
 
   searchInput: {
-    minWidth: 0,
+    ...resetInput,
     width: '100%',
+    minWidth: 0,
     height: '100%',
-    padding: 0,
-    border: 0,
-    outline: 0,
-    color: '#111827',
+    color: UI.text,
     background: 'transparent',
     fontSize: 12,
     fontWeight: 550,
   },
 
-  searchHint: {
+  searchKey: {
+    width: 21,
+    height: 21,
+    flex: '0 0 21px',
     display: 'grid',
     placeItems: 'center',
-    width: 20,
-    height: 20,
-    flexShrink: 0,
+    boxSizing: 'border-box',
     border:
       '1px solid rgba(15,23,42,.09)',
     borderRadius: 5,
@@ -1056,218 +1044,233 @@ const styles = {
     fontFamily: 'inherit',
   },
 
-  accountContainer: {
+  accountWrap: {
     position: 'relative',
+    zIndex: UI.dropdownZ,
+    flex: '0 0 auto',
   },
 
   iconButtonActive: {
-    color: '#111827',
+    color: UI.text,
     background: '#f5f3ee',
     borderColor:
-      'rgba(184,145,67,.28)',
+      'rgba(184,145,67,.3)',
   },
 
-  accountStatus: {
+  onlineDot: {
     position: 'absolute',
     right: 5,
     bottom: 5,
     width: 7,
     height: 7,
+    boxSizing: 'border-box',
+    border: '2px solid #fff',
     borderRadius: '50%',
     background: '#22c55e',
-    border: '2px solid #fff',
   },
 
-  cartCount: {
+  cartBadge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
+    top: -5,
+    right: -5,
     minWidth: 18,
     height: 18,
+    padding: '0 4px',
+    boxSizing: 'border-box',
     display: 'grid',
     placeItems: 'center',
-    padding: '0 4px',
-    border: '2px solid #fff',
+    border:
+      '2px solid #fff',
     borderRadius: 999,
     color: '#fff',
-    background: '#b89143',
+    background: UI.gold,
     fontSize: 9,
     lineHeight: 1,
     fontWeight: 850,
+    whiteSpace: 'nowrap',
   },
 
   accountMenu: {
     position: 'absolute',
     top: 'calc(100% + 10px)',
     right: 0,
+    zIndex: UI.dropdownZ,
     width: 270,
+    maxWidth:
+      'calc(100vw - 28px)',
     padding: 8,
+    boxSizing: 'border-box',
     border:
       '1px solid rgba(15,23,42,.09)',
     borderRadius: 16,
     background: '#fff',
     boxShadow:
-      '0 20px 50px rgba(15,23,42,.14)',
+      '0 22px 55px rgba(15,23,42,.16)',
   },
 
-  menuIdentity: {
+  identity: {
     display: 'flex',
     alignItems: 'center',
     gap: 10,
-    padding: 10,
+    padding: 9,
   },
 
   avatar: {
-    width: 38,
-    height: 38,
+    width: 40,
+    height: 40,
+    flex: '0 0 40px',
     display: 'grid',
     placeItems: 'center',
-    flexShrink: 0,
     borderRadius: 12,
     color: '#fff',
     background:
       'linear-gradient(135deg,#111827,#475569)',
     fontSize: 14,
-    fontWeight: 800,
+    fontWeight: 850,
   },
 
-  identityText: {
+  identityCopy: {
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
     gap: 3,
   },
 
-  menuDivider: {
+  accountLink: {
+    ...resetButton,
+    width: '100%',
+    minHeight: 40,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '0 10px',
+    borderRadius: 9,
+    color: '#475569',
+    background: 'transparent',
+    textDecoration: 'none',
+    fontSize: 12,
+    fontWeight: 650,
+    textAlign: 'left',
+  },
+
+  accountLinkAccent: {
+    color: '#8a692d',
+    background: '#faf7ef',
+  },
+
+  logout: {
+    ...resetButton,
+    width: '100%',
+    minHeight: 40,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '0 10px',
+    borderRadius: 9,
+    color: '#b91c1c',
+    background: 'transparent',
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 650,
+    textAlign: 'left',
+  },
+
+  divider: {
     height: 1,
     margin: '5px 4px',
     background:
       'rgba(15,23,42,.07)',
   },
 
-  menuLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    width: '100%',
-    minHeight: 40,
-    padding: '0 10px',
-    borderRadius: 9,
-    color: '#475569',
-    textDecoration: 'none',
-    fontSize: 12,
-    fontWeight: 650,
-  },
-
-  menuLinkAccent: {
-    color: '#8a692d',
-    background: '#faf7ef',
-  },
-
-  menuLogout: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    width: '100%',
-    minHeight: 40,
-    padding: '0 10px',
-    border: 0,
-    borderRadius: 9,
-    color: '#b91c1c',
-    background: 'transparent',
-    fontSize: 12,
-    fontWeight: 650,
-    cursor: 'pointer',
-    textAlign: 'left',
-  },
-
-  mobileMenuButton: {
-    ...iconButtonStyle,
-    display: 'none',
-  },
-
   backdrop: {
     position: 'fixed',
     inset: 0,
-    zIndex: 998,
+    zIndex: UI.backdropZ,
+    boxSizing: 'border-box',
     background: 'rgba(15,23,42,.42)',
     opacity: 0,
+    visibility: 'hidden',
     pointerEvents: 'none',
-    transition: 'opacity 200ms ease',
+    transition:
+      'opacity 200ms ease, visibility 200ms ease',
     backdropFilter: 'blur(2px)',
+    WebkitBackdropFilter: 'blur(2px)',
   },
 
   backdropOpen: {
     opacity: 1,
+    visibility: 'visible',
     pointerEvents: 'auto',
   },
 
-  mobileDrawer: {
+  drawer: {
     position: 'fixed',
     top: 0,
     right: 0,
     bottom: 0,
-    zIndex: 999,
+    zIndex: UI.drawerZ,
     width: 'min(390px, 92vw)',
+    maxWidth: '100vw',
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
+    overflow: 'hidden',
     background: '#fff',
     boxShadow:
-      '-20px 0 60px rgba(15,23,42,.16)',
-    transform: 'translateX(105%)',
+      '-22px 0 60px rgba(15,23,42,.18)',
+    transform: 'translate3d(105%,0,0)',
+    visibility: 'hidden',
     transition:
-      'transform 260ms cubic-bezier(.2,.8,.2,1)',
+      'transform 260ms cubic-bezier(.2,.8,.2,1), visibility 260ms ease',
   },
 
-  mobileDrawerOpen: {
-    transform: 'translateX(0)',
+  drawerOpen: {
+    transform: 'translate3d(0,0,0)',
+    visibility: 'visible',
   },
 
-  mobileDrawerHeader: {
+  drawerHeader: {
     minHeight: 70,
+    flex: '0 0 70px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 18px',
+    padding:
+      '0 max(16px, env(safe-area-inset-left)) 0 max(16px, env(safe-area-inset-right))',
+    boxSizing: 'border-box',
     borderBottom:
       '1px solid rgba(15,23,42,.07)',
   },
 
   mobileBrand: {
-    color: '#111827',
+    color: UI.text,
     textDecoration: 'none',
     fontSize: 24,
+    lineHeight: 1,
     fontWeight: 850,
     letterSpacing: '-.055em',
   },
 
-  mobileCloseButton: {
-    width: 40,
-    height: 40,
-    display: 'grid',
-    placeItems: 'center',
-    border:
-      '1px solid rgba(15,23,42,.08)',
-    borderRadius: 11,
-    color: '#334155',
-    background: '#fff',
-    cursor: 'pointer',
-  },
-
-  mobileDrawerContent: {
-    flex: 1,
+  drawerContent: {
+    flex: '1 1 auto',
+    minHeight: 0,
     overflowY: 'auto',
-    padding: 16,
+    overflowX: 'hidden',
+    padding:
+      '12px 16px max(20px, env(safe-area-inset-bottom))',
+    boxSizing: 'border-box',
     WebkitOverflowScrolling: 'touch',
   },
 
   mobileSearch: {
+    width: '100%',
     height: 46,
     display: 'flex',
     alignItems: 'center',
     gap: 9,
+    margin: '0 0 10px',
     padding: '0 13px',
-    marginBottom: 14,
+    boxSizing: 'border-box',
     border:
       '1px solid rgba(15,23,42,.1)',
     borderRadius: 13,
@@ -1275,64 +1278,75 @@ const styles = {
   },
 
   mobileSearchInput: {
+    ...resetInput,
     width: '100%',
     minWidth: 0,
     height: '100%',
-    border: 0,
-    outline: 0,
-    color: '#111827',
+    color: UI.text,
     background: 'transparent',
     fontSize: 13,
   },
 
   mobileSection: {
     padding: '8px 0',
+    boxSizing: 'border-box',
     borderBottom:
       '1px solid rgba(15,23,42,.07)',
   },
 
   mobileLink: {
+    ...resetButton,
+    width: '100%',
+    minHeight: 46,
     display: 'flex',
     alignItems: 'center',
     gap: 12,
-    minHeight: 47,
     padding: '0 11px',
+    boxSizing: 'border-box',
     borderRadius: 11,
     color: '#334155',
+    background: 'transparent',
     textDecoration: 'none',
     fontSize: 14,
     fontWeight: 650,
-  },
-
-  mobileAction: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    width: '100%',
-    minHeight: 47,
-    padding: '0 11px',
-    border: 0,
-    borderRadius: 11,
-    color: '#b91c1c',
-    background: 'transparent',
-    fontSize: 14,
-    fontWeight: 650,
-    cursor: 'pointer',
     textAlign: 'left',
   },
 
-  mobileAdminContainer: {
-    paddingBottom: 8,
+  mobileLogout: {
+    ...resetButton,
+    width: '100%',
+    minHeight: 46,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '0 11px',
+    boxSizing: 'border-box',
+    borderRadius: 11,
+    color: '#b91c1c',
+    background: 'transparent',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 650,
+    textAlign: 'left',
   },
 
-  mobileAdminGroup: {
-    padding: '9px 0',
+  adminGroups: {
+    width: '100%',
+  },
+
+  adminGroup: {
+    padding: '8px 0',
+    boxSizing: 'border-box',
     borderBottom:
       '1px solid rgba(15,23,42,.06)',
   },
 
-  mobileAdminLabel: {
-    padding: '4px 11px 7px',
+  adminGroupLabel: {
+    minHeight: 26,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 11px',
+    boxSizing: 'border-box',
     color: '#94a3b8',
     fontSize: 10,
     fontWeight: 850,
@@ -1340,20 +1354,23 @@ const styles = {
     textTransform: 'uppercase',
   },
 
-  adminMobileLink: {
+  adminLink: {
+    width: '100%',
+    minHeight: 43,
     display: 'flex',
     alignItems: 'center',
     gap: 11,
-    minHeight: 43,
     padding: '0 11px',
+    boxSizing: 'border-box',
     borderRadius: 10,
     color: '#475569',
+    background: 'transparent',
     textDecoration: 'none',
     fontSize: 13,
     fontWeight: 650,
   },
 
-  adminMobileLinkActive: {
+  adminLinkActive: {
     color: '#8a692d',
     background: '#faf7ef',
   },
