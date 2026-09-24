@@ -587,7 +587,34 @@ button,input,select,textarea{font:inherit}
   [data-luviio-app] .checkout-layout{grid-template-columns:1fr}
   [data-luviio-app] .cart-summary,
   [data-luviio-app] .checkout-summary{position:static}
-  [data-luviio-app] .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ 
+[data-luviio-app] .pagination{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:26px auto;padding:8px}
+[data-luviio-app] .page-btn{width:40px;min-width:40px;height:40px;display:grid;place-items:center;padding:0;border:1px solid var(--lv-border);border-radius:11px;color:var(--lv-muted);background:rgba(255,255,255,.025);cursor:pointer}
+[data-luviio-app] .page-btn:hover:not(:disabled),[data-luviio-app] .page-btn.is-active{color:#0b0b0a;border-color:var(--lv-gold);background:var(--lv-gold)}
+[data-luviio-app] .page-btn:disabled{opacity:.35;cursor:not-allowed}
+[data-luviio-app] .page-ellipsis{width:28px;text-align:center;color:var(--lv-muted)}
+[data-luviio-app] .state{width:100%;max-width:100%;box-sizing:border-box;overflow:hidden}
+[data-luviio-app] .state-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto;border:1px solid var(--lv-border-gold);border-radius:16px;color:var(--lv-gold);background:rgba(216,173,106,.07)}
+[data-luviio-app] .state-icon-alert{color:#f08a8a;border-color:rgba(240,138,138,.25);background:rgba(240,138,138,.06)}
+[data-luviio-app] .state-title{color:var(--lv-text);font-weight:800;font-size:15px}
+[data-luviio-app] .state-message{max-width:620px;margin:0 auto;color:var(--lv-muted);line-height:1.65;overflow-wrap:anywhere}
+[data-luviio-app] .state-action-row{display:flex;justify-content:center;flex-wrap:wrap;gap:10px}
+[data-luviio-app] .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:clamp(14px,2vw,20px);align-items:stretch}
+[data-luviio-app] .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.045),rgba(255,255,255,.09),rgba(255,255,255,.045));background-size:200% 100%;animation:lv-shimmer 1.5s linear infinite}
+[data-luviio-app] .skeleton-media{aspect-ratio:1;border-radius:18px}
+[data-luviio-app] .skeleton-line{height:14px;margin-top:12px;border-radius:8px}
+[data-luviio-app] .skeleton-line-short{width:62%}
+[data-luviio-app] .confirm-dialog-backdrop{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));background:rgba(0,0,0,.76);backdrop-filter:blur(10px)}
+[data-luviio-app] .confirm-dialog{width:min(460px,100%);max-height:min(88vh,680px);overflow:auto;padding:22px;border:1px solid var(--lv-border);border-radius:22px;background:#10100f;color:var(--lv-text);box-shadow:0 30px 100px rgba(0,0,0,.55)}
+[data-luviio-app] .confirm-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+[data-luviio-app] .confirm-dialog-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:var(--lv-gold);background:rgba(216,173,106,.08);border:1px solid var(--lv-border-gold)}
+[data-luviio-app] .confirm-dialog-icon.is-danger{color:#f08a8a;border-color:rgba(240,138,138,.25);background:rgba(240,138,138,.07)}
+[data-luviio-app] .confirm-dialog-close{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--lv-border);border-radius:12px;color:var(--lv-muted);background:rgba(255,255,255,.035);cursor:pointer}
+[data-luviio-app] .confirm-dialog h2{margin:20px 0 8px;color:var(--lv-text);font-size:22px;letter-spacing:-.025em}
+[data-luviio-app] .confirm-dialog p{margin:0;color:var(--lv-muted);line-height:1.65;overflow-wrap:anywhere}
+[data-luviio-app] .confirm-dialog .btn-row{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:24px}
+@keyframes lv-shimmer{to{background-position:-200% 0}}
+[data-luviio-app] .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
   [data-luviio-app] .page.container{width:min(100% - 22px,1240px);padding:28px 0 50px}
