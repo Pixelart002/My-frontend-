@@ -634,6 +634,96 @@ button,input,select,textarea{font:inherit}
   [data-luviio-app] .footer-bottom{flex-direction:column}
   [data-luviio-app] .product-actions .btn{flex:1 1 150px}
 }
+
+/* CHECKOUT — scoped, self-contained; no external checkout stylesheet required */
+[data-luviio-app] .checkout{padding-top:clamp(28px,5vw,60px);overflow-x:clip}
+[data-luviio-app] .checkout-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 24px;padding:0;border:0;background:transparent;color:var(--lv-muted);font-size:13px;cursor:pointer}
+[data-luviio-app] .checkout-back:hover{color:var(--lv-gold);transform:translateX(-2px)}
+[data-luviio-app] .checkout-heading{max-width:760px;margin-bottom:20px}
+[data-luviio-app] .checkout-heading .eyebrow{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+[data-luviio-app] .checkout-subtitle{margin:12px 0 0!important;color:var(--lv-muted);line-height:1.6}
+[data-luviio-app] .checkout-steps{display:flex;align-items:center;width:min(680px,100%);margin:0 0 30px;color:var(--lv-dim);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+[data-luviio-app] .checkout-steps span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+[data-luviio-app] .checkout-steps b{display:grid;place-items:center;width:27px;height:27px;border:1px solid var(--lv-border);border-radius:50%;font-size:11px}
+[data-luviio-app] .checkout-steps i{flex:1;height:1px;min-width:18px;margin:0 10px;background:var(--lv-border)}
+[data-luviio-app] .checkout-steps .is-complete,[data-luviio-app] .checkout-steps .is-current{color:var(--lv-gold)}
+[data-luviio-app] .checkout-steps .is-complete b,[data-luviio-app] .checkout-steps .is-current b{border-color:var(--lv-gold);background:var(--lv-gold);color:#080808}
+[data-luviio-app] .checkout-layout-refined{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:clamp(20px,4vw,42px);align-items:start}
+[data-luviio-app] .checkout-main{min-width:0;display:flex;flex-direction:column;gap:16px}
+[data-luviio-app] .checkout-section{min-width:0;padding:clamp(18px,3vw,26px);border:1px solid var(--lv-border);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 55%),var(--lv-surface);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+[data-luviio-app] .checkout-section h2{display:flex;align-items:center;gap:8px;margin:0 0 18px;color:var(--lv-text);font-size:13px;letter-spacing:.11em}
+[data-luviio-app] .checkout-section h2::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+[data-luviio-app] .checkout-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+[data-luviio-app] .checkout-section-heading h2{margin:0}
+[data-luviio-app] .section-kicker{margin:0 0 4px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+[data-luviio-app] .checkout-live-badge{flex:0 0 auto;padding:6px 10px;border:1px solid var(--lv-border-gold);border-radius:999px;color:var(--lv-gold);font-size:10px;white-space:nowrap}
+[data-luviio-app] .address-list{display:flex;flex-direction:column;gap:9px;min-width:0}
+[data-luviio-app] .address-card{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);min-width:0;gap:11px;padding:14px;border:1px solid var(--lv-border);border-radius:16px;background:#0b0b0a;box-sizing:border-box;cursor:pointer}
+[data-luviio-app] .address-card:hover{border-color:var(--lv-border-gold)}
+[data-luviio-app] .address-card.is-selected{border-color:var(--lv-gold);background:linear-gradient(90deg,rgba(216,173,106,.09),transparent 75%),#0b0b0a;box-shadow:0 0 0 1px rgba(216,173,106,.1)}
+[data-luviio-app] .address-card p{margin:5px 0;color:var(--lv-muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+[data-luviio-app] .address-card strong{font-size:14px}
+[data-luviio-app] .address-card input{margin-top:3px;accent-color:var(--lv-gold)}
+[data-luviio-app] .address-flow-note{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 14px;border:1px solid rgba(216,173,106,.18);border-radius:12px;background:rgba(216,173,106,.05)}
+[data-luviio-app] .address-flow-note svg{flex:0 0 auto;margin-top:2px;color:var(--lv-gold)}
+[data-luviio-app] .address-flow-note div{display:grid;gap:2px;min-width:0}
+[data-luviio-app] .address-flow-note strong{font-size:13px}
+[data-luviio-app] .address-flow-note span{font-size:12px;line-height:1.45;color:var(--lv-muted)}
+[data-luviio-app] .payment-selector{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid var(--lv-border);border-radius:16px;background:#0b0b0a;box-sizing:border-box}
+[data-luviio-app] .payment-selector-copy{min-width:0;display:flex;flex-direction:column;gap:5px}
+[data-luviio-app] .payment-selector-label{display:flex;align-items:center;gap:6px;color:var(--lv-gold);font-size:12px}
+[data-luviio-app] .payment-selector-copy strong{font-size:15px;overflow-wrap:anywhere}
+[data-luviio-app] .payment-selector-copy small{color:var(--lv-muted);line-height:1.5;overflow-wrap:anywhere}
+[data-luviio-app] .coupon-input-row{display:flex;gap:8px;min-width:min(100%,340px)}
+[data-luviio-app] .coupon-input-row input{min-width:0;flex:1;border:1px solid var(--lv-border);border-radius:12px;background:var(--lv-surface);color:var(--lv-text);padding:11px 12px;outline:none}
+[data-luviio-app] .coupon-input-row input:focus{border-color:var(--lv-gold);box-shadow:0 0 0 3px rgba(216,173,106,.08)}
+[data-luviio-app] .checkout-summary{position:sticky;top:90px;align-self:start;min-width:0;width:100%;padding:24px;border:1px solid var(--lv-border);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.03),transparent 55%),var(--lv-surface);box-sizing:border-box}
+[data-luviio-app] .checkout-summary .summary-items{margin:14px 0;padding:0 0 10px;list-style:none;border-bottom:1px solid rgba(255,255,255,.07)}
+[data-luviio-app] .checkout-summary .summary-items li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:13px;min-width:0}
+[data-luviio-app] .checkout-summary .summary-items li span{min-width:0;overflow-wrap:anywhere}
+[data-luviio-app] .checkout-summary .summary-items li strong{white-space:nowrap}
+[data-luviio-app] .checkout-summary .summary-lines{display:grid;gap:12px}
+[data-luviio-app] .checkout-summary .summary-lines>div{display:flex;justify-content:space-between;gap:12px;min-width:0}
+[data-luviio-app] .checkout-summary .summary-lines dt{color:var(--lv-muted)}
+[data-luviio-app] .checkout-summary .summary-lines dd{margin:0;text-align:right;color:var(--lv-text);white-space:nowrap}
+[data-luviio-app] .checkout-summary .final-cost-row{margin-top:8px;padding-top:15px;border-top:1px solid var(--lv-gold)}
+[data-luviio-app] .checkout-summary .final-cost-row dt{font-weight:800;color:var(--lv-text)}
+[data-luviio-app] .checkout-summary .final-cost-row dd{font-size:21px;font-weight:800;color:var(--lv-gold);white-space:nowrap}
+[data-luviio-app] .checkout-shipping-detail{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+[data-luviio-app] .checkout-shipping-detail span{display:grid;gap:2px;min-width:0}
+[data-luviio-app] .checkout-shipping-detail b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-luviio-app] .checkout-shipping-detail small{font-size:11px;color:var(--lv-dim)}
+[data-luviio-app] .checkout-shipping-detail em{font-style:normal;font-size:10px;padding:4px 7px;border-radius:999px;color:var(--lv-gold);background:rgba(216,173,106,.1);white-space:nowrap}
+[data-luviio-app] .shipping-courier-list{display:grid;gap:10px;margin-top:14px}
+[data-luviio-app] .shipping-courier-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--lv-border);border-radius:14px;background:rgba(255,255,255,.02);cursor:pointer}
+[data-luviio-app] .shipping-courier-card.is-selected{border-color:var(--lv-gold);background:rgba(216,173,106,.07)}
+[data-luviio-app] .shipping-courier-card input{accent-color:var(--lv-gold)}
+[data-luviio-app] .shipping-courier-copy{display:grid;gap:3px;min-width:0}
+[data-luviio-app] .shipping-courier-copy strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-luviio-app] .shipping-courier-copy small{font-size:11px;color:var(--lv-dim)}
+[data-luviio-app] .shipping-courier-price{font-weight:800;white-space:nowrap}
+[data-luviio-app] .checkout-loading-page{min-height:60vh;display:grid;place-items:center}
+[data-luviio-app] .checkout-cancel-modal-backdrop{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(12px);box-sizing:border-box}
+[data-luviio-app] .checkout-cancel-modal{width:min(440px,100%);max-height:min(90dvh,620px);overflow:auto;padding:24px;border:1px solid var(--lv-border-gold);border-radius:22px;background:var(--lv-surface);box-shadow:0 30px 90px rgba(0,0,0,.7);color:var(--lv-text)}
+[data-luviio-app] .checkout-cancel-modal-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:16px;border:1px solid rgba(239,123,114,.35);border-radius:14px;background:rgba(239,123,114,.12);color:#d99584}
+[data-luviio-app] .checkout-cancel-modal-copy{display:grid;gap:7px}
+[data-luviio-app] .checkout-cancel-modal-copy h3{margin:0;font-size:clamp(24px,6vw,31px);line-height:1.08}
+[data-luviio-app] .checkout-cancel-modal-copy p:last-child{margin:4px 0 0;color:var(--lv-muted);font-size:13px;line-height:1.6}
+[data-luviio-app] .checkout-cancel-modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+[data-luviio-app] .checkout-cancel-modal-actions .btn{min-height:48px;width:100%;justify-content:center}
+[data-luviio-app] .checkout-cancel-danger{background:#8d4031!important;color:#fff!important;border-color:#a75343!important}
+[data-luviio-app] .address-form{display:grid;gap:12px}
+[data-luviio-app] .address-form .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+[data-luviio-app] .address-form .field{display:grid;gap:6px;min-width:0}
+[data-luviio-app] .address-form label{color:var(--lv-muted);font-size:11px;font-weight:700}
+[data-luviio-app] .address-form input,[data-luviio-app] .address-form select{width:100%;min-height:46px;padding:11px 12px;border:1px solid var(--lv-border);border-radius:12px;background:#0b0b0a;color:var(--lv-text);outline:none}
+[data-luviio-app] .address-form input:focus,[data-luviio-app] .address-form select:focus{border-color:var(--lv-gold);box-shadow:0 0 0 3px rgba(216,173,106,.08)}
+[data-luviio-app] .check-line{display:flex!important;align-items:center;gap:8px;color:var(--lv-muted);font-size:12px}
+[data-luviio-app] .check-line input{width:16px;height:16px;accent-color:var(--lv-gold)}
+[data-luviio-app] .form-error{margin-top:10px;padding:11px 13px;border:1px solid rgba(239,123,114,.28);border-radius:12px;background:rgba(239,123,114,.07);color:#f0aaa4;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:1080px){[data-luviio-app] .checkout-layout-refined{display:flex!important;flex-direction:column!important;width:100%!important;gap:18px!important}[data-luviio-app] .checkout-main,[data-luviio-app] .checkout-section,[data-luviio-app] .checkout-summary{width:100%;max-width:100%}[data-luviio-app] .checkout-summary{position:static;order:2}}
+@media(max-width:700px){[data-luviio-app] .checkout{padding-top:24px}[data-luviio-app] .checkout-section{padding:16px}[data-luviio-app] .checkout-section-heading{gap:10px}[data-luviio-app] .checkout-live-badge{font-size:9px;padding:5px 8px}[data-luviio-app] .payment-selector{align-items:stretch;flex-direction:column;gap:12px}[data-luviio-app] .payment-selector .btn{width:100%;justify-content:center}[data-luviio-app] .coupon-input-row{width:100%}[data-luviio-app] .checkout-summary{padding:18px}[data-luviio-app] .address-card{grid-template-columns:auto minmax(0,1fr);padding:13px}[data-luviio-app] .address-form .field-grid{grid-template-columns:1fr}[data-luviio-app] .checkout-cancel-modal{padding:20px}[data-luviio-app] .checkout-cancel-modal-actions{grid-template-columns:1fr}}
+@media(max-width:480px){[data-luviio-app] .checkout-steps{width:100%;font-size:9px}[data-luviio-app] .checkout-steps i{margin-inline:5px;min-width:10px}[data-luviio-app] .checkout-steps span{flex-direction:column;gap:3px;text-align:center}[data-luviio-app] .checkout-steps b{width:24px;height:24px}[data-luviio-app] .checkout-section{padding:14px}[data-luviio-app] .checkout-summary{padding:16px}[data-luviio-app] .coupon-input-row{flex-direction:column}[data-luviio-app] .coupon-input-row .btn{width:100%}[data-luviio-app] .checkout-shipping-detail{align-items:flex-start}}
 `;
 
 export default function LuviioInlineTheme() {
