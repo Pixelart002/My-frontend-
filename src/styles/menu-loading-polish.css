@@ -103,53 +103,7 @@
 }
 
 /* Initial app boot screen: restrained luxury treatment, no layout jump. */
-.boot-screen {
-  background:
-    radial-gradient(circle at 50% 42%,rgba(216,173,106,.075),transparent 30%),
-    #080808 !important;
-  color:var(--text);
-  gap:22px !important;
-}
-.boot-brand {
-  color:#d9a65c;
-  font-family:var(--font-display,'Playfair Display',serif);
-  font-size:clamp(30px,6vw,42px) !important;
-  font-weight:500 !important;
-  letter-spacing:.08em !important;
-  text-transform:lowercase !important;
-  animation:boot-brand-in .5s ease both;
-}
-.boot-spinner {
-  width:28px !important;
-  height:28px !important;
-  border:1px solid rgba(255,255,255,.13) !important;
-  border-top:2px solid var(--gold) !important;
-  box-shadow:0 0 24px rgba(216,173,106,.10);
-  animation:spin .8s linear infinite,boot-spinner-in .5s .08s ease both !important;
-}
-.boot-screen::after {
-  content:'STORE · HARDWARE · SANITARY';
-  position:absolute;
-  bottom:30px;
-  color:rgba(245,242,236,.32);
-  font-family:var(--font-body,'DM Sans',sans-serif);
-  font-size:9px;
-  font-weight:500;
-  letter-spacing:.22em;
-  animation:boot-copy-in .6s .12s ease both;
-}
-@keyframes boot-brand-in {
-  from { opacity:0; transform:translateY(6px); letter-spacing:.16em; }
-  to { opacity:1; transform:none; letter-spacing:.08em; }
-}
-@keyframes boot-spinner-in {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-@keyframes boot-copy-in {
-  from { opacity:0; transform:translateY(4px); }
-  to { opacity:1; transform:none; }
+to { opacity:1; transform:none; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .boot-brand,.boot-spinner,.boot-screen::after { animation:none !important; }
-}
+  .boot-brand,.boot-spinner,}
