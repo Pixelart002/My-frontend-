@@ -23,6 +23,12 @@ import AdminMfaGate from './AdminMfaGate';
 import { classifyAdminAccessError } from './adminAccess';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 
+// Admin-only CSS. Storefront CSS is intentionally not global.
+import '../../styles/admin.css';
+import '../../styles/admin-desktop-drawer.css';
+import '../../styles/admin-layout-fix.css';
+import '../../styles/admin-business-profile.css';
+
 const NAV=[{key:'dashboard',label:'Dashboard',icon:RiDashboardLine},{key:'products',label:'Products',icon:RiPriceTag3Line},{key:'categories',label:'Categories',icon:RiFolder2Line},{key:'orders',label:'Orders',icon:RiShoppingCart2Line},{key:'coupons',label:'Coupons',icon:RiCoupon3Line},{key:'inventory',label:'Inventory',icon:RiStackLine},{key:'shipping',label:'Shipping',icon:RiTruckLine},{key:'fulfillment',label:'Fulfillment',icon:RiTruckLine},{key:'subscriptions',label:'Subscriptions',icon:RiVipCrownLine},{key:'users',label:'Users',icon:RiGroupLine},{key:'user-actions',label:'User Actions',icon:RiUserSettingsLine},{key:'reviews',label:'Reviews',icon:RiStarLine},{key:'rbac',label:'Roles & Permissions',icon:RiShieldKeyholeLine},{key:'notifications',label:'Notifications',icon:RiNotification3Line},{key:'settings',label:'Settings',icon:RiSettings3Line},{key:'business-profile',label:'Business Profile',icon:RiBuilding4Line},{key:'payments',label:'Payments',icon:RiBankCardLine},{key:'stripe',label:'Stripe Configuration',icon:RiBankCardLine},{key:'reports',label:'Reports',icon:RiBarChart2Line},{key:'audit',label:'Audit Logs',icon:RiFileList3Line}];
 
 const ROLE_PANELS={
