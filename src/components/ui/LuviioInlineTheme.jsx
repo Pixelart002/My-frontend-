@@ -1,4 +1,12 @@
 const CSS = `
+html,body,#root{margin:0;min-width:0;background:#080808;color:#f5efe8;font-family:DM Sans,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+body{overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+a{color:inherit}
+button,input,select,textarea{font:inherit}
+
 [data-luviio-app]{
   --lv-bg:#080808;
   --lv-surface:#10100f;
@@ -570,6 +578,10 @@ const CSS = `
   border-color:var(--lv-border)!important
 }
 @media (max-width:900px){
+  [data-luviio-app] .home-hero-grid,
+  [data-luviio-app] .home-overview-grid,
+  [data-luviio-app] .home-value-grid{grid-template-columns:1fr!important}
+  [data-luviio-app] .home-highlight-stats{grid-template-columns:1fr!important}
   [data-luviio-app] .product-detail,
   [data-luviio-app] .cart-layout,
   [data-luviio-app] .checkout-layout{grid-template-columns:1fr}
