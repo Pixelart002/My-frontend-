@@ -1,7 +1,7 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RiAddLine, RiAlertLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiCoupon3Line, RiLockLine, RiErrorWarningLine } from '@remixicon/react';
+import { RiAddLine, RiAlertLine, RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiCoupon3Line, RiErrorWarningLine } from '@remixicon/react';
 import { getStripePromise } from '../services/stripeConfig';
 import { useCart } from '../context/CartContext';
 import { userService } from '../services/users';
