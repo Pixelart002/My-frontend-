@@ -98,12 +98,12 @@ const UI = {
   backdropZ: 1090,
   drawerZ: 1100,
 
-  text: '#111827',
-  muted: '#64748b',
-  border: 'rgba(15,23,42,.09)',
+  text: '#f5f0e6',
+  muted: 'rgba(245,240,230,.62)',
+  border: 'rgba(255,255,255,.10)',
   gold: '#b89143',
-  surface: '#ffffff',
-  soft: '#f8fafc',
+  surface: '#101010',
+  soft: '#141414',
 };
 
 const resetButton = {
@@ -144,7 +144,7 @@ const iconButton = {
   justifyContent: 'center',
   border: `1px solid ${UI.border}`,
   borderRadius: 12,
-  color: '#334155',
+  color: 'rgba(245,240,230,.78)',
   background: UI.surface,
   cursor: 'pointer',
   overflow: 'visible',
@@ -951,9 +951,9 @@ const styles = {
     width: '100%',
     boxSizing: 'border-box',
     isolation: 'isolate',
-    background: 'rgba(255,255,255,.96)',
+    background: 'rgba(8,8,8,.94)',
     borderBottom:
-      '1px solid rgba(15,23,42,.07)',
+      '1px solid rgba(255,255,255,.08)',
     backdropFilter: 'blur(18px)',
     WebkitBackdropFilter: 'blur(18px)',
     transition:
@@ -961,9 +961,9 @@ const styles = {
   },
 
   headerScrolled: {
-    background: 'rgba(255,255,255,.91)',
+    background: 'rgba(8,8,8,.88)',
     boxShadow:
-      '0 8px 30px rgba(15,23,42,.07)',
+      '0 8px 30px rgba(0,0,0,.30)',
   },
 
   headerInner: {
@@ -1036,7 +1036,7 @@ const styles = {
     border:
       '1px solid rgba(15,23,42,.09)',
     borderRadius: 12,
-    background: '#f8fafc',
+    background: '#141414',
   },
 
   searchInput: {
@@ -1060,8 +1060,8 @@ const styles = {
     border:
       '1px solid rgba(15,23,42,.09)',
     borderRadius: 5,
-    color: '#94a3b8',
-    background: '#fff',
+    color: 'rgba(245,240,230,.42)',
+    background: '#101010',
     fontSize: 11,
     fontFamily: 'inherit',
   },
@@ -1074,7 +1074,7 @@ const styles = {
 
   iconButtonActive: {
     color: UI.text,
-    background: '#f5f3ee',
+    background: 'rgba(216,173,106,.10)',
     borderColor:
       'rgba(184,145,67,.3)',
   },
@@ -1086,7 +1086,7 @@ const styles = {
     width: 7,
     height: 7,
     boxSizing: 'border-box',
-    border: '2px solid #fff',
+    border: '2px solid #080808',
     borderRadius: '50%',
     background: '#22c55e',
   },
@@ -1125,9 +1125,9 @@ const styles = {
     border:
       '1px solid rgba(15,23,42,.09)',
     borderRadius: 16,
-    background: '#fff',
+    background: '#101010',
     boxShadow:
-      '0 22px 55px rgba(15,23,42,.16)',
+      '0 22px 55px rgba(0,0,0,.45)',
   },
 
   identity: {
@@ -1167,7 +1167,7 @@ const styles = {
     gap: 10,
     padding: '0 10px',
     borderRadius: 9,
-    color: '#475569',
+    color: 'rgba(245,240,230,.72)',
     background: 'transparent',
     textDecoration: 'none',
     fontSize: 12,
@@ -1176,8 +1176,8 @@ const styles = {
   },
 
   accountLinkAccent: {
-    color: '#8a692d',
-    background: '#faf7ef',
+    color: '#d8ad6a',
+    background: 'rgba(216,173,106,.10)',
   },
 
   logout: {
@@ -1201,7 +1201,7 @@ const styles = {
     height: 1,
     margin: '5px 4px',
     background:
-      'rgba(15,23,42,.07)',
+      'rgba(255,255,255,.08)',
   },
 
   backdrop: {
@@ -1209,7 +1209,7 @@ const styles = {
     inset: 0,
     zIndex: UI.backdropZ,
     boxSizing: 'border-box',
-    background: 'rgba(15,23,42,.42)',
+    background: 'rgba(0,0,0,.58)',
     opacity: 0,
     visibility: 'hidden',
     pointerEvents: 'none',
@@ -1237,7 +1237,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    background: '#fff',
+    background: '#101010',
     boxShadow:
       '-22px 0 60px rgba(15,23,42,.18)',
     transform: 'translate3d(105%,0,0)',
@@ -1261,7 +1261,7 @@ const styles = {
       '0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left))',
     boxSizing: 'border-box',
     borderBottom:
-      '1px solid rgba(15,23,42,.07)',
+      '1px solid rgba(255,255,255,.08)',
   },
 
   mobileBrand: {
@@ -1296,7 +1296,7 @@ const styles = {
     border:
       '1px solid rgba(15,23,42,.1)',
     borderRadius: 13,
-    background: '#f8fafc',
+    background: '#141414',
   },
 
   mobileSearchInput: {
@@ -1313,7 +1313,7 @@ const styles = {
     padding: '8px 0',
     boxSizing: 'border-box',
     borderBottom:
-      '1px solid rgba(15,23,42,.07)',
+      '1px solid rgba(255,255,255,.08)',
   },
 
   mobileLink: {
@@ -1326,7 +1326,7 @@ const styles = {
     padding: '0 11px',
     boxSizing: 'border-box',
     borderRadius: 11,
-    color: '#334155',
+    color: 'rgba(245,240,230,.78)',
     background: 'transparent',
     textDecoration: 'none',
     fontSize: 14,
@@ -1369,7 +1369,7 @@ const styles = {
     alignItems: 'center',
     padding: '0 11px',
     boxSizing: 'border-box',
-    color: '#94a3b8',
+    color: 'rgba(245,240,230,.42)',
     fontSize: 10,
     fontWeight: 850,
     letterSpacing: '.1em',
@@ -1385,7 +1385,7 @@ const styles = {
     padding: '0 11px',
     boxSizing: 'border-box',
     borderRadius: 10,
-    color: '#475569',
+    color: 'rgba(245,240,230,.72)',
     background: 'transparent',
     textDecoration: 'none',
     fontSize: 13,
@@ -1393,7 +1393,7 @@ const styles = {
   },
 
   adminLinkActive: {
-    color: '#8a692d',
-    background: '#faf7ef',
+    color: '#d8ad6a',
+    background: 'rgba(216,173,106,.10)',
   },
 };
