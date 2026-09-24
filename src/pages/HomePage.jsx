@@ -345,9 +345,9 @@ export default function HomePage() {
                 }}
               >
                 {[
-                  ['2.4k+', 'homes served'],
-                  ['48h', 'dispatch window'],
-                  ['100%', 'secure checkout'],
+                  ['Everyday', 'hardware essentials'],
+                  ['Clear', 'product details'],
+                  ['Secure', 'checkout flow'],
                 ].map(([value, label]) => (
                   <div
                     key={label}
@@ -396,10 +396,10 @@ export default function HomePage() {
                 <div style={{ minWidth: 0 }}>
                   <p style={{ ...styles.eyebrow, fontSize: 9 }}>Best seller</p>
                   <h3 style={{ margin: '5px 0 3px', color: UI.text, fontSize: 15, lineHeight: 1.2 }}>
-                    Bathroom fittings
+                    Everyday hardware
                   </h3>
                   <span style={{ color: UI.muted, fontSize: 11 }}>
-                    Made for daily reliability
+                    Selected for everyday use
                   </span>
                 </div>
               </div>
@@ -422,8 +422,8 @@ export default function HomePage() {
           }}
         >
           {[
-            [RiTruckLine, 'Fast delivery', 'Quick dispatch across India'],
-            [RiShieldCheckLine, 'Secure checkout', 'Protected online payments'],
+            [RiTruckLine, 'Fast delivery', 'Delivery options shown at checkout'],
+            [RiShieldCheckLine, 'Secure checkout', 'Secure payment processing'],
             [RiToolsLine, 'Daily essentials', 'Made for practical use'],
           ].map(([Icon, title, text]) => (
             <div
@@ -482,8 +482,8 @@ export default function HomePage() {
           </article>
 
           {[
-            ['Smart buying', 'Clear pricing, live totals, and dependable fulfilment.'],
-            ['Professional standards', 'Backed by secure payment flow and order tracking.'],
+            ['Smart buying', 'Clear product pricing and order totals.'],
+            ['Professional standards', 'Order flow with payment and tracking updates.'],
           ].map(([eyebrow, title]) => (
             <article
               key={eyebrow}
