@@ -1,1 +1,417 @@
-/* Payment and telemetry component styles are intentionally scoped in JSX/Tailwind. */
+.admin-telemetry-card {
+  min-width: 0;
+}
+
+.payment-orders-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  min-width: 0;
+}
+
+.payment-order-card {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface, #111);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.payment-order-toggle,
+.payment-attempt-toggle {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.payment-order-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 56px;
+  padding: 17px 20px;
+}
+
+.payment-order-toggle:hover,
+.payment-attempt-toggle:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.payment-order-toggle:focus-visible,
+.payment-attempt-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.payment-order-toggle > span:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.payment-order-toggle small {
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
+}
+
+.payment-order-toggle strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.payment-order-toggle em {
+  font-style: normal;
+  font-size: 0.72rem;
+  opacity: 0.58;
+  overflow-wrap: anywhere;
+}
+
+.payment-order-right,
+.payment-attempt-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.payment-order-right b {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.payment-order-right svg,
+.payment-attempt-toggle-right svg {
+  flex: 0 0 auto;
+  opacity: 0.55;
+  transition: transform 0.18s ease;
+}
+
+.payment-order-right svg.rotated,
+.payment-attempt-toggle-right svg.rotated {
+  transform: rotate(180deg);
+}
+
+.payment-attempt-list {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+}
+
+.payment-attempt-card {
+  min-width: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.payment-attempt-card:last-child {
+  border-bottom: 0;
+}
+
+.payment-attempt-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 48px;
+  padding: 13px 20px;
+}
+
+.payment-attempt-number {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.payment-attempt-number > b {
+  flex: 0 0 20px;
+  font-size: 0.78rem;
+  opacity: 0.55;
+}
+
+.payment-attempt-number > span {
+  min-width: 0;
+}
+
+.payment-attempt-number strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+}
+
+.payment-attempt-number small {
+  display: block;
+  max-width: 100%;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 0.67rem;
+  opacity: 0.52;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.payment-attempt-body {
+  min-width: 0;
+  padding: 0 20px 17px;
+}
+
+.payment-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+  gap: 9px;
+  min-width: 0;
+}
+
+.payment-detail {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.payment-detail span,
+.payment-detail-block > span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.payment-detail strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.77rem;
+}
+
+.payment-detail-mono,
+.payment-detail-block code,
+.payment-gateway-details pre {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+}
+
+.payment-detail-block {
+  min-width: 0;
+  margin-top: 9px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.payment-detail-block code {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.73rem;
+}
+
+.payment-detail-block p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.77rem;
+}
+
+.payment-gateway-details {
+  min-width: 0;
+  margin-top: 9px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.payment-gateway-details summary {
+  min-height: 40px;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.payment-gateway-details summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.payment-gateway-details pre {
+  max-height: 260px;
+  margin: 0;
+  padding: 11px;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  font-size: 0.68rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-telemetry-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+  margin-top: 18px;
+}
+
+.admin-telemetry-filters select {
+  min-width: 150px;
+  max-width: 100%;
+}
+
+.admin-telemetry-table {
+  min-width: 900px;
+}
+
+.admin-telemetry-table th {
+  white-space: nowrap;
+}
+
+.payment-id-cell {
+  max-width: 260px;
+  overflow-wrap: anywhere;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  font-size: 0.78rem;
+  opacity: 0.78;
+}
+
+.attempt-value {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.attempt-caption {
+  display: none;
+  font-size: 0.68rem;
+  opacity: 0.58;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ops-path {
+  display: block;
+  max-width: 360px;
+  overflow: hidden;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 700px) {
+  .payment-order-toggle {
+    padding: 15px;
+  }
+
+  .payment-attempt-toggle,
+  .payment-attempt-body {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .payment-order-right {
+    gap: 7px;
+  }
+
+  .payment-detail-grid {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .admin-telemetry-card .admin-stats {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .admin-telemetry-filters select {
+    flex: 1 1 130px;
+    min-width: 130px;
+  }
+
+  .ops-path {
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 420px) {
+  .payment-order-toggle {
+    align-items: flex-start;
+  }
+
+  .payment-order-right {
+    display: grid;
+    justify-items: end;
+  }
+
+  .payment-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-telemetry-card .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-telemetry-filters {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .admin-telemetry-filters select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .payment-attempt-toggle-right .admin-pill {
+    font-size: 0.6rem;
+  }
+
+  .payment-attempt-number small {
+    max-width: 150px;
+  }
+
+  .ops-path {
+    max-width: 210px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-order-right svg,
+  .payment-attempt-toggle-right svg {
+    transition: none;
+  }
+}
