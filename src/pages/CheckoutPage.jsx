@@ -298,13 +298,13 @@ function AddressForm({ onSaved, onCancel }) {
 
   return (
     <form
-      className="address-form"
+      className="address-form min-w-0"
       onSubmit={submit}
       noValidate
     >
       {error && (
         <div
-          className="form-error"
+          className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
           role="alert"
           aria-live="assertive"
         >
@@ -312,8 +312,8 @@ function AddressForm({ onSaved, onCancel }) {
         </div>
       )}
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-full-name">
             Full name
           </label>
@@ -333,7 +333,7 @@ function AddressForm({ onSaved, onCancel }) {
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-email">
             Email *
           </label>
@@ -356,8 +356,8 @@ function AddressForm({ onSaved, onCancel }) {
         </div>
       </div>
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-phone">
             Phone *
           </label>
@@ -380,7 +380,7 @@ function AddressForm({ onSaved, onCancel }) {
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-pin">
             PIN code *
           </label>
@@ -403,7 +403,7 @@ function AddressForm({ onSaved, onCancel }) {
         </div>
       </div>
 
-      <div className="field">
+      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
         <label htmlFor="checkout-line1">
           Address line 1 *
         </label>
@@ -424,7 +424,7 @@ function AddressForm({ onSaved, onCancel }) {
         />
       </div>
 
-      <div className="field">
+      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
         <label htmlFor="checkout-line2">
           Address line 2
         </label>
@@ -444,8 +444,8 @@ function AddressForm({ onSaved, onCancel }) {
         />
       </div>
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-city">
             City *
           </label>
@@ -466,7 +466,7 @@ function AddressForm({ onSaved, onCancel }) {
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-state">
             State
           </label>
@@ -487,8 +487,8 @@ function AddressForm({ onSaved, onCancel }) {
         </div>
       </div>
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-landmark">
             Landmark
           </label>
@@ -507,7 +507,7 @@ function AddressForm({ onSaved, onCancel }) {
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor="checkout-address-type">
             Address type
           </label>
@@ -530,7 +530,7 @@ function AddressForm({ onSaved, onCancel }) {
         </div>
       </div>
 
-      <label className="check-line">
+      <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-[rgba(216,173,106,.60)] has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
         <input
           type="checkbox"
           checked={form.is_default}
@@ -545,10 +545,10 @@ function AddressForm({ onSaved, onCancel }) {
         <span>Make this my default address</span>
       </label>
 
-      <div className="btn-row">
+      <div className="btn-row mt-5 flex min-w-0 flex-wrap items-center gap-2.5 max-[480px]:flex-col max-[480px]:items-stretch">
         <button
           type="button"
-          className="btn btn-quiet"
+          className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onCancel}
           disabled={busy}
         >
@@ -557,13 +557,13 @@ function AddressForm({ onSaved, onCancel }) {
 
         <button
           type="submit"
-          className="btn"
+          className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
           disabled={busy}
           aria-busy={busy}
         >
           {busy && (
             <RiLoader4Line
-              className="spin"
+              className="spin animate-spin"
               size={17}
               aria-hidden="true"
             />
@@ -1548,7 +1548,7 @@ export default function CheckoutPage() {
 
   if (cartLoading) {
     return (
-      <div className="page container checkout-loading-page">
+      <div className="page container checkout-loading-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px]">
         <Spinner label="Preparing your checkout…" />
       </div>
     );
@@ -1556,14 +1556,14 @@ export default function CheckoutPage() {
 
   if (!canProceed && !activeOrder) {
     return (
-      <div className="page container">
-        <div className="page-heading compact">
-          <p className="eyebrow">Checkout</p>
+      <div className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
+        <div className="page-heading compact mb-5 min-w-0 max-w-[760px]">
+          <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">Checkout</p>
           <h1>Your bag is empty.</h1>
         </div>
 
         <button
-          className="btn"
+          className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onClick={() =>
             navigate('/shop')
@@ -1613,7 +1613,7 @@ export default function CheckoutPage() {
     <div className="page container checkout">
       <button
         type="button"
-        className="checkout-back"
+        className="checkout-back mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         onClick={() => {
           if (!activeOrder) {
             navigate('/cart');
@@ -1628,8 +1628,8 @@ export default function CheckoutPage() {
         Back to cart
       </button>
 
-      <div className="checkout-heading page-heading compact">
-        <p className="eyebrow">
+      <div className="checkout-heading page-heading compact mb-6 min-w-0 max-w-[760px]">
+        <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
           <RiLockLine
             size={13}
             aria-hidden="true"
@@ -1639,7 +1639,7 @@ export default function CheckoutPage() {
 
         <h1>Complete your order.</h1>
 
-        <p className="checkout-subtitle">
+        <p className="checkout-subtitle mt-3 max-w-[58ch] text-sm leading-6 text-muted">
           Your address, payment and order
           details stay protected throughout
           checkout.
@@ -1647,7 +1647,7 @@ export default function CheckoutPage() {
       </div>
 
       <div
-        className="checkout-steps"
+        className="checkout-steps mb-7 flex min-w-0 items-center gap-2 text-xs text-dim max-[560px]:gap-1.5 [&_span]:inline-flex [&_span]:min-h-10 [&_span]:items-center [&_span]:gap-1.5 [&_span]:rounded-full [&_span]:border [&_span]:border-line [&_span]:px-3 [&_span]:font-semibold [&_span]:whitespace-nowrap [&_span]:max-[560px]:px-2.5 [&_.is-complete]:border-[rgba(111,191,138,.45)] [&_.is-complete]:bg-success-dim [&_.is-complete]:text-success [&_.is-current]:border-gold [&_.is-current]:bg-gold-dim [&_.is-current]:text-gold-soft [&_i]:h-px [&_i]:min-w-4 [&_i]:flex-1 [&_i]:bg-line"
         aria-label="Checkout progress"
       >
         <span className="is-complete">
@@ -1670,12 +1670,12 @@ export default function CheckoutPage() {
         </span>
       </div>
 
-      <div className="checkout-layout checkout-layout-refined">
-        <div className="checkout-main">
-          <section className="checkout-section">
-            <div className="checkout-section-heading">
+      <div className="checkout-layout checkout-layout-refined grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(300px,380px)] items-start gap-6 max-[900px]:grid-cols-1">
+        <div className="checkout-main min-w-0 space-y-4">
+          <section className="checkout-section min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
+            <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
               <div>
-                <p className="section-kicker">
+                <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
                   Delivery
                 </p>
                 <h2>
@@ -1683,7 +1683,7 @@ export default function CheckoutPage() {
                 </h2>
               </div>
 
-              <span className="checkout-live-badge">
+              <span className="checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border border-[rgba(111,191,138,.40)] bg-success-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-success">
                 Used for shipping
               </span>
             </div>
@@ -1697,7 +1697,7 @@ export default function CheckoutPage() {
 
             {addresses.length > 0 &&
               !showForm && (
-                <div className="address-list">
+                <div className="address-list grid min-w-0 gap-3">
                   {addresses.map((addr) => (
                     <label
                       key={addr.id}
@@ -1765,7 +1765,7 @@ export default function CheckoutPage() {
                         )}
 
                         {addr.is_default && (
-                          <span className="chip chip-sm">
+                          <span className="chip chip-sm inline-flex min-h-8 items-center rounded-full border border-gold bg-gold-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
                             Default
                           </span>
                         )}
@@ -1774,7 +1774,7 @@ export default function CheckoutPage() {
                   ))}
 
                   <button
-                    className="btn btn-quiet btn-sm"
+                    className="btn btn-quiet btn-sm inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-transparent px-3 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     type="button"
                     disabled={Boolean(
                       activeOrder,
@@ -1794,7 +1794,7 @@ export default function CheckoutPage() {
 
             {addresses.length === 0 &&
               !showForm && (
-                <div className="state">
+                <div className="state flex min-w-0 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-bg px-5 py-12 text-center text-muted">
                   <p>
                     You’ll need a delivery
                     address to check out.
@@ -1802,7 +1802,7 @@ export default function CheckoutPage() {
 
                   <button
                     type="button"
-                    className="btn btn-sm"
+                    className="btn btn-sm inline-flex min-h-10 items-center justify-center rounded-lg border border-transparent bg-gold px-3.5 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     onClick={() =>
                       setShowForm(true)
                     }
@@ -1829,7 +1829,7 @@ export default function CheckoutPage() {
             )}
 
             {selectedAddress && (
-              <div className="address-flow-note">
+              <div className="address-flow-note mt-3 rounded-xl border border-line-soft bg-bg px-3.5 py-3 text-xs leading-5 text-dim">
                 <RiLockLine
                   size={15}
                   aria-hidden="true"
@@ -1850,10 +1850,10 @@ export default function CheckoutPage() {
             )}
           </section>
 
-          <section className="checkout-section checkout-shipping-options">
-            <div className="checkout-section-heading">
+          <section className="checkout-section checkout-shipping-options min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
+            <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
               <div>
-                <p className="section-kicker">
+                <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
                   Shipping
                 </p>
 
@@ -1862,18 +1862,18 @@ export default function CheckoutPage() {
                 </h2>
               </div>
 
-              <span className="checkout-live-badge">
+              <span className="checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border border-success/40 bg-success-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-success">
                 Live delivery rates
               </span>
             </div>
 
             {shippingQuoteLoading && (
               <p
-                className="free-ship-note"
+                className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft"
                 role="status"
               >
                 <RiLoader4Line
-                  className="spin"
+                  className="spin animate-spin"
                   size={15}
                   aria-hidden="true"
                 />
@@ -1884,7 +1884,7 @@ export default function CheckoutPage() {
 
             {shippingQuoteError && (
               <div
-                className="form-error"
+                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
                 role="alert"
               >
                 {shippingQuoteError}
@@ -1895,7 +1895,7 @@ export default function CheckoutPage() {
               !shippingQuoteError &&
               shippingOptions.length > 0 && (
                 <div
-                  className="shipping-courier-list"
+                  className="shipping-courier-list grid min-w-0 gap-2.5"
                   role="radiogroup"
                   aria-label="Choose delivery partner"
                 >
@@ -1948,7 +1948,7 @@ export default function CheckoutPage() {
                             }
                           />
 
-                          <span className="shipping-courier-copy">
+                          <span className="shipping-courier-copy flex min-w-0 flex-1 flex-col gap-1">
                             <strong>
                               {text(
                                 courier.courier_name,
@@ -1964,7 +1964,7 @@ export default function CheckoutPage() {
                             </small>
                           </span>
 
-                          <span className="shipping-courier-price">
+                          <span className="shipping-courier-price shrink-0 text-sm font-semibold tabular-nums text-text">
                             {formatMoney(
                               courier.shipping_cost,
                             )}
@@ -1977,7 +1977,7 @@ export default function CheckoutPage() {
               )}
 
             {shippingQuote && (
-              <p className="free-ship-note">
+              <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
                 <RiArrowRightLine
                   size={15}
                   aria-hidden="true"
@@ -2005,7 +2005,7 @@ export default function CheckoutPage() {
 
             {shippingQuote &&
               !selectedDeliveryMode && (
-                <p className="free-ship-note">
+                <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
                   Delivery mode is shown only
                   when the shipping service
                   provides it. LUVIIO does not
@@ -2015,13 +2015,13 @@ export default function CheckoutPage() {
               )}
           </section>
 
-          <section className="checkout-section">
+          <section className="checkout-section min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
             <h2>2 · Coupon</h2>
 
             {coupon ? (
-              <div className="payment-selector">
-                <div className="payment-selector-copy">
-                  <span className="payment-selector-label">
+              <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
+                <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
+                  <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
                     <RiCoupon3Line
                       size={15}
                       aria-hidden="true"
@@ -2043,7 +2043,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <button
-                  className="btn btn-quiet btn-sm"
+                  className="btn btn-quiet btn-sm inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-transparent px-3 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                   type="button"
                   disabled={Boolean(
                     activeOrder,
@@ -2058,9 +2058,9 @@ export default function CheckoutPage() {
                 </button>
               </div>
             ) : (
-              <div className="payment-selector">
-                <div className="payment-selector-copy">
-                  <span className="payment-selector-label">
+              <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
+                <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
+                  <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
                     <RiCoupon3Line
                       size={15}
                       aria-hidden="true"
@@ -2076,7 +2076,7 @@ export default function CheckoutPage() {
                   </small>
                 </div>
 
-                <div className="coupon-input-row">
+                <div className="coupon-input-row grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 max-[480px]:grid-cols-1 [&_input]:min-h-11 [&_input]:min-w-0 [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-surface [&_input]:px-3.5 [&_input]:text-sm [&_input]:font-semibold [&_input]:tracking-[.08em] [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)]">
                   <input
                     disabled={Boolean(
                       activeOrder,
@@ -2104,7 +2104,7 @@ export default function CheckoutPage() {
                   />
 
                   <button
-                    className="btn"
+                    className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                     type="button"
                     onClick={applyCoupon}
                     disabled={
@@ -2126,7 +2126,7 @@ export default function CheckoutPage() {
 
             {couponError && (
               <div
-                className="form-error"
+                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
                 role="alert"
               >
                 {couponError}
@@ -2134,12 +2134,12 @@ export default function CheckoutPage() {
             )}
           </section>
 
-          <section className="checkout-section checkout-payment-launch">
+          <section className="checkout-section checkout-payment-launch min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
             <h2>3 · Payment</h2>
 
             {intentError && (
               <div
-                className="form-error"
+                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
                 role="alert"
                 aria-live="assertive"
               >
@@ -2147,9 +2147,9 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <div className="payment-selector">
-              <div className="payment-selector-copy">
-                <span className="payment-selector-label">
+            <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
+              <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
+                <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
                   Payment &amp; review
                 </span>
 
@@ -2171,7 +2171,7 @@ export default function CheckoutPage() {
               </div>
 
               <button
-                className="btn"
+                className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 onClick={
                   openPaymentChooser
@@ -2199,7 +2199,7 @@ export default function CheckoutPage() {
               {!selectedPhoneValid &&
                 selectedAddress && (
                   <p
-                    className="form-error"
+                    className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
                     role="alert"
                   >
                     A valid Indian mobile
@@ -2214,14 +2214,14 @@ export default function CheckoutPage() {
         </div>
 
         <aside
-          className="summary checkout-summary"
+          className="summary checkout-summary sticky top-[92px] min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static max-[560px]:p-4"
           aria-label="Order summary"
         >
-          <p className="eyebrow">
+          <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
             Order summary
           </p>
 
-          <ul className="summary-items">
+          <ul className="summary-items mb-4 space-y-2.5 border-b border-line pb-4 text-xs text-muted [&_li]:flex [&_li]:items-start [&_li]:justify-between [&_li]:gap-3 [&_strong]:text-text">
             {items
               .slice(0, 6)
               .map((item) => (
@@ -2256,7 +2256,7 @@ export default function CheckoutPage() {
             )}
           </ul>
 
-          <dl className="summary-lines">
+          <dl className="summary-lines space-y-3 text-sm text-muted [&_div]:flex [&_div]:items-start [&_div]:justify-between [&_dd]:m-0 [&_dd]:font-medium [&_dd]:text-text">
             <div>
               <dt>Subtotal</dt>
               <dd>
@@ -2280,7 +2280,7 @@ export default function CheckoutPage() {
             </div>
 
             {shippingQuote && (
-              <div className="checkout-shipping-detail">
+              <div className="checkout-shipping-detail mt-1 text-xs leading-5 text-dim">
                 <span>
                   <b>
                     {text(
@@ -2344,7 +2344,7 @@ export default function CheckoutPage() {
               </dd>
             </div>
 
-            <div className="total">
+            <div className="total mt-4 flex items-center justify-between border-t border-line pt-4 text-base font-semibold text-text">
               <dt>Final order total</dt>
               <dd>
                 Confirmed securely at
@@ -2355,11 +2355,11 @@ export default function CheckoutPage() {
 
           {shippingQuoteLoading && (
             <p
-              className="free-ship-note shipping-loading-note"
+              className="free-ship-note shipping-loading-note mt-3 rounded-xl border border-line-soft bg-bg px-3 py-2.5 text-xs leading-5 text-dim"
               role="status"
             >
               <RiLoader4Line
-                className="spin"
+                className="spin animate-spin"
                 size={15}
                 aria-hidden="true"
               />
@@ -2369,7 +2369,7 @@ export default function CheckoutPage() {
           )}
 
           {shippingQuote && (
-            <p className="free-ship-note">
+            <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
               <RiArrowRightLine
                 size={15}
                 aria-hidden="true"
@@ -2429,8 +2429,8 @@ export default function CheckoutPage() {
         {paymentContent ||
           (activeOrder?.paymentMethod ===
           'cod' ? (
-            <div className="payment-review">
-              <div className="payment-review-card">
+            <div className="payment-review mt-4 min-w-0">
+              <div className="payment-review-card min-w-0 rounded-xl border border-line bg-bg p-4">
                 <RiAlertLine
                   size={20}
                   aria-hidden="true"
@@ -2452,7 +2452,7 @@ export default function CheckoutPage() {
 
                 <button
                   type="button"
-                  className="btn"
+                  className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={
                     handleCodSuccess
                   }
@@ -2470,7 +2470,7 @@ export default function CheckoutPage() {
 
       {cancelConfirmOpen && (
         <div
-          className="checkout-cancel-modal-backdrop"
+          className="checkout-cancel-modal-backdrop fixed inset-0 z-[500] grid place-items-center bg-black/70 p-5 backdrop-blur-sm"
           role="presentation"
           onMouseDown={(event) => {
             if (
@@ -2486,7 +2486,7 @@ export default function CheckoutPage() {
         >
           <div
             ref={cancelModalRef}
-            className="checkout-cancel-modal"
+            className="checkout-cancel-modal w-full max-w-[460px] overflow-auto rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_80px_rgba(0,0,0,.45)] max-[480px]:p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby={
@@ -2495,7 +2495,7 @@ export default function CheckoutPage() {
             tabIndex={-1}
           >
             <div
-              className="checkout-cancel-modal-icon"
+              className="checkout-cancel-modal-icon mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(224,115,95,.12)] text-danger"
               aria-hidden="true"
             >
               <RiErrorWarningLine
@@ -2503,8 +2503,8 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <div className="checkout-cancel-modal-copy">
-              <p className="eyebrow">
+            <div className="checkout-cancel-modal-copy min-w-0 text-sm leading-6 text-muted">
+              <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
                 Payment checkout
               </p>
 
@@ -2531,11 +2531,11 @@ export default function CheckoutPage() {
               </p>
             </div>
 
-            <div className="checkout-cancel-modal-actions">
+            <div className="checkout-cancel-modal-actions mt-5 flex flex-wrap justify-end gap-2 max-[480px]:flex-col">
               <button
                 ref={cancelCloseRef}
                 type="button"
-                className="btn btn-quiet"
+                className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() =>
                   setCancelConfirmOpen(
                     false,
@@ -2550,7 +2550,7 @@ export default function CheckoutPage() {
 
               <button
                 type="button"
-                className="btn checkout-cancel-danger"
+                className="btn checkout-cancel-danger inline-flex min-h-11 items-center justify-center rounded-xl border border-danger bg-transparent px-4 text-xs font-bold uppercase tracking-[.04em] text-danger transition-colors hover:bg-danger-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[480px]:w-full"
                 onClick={
                   cancelActiveOrder
                 }
