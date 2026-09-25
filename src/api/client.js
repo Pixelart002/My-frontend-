@@ -207,6 +207,24 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
+async function ensureAccessToken() {
+  const current = readToken();
+
+  if (current) {
+    return current;
+  }
+
+  const freshToken = await refreshAccessToken();
+
+  if (!freshToken) {
+    return null;
+  }
+
+  publishToken(freshToken);
+
+  return freshToken;
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* Backend path compatibility                                                 */
@@ -372,11 +390,32 @@ export async function request(
   let attempt = 0;
   let refreshed = isRetry;
 
+  /*
+   * Protected requests must never be sent without credentials.
+   * Recover a short-lived access token from the HttpOnly refresh
+   * cookie before the first network attempt when memory is empty.
+   */
+  let ensuredToken = null;
+
+  if (protectedPath) {
+    ensuredToken = await ensureAccessToken();
+
+    if (!ensuredToken) {
+      clearPublishedToken();
+
+      throw new ApiError(
+        'Your session has expired. Please sign in again.',
+        401,
+        'AUTH_REQUIRED',
+      );
+    }
+  }
+
   while (attempt <= (retryable ? MAX_RETRIES : 0)) {
     attempt += 1;
 
     const headers = {};
-    const token = readToken();
+    const token = ensuredToken || readToken();
 
     if (token && protectedPath) {
       headers.Authorization = `Bearer ${token}`;
@@ -407,6 +446,7 @@ export async function request(
 
         if (freshToken) {
           publishToken(freshToken);
+          ensuredToken = freshToken;
 
           /*
            * Retry the same request exactly once with the fresh token.
