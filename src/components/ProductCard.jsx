@@ -182,7 +182,7 @@ export default function ProductCard({ product }) {
 
   return (
     <article
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-luviio-card transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--gold)_28%,var(--line))]"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-luviio-card transition-all duration-200 hover:-translate-y-0.5 hover:border-gold"
       aria-label={name}
     >
       <div
@@ -319,7 +319,7 @@ export default function ProductCard({ product }) {
           type="button"
           className={`mt-3 flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
             added
-              ? 'border-success/40 bg-success-dim text-success'
+              ? 'border-[rgba(111,191,138,.45)] bg-success-dim text-success'
               : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
           }`}
           onClick={handleAdd}
@@ -346,7 +346,7 @@ export default function ProductCard({ product }) {
           <span
             className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border ${
               added
-                ? 'border-success/35 bg-success/10 text-success'
+                ? 'border-[rgba(111,191,138,.35)] bg-[rgba(111,191,138,.10)] text-success'
                 : 'border-line bg-black/15 text-gold'
             }`}
             aria-hidden="true"
