@@ -495,7 +495,7 @@ export default function ProductDetailPage() {
   finiteNumber(product?.price) ?? 0;
  
  const compare =
-  finiteNumber(product.compare_price) ??
+  finiteNumber(product?.compare_price) ??
   0;
  
  const discount =
