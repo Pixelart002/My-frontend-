@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
+import './styles/tailwind-input.css';
 
 import registerServiceWorker from './registerServiceWorker';
 import { installLocationAutocomplete } from './services/locationAutocomplete';
@@ -49,4 +50,3 @@ try {
   error
  );
 }
-import './styles/tailwind-input.css';
