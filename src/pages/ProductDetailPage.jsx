@@ -355,7 +355,7 @@ export default function ProductDetailPage() {
   ).toUpperCase();
   
   const stock =
-   normalizeStock(product.stock);
+   normalizeStock(product?.stock);
   
   const hasPrice =
    price !== null &&
@@ -437,25 +437,6 @@ export default function ProductDetailPage() {
   });
  }, [error, product, slug]);
  
- if (error) {
-  return (
-   <div className="page container">
-    <ErrorState
-     message={error}
-     onRetry={loadProduct}
-    />
-   </div>
-  );
- }
-
- if (!product) {
-  return (
-   <div className="page container">
-    <Spinner label="Loading product…" />
-   </div>
-  );
- }
-
  const moveImage = useCallback(
   (direction) => {
    if (images.length < 2) {
@@ -511,7 +492,7 @@ export default function ProductDetailPage() {
  };
  
  const price =
-  finiteNumber(product.price) ?? 0;
+  finiteNumber(product?.price) ?? 0;
  
  const compare =
   finiteNumber(product.compare_price) ??
@@ -527,13 +508,13 @@ export default function ProductDetailPage() {
   0;
  
  const stock =
-  normalizeStock(product.stock);
+  normalizeStock(product?.stock);
  
  const hasKnownInventory =
   stock !== null;
  
  const outOfStock =
-  product.is_active === false ||
+  product?.is_active === false ||
   (hasKnownInventory && stock <= 0);
  
  const lowStock = !outOfStock &&
@@ -544,7 +525,7 @@ export default function ProductDetailPage() {
   Math.max(1, stock ?? 999);
  
  const specifications =
-  product.specifications &&
+  product?.specifications &&
   typeof product.specifications ===
   'object' &&
   !Array.isArray(product.specifications) ?
@@ -552,15 +533,15 @@ export default function ProductDetailPage() {
   {};
  
  const measurement =
-  product.measurement_type &&
-  product.measurement_value != null &&
-  product.measurement_unit ?
-  `${product.measurement_value} ${product.measurement_unit}` :
+  product?.measurement_type &&
+  product?.measurement_value != null &&
+  product?.measurement_unit ?
+  `${product?.measurement_value} ${product?.measurement_unit}` :
   '';
  
  const measurementLabel =
   text(
-   product.measurement_type,
+   product?.measurement_type,
    'measurement',
   ).replace(/_/g, ' ');
  
@@ -577,13 +558,13 @@ export default function ProductDetailPage() {
   );
  
  const rawAttributes = {
-  brand: product.brand,
-  manufacturer: product.manufacturer,
-  model_number: product.model_number,
-  material: product.material,
-  finish: product.finish,
-  color: product.color,
-  size: product.size,
+  brand: product?.brand,
+  manufacturer: product?.manufacturer,
+  model_number: product?.model_number,
+  material: product?.material,
+  finish: product?.finish,
+  color: product?.color,
+  size: product?.size,
   ...(measurement ?
    {
     [measurementLabel]: measurement,
@@ -604,9 +585,9 @@ export default function ProductDetailPage() {
   );
  });
  
- const reviewUrl = product.id ?
+ const reviewUrl = product?.id ?
   `/reviews?product=${encodeURIComponent(
-        String(product.id),
+        String(product?.id),
       )}` :
   '/reviews';
  
@@ -687,6 +668,25 @@ export default function ProductDetailPage() {
   }
  };
  
+ if (error) {
+  return (
+   <div className="page container">
+    <ErrorState
+     message={error}
+     onRetry={loadProduct}
+    />
+   </div>
+  );
+ }
+
+ if (!product) {
+  return (
+   <div className="page container">
+    <Spinner label="Loading product…" />
+   </div>
+  );
+ }
+
  return (
   <div className="page container">
       <nav
