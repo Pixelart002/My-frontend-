@@ -437,6 +437,25 @@ export default function ProductDetailPage() {
   });
  }, [error, product, slug]);
  
+ if (error) {
+  return (
+   <div className="page container">
+    <ErrorState
+     message={error}
+     onRetry={loadProduct}
+    />
+   </div>
+  );
+ }
+
+ if (!product) {
+  return (
+   <div className="page container">
+    <Spinner label="Loading product…" />
+   </div>
+  );
+ }
+
  const moveImage = useCallback(
   (direction) => {
    if (images.length < 2) {
@@ -667,25 +686,6 @@ export default function ProductDetailPage() {
    }
   }
  };
- 
- if (error) {
-  return (
-   <div className="page container">
-        <ErrorState
-          message={error}
-          onRetry={loadProduct}
-        />
-      </div>
-  );
- }
- 
- if (!product) {
-  return (
-   <div className="page container">
-        <Spinner label="Loading product…" />
-      </div>
-  );
- }
  
  return (
   <div className="page container">
