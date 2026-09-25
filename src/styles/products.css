@@ -1018,3 +1018,158 @@
     transform: none;
   }
 }
+
+/* ============================================================
+   LUVIIO — FINAL CARD POLISH
+   Visual-only override. Existing markup/API contracts preserved.
+   ============================================================ */
+
+.products-grid,
+.products-grid-3 {
+  align-items: stretch;
+}
+
+.product-card {
+  align-self: stretch;
+  overflow: visible;
+}
+
+.product-media {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .10);
+}
+
+.product-card:hover .product-media {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+}
+
+.product-meta {
+  padding: 13px 1px 2px;
+  gap: 7px;
+}
+
+.product-category {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .11em;
+}
+
+.product-meta h3 {
+  font-size: 14px;
+  line-height: 1.42;
+  letter-spacing: 0;
+}
+
+.product-price-row {
+  gap: 8px;
+  min-height: 26px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.product-price-row .was {
+  font-size: 11px;
+}
+
+.product-price-row .off {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--success-dim);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.badge {
+  top: 10px;
+  left: 10px;
+  padding: 5px 8px;
+  background: rgba(216, 173, 106, .94);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.add-button {
+  min-height: 42px;
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.add-button.done {
+  font-weight: 700;
+}
+
+.product-carousel-count {
+  top: 9px;
+  right: 9px;
+  padding: 5px 8px;
+  background: rgba(8, 8, 8, .66);
+}
+
+@media (max-width: 760px) {
+  .products-grid,
+  .products-grid-3 {
+    gap: 18px 12px;
+  }
+
+  .product-meta {
+    padding-top: 12px;
+  }
+
+  .product-carousel-arrow {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid,
+  .products-grid-3 {
+    gap: 18px 10px;
+  }
+
+  .product-meta h3 {
+    font-size: 13px;
+  }
+
+  .product-price-row {
+    font-size: 14px;
+  }
+
+  .add-button {
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 360px) {
+  .products-grid,
+  .products-grid-3 {
+    gap: 14px 8px;
+  }
+
+  .product-meta h3 {
+    font-size: 13px;
+  }
+
+  .product-category {
+    font-size: 8px;
+  }
+
+  .add-button {
+    padding-inline: 9px;
+    font-size: 11px;
+  }
+}
+
+@media (hover: none) {
+  .product-card:hover .product-media {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .10);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card:hover .product-media {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .10);
+  }
+}
