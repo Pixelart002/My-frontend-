@@ -1,8 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useEffect,
-} from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import {
   BrowserRouter,
   Route,
@@ -23,21 +19,13 @@ import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
-const LoginPage = lazy(() =>
-  import('./pages/LoginPage'),
-);
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
-const RegisterPage = lazy(() =>
-  import('./pages/RegisterPage'),
-);
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 
-const ForgotPasswordPage = lazy(() =>
-  import('./pages/ForgotPasswordPage'),
-);
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 
-const ChangePasswordPage = lazy(() =>
-  import('./pages/ChangePasswordPage'),
-);
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
 
 const CartPage = lazy(() =>
   import('./pages/CartPage'),
