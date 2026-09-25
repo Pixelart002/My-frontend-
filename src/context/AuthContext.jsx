@@ -84,6 +84,8 @@ function createTimeoutSignal(ms) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
+  const [token, setToken] = useState(null);
+
   // Access tokens live only in memory; the refresh token is the only persistent auth credential and is an HttpOnly cookie.
 
   const [initializing, setInitializing] = useState(true);
