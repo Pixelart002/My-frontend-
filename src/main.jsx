@@ -49,3 +49,4 @@ try {
   error
  );
 }
+import './styles/tailwind-input.css';
