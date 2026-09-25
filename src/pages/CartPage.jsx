@@ -91,7 +91,7 @@ function QuantityEditor({
       </button>
 
       <span
-        className="cart-qty-value"
+        className="cart-qty-value inline-flex min-w-12 items-center justify-center text-sm font-semibold tabular-nums text-text"
         aria-live="polite"
         aria-atomic="true"
       >
@@ -118,7 +118,7 @@ function QuantityEditor({
 
       {disabled && (
         <RiLoader4Line
-          className="cart-qty-spinner spin"
+          className="cart-qty-spinner spin animate-spin text-gold"
           size={13}
           aria-hidden="true"
         />
@@ -237,9 +237,9 @@ export default function CartPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="page container cart-page">
-        <div className="cart-page-heading">
-          <p className="eyebrow">
+      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
+        <div className="cart-page-heading mb-7 min-w-0">
+          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
             Your selection
           </p>
 
@@ -255,7 +255,7 @@ export default function CartPage() {
           message="Sign in to see the items in your bag."
           action={
             <Link
-              className="btn"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
               to="/login"
             >
               Sign in
@@ -271,7 +271,7 @@ export default function CartPage() {
     items.length === 0
   ) {
     return (
-      <div className="page container cart-page">
+      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
         <Spinner label="Loading your bag…" />
       </div>
     );
@@ -282,9 +282,9 @@ export default function CartPage() {
     items.length === 0
   ) {
     return (
-      <div className="page container cart-page">
-        <div className="cart-page-heading">
-          <p className="eyebrow">
+      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
+        <div className="cart-page-heading mb-7 min-w-0">
+          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
             Your selection
           </p>
 
@@ -305,9 +305,9 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="page container cart-page">
-        <div className="cart-page-heading">
-          <p className="eyebrow">
+      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
+        <div className="cart-page-heading mb-7 min-w-0">
+          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
             Your selection
           </p>
 
@@ -323,7 +323,7 @@ export default function CartPage() {
           message="Find something good to add."
           action={
             <Link
-              className="btn"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
               to="/shop"
             >
               Continue shopping
@@ -353,9 +353,9 @@ export default function CartPage() {
     clearing;
 
   return (
-    <div className="page container cart-page">
+    <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
       <Link
-        className="cart-back"
+        className="cart-back mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         to="/shop"
       >
         <RiArrowLeftLine
@@ -365,8 +365,8 @@ export default function CartPage() {
         Continue shopping
       </Link>
 
-      <div className="cart-page-heading">
-        <p className="eyebrow">
+      <div className="cart-page-heading mb-7 min-w-0">
+        <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
           Your selection
         </p>
 
@@ -379,21 +379,21 @@ export default function CartPage() {
 
       {error && (
         <div
-          className="notice error cart-action-notice"
+          className="notice error cart-action-notice mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
           role="alert"
         >
           {error}
         </div>
       )}
 
-      <div className="cart-layout cart-layout-refined">
+      <div className="cart-layout cart-layout-refined grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(300px,380px)] items-start gap-6 max-[900px]:grid-cols-1">
         <section
-          className="cart-items"
+          className="cart-items min-w-0 overflow-hidden rounded-2xl border border-line bg-surface"
           aria-label="Cart items"
         >
           {hasUnavailableItems && (
             <div
-              className="notice warn"
+              className="notice warn mb-4 rounded-xl border border-[rgb(224_169_82_/_0.5)] bg-[rgb(224_169_82_/_0.08)] px-3.5 py-3 text-sm text-warn"
               role="alert"
             >
               Some items are no longer available.
@@ -442,7 +442,7 @@ export default function CartPage() {
               >
                 <Link
                   to={productPath}
-                  className="cart-card-thumb"
+                  className="cart-card-thumb flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-bg max-[560px]:h-20 max-[560px]:w-20"
                   aria-label={`View ${
                     item.name ||
                     'product'
@@ -467,9 +467,9 @@ export default function CartPage() {
                   )}
                 </Link>
 
-                <div className="cart-card-main">
-                  <div className="cart-card-copy">
-                    <p className="product-category">
+                <div className="cart-card-main min-w-0 flex-1">
+                  <div className="cart-card-copy min-w-0">
+                    <p className="product-category mb-1 block text-[10px] font-semibold uppercase tracking-[.12em] text-dim">
                       {item.hsn_code
                         ? `HSN ${item.hsn_code}`
                         : 'Product'}
@@ -482,18 +482,18 @@ export default function CartPage() {
                     </h2>
 
                     {unavailable && (
-                      <p className="cart-unavailable">
+                      <p className="cart-unavailable mt-2 inline-flex min-h-8 items-center rounded-full border border-danger/40 bg-danger-dim px-2.5 text-[11px] font-semibold text-danger">
                         Unavailable
                       </p>
                     )}
 
                     {item.price_changed && (
-                      <p className="cart-changed">
+                      <p className="cart-changed mt-2 inline-flex min-h-8 items-center rounded-full border border-[rgb(224_169_82_/_0.5)] bg-[rgb(224_169_82_/_0.08)] px-2.5 text-[11px] font-semibold text-warn">
                         Price updated since added
                       </p>
                     )}
 
-                    <p className="cart-unit">
+                    <p className="cart-unit mt-2 text-xs text-muted">
                       {formatMoney(
                         item.unit_price,
                       )}{' '}
@@ -501,7 +501,7 @@ export default function CartPage() {
                     </p>
                   </div>
 
-                  <div className="cart-card-controls">
+                  <div className="cart-card-controls mt-3 flex min-w-0 flex-wrap items-center gap-3 max-[560px]:gap-2">
                     <QuantityEditor
                       item={item}
                       disabled={
@@ -516,7 +516,7 @@ export default function CartPage() {
                       }
                     />
 
-                    <strong className="cart-line-total">
+                    <strong className="cart-line-total ml-auto min-w-20 text-right text-sm font-semibold tabular-nums text-text">
                       {formatMoney(
                         item.line_total,
                       )}
@@ -526,7 +526,7 @@ export default function CartPage() {
 
                 <button
                   type="button"
-                  className="cart-remove"
+                  className="cart-remove inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-transparent text-muted transition-colors hover:bg-danger-dim hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                   onClick={() =>
                     handleRemove(
                       item.product_id,
@@ -543,7 +543,7 @@ export default function CartPage() {
                 >
                   {removing ? (
                     <RiLoader4Line
-                      className="spin"
+                      className="spin animate-spin"
                       size={18}
                       aria-hidden="true"
                     />
@@ -558,10 +558,10 @@ export default function CartPage() {
             );
           })}
 
-          <div className="cart-utilities">
+          <div className="cart-utilities mt-5 flex min-w-0 flex-wrap items-center gap-2">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               onClick={handleClear}
               disabled={
                 actionBusy
@@ -570,7 +570,7 @@ export default function CartPage() {
             >
               {clearing ? (
                 <RiLoader4Line
-                  className="spin"
+                  className="spin animate-spin"
                   size={15}
                   aria-hidden="true"
                 />
@@ -587,7 +587,7 @@ export default function CartPage() {
             </button>
 
             <Link
-              className="btn btn-ghost"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
             >
               Keep shopping
@@ -600,16 +600,16 @@ export default function CartPage() {
         </section>
 
         <aside
-          className="summary cart-summary"
+          className="summary cart-summary sticky top-[92px] min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static"
           aria-label="Order summary"
         >
-          <div className="summary-heading">
-            <p className="eyebrow">
+          <div className="summary-heading mb-4 text-base font-semibold text-text">
+            <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
               Order summary
             </p>
           </div>
 
-          <dl className="summary-lines">
+          <dl className="summary-lines space-y-3 text-sm text-muted">
             <div>
               <dt>Subtotal</dt>
               <dd>
@@ -621,7 +621,7 @@ export default function CartPage() {
 
             <div>
               <dt>Shipping</dt>
-              <dd className="shipping-at-checkout">
+              <dd className="shipping-at-checkout mt-3 text-xs text-dim">
                 Calculated at checkout
               </dd>
             </div>
@@ -635,7 +635,7 @@ export default function CartPage() {
               </dd>
             </div>
 
-            <div className="total">
+            <div className="total mt-4 flex items-center justify-between border-t border-line pt-4 text-base font-semibold text-text">
               <dt>Before shipping</dt>
               <dd>
                 {formatMoney(
@@ -645,7 +645,7 @@ export default function CartPage() {
             </div>
           </dl>
 
-          <p className="free-ship-note">
+          <p className="free-ship-note mt-3 rounded-xl border border-gold/30 bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
             <RiTruckLine
               size={16}
               aria-hidden="true"
@@ -657,7 +657,7 @@ export default function CartPage() {
 
           <button
             type="button"
-            className="btn btn-block cart-checkout"
+            className="btn btn-block cart-checkout mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.06em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             onClick={() =>
               navigate('/checkout')
             }
@@ -679,7 +679,7 @@ export default function CartPage() {
             />
           </button>
 
-          <p className="cart-secure-note">
+          <p className="cart-secure-note mt-3 flex items-center gap-2 text-[11px] leading-5 text-dim">
             Secure checkout · Your payment details
             are protected.
           </p>
