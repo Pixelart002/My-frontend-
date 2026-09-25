@@ -3,6 +3,7 @@ import {
   RiArrowLeftSLine,
   RiArrowRightLine,
   RiCheckLine,
+  RiShoppingBag3Line,
 } from '@remixicon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -65,9 +66,11 @@ export default function ProductCard({ product }) {
       ? product.images.filter(Boolean)
       : [];
 
-    if (images.length > 0) return images;
-
-    return product.image_url ? [product.image_url] : [];
+    return images.length > 0
+      ? images
+      : product.image_url
+        ? [product.image_url]
+        : [];
   }, [product.images, product.image_url]);
 
   const imageCount = gallery.length;
@@ -77,6 +80,7 @@ export default function ProductCard({ product }) {
       : 0;
 
   const currentImage = gallery[safeIndex];
+  const savings = Math.max(comparePrice - price, 0);
 
   const moveImage = (event, direction) => {
     event?.preventDefault();
@@ -85,10 +89,9 @@ export default function ProductCard({ product }) {
     if (imageCount < 2) return;
 
     setImageFailed(false);
-
-    setActiveImage((current) => {
-      return (current + direction + imageCount) % imageCount;
-    });
+    setActiveImage(
+      (current) => (current + direction + imageCount) % imageCount,
+    );
   };
 
   const selectImage = (event, index) => {
@@ -128,7 +131,6 @@ export default function ProductCard({ product }) {
       touchStart.current;
 
     const delta = end - touchStart.current;
-
     touchStart.current = null;
 
     if (Math.abs(delta) <= 36) return;
@@ -179,21 +181,12 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <article
-      className="product-card"
-      aria-label={name}
-    >
+    <article className="product-card" aria-label={name}>
       <div
         className="product-media"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {discount > 0 && (
-          <span className="product-discount-badge">
-            Save {discount}%
-          </span>
-        )}
-
         <Link
           to={`/product/${slug}`}
           className="product-media-link"
@@ -211,16 +204,19 @@ export default function ProductCard({ product }) {
               onError={() => setImageFailed(true)}
             />
           ) : (
-            <span
-              className="product-image-placeholder"
-              aria-hidden="true"
-            >
+            <span className="product-image-placeholder" aria-hidden="true">
               {name.trim().slice(0, 1).toUpperCase() || 'L'}
             </span>
           )}
 
           <span className="product-image-shade" aria-hidden="true" />
         </Link>
+
+        {discount > 0 && (
+          <span className="product-discount-badge">
+            Save {discount}%
+          </span>
+        )}
 
         {imageCount > 1 && (
           <>
@@ -230,7 +226,7 @@ export default function ProductCard({ product }) {
               onClick={(event) => moveImage(event, -1)}
               aria-label="Previous product image"
             >
-              <RiArrowLeftSLine size={19} />
+              <RiArrowLeftSLine size={18} />
             </button>
 
             <button
@@ -239,13 +235,10 @@ export default function ProductCard({ product }) {
               onClick={(event) => moveImage(event, 1)}
               aria-label="Next product image"
             >
-              <RiArrowRightLine size={19} />
+              <RiArrowRightLine size={18} />
             </button>
 
-            <span
-              className="product-carousel-count"
-              aria-live="polite"
-            >
+            <span className="product-carousel-count" aria-live="polite">
               {safeIndex + 1}
               <span aria-hidden="true"> / </span>
               {imageCount}
@@ -259,17 +252,11 @@ export default function ProductCard({ product }) {
                 <button
                   key={index}
                   type="button"
-                  className={
-                    index === safeIndex ? 'is-active' : ''
-                  }
-                  onClick={(event) =>
-                    selectImage(event, index)
-                  }
+                  className={index === safeIndex ? 'is-active' : ''}
+                  onClick={(event) => selectImage(event, index)}
                   aria-label={`View image ${index + 1}`}
                   aria-current={
-                    index === safeIndex
-                      ? 'true'
-                      : undefined
+                    index === safeIndex ? 'true' : undefined
                   }
                 />
               ))}
@@ -280,18 +267,14 @@ export default function ProductCard({ product }) {
 
       <div className="product-card-content">
         <div className="product-copy">
-          <p className="product-category">
-            {category}
-          </p>
+          <p className="product-category">{category}</p>
 
           <h3 className="product-title">
-            <Link to={`/product/${slug}`}>
-              {name}
-            </Link>
+            <Link to={`/product/${slug}`}>{name}</Link>
           </h3>
         </div>
 
-        <div className="product-pricing">
+        <div className="product-pricing" aria-label="Product price">
           <span className="product-price">
             {formatMoney(price)}
           </span>
@@ -301,19 +284,21 @@ export default function ProductCard({ product }) {
               {formatMoney(comparePrice)}
             </span>
           )}
+
+          {discount > 0 && (
+            <span className="product-off">{discount}% off</span>
+          )}
         </div>
 
-        {discount > 0 && (
-          <span className="product-saving">
-            You save {formatMoney(comparePrice - price)}
-          </span>
+        {savings > 0 && (
+          <p className="product-saving">
+            You save {formatMoney(savings)}
+          </p>
         )}
 
         <button
           type="button"
-          className={`product-add-button ${
-            added ? 'is-added' : ''
-          } ${outOfStock ? 'is-disabled' : ''}`}
+          className={`product-add-button${added ? ' is-added' : ''}${outOfStock ? ' is-disabled' : ''}`}
           onClick={handleAdd}
           disabled={outOfStock || adding}
           aria-busy={adding}
@@ -325,7 +310,7 @@ export default function ProductCard({ product }) {
                 : `Add ${name} to bag`
           }
         >
-          <span>
+          <span className="product-add-label">
             {outOfStock
               ? 'Out of stock'
               : adding
@@ -335,12 +320,13 @@ export default function ProductCard({ product }) {
                   : 'Add to bag'}
           </span>
 
-          {!outOfStock &&
-            (added ? (
-              <RiCheckLine size={16} />
+          <span className="product-add-icon" aria-hidden="true">
+            {added ? (
+              <RiCheckLine size={17} />
             ) : (
-              <RiArrowRightLine size={16} />
-            ))}
+              <RiShoppingBag3Line size={17} />
+            )}
+          </span>
         </button>
       </div>
     </article>
