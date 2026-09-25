@@ -20,7 +20,6 @@ import {
 import { paymentService } from '../../services/payments';
 import { orderService } from '../../services/orders';
 import { useAuth } from '../../context/AuthContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const RETRY_PREFIX = 'luviio:payment-retrying:';
 const RECONCILE_ATTEMPTS = 8;
