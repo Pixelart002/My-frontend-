@@ -27,7 +27,6 @@ import { API_BASE } from '../config/env';
 import { authService } from '../services/auth';
 import { userService } from '../services/users';
 
-const AT_KEY = '__lv_at';
 const SESSION_HINT = '__lv_has_session';
 const REFRESH_TIMEOUT_MS = 9000;
 
@@ -85,9 +84,7 @@ function createTimeoutSignal(ms) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const [token, setToken] = useState(() =>
-    readStorage(AT_KEY),
-  );
+  // Access tokens live only in memory; the refresh token is the only persistent auth credential and is an HttpOnly cookie.
 
   const [initializing, setInitializing] = useState(true);
 
@@ -99,10 +96,6 @@ export function AuthProvider({ children }) {
     setAccessToken(accessToken || null);
     setToken(accessToken || null);
 
-    writeStorage(
-      AT_KEY,
-      accessToken || null,
-    );
   }, []);
 
   /**
@@ -175,42 +168,12 @@ export function AuthProvider({ children }) {
     let active = true;
 
     const bootstrap = async () => {
-      const existingToken = readStorage(AT_KEY);
       const hasSessionHint =
         readStorage(SESSION_HINT) === '1';
 
       /*
-       * If we already have an access token, restore the API
-       * client immediately. The backend profile request will
-       * validate whether the token is still usable.
-       */
-      if (existingToken) {
-        setAccessToken(existingToken);
-
-        if (active) {
-          setToken(existingToken);
-        }
-
-        const profile = await loadProfile();
-
-        if (active && profile) {
-          setInitializing(false);
-          return;
-        }
-
-        /*
-         * Existing token is stale/invalid.
-         * Fall through to refresh-cookie recovery.
-         */
-        if (active) {
-          persistToken(null);
-          setUser(null);
-        }
-      }
-
-      /*
-       * No existing token and no session hint means there is
-       * no reason to contact /auth/refresh.
+       * Access tokens are memory-only. After a reload, the backend
+       * refresh cookie restores a fresh short-lived access token.
        */
       if (!hasSessionHint) {
         if (active) {
