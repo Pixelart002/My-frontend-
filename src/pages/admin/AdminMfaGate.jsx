@@ -412,7 +412,7 @@ export default function AdminMfaGate({
             'MFA verified. Opening admin console…',
           );
 
-          await onVerified();
+          await onVerified(access);
         } catch (err) {
           if (!mountedRef.current) {
             return;
