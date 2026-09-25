@@ -514,15 +514,15 @@ function SignaturePad({
     ]);
 
   return (
-    <div className="signature-editor">
-      <div className="signature-canvas-wrap">
-        <div className="signature-guide">
+    <div className="signature-editor grid min-w-0 gap-2.5">
+      <div className="signature-canvas-wrap relative h-[150px] w-full overflow-hidden rounded-xl border border-line bg-white touch-none max-[700px]:h-[170px]">
+        <div className="signature-guide pointer-events-none absolute inset-x-3 bottom-[34px] z-0 border-b border-dashed border-[#cfcfcf] text-right text-[9px] leading-none text-[#999]">
           Sign inside this area
         </div>
 
         <canvas
           ref={canvasRef}
-          className="signature-canvas"
+          className="signature-canvas relative z-[1] block h-full w-full cursor-crosshair touch-none"
           aria-label="Authorised signature drawing area"
           onPointerDown={
             handlePointerDown
@@ -540,9 +540,9 @@ function SignaturePad({
         />
       </div>
 
-      <div className="asset-actions">
+      <div className="asset-actions flex flex-wrap justify-end gap-2 max-[700px]:justify-stretch [&_.btn]:max-[700px]:flex-1">
         <button
-          className="btn btn-quiet"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           type="button"
           onClick={clear}
           disabled={busy}
@@ -555,7 +555,7 @@ function SignaturePad({
         </button>
 
         <button
-          className="btn"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onClick={save}
           disabled={busy}
@@ -1010,15 +1010,15 @@ export default function BusinessProfilePanel() {
 
   if (loading) {
     return (
-      <section className="admin-panel">
-        <div className="admin-card">
+      <section className="min-w-0">
+        <div className="min-w-0 mb-[18px] rounded-xl border border-line bg-surface p-5">
           <div
-            className="state spinner"
+            className="flex min-w-0 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-bg px-5 py-12 text-center text-muted"
             role="status"
             aria-live="polite"
           >
             <span
-              className="spin"
+              className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-gold motion-reduce:animate-none"
               aria-hidden="true"
             >
               ●
@@ -1035,12 +1035,12 @@ export default function BusinessProfilePanel() {
 
   return (
     <section
-      className="admin-panel business-profile-panel"
+      className="grid min-w-0 gap-0"
       aria-labelledby="business-profile-title"
     >
-      <div className="admin-card business-profile-hero">
+      <div className="flex min-w-0 items-center justify-between gap-6 rounded-2xl border border-line bg-surface p-6 max-[700px]:flex-col max-[700px]:items-stretch max-[700px]:gap-4">
         <div>
-          <div className="eyebrow">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.12em] text-gold-soft">
             <RiShieldCheckLine
               size={15}
               aria-hidden="true"
@@ -1059,9 +1059,9 @@ export default function BusinessProfilePanel() {
           </p>
         </div>
 
-        <div className="btn-row">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <button
-            className="btn btn-quiet"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             type="button"
             onClick={load}
             disabled={
@@ -1076,7 +1076,7 @@ export default function BusinessProfilePanel() {
           </button>
 
           <button
-            className="btn"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             onClick={save}
             disabled={
@@ -1095,7 +1095,7 @@ export default function BusinessProfilePanel() {
         </div>
       </div>
 
-      <div className="business-profile-notice">
+      <div className="mb-[18px] rounded-lg border border-line border-l-2 border-l-gold bg-surface-2 px-3.5 py-3 text-xs leading-6 text-muted [&_strong]:text-text">
         <strong>
           Before saving:
         </strong>{' '}
@@ -1114,12 +1114,12 @@ export default function BusinessProfilePanel() {
           items,
         }) => (
           <div
-            className="admin-card business-profile-section"
+            className="min-w-0 border-b border-line-soft bg-surface p-5 max-[700px]:p-4 last:border-b-0"
             key={section}
           >
-            <div className="business-section-head">
+            <div className="mb-[18px] flex min-w-0 items-center gap-3 border-b border-line-soft pb-3.5 max-[700px]:items-start">
               <div
-                className="business-section-icon"
+                className="flex size-[38px] shrink-0 items-center justify-center rounded-lg border border-line bg-surface-2 text-gold-soft"
                 aria-hidden="true"
               >
                 <Icon size={19} />
@@ -1134,9 +1134,9 @@ export default function BusinessProfilePanel() {
 
               {section ===
                 'Seller address' && (
-                <div className="business-section-actions">
+                <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
                   <button
-                    className="btn btn-quiet"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     type="button"
                     onClick={() =>
                       setEditingAddress(
@@ -1171,20 +1171,20 @@ export default function BusinessProfilePanel() {
 
             {section ===
             'Brand assets' ? (
-              <div className="brand-assets-grid">
-                <div className="asset-card">
+              <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
+                <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
                   <div>
-                    <div className="asset-card-title">
+                    <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
                       Business logo
                     </div>
 
-                    <p className="asset-help">
+                    <p className="mt-1 text-[11px] leading-6 text-muted">
                       Shown on newly generated
                       invoices when uploaded.
                     </p>
                   </div>
 
-                  <div className="asset-preview logo-preview">
+                  <div className="flex min-h-[90px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-bg text-dim [&_img]:block [&_img]:max-h-[100px] [&_img]:max-w-[90%] [&_img]:object-contain">
                     {logoUrl ? (
                       <img
                         src={logoUrl}
@@ -1210,7 +1210,7 @@ export default function BusinessProfilePanel() {
                   />
 
                   <button
-                    className="btn"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                     type="button"
                     onClick={() =>
                       logoInput.current?.click()
@@ -1238,13 +1238,13 @@ export default function BusinessProfilePanel() {
                   </small>
                 </div>
 
-                <div className="asset-card">
+                <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
                   <div>
-                    <div className="asset-card-title">
+                    <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
                       Authorised signature
                     </div>
 
-                    <p className="asset-help">
+                    <p className="mt-1 text-[11px] leading-6 text-muted">
                       Optional. Appears on
                       newly issued invoices
                       when saved.
@@ -1252,7 +1252,7 @@ export default function BusinessProfilePanel() {
                   </div>
 
                   {signatureUrl ? (
-                    <div className="asset-preview signature-preview">
+                    <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim [&_img]:block [&_img]:max-h-[68px] [&_img]:max-w-[90%] [&_img]:object-contain">
                       <img
                         src={signatureUrl}
                         alt="Saved authorised signature"
@@ -1260,7 +1260,7 @@ export default function BusinessProfilePanel() {
                       />
                     </div>
                   ) : (
-                    <div className="asset-preview signature-preview empty-signature">
+                    <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim">
                       <span>
                         No signature saved
                       </span>
@@ -1293,7 +1293,7 @@ export default function BusinessProfilePanel() {
                 </div>
               </div>
             ) : (
-              <div className="business-profile-grid">
+              <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
                 {items.map(
                   ([
                     key,
@@ -1317,7 +1317,7 @@ export default function BusinessProfilePanel() {
 
                     return (
                       <label
-                        className="business-field"
+                        className="flex min-w-0 flex-col gap-1.5 [&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:gap-2 [&>span]:text-[11px] [&>span]:font-bold [&>span]:uppercase [&>span]:tracking-[.08em] [&>span]:text-muted [&_em]:shrink-0 [&_em]:text-[9px] [&_em]:font-semibold [&_em]:not-italic [&_em]:normal-case [&_em]:text-gold-soft [&_input]:min-h-[42px] [&_input]:w-full [&_input]:min-w-0 [&_input]:rounded-lg [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_input:disabled]:cursor-not-allowed [&_input:disabled]:opacity-60 [&_select]:min-h-[42px] [&_select]:w-full [&_select]:min-w-0 [&_select]:rounded-lg [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3 [&_select]:text-sm [&_select]:text-text [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)]"
                         key={key}
                       >
                         <span>
