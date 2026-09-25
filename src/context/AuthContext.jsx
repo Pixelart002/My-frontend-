@@ -162,28 +162,14 @@ export function AuthProvider({ children }) {
   /**
    * Bootstrap authentication from the backend refresh cookie.
    *
-   * SESSION_HINT avoids making an unnecessary refresh request
-   * for users who have never authenticated in this browser tab.
+   * The refresh cookie is the source of truth. Do not gate session
+   * restoration on a client-side hint, because the hint can be lost
+   * independently of the HttpOnly cookie.
    */
   useEffect(() => {
     let active = true;
 
     const bootstrap = async () => {
-      const hasSessionHint =
-        readStorage(SESSION_HINT) === '1';
-
-      /*
-       * Access tokens are memory-only. After a reload, the backend
-       * refresh cookie restores a fresh short-lived access token.
-       */
-      if (!hasSessionHint) {
-        if (active) {
-          setInitializing(false);
-        }
-
-        return;
-      }
-
       try {
         const response = await fetch(
           `${API_BASE}/auth/refresh`,
@@ -215,7 +201,9 @@ export function AuthProvider({ children }) {
         const access =
           payload?.access_token || null;
 
-        if (!active) return;
+        if (!active) {
+          return;
+        }
 
         if (!access) {
           clearSession();
@@ -225,13 +213,13 @@ export function AuthProvider({ children }) {
         persistToken(access);
         writeStorage(SESSION_HINT, '1');
 
-        /*
-         * persistToken() updates React state, but loadProfile()
-         * reads the API client's token, so it can immediately
-         * authenticate this request.
-         */
         await loadProfile();
       } catch {
+        /*
+         * A refresh failure during startup means there is no usable
+         * access token for this page lifecycle. Keep the handling
+         * deterministic and let protected routes redirect normally.
+         */
         if (active) {
           clearSession();
         }
