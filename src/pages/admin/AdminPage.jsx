@@ -530,11 +530,7 @@ export default function AdminPage() {
   const closeDrawer =
     useCallback(() => {
       setDrawerOpen(false);
-    }, [
-      initializing,
-      isAuthenticated,
-      token,
-    ]);
+    }, []);
 
   const verifyAdmin =
     useCallback(async (verifiedToken = token) => {
@@ -569,7 +565,11 @@ export default function AdminPage() {
       setStatus('verified');
 
       return response;
-    }, []);
+    }, [
+      initializing,
+      isAuthenticated,
+      token,
+    ]);
 
   useEffect(() => {
     if (initializing) {
@@ -591,6 +591,8 @@ export default function AdminPage() {
       }
 
       try {
+        setAccessToken(token);
+
         const response =
           await adminService.verify();
 
