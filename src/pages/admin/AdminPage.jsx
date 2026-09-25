@@ -39,6 +39,7 @@ import {
   RiVipCrownLine,
 } from '@remixicon/react';
 
+import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -548,6 +549,8 @@ export default function AdminPage() {
 
       const requestId =
         ++verifyRequestRef.current;
+
+      setAccessToken(token);
 
       const response =
         await adminService.verify();
