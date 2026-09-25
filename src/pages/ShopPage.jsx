@@ -649,7 +649,7 @@ export default function ShopPage() {
 
       <div className="shop-toolbar mb-6 flex min-w-0 items-center justify-between gap-3 max-[640px]:flex-wrap">
         <form
-          className="shop-search flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 transition-colors focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/10 [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim [&_button]:inline-flex [&_button]:h-10 [&_button]:w-10 [&_button]:shrink-0 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-lg [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-muted [&_button]:transition-colors [&_button:hover]:bg-surface-2 [&_button:hover]:text-gold [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-gold"
+          className="shop-search flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 transition-colors focus-within:border-gold focus-within:ring-2 focus-within:ring-[rgba(216,173,106,.10)] [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim [&_button]:inline-flex [&_button]:h-10 [&_button]:w-10 [&_button]:shrink-0 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-lg [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-muted [&_button]:transition-colors [&_button:hover]:bg-surface-2 [&_button:hover]:text-gold [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-gold"
           onSubmit={(event) => {
             event.preventDefault();
 
@@ -776,7 +776,7 @@ export default function ShopPage() {
               Availability
             </span>
 
-            <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-gold/60 has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
+            <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-[rgba(216,173,106,.60)] has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
               <input
                 type="checkbox"
                 checked={
@@ -805,7 +805,7 @@ export default function ShopPage() {
             </span>
 
             <form
-              className="price-row grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 max-[480px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] [&_input]:h-11 [&_input]:min-w-0 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-gold/10 [&_button]:h-11 [&_button]:rounded-xl max-[480px]:[&_button]:col-span-3"
+              className="price-row grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 max-[480px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] [&_input]:h-11 [&_input]:min-w-0 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_button]:h-11 [&_button]:rounded-xl max-[480px]:[&_button]:col-span-3"
               onSubmit={
                 applyPrice
               }
