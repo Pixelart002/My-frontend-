@@ -310,23 +310,20 @@ function RouteSeo() {
 
 function LoadingFallback() {
   return (
-    <div className="page container">
+    <main className="flex min-h-[50vh] items-center justify-center px-5 py-16 text-text">
       <div
-        className="state spinner"
+        className="flex items-center gap-3 text-sm text-muted"
         role="status"
         aria-live="polite"
         aria-busy="true"
       >
         <span
-          className="spin"
+          className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-gold motion-reduce:animate-none"
           aria-hidden="true"
-        >
-          ●
-        </span>
-
+        />
         <span>Loading…</span>
       </div>
-    </div>
+    </main>
   );
 }
 
