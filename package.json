@@ -6,13 +6,13 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-sitemap.mjs && vite build",
+    "build": "npm run build:css && node scripts/generate-sitemap.mjs && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --max-warnings 0",
     "format:check": "prettier --check .",
-    "build:css": "tailwindcss -i ./css/tailwind-input.css -o ./css/tailwind.css --minify"
+    "build:css": "tailwindcss -c ./tailwind.config.cjs -i ./src/styles/tailwind-input.css -o ./public/tailwind.css --minify"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
