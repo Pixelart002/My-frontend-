@@ -3,7 +3,7 @@
  *
  * Token model:
  *  - refresh_token: httpOnly cookie scoped to /api/v1/auth
- *  - access_token: short-lived JWT stored in sessionStorage + memory
+ *  - access_token: short-lived JWT kept in memory only
  *
  * Responsibilities:
  *  - restore authentication on app startup
@@ -91,8 +91,7 @@ export function AuthProvider({ children }) {
   const [initializing, setInitializing] = useState(true);
 
   /**
-   * Keep React state, sessionStorage and API client
-   * synchronized in one place.
+   * Keep React state and the API client synchronized in one place.
    */
   const persistToken = useCallback((accessToken) => {
     setAccessToken(accessToken || null);
