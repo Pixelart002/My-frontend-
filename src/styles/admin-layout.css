@@ -1,3 +1,162 @@
+@media (min-width: 901px) {
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(1480px, 100%);
+    min-width: 0;
+  }
+
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-menu-trigger {
+    display: inline-flex;
+  }
+
+  .admin-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    cursor: default;
+  }
+
+  .admin-drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    width: min(380px, 34vw);
+    min-width: 300px;
+    max-width: 100%;
+    height: 100dvh;
+    min-height: 100vh;
+    overflow: hidden;
+    transform: translate3d(-105%, 0, 0);
+    visibility: hidden;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.28);
+    transition:
+      transform 0.22s ease,
+      visibility 0.22s ease;
+    will-change: transform;
+  }
+
+  .admin-drawer.is-open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+  }
+
+  .admin-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 0 0 auto;
+    min-width: 0;
+    padding:
+      max(18px, env(safe-area-inset-top))
+      20px
+      18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .admin-drawer-head > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .admin-drawer-head strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: 19px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-drawer-head span {
+    overflow: hidden;
+    color: var(--dim);
+    font-size: 11px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-drawer-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    padding: 10px 14px
+      max(22px, env(safe-area-inset-bottom));
+  }
+
+  .admin-drawer .admin-sb-btn {
+    min-height: 44px;
+  }
+
+  .admin-drawer .admin-account {
+    margin-top: 20px;
+    padding-bottom: 8px;
+  }
+
+  .admin-drawer button:focus-visible,
+  .admin-drawer a:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .admin-drawer {
+    width: min(360px, 42vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-drawer {
+    transition: none;
+    will-change: auto;
+  }
+}
+
+@media (max-height: 600px) and (min-width: 901px) {
+  .admin-drawer-head {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .admin-drawer-scroll {
+    padding-top: 8px;
+    padding-bottom: 16px;
+  }
+
+  .admin-drawer .admin-account {
+    margin-top: 12px;
+  }
+}
+
+/* ============================================================
+   Admin layout hardening — merged from admin-layout-fix.css
+   ============================================================ */
+
 /* Luviio admin console — structural UI polish.
    Preserve the existing admin header.
    Desktop uses the full sidebar; mobile uses the existing drawer. */
