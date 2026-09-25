@@ -482,7 +482,7 @@ export default function CartPage() {
                     </h2>
 
                     {unavailable && (
-                      <p className="cart-unavailable mt-2 inline-flex min-h-8 items-center rounded-full border border-danger/40 bg-danger-dim px-2.5 text-[11px] font-semibold text-danger">
+                      <p className="cart-unavailable mt-2 inline-flex min-h-8 items-center rounded-full border border-[rgba(224,115,95,.40)] bg-danger-dim px-2.5 text-[11px] font-semibold text-danger">
                         Unavailable
                       </p>
                     )}
@@ -645,7 +645,7 @@ export default function CartPage() {
             </div>
           </dl>
 
-          <p className="free-ship-note mt-3 rounded-xl border border-gold/30 bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
+          <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
             <RiTruckLine
               size={16}
               aria-hidden="true"
