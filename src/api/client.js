@@ -119,17 +119,8 @@ function readToken() {
     // Browser bridge unavailable.
   }
 
-  try {
-    const stored = sessionStorage.getItem('__lv_at');
-
-    if (stored) {
-      accessToken = stored;
-      return stored;
-    }
-  } catch {
-    // Storage may be unavailable/restricted.
-  }
-
+  // Access tokens are intentionally never read from Web Storage.
+  // A page reload obtains a fresh token through the HttpOnly refresh cookie.
   return null;
 }
 
