@@ -660,7 +660,7 @@ export default function AdminPage() {
     initializing,
     isAuthenticated,
     token,
-  ]););
+  ]);
 
   useEffect(() => {
     if (
