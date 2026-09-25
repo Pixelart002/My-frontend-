@@ -365,7 +365,7 @@ const NAV_GROUPS = [
 function AdminPanelFallback() {
   return (
     <div
-      className="admin-panel-fallback"
+      className="admin-panel-fallback flex min-h-48 items-center justify-center gap-3 rounded-2xl border border-line bg-surface p-6 text-sm text-muted"
       role="status"
       aria-live="polite"
       aria-busy="true"
@@ -387,9 +387,9 @@ function AdminGate({
   children,
 }) {
   return (
-    <main className="page container">
+    <main className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] py-12 max-[760px]:px-[18px] max-[760px]:py-8 max-[480px]:px-4">
       <section
-        className="admin-gate"
+        className="admin-gate mx-auto flex w-full max-w-[520px] flex-col items-center rounded-2xl border border-line bg-surface p-8 text-center shadow-luviio-card max-[560px]:p-5"
         aria-labelledby="admin-gate-title"
       >
         <RiShieldStarLine
@@ -788,9 +788,9 @@ export default function AdminPage() {
     status === 'verifying'
   ) {
     return (
-      <main className="page container">
+      <main className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] py-12 max-[760px]:px-[18px] max-[760px]:py-8 max-[480px]:px-4">
         <div
-          className="admin-access-loading"
+          className="admin-access-loading flex min-h-48 items-center justify-center gap-3 text-sm text-muted"
           role="status"
           aria-live="polite"
           aria-busy="true"
@@ -811,7 +811,7 @@ export default function AdminPage() {
     status === 'mfa-required'
   ) {
     return (
-      <main className="page container">
+      <main className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] py-12 max-[760px]:px-[18px] max-[760px]:py-8 max-[480px]:px-4">
         <AdminMfaGate
           role={currentRole}
           onVerified={
@@ -830,7 +830,7 @@ export default function AdminPage() {
         title="Session expired"
         message="Please sign in again to continue to the admin console."
       >
-        <div className="admin-gate-actions">
+        <div className="admin-gate-actions mt-6 flex flex-wrap justify-center gap-2.5 max-[480px]:w-full max-[480px]:flex-col">
           <Link
             className="btn"
             to="/login"
@@ -862,7 +862,7 @@ export default function AdminPage() {
         title="Admin access required"
         message="Your account is authenticated, but its role does not have console access."
       >
-        <div className="admin-gate-actions">
+        <div className="admin-gate-actions mt-6 flex flex-wrap justify-center gap-2.5 max-[480px]:w-full max-[480px]:flex-col">
           <Link
             className="btn"
             to="/"
@@ -882,8 +882,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
+    <div className="grid min-w-0 grid-cols-[248px_minmax(0,1fr)] items-start gap-7 mx-auto w-full max-w-[1480px] px-[clamp(16px,8vw,120px)] pb-16 pt-7 max-[1100px]:grid-cols-[220px_minmax(0,1fr)] max-[1100px]:gap-[18px] max-[900px]:block max-[900px]:px-[clamp(16px,8vw,120px)] max-[900px]:pb-12 max-[900px]:pt-4">
+      <aside className="sticky top-6 flex min-w-0 min-h-[calc(100vh-72px)] max-h-[calc(100vh-48px)] flex-col gap-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-line bg-surface p-3 shadow-[0_12px_36px_rgba(0,0,0,.12)] overscroll-contain scrollbar-gutter-stable max-[900px]:hidden">
         <AdminNavigation
           panel={effectivePanel}
           allowed={allowed}
@@ -899,7 +899,7 @@ export default function AdminPage() {
       {drawerOpen && (
         <button
           type="button"
-          className="admin-drawer-backdrop"
+          className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px]"
           aria-label="Close admin menu"
           onClick={closeDrawer}
         />
@@ -907,11 +907,7 @@ export default function AdminPage() {
 
       <aside
         ref={drawerRef}
-        className={`admin-drawer ${
-          drawerOpen
-            ? 'is-open'
-            : ''
-        }`}
+        className={`admin-drawer ${drawerOpen ? 'translate-x-0 visible' : ''}`}
         aria-label="Admin menu"
         aria-hidden={
           !drawerOpen
@@ -923,8 +919,8 @@ export default function AdminPage() {
         }
         tabIndex={-1}
       >
-        <div className="admin-drawer-head">
-          <div className="admin-drawer-brand">
+        <div className="flex shrink-0 min-w-0 items-center justify-between gap-3 border-b border-line px-4 py-4 pt-[max(16px,env(safe-area-inset-top))]">
+          <div className="flex min-w-0 flex-col gap-0.5 [&_strong]:truncate [&_strong]:text-[19px] [&_strong]:font-semibold [&_strong]:leading-tight [&_span]:truncate [&_span]:text-[11px] [&_span]:text-dim">
             <strong>
               Luviio
             </strong>
@@ -938,7 +934,7 @@ export default function AdminPage() {
               drawerCloseRef
             }
             type="button"
-            className="icon-btn"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-transparent text-muted transition-colors hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             aria-label="Close menu"
             onClick={
               closeDrawer
@@ -951,7 +947,7 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div className="admin-drawer-scroll">
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3.5 py-2 pb-[max(22px,env(safe-area-inset-bottom))]">
           <AdminNavigation
             panel={effectivePanel}
             allowed={allowed}
@@ -967,12 +963,12 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="admin-main">
-        <header className="admin-head">
-          <div className="admin-head-title">
+      <main className="min-w-0 w-full">
+        <header className="mb-7 flex min-w-0 min-h-16 items-start justify-between gap-5 border-b border-line pb-[18px] max-[900px]:mb-5">
+          <div className="flex min-w-0 items-start gap-3">
             <button
               type="button"
-              className="admin-menu-trigger"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-text transition-colors hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[900px]:inline-flex"
               aria-label="Open admin menu"
               aria-expanded={
                 drawerOpen
@@ -988,7 +984,7 @@ export default function AdminPage() {
             </button>
 
             <div>
-              <p className="admin-head-eyebrow">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-[.16em] text-gold">
                 Luviio Admin
               </p>
 
@@ -996,7 +992,7 @@ export default function AdminPage() {
                 {active.label}
               </h1>
 
-              <p className="admin-sub">
+              <p className="mt-1 text-sm text-muted">
                 Store administration
                 {' · '}
                 {currentRole ||
@@ -1007,7 +1003,7 @@ export default function AdminPage() {
         </header>
 
         <section
-          className="admin-content"
+          className="min-w-0"
           aria-label={`${active.label} panel`}
         >
           <Suspense
@@ -1143,7 +1139,7 @@ function AdminNavigation({
       className="admin-navigation"
       aria-label="Admin navigation"
     >
-      <div className="admin-nav-groups">
+      <div className="min-w-0">
         {NAV_GROUPS.map(
           ([label, keys]) => {
             const visible =
@@ -1158,13 +1154,13 @@ function AdminNavigation({
             return (
               <div
                 key={label}
-                className="admin-nav-group"
+                className="min-w-0"
               >
-                <div className="admin-sb-label">
+                <div className="mb-1.5 mt-4 px-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-dim first:mt-1">
                   {label}
                 </div>
 
-                <div className="admin-nav-items">
+                <div className="grid gap-1">
                   {visible.map(
                     (key) => {
                       const nav =
@@ -1197,20 +1193,20 @@ function AdminNavigation({
         )}
       </div>
 
-      <div className="admin-account">
-        <div className="admin-account-name">
+      <div className="mt-5 border-t border-line-soft px-1.5 pb-2 pt-4 text-xs text-dim">
+        <div className="font-semibold text-text">
           {profile?.full_name ||
             user?.full_name ||
             'Staff'}
         </div>
 
-        <div className="admin-account-email">
+        <div className="mt-0.5 break-words">
           {profile?.email ||
             user?.email ||
             ''}
         </div>
 
-        <div className="admin-account-role">
+        <div className="mt-1.5 capitalize">
           {profile?.role ||
             user?.role ||
             'Staff'}
@@ -1219,7 +1215,7 @@ function AdminNavigation({
         <button
           type="button"
           onClick={onLogout}
-          className="admin-signout"
+          className="mt-2.5 inline-flex min-h-10 items-center gap-2 border-0 bg-transparent px-0 text-xs font-medium text-muted transition-colors hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           <RiLogoutBoxRLine
             size={15}
@@ -1246,11 +1242,7 @@ function SideBtn({
   return (
     <button
       type="button"
-      className={`admin-sb-btn ${
-        isActive
-          ? 'is-active'
-          : ''
-      }`}
+      className={`admin-sb-btn ${isActive ? 'bg-gold-dim text-gold-soft shadow-[inset_2px_0_0_var(--gold)] [&_svg]:text-gold-soft' : ''}`}
       onClick={onClick}
       aria-current={
         isActive
