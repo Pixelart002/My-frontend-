@@ -630,9 +630,9 @@ export default function ShopPage() {
     );
 
   return (
-    <div className="page container">
-      <div className="page-heading">
-        <p className="eyebrow">
+    <div className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4 max-[480px]:pt-8">
+      <div className="page-heading mb-8 min-w-0 max-w-[760px]">
+        <p className="eyebrow mb-4 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
           The collection
         </p>
 
@@ -647,9 +647,9 @@ export default function ShopPage() {
         </p>
       </div>
 
-      <div className="shop-toolbar">
+      <div className="shop-toolbar mb-6 flex min-w-0 items-center justify-between gap-3 max-[640px]:flex-wrap">
         <form
-          className="shop-search"
+          className="shop-search flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-surface px-3.5 transition-colors focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/10 [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim [&_button]:inline-flex [&_button]:h-10 [&_button]:w-10 [&_button]:shrink-0 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-lg [&_button]:border-0 [&_button]:bg-transparent [&_button]:text-muted [&_button]:transition-colors [&_button:hover]:bg-surface-2 [&_button:hover]:text-gold [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-gold"
           onSubmit={(event) => {
             event.preventDefault();
 
@@ -682,7 +682,7 @@ export default function ShopPage() {
 
         <button
           type="button"
-          className="btn btn-quiet btn-sm filter-toggle"
+          className="filter-toggle inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-line bg-transparent px-3.5 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[480px]:flex-1 max-[480px]:justify-center"
           onClick={() =>
             setShowFilters(
               (value) => !value,
@@ -704,25 +704,21 @@ export default function ShopPage() {
       {showFilters && (
         <div
           id="shop-filters"
-          className="filter-panel"
+          className="filter-panel mt-3 grid min-w-0 grid-cols-[repeat(3,minmax(0,1fr))] gap-4 rounded-2xl border border-line bg-surface p-4 shadow-luviio-card max-[900px]:grid-cols-1 max-[560px]:p-3"
         >
-          <div className="filter-group">
-            <span className="filter-label">
+          <div className="filter-group min-w-0 rounded-xl border border-line-soft bg-surface-2/40 p-4">
+            <span className="filter-label mb-2.5 block text-[11px] font-semibold uppercase tracking-[.16em] text-muted">
               Category
             </span>
 
             <div
-              className="chip-row"
+              className="chip-row flex min-w-0 flex-wrap gap-2"
               role="group"
               aria-label="Product category"
             >
               <button
                 type="button"
-                className={`chip ${
-                  !category
-                    ? 'is-active'
-                    : ''
-                }`}
+                className={`chip inline-flex min-h-10 items-center justify-center rounded-full border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${!category ? 'border-gold bg-gold-dim text-gold-soft' : 'border-line bg-bg text-muted hover:border-gold hover:text-text'}`}
                 aria-pressed={!category}
                 onClick={() =>
                   setParam(
@@ -752,12 +748,7 @@ export default function ShopPage() {
                     <button
                       type="button"
                       key={id}
-                      className={`chip ${
-                        category ===
-                        slug
-                          ? 'is-active'
-                          : ''
-                      }`}
+                      className={`chip inline-flex min-h-10 items-center justify-center rounded-full border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${category === slug ? 'border-gold bg-gold-dim text-gold-soft' : 'border-line bg-bg text-muted hover:border-gold hover:text-text'}`}
                       aria-pressed={
                         category ===
                         slug
@@ -780,12 +771,12 @@ export default function ShopPage() {
             </div>
           </div>
 
-          <div className="filter-group">
-            <span className="filter-label">
+          <div className="filter-group min-w-0 rounded-xl border border-line-soft bg-surface-2/40 p-4">
+            <span className="filter-label mb-2.5 block text-[11px] font-semibold uppercase tracking-[.16em] text-muted">
               Availability
             </span>
 
-            <label className="check-line">
+            <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-gold/60 has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
               <input
                 type="checkbox"
                 checked={
@@ -808,13 +799,13 @@ export default function ShopPage() {
             </label>
           </div>
 
-          <div className="filter-group">
-            <span className="filter-label">
+          <div className="filter-group min-w-0 rounded-xl border border-line-soft bg-surface-2/40 p-4">
+            <span className="filter-label mb-2.5 block text-[11px] font-semibold uppercase tracking-[.16em] text-muted">
               Price
             </span>
 
             <form
-              className="price-row"
+              className="price-row grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] items-center gap-2 max-[480px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] [&_input]:h-11 [&_input]:min-w-0 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-gold/10 [&_button]:h-11 [&_button]:rounded-xl max-[480px]:[&_button]:col-span-3"
               onSubmit={
                 applyPrice
               }
@@ -867,7 +858,7 @@ export default function ShopPage() {
               />
 
               <button
-                className="btn btn-sm"
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-transparent bg-gold px-3.5 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                 type="submit"
               >
                 Apply
@@ -880,7 +871,7 @@ export default function ShopPage() {
       {hasActiveFilters && (
         <button
           type="button"
-          className="clear-filters"
+          className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-transparent px-2 text-xs font-medium text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           onClick={clearFilters}
         >
           <RiCloseLine
@@ -907,7 +898,7 @@ export default function ShopPage() {
           action={
             <button
               type="button"
-              className="btn btn-quiet btn-sm"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-transparent px-3.5 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               onClick={
                 clearFilters
               }
@@ -918,7 +909,7 @@ export default function ShopPage() {
         />
       ) : (
         <>
-          <div className="products-grid">
+          <div className="products-grid grid min-w-0 grid-cols-2 gap-x-3 gap-y-4 min-[768px]:grid-cols-3 min-[1024px]:grid-cols-4 min-[1280px]:gap-x-4 min-[1280px]:gap-y-5 max-[375px]:grid-cols-1">
             {items.map(
               (product, index) => (
                 <ProductCard
@@ -934,12 +925,12 @@ export default function ShopPage() {
 
           {hasMore && (
             <div
-              className="shop-load-more"
+              className="shop-load-more flex justify-center px-1 pb-2 pt-10"
               ref={loadMoreRef}
             >
               <button
                 type="button"
-                className="btn btn-quiet"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-sm font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                 onClick={loadMore}
                 disabled={loadingMore}
                 aria-label="Load more products"
@@ -949,7 +940,7 @@ export default function ShopPage() {
                   <>
                     <RiLoader4Line
                       size={17}
-                      className="spin"
+                      className="spin animate-spin"
                       aria-hidden="true"
                     />
                     Loading products…
