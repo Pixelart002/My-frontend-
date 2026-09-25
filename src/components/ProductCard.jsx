@@ -181,21 +181,24 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <article className="product-card" aria-label={name}>
+    <article
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-luviio-card transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--gold)_28%,var(--line))]"
+      aria-label={name}
+    >
       <div
-        className="product-media"
+        className="product-media relative aspect-square overflow-hidden rounded-t-2xl border-0 bg-[#f2f0eb] shadow-none"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <Link
           to={`/product/${slug}`}
-          className="product-media-link"
+          className="product-media-link absolute inset-0 z-[1] block overflow-hidden"
           aria-label={`View ${name}`}
           onKeyDown={handleMediaKeyDown}
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image"
+              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -204,16 +207,19 @@ export default function ProductCard({ product }) {
               onError={() => setImageFailed(true)}
             />
           ) : (
-            <span className="product-image-placeholder" aria-hidden="true">
+            <span className="flex h-full w-full items-center justify-center bg-[#211e1a] font-display text-5xl text-gold">
               {name.trim().slice(0, 1).toUpperCase() || 'L'}
             </span>
           )}
 
-          <span className="product-image-shade" aria-hidden="true" />
+          <span
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+            aria-hidden="true"
+          />
         </Link>
 
         {discount > 0 && (
-          <span className="product-discount-badge">
+          <span className="absolute left-3 top-3 z-10 inline-flex min-h-7 items-center rounded-full border border-gold/30 bg-[#11100f]/85 px-2.5 text-[9px] font-bold uppercase tracking-[0.08em] text-gold-soft shadow-lg backdrop-blur-md">
             Save {discount}%
           </span>
         )}
@@ -222,7 +228,7 @@ export default function ProductCard({ product }) {
           <>
             <button
               type="button"
-              className="product-carousel-arrow product-carousel-prev"
+              className="product-carousel-arrow left-2.5 top-1/2 border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-md"
               onClick={(event) => moveImage(event, -1)}
               aria-label="Previous product image"
             >
@@ -231,21 +237,24 @@ export default function ProductCard({ product }) {
 
             <button
               type="button"
-              className="product-carousel-arrow product-carousel-next"
+              className="product-carousel-arrow right-2.5 top-1/2 border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-md"
               onClick={(event) => moveImage(event, 1)}
               aria-label="Next product image"
             >
               <RiArrowRightLine size={18} />
             </button>
 
-            <span className="product-carousel-count" aria-live="polite">
+            <span
+              className="product-carousel-count rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[9px] font-medium text-white backdrop-blur-md"
+              aria-live="polite"
+            >
               {safeIndex + 1}
               <span aria-hidden="true"> / </span>
               {imageCount}
             </span>
 
             <div
-              className="product-carousel-dots"
+              className="product-carousel-dots rounded-full border border-white/10 bg-black/45 px-1.5 py-0.5 backdrop-blur-md"
               aria-label="Product image navigation"
             >
               {gallery.map((_, index) => (
@@ -265,40 +274,54 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      <div className="product-card-content">
-        <div className="product-copy">
-          <p className="product-category">{category}</p>
+      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
+        <div className="min-w-0">
+          <p className="m-0 mb-1.5 truncate text-[9px] font-bold uppercase tracking-[0.11em] text-muted">
+            {category}
+          </p>
 
-          <h3 className="product-title">
-            <Link to={`/product/${slug}`}>{name}</Link>
+          <h3 className="m-0 line-clamp-2 min-h-[2.7rem] text-[13px] font-semibold leading-[1.4] tracking-[-0.005em] text-text sm:text-[14px]">
+            <Link
+              to={`/product/${slug}`}
+              className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            >
+              {name}
+            </Link>
           </h3>
         </div>
 
-        <div className="product-pricing" aria-label="Product price">
-          <span className="product-price">
+        <div className="mt-3 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-text sm:text-base">
             {formatMoney(price)}
           </span>
 
           {comparePrice > price && price > 0 && (
-            <span className="product-was">
+            <span className="text-[10px] font-medium tabular-nums text-dim line-through sm:text-[11px]">
               {formatMoney(comparePrice)}
             </span>
           )}
 
           {discount > 0 && (
-            <span className="product-off">{discount}% off</span>
+            <span className="rounded bg-success-dim px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-success">
+              {discount}% off
+            </span>
           )}
         </div>
 
-        {savings > 0 && (
-          <p className="product-saving">
-            You save {formatMoney(savings)}
-          </p>
-        )}
+        <p
+          className={`m-0 mt-1 min-h-4 text-[9px] leading-4 text-muted${savings > 0 ? '' : ' opacity-0'}`}
+          aria-hidden={savings <= 0}
+        >
+          You save {formatMoney(savings)}
+        </p>
 
         <button
           type="button"
-          className={`product-add-button${added ? ' is-added' : ''}${outOfStock ? ' is-disabled' : ''}`}
+          className={`mt-3 flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
+            added
+              ? 'border-success/40 bg-success-dim text-success'
+              : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
+          }`}
           onClick={handleAdd}
           disabled={outOfStock || adding}
           aria-busy={adding}
@@ -310,7 +333,7 @@ export default function ProductCard({ product }) {
                 : `Add ${name} to bag`
           }
         >
-          <span className="product-add-label">
+          <span className="min-w-0 truncate">
             {outOfStock
               ? 'Out of stock'
               : adding
@@ -320,11 +343,18 @@ export default function ProductCard({ product }) {
                   : 'Add to bag'}
           </span>
 
-          <span className="product-add-icon" aria-hidden="true">
+          <span
+            className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border ${
+              added
+                ? 'border-success/35 bg-success/10 text-success'
+                : 'border-line bg-black/15 text-gold'
+            }`}
+            aria-hidden="true"
+          >
             {added ? (
-              <RiCheckLine size={17} />
+              <RiCheckLine size={16} />
             ) : (
-              <RiShoppingBag3Line size={17} />
+              <RiShoppingBag3Line size={16} />
             )}
           </span>
         </button>
