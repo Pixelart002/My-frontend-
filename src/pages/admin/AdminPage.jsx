@@ -440,6 +440,9 @@ export default function AdminPage() {
   const {
     user,
     logout,
+    initializing,
+    isAuthenticated,
+    token,
   } = useAuth();
 
   const { toast } =
@@ -526,10 +529,23 @@ export default function AdminPage() {
   const closeDrawer =
     useCallback(() => {
       setDrawerOpen(false);
-    }, []);
+    }, [
+      initializing,
+      isAuthenticated,
+      token,
+    ]);
 
   const verifyAdmin =
     useCallback(async () => {
+      if (initializing) {
+        return null;
+      }
+
+      if (!isAuthenticated || !token) {
+        setStatus('auth-required');
+        return null;
+      }
+
       const requestId =
         ++verifyRequestRef.current;
 
@@ -553,11 +569,23 @@ export default function AdminPage() {
     }, []);
 
   useEffect(() => {
+    if (initializing) {
+      setStatus('verifying');
+      return undefined;
+    }
+
     let activeRequest = true;
 
     const verify = async () => {
       const requestId =
         ++verifyRequestRef.current;
+
+      if (!isAuthenticated || !token) {
+        if (activeRequest) {
+          setStatus('auth-required');
+        }
+        return;
+      }
 
       try {
         const response =
@@ -623,7 +651,11 @@ export default function AdminPage() {
       activeRequest = false;
       verifyRequestRef.current += 1;
     };
-  }, []);
+  }, [
+    initializing,
+    isAuthenticated,
+    token,
+  ]););
 
   useEffect(() => {
     if (
