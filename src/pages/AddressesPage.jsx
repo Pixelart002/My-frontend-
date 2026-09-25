@@ -154,21 +154,21 @@ function AddressForm({
 
   return (
     <form
-      className="address-form"
+      className="address-form min-w-0"
       onSubmit={onSubmit}
       noValidate
     >
       {error && (
         <div
-          className="form-error"
+          className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
           role="alert"
         >
           {error}
         </div>
       )}
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-name`}>
             Full name (recipient)
           </label>
@@ -183,7 +183,7 @@ function AddressForm({
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-phone`}>
             Phone
           </label>
@@ -201,7 +201,7 @@ function AddressForm({
         </div>
       </div>
 
-      <div className="field">
+      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
         <label htmlFor={`${formId}-email`}>
           Email address *
         </label>
@@ -220,12 +220,12 @@ function AddressForm({
           disabled={saving}
         />
 
-        <small className="hint">
+        <small className="hint mt-1 text-xs leading-5 text-dim">
           Used for order confirmations and delivery updates.
         </small>
       </div>
 
-      <div className="field">
+      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
         <label htmlFor={`${formId}-line1`}>
           Street address *
         </label>
@@ -242,7 +242,7 @@ function AddressForm({
         />
       </div>
 
-      <div className="field">
+      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
         <label htmlFor={`${formId}-line2`}>
           Apartment / area
         </label>
@@ -257,8 +257,8 @@ function AddressForm({
         />
       </div>
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-city`}>
             City *
           </label>
@@ -274,7 +274,7 @@ function AddressForm({
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-state`}>
             State
           </label>
@@ -290,8 +290,8 @@ function AddressForm({
         </div>
       </div>
 
-      <div className="field-grid">
-        <div className="field">
+      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-postal`}>
             Postal code *
           </label>
@@ -308,7 +308,7 @@ function AddressForm({
           />
         </div>
 
-        <div className="field">
+        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
           <label htmlFor={`${formId}-country`}>
             Country (2-letter)
           </label>
@@ -326,7 +326,7 @@ function AddressForm({
         </div>
       </div>
 
-      <label className="check-line">
+      <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-[rgba(216,173,106,.60)] has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
         <input
           type="checkbox"
           checked={values.is_default}
@@ -337,9 +337,9 @@ function AddressForm({
         <span>Set as default address</span>
       </label>
 
-      <div className="btn-row">
+      <div className="btn-row mt-5 flex min-w-0 flex-wrap items-center gap-2.5 max-[480px]:flex-col max-[480px]:items-stretch">
         <button
-          className="btn"
+          className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 max-[480px]:w-full"
           type="submit"
           disabled={saving}
         >
@@ -347,7 +347,7 @@ function AddressForm({
         </button>
 
         <button
-          className="btn btn-quiet"
+          className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[480px]:w-full"
           type="button"
           onClick={onCancel}
           disabled={saving}
@@ -466,9 +466,9 @@ export default function AddressesPage() {
   };
 
   return (
-    <div className="page container addresses-page">
+    <div className="page container addresses-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
       <Link
-        className="back-link"
+        className="back-link mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         to="/account"
       >
         <RiArrowLeftLine
@@ -478,8 +478,8 @@ export default function AddressesPage() {
         Back to profile
       </Link>
 
-      <div className="page-heading compact">
-        <p className="eyebrow">Your account</p>
+      <div className="page-heading compact mb-7 min-w-0 max-w-[760px]">
+        <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">Your account</p>
         <h1>Addresses.</h1>
       </div>
 
@@ -491,7 +491,7 @@ export default function AddressesPage() {
       ) : addresses === null ? (
         <Spinner label="Loading addresses…" />
       ) : (
-        <div className="address-list manage">
+        <div className="address-list manage mt-6 grid min-w-0 grid-cols-2 gap-4 max-[900px]:grid-cols-1">
           {addresses.length === 0 &&
             !showForm && (
               <EmptyState
@@ -502,18 +502,18 @@ export default function AddressesPage() {
 
           {addresses.map((address) => (
             <article
-              className="address-card-manage"
+              className="address-card-manage min-w-0 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-[rgba(216,173,106,.35)] max-[560px]:p-4"
               key={address.id}
             >
-              <div className="address-card-content">
-                <div className="address-card-title">
+              <div className="address-card-content min-w-0">
+                <div className="address-card-title mb-2 flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold text-text">
                   <strong>
                     {address.full_name ||
                       'Delivery'}
                   </strong>
 
                   {address.is_default && (
-                    <span className="chip chip-sm">
+                    <span className="chip chip-sm inline-flex min-h-8 items-center rounded-full border border-gold bg-gold-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
                       Default
                     </span>
                   )}
@@ -544,7 +544,7 @@ export default function AddressesPage() {
                 </p>
 
                 {address.email && (
-                  <small className="address-email">
+                  <small className="address-email mt-2 break-words text-xs text-dim">
                     {address.email}
                   </small>
                 )}
@@ -552,7 +552,7 @@ export default function AddressesPage() {
 
               <button
                 type="button"
-                className="btn btn-danger btn-sm"
+                className="btn btn-danger btn-sm mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-danger bg-transparent px-3 text-xs font-semibold text-danger transition-colors hover:bg-danger-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                 onClick={() =>
                   setDeleteId(address.id)
                 }
@@ -585,7 +585,7 @@ export default function AddressesPage() {
           ) : (
             <button
               type="button"
-              className="btn btn-quiet"
+              className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[480px]:w-full"
               onClick={() =>
                 setShowForm(true)
               }
