@@ -186,13 +186,13 @@ export default function ProductCard({ product }) {
       aria-label={name}
     >
       <div
-        className="product-media relative aspect-square overflow-hidden rounded-t-2xl border-0 bg-[#f2f0eb] shadow-none"
+        className="relative aspect-square overflow-hidden rounded-t-2xl bg-[#f2f0eb]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <Link
           to={`/product/${slug}`}
-          className="product-media-link absolute inset-0 z-[1] block overflow-hidden"
+          className="absolute inset-0 z-[1] block overflow-hidden"
           aria-label={`View ${name}`}
           onKeyDown={handleMediaKeyDown}
         >
@@ -228,7 +228,7 @@ export default function ProductCard({ product }) {
           <>
             <button
               type="button"
-              className="product-carousel-arrow left-2.5 top-1/2 border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-md"
+              className="absolute left-2.5 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/45 text-white opacity-0 shadow-lg backdrop-blur-md transition-all duration-150 hover:scale-105 hover:bg-black/70 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold group-hover:opacity-100 motion-reduce:transition-none max-[760px]:opacity-100"
               onClick={(event) => moveImage(event, -1)}
               aria-label="Previous product image"
             >
@@ -237,7 +237,7 @@ export default function ProductCard({ product }) {
 
             <button
               type="button"
-              className="product-carousel-arrow right-2.5 top-1/2 border-white/20 bg-black/45 text-white shadow-lg backdrop-blur-md"
+              className="absolute right-2.5 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-black/45 text-white opacity-0 shadow-lg backdrop-blur-md transition-all duration-150 hover:scale-105 hover:bg-black/70 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold group-hover:opacity-100 motion-reduce:transition-none max-[760px]:opacity-100"
               onClick={(event) => moveImage(event, 1)}
               aria-label="Next product image"
             >
@@ -245,7 +245,7 @@ export default function ProductCard({ product }) {
             </button>
 
             <span
-              className="product-carousel-count rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[9px] font-medium text-white backdrop-blur-md"
+              className="absolute right-3 top-3 z-10 rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[9px] font-medium tabular-nums text-white backdrop-blur-md"
               aria-live="polite"
             >
               {safeIndex + 1}
@@ -254,14 +254,14 @@ export default function ProductCard({ product }) {
             </span>
 
             <div
-              className="product-carousel-dots rounded-full border border-white/10 bg-black/45 px-1.5 py-0.5 backdrop-blur-md"
+              className="absolute bottom-2 left-1/2 z-10 flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-0.5 rounded-full border border-white/10 bg-black/45 px-1.5 py-0.5 backdrop-blur-md"
               aria-label="Product image navigation"
             >
               {gallery.map((_, index) => (
                 <button
                   key={index}
                   type="button"
-                  className={index === safeIndex ? 'is-active' : ''}
+                  className={`relative h-7 w-7 shrink-0 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold before:absolute before:left-1/2 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-white/60 before:transition-all before:duration-150 ${index === safeIndex ? "before:w-4 before:rounded-full before:bg-white" : ""}`}
                   onClick={(event) => selectImage(event, index)}
                   aria-label={`View image ${index + 1}`}
                   aria-current={
