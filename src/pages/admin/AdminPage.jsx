@@ -883,7 +883,7 @@ export default function AdminPage() {
 
   return (
     <div className="grid min-w-0 grid-cols-[248px_minmax(0,1fr)] items-start gap-7 mx-auto w-full max-w-[1480px] px-[clamp(16px,8vw,120px)] pb-16 pt-7 max-[1100px]:grid-cols-[220px_minmax(0,1fr)] max-[1100px]:gap-[18px] max-[900px]:block max-[900px]:px-[clamp(16px,8vw,120px)] max-[900px]:pb-12 max-[900px]:pt-4">
-      <aside className="sticky top-6 flex min-w-0 min-h-[calc(100vh-72px)] max-h-[calc(100vh-48px)] flex-col gap-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-line bg-surface p-3 shadow-[0_12px_36px_rgba(0,0,0,.12)] overscroll-contain scrollbar-gutter-stable max-[900px]:hidden">
+      <aside className="sticky top-6 flex min-w-0 min-h-[calc(100vh-72px)] max-h-[calc(100vh-48px)] flex-col gap-1 overflow-x-hidden overflow-y-auto rounded-2xl border border-line bg-surface p-3 shadow-[0_12px_36px_rgba(0,0,0,.12)] overscroll-contain scrollbar-gutter-stable max-[900px]:!hidden">
         <AdminNavigation
           panel={effectivePanel}
           allowed={allowed}
@@ -899,7 +899,7 @@ export default function AdminPage() {
       {drawerOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[200] hidden bg-black/60 max-[900px]:!block backdrop-blur-[2px]"
           aria-label="Close admin menu"
           onClick={closeDrawer}
         />
@@ -968,7 +968,7 @@ export default function AdminPage() {
           <div className="flex min-w-0 items-start gap-3">
             <button
               type="button"
-              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-text transition-colors hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[900px]:inline-flex"
+              className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-text transition-colors hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[900px]:!inline-flex"
               aria-label="Open admin menu"
               aria-expanded={
                 drawerOpen
