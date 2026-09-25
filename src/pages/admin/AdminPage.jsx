@@ -537,12 +537,12 @@ export default function AdminPage() {
     ]);
 
   const verifyAdmin =
-    useCallback(async () => {
+    useCallback(async (verifiedToken = token) => {
       if (initializing) {
         return null;
       }
 
-      if (!isAuthenticated || !token) {
+      if (!isAuthenticated || !verifiedToken) {
         setStatus('auth-required');
         return null;
       }
@@ -550,7 +550,7 @@ export default function AdminPage() {
       const requestId =
         ++verifyRequestRef.current;
 
-      setAccessToken(token);
+      setAccessToken(verifiedToken);
 
       const response =
         await adminService.verify();
