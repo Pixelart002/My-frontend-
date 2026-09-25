@@ -24,6 +24,18 @@ const PUBLIC_PREFIXES = [
 
 const PUBLIC_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
+const PUBLIC_AUTH_PATHS = new Set([
+  '/auth/register',
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/logout',
+  '/auth/forgot-password',
+]);
+
+function isPublicAuthPath(path) {
+  return PUBLIC_AUTH_PATHS.has(path);
+}
+
 /*
  * Only retry requests whose repetition cannot create a second mutation.
  *
@@ -80,7 +92,7 @@ function isPublicRequest(method, path) {
 function isProtectedRequest(method, path) {
   return (
     !isPublicRequest(method, path) &&
-    !path.startsWith('/auth/')
+    !isPublicAuthPath(path)
   );
 }
 
@@ -353,7 +365,7 @@ export async function request(
   const protectedPath =
     !publicRequest &&
     path !== '/products/hsn-suggestions' &&
-    !path.startsWith('/auth/');
+    !isPublicAuthPath(path);
 
   const retryable = canRetryMethod(normalizedMethod);
 
