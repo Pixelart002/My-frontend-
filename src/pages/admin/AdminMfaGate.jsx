@@ -12,6 +12,7 @@ import {
 
 import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
 const MFA_CODE_PATTERN = /^\d{6,8}$/;
@@ -97,6 +98,7 @@ export default function AdminMfaGate({
   role,
   onVerified,
 }) {
+  const { token } = useAuth();
   const { toast } = useToast();
 
   const [state, setState] = useState('loading');
@@ -130,6 +132,21 @@ export default function AdminMfaGate({
 
     setError('');
     setState('loading');
+
+    /*
+     * Admin verification already proved that this AAL1 access token
+     * exists. Synchronize it explicitly before every MFA request so
+     * the privileged flow cannot depend on a stale API-client bridge.
+     */
+    if (!token) {
+      setError(
+        'Your admin session is not ready. Please sign in again.',
+      );
+      setState('error');
+      return;
+    }
+
+    setAccessToken(token);
 
     try {
       const data =
@@ -199,7 +216,7 @@ export default function AdminMfaGate({
       );
       setState('error');
     }
-  }, [onVerified]);
+  }, [onVerified, token]);
 
   useEffect(() => {
     loadStatus();
@@ -211,6 +228,16 @@ export default function AdminMfaGate({
 
       setBusy(true);
       setError('');
+
+      if (!token) {
+        setError(
+          'Your admin session is not ready. Please sign in again.',
+        );
+        setBusy(false);
+        return;
+      }
+
+      setAccessToken(token);
 
       try {
         const data =
@@ -253,7 +280,7 @@ export default function AdminMfaGate({
           setBusy(false);
         }
       }
-    }, [busy, toast]);
+    }, [busy, toast, token]);
 
   const resetPendingEnrollment =
     useCallback(async () => {
@@ -267,6 +294,16 @@ export default function AdminMfaGate({
 
       setBusy(true);
       setError('');
+
+      if (!token) {
+        setError(
+          'Your admin session is not ready. Please sign in again.',
+        );
+        setBusy(false);
+        return;
+      }
+
+      setAccessToken(token);
 
       try {
         await adminService.mfaUnenroll(
@@ -304,6 +341,7 @@ export default function AdminMfaGate({
       factor?.status,
       factorId,
       toast,
+      token,
     ]);
 
   const verify =
@@ -331,6 +369,16 @@ export default function AdminMfaGate({
 
         setBusy(true);
         setError('');
+
+        if (!token) {
+          setError(
+            'Your admin session is not ready. Please sign in again.',
+          );
+          setBusy(false);
+          return;
+        }
+
+        setAccessToken(token);
 
         try {
           const data =
@@ -390,6 +438,7 @@ export default function AdminMfaGate({
         factorId,
         onVerified,
         toast,
+        token,
       ],
     );
 
