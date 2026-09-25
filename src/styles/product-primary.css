@@ -1,110 +1,217 @@
- /* ============================================================
-    LUVIIO — PRODUCT IMAGE MANAGEMENT FINAL OVERRIDE
-    Visual-only. Upload/API/product logic untouched.
-    ============================================================ */
+/* ============================================================
+   LUVIIO — PRODUCT IMAGE MANAGEMENT
+   Presentation-only layer.
+   Upload, API, permissions and image actions remain untouched.
+   ============================================================ */
 
 .product-editor .admin-image-item {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 8px);
+  background: var(--surface-2);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.product-editor .admin-image-item:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--gold) 38%,
+    var(--line)
+  );
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
 }
 
 .product-editor .admin-image-item.is-primary {
   border-color: var(--gold);
-  outline: 1px solid var(--gold);
-  outline-offset: 1px;
-  box-shadow: 0 0 0 2px var(--gold-dim);
+  box-shadow:
+    0 0 0 1px var(--gold),
+    0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
-/* Image controls sit above the image without affecting layout. */
-.product-editor .admin-image-actions {
+/* Keep the product image clean and predictable. */
+.product-editor .admin-image-item > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  background: #f4f2ed;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Subtle bottom contrast so controls remain readable on light images. */
+.product-editor .admin-image-item::after {
+  content: "";
   position: absolute;
-  left: 6px;
-  right: 6px;
-  bottom: 6px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-  min-width: 0;
+  inset: auto 0 0;
+  height: 38%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.56),
+    rgba(0, 0, 0, 0)
+  );
 }
 
-.product-editor .admin-image-actions .btn {
-  min-width: 0;
-  min-height: 28px;
-  padding: 5px 7px;
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 8px;
-  background: rgba(0,0,0,.72);
-  color: #fff;
-  font-size: 10px;
-  line-height: 1;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.product-editor .admin-image-actions .btn:hover {
-  background: rgba(0,0,0,.86);
-  border-color: rgba(217,170,91,.48);
-}
-
-.product-editor .admin-image-actions .icon-btn {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  min-height: 28px;
-  padding: 0;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 28px;
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 8px;
-  background: rgba(0,0,0,.72);
-  color: inherit;
-}
-
-.product-editor .admin-image-actions .icon-btn:hover {
-  border-color: rgba(217,170,91,.48);
-  background: rgba(0,0,0,.86);
-}
-
+/* Primary / image position label. */
 .product-editor .admin-image-index {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  max-width: calc(100% - 12px);
+  gap: 5px;
+  max-width: calc(100% - 16px);
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(10, 9, 8, 0.78);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .product-editor .admin-image-index svg {
   flex: 0 0 auto;
 }
 
+/* Action bar stays attached to the image without obscuring the label. */
+.product-editor .admin-image-actions {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.product-editor .admin-image-actions .btn {
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(12, 11, 10, 0.84);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.product-editor .admin-image-actions .btn:hover {
+  border-color: var(--gold);
+  background: rgba(20, 17, 13, 0.94);
+}
+
+.product-editor .admin-image-actions .btn:active {
+  transform: translateY(1px);
+}
+
+.product-editor .admin-image-actions .icon-btn {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 36px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(12, 11, 10, 0.84);
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.product-editor .admin-image-actions .icon-btn:hover {
+  border-color: var(--danger);
+  background: rgba(20, 17, 13, 0.94);
+  color: #fff;
+}
+
 /* Product/gallery images remain swipe-friendly on touch devices. */
-.product-media img,
-.product-editor .admin-image-item img {
+.product-media img {
   touch-action: pan-y;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* Carousel dots: preserve the visual dot while keeping a usable target. */
+/* Carousel dots: compact visual, accessible surrounding button target. */
 .product-carousel-dots {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 4px;
 }
 
 .product-carousel-dots button {
-  width: 7px;
-  min-width: 7px;
-  height: 7px;
-  min-height: 7px;
+  position: relative;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
   padding: 0;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
 }
 
-/* Keyboard access */
+.product-carousel-dots button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.product-carousel-dots button[aria-current="true"]::after,
+.product-carousel-dots button.is-active::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* Keyboard access. */
 .product-editor .admin-image-actions .btn:focus-visible,
 .product-editor .admin-image-actions .icon-btn:focus-visible,
 .product-carousel-dots button:focus-visible {
@@ -112,55 +219,83 @@
   outline-offset: 2px;
 }
 
-/* Touch devices: controls stay visible and do not depend on hover. */
+/* Touch devices: never depend on hover for essential controls. */
 @media (hover: none) {
-  .product-editor .admin-image-actions .btn:hover,
+  .product-editor .admin-image-item:hover {
+    border-color: var(--line);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  }
+
+  .product-editor .admin-image-actions .btn:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(12, 11, 10, 0.84);
+  }
+
   .product-editor .admin-image-actions .icon-btn:hover {
-    background: rgba(0,0,0,.72);
-    border-color: rgba(255,255,255,.15);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(12, 11, 10, 0.84);
   }
 }
 
-/* Mobile image editor */
+/* Mobile image editor. */
 @media (max-width: 560px) {
   .product-editor .admin-image-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 
   .product-editor .admin-image-actions {
-    left: 5px;
-    right: 5px;
-    bottom: 5px;
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    gap: 6px;
   }
 
   .product-editor .admin-image-actions .btn {
-    min-height: 28px;
-    padding: 4px 6px;
-    font-size: 9px;
+    min-height: 36px;
+    padding-inline: 9px;
+    font-size: 10px;
   }
 
   .product-editor .admin-image-actions .icon-btn {
-    width: 28px;
-    min-width: 28px;
-    height: 28px;
-    min-height: 28px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+
+  .product-editor .admin-image-index {
+    top: 7px;
+    left: 7px;
+    min-height: 25px;
+    padding-inline: 7px;
+    font-size: 9px;
   }
 }
 
 @media (max-width: 380px) {
+  .product-editor .admin-image-grid {
+    gap: 10px;
+  }
+
   .product-editor .admin-image-actions {
-    gap: 4px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
   }
 
   .product-editor .admin-image-actions .btn {
-    padding-inline: 5px;
-    font-size: 8px;
+    padding-inline: 8px;
+    font-size: 9px;
   }
 }
 
+/* Reduced motion. */
 @media (prefers-reduced-motion: reduce) {
+  .product-editor .admin-image-item,
   .product-editor .admin-image-actions .btn,
-  .product-editor .admin-image-actions .icon-btn {
+  .product-editor .admin-image-actions .icon-btn,
+  .product-carousel-dots button::after {
     transition: none;
   }
 }
