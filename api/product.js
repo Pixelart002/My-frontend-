@@ -24,21 +24,29 @@ function text(value, fallback = '') {
   return result || fallback;
 }
 
-function firstImage(product) {
+function productImages(product) {
   const candidates = [
     product?.image_url,
     ...(Array.isArray(product?.images) ? product.images : []),
   ];
+  const seen = new Set();
+  const images = [];
 
   for (const item of candidates) {
     const url = typeof item === 'string'
       ? item.trim()
       : text(item?.url || item?.image_url || item?.src);
 
-    if (/^https:\/\//i.test(url)) return url;
+    if (!/^https:\/\//i.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    images.push(url);
   }
 
-  return DEFAULT_IMAGE;
+  return images.length ? images : [DEFAULT_IMAGE];
+}
+
+function firstImage(product) {
+  return productImages(product)[0];
 }
 
 function productPayload(payload) {
@@ -102,7 +110,7 @@ export default async function handler(req, res) {
     }
     const indexable = product.robots_index !== false && product.is_active !== false;
     const followable = product.robots_follow !== false;
-    const image = firstImage(product);
+    const images = productImages(product);\n    const image = images[0];
     const price = Number(product.price);
     const currency = text(
       product.currency || product.price_currency,
@@ -119,7 +127,7 @@ export default async function handler(req, res) {
       name,
       description,
       url: canonicalUrl,
-      image: [image],
+      image: images,
       ...(product.sku ? { sku: text(product.sku) } : {}),
       ...(product.brand ? {
         brand: {
