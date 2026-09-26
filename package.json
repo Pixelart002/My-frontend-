@@ -6,7 +6,7 @@
   },
   "scripts": {
     "dev": "npm run build:css && vite",
-    "build": "npm run build:css && node scripts/generate-sitemap.mjs && vite build",
+    "build": "npm run build:css && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
