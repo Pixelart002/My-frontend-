@@ -970,7 +970,6 @@ export default function CheckoutPage() {
   }, [
     selectedAddress?.postal_code,
     shipmentWeightKg,
-    paymentMethod,
     cart?.subtotal,
     items.length,
     canProceed,
