@@ -2398,8 +2398,15 @@ export default function CheckoutPage() {
           setPaymentMethod(method);
           setIntent(null);
           setIntentError('');
-          setPaymentReview(false);
           setPaymentSessionKey('');
+
+          /*
+           * Selecting a payment method is the first step of this
+           * dialog. Advance immediately to review so the same
+           * selection cannot be requested a second time.
+           * "Back" remains the single path to change the method.
+           */
+          setPaymentReview(true);
         }}
         onClose={() => {
           if (
