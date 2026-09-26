@@ -512,6 +512,222 @@ Only transactional routes should move to the app subdomain as part of the applic
 
 ---
 
+## 10. Domain → Controller → Router → Page → API
+
+The request flow is separated by responsibility. A page must not become the controller, and a controller must not contain frontend presentation logic.
+
+```text
+USER / CRAWLER
+      |
+      v
++----------------------+
+| Domain / Host        |
+| luviio.in             |
+| app.luviio.in         |
++----------+-----------+
+           |
+           v
++----------------------+
+| Controller /         |
+| Request Boundary     |
++----------+-----------+
+           |
+           v
++----------------------+
+| Router / Route       |
+| validation + auth    |
++----------+-----------+
+           |
+           v
++----------------------+
+| Domain Service       |
+| business rules       |
++----------+-----------+
+           |
+           v
++----------------------+
+| Repository /         |
+| Integration         |
++----------+-----------+
+           |
+           v
+      Supabase / External
+      Provider APIs
+```
+
+### Public product / SEO controller flow
+
+```text
+Google / Social / User
+          |
+          v
+luviio.in/product/:slug
+          |
+          v
+Vercel request boundary
+          |
+          +---- crawler ----> SSR Product Controller
+          |                         |
+          |                         v
+          |                   Backend Product API
+          |                         |
+          |                         v
+          |                   Product + SEO + Images
+          |                         |
+          |                         v
+          |                   HTML / OG / JSON-LD
+          |
+          +---- browser ----> React Product Page
+                                    |
+                                    v
+                              Backend Product API
+```
+
+The backend share controller is the public social-preview boundary:
+
+```text
+/share/products/:slug
+        |
+        v
+Social Share Controller
+        |
+        v
+Product service / repository
+        |
+        v
+SEO + OG HTML
+```
+
+The public SEO product URL remains `luviio.in/product/:slug`; the share endpoint is an implementation endpoint and must not become a competing canonical page.
+
+### Ecommerce controller flow
+
+```text
+app.luviio.in
+      |
+      +--> Shop Controller
+      |       |
+      |       +--> Product API
+      |       +--> Category API
+      |
+      +--> Product Controller
+      |       |
+      |       +--> Product API
+      |
+      +--> Cart Controller
+      |       |
+      |       +--> Cart API
+      |
+      +--> Checkout Controller
+              |
+              +--> Address
+              +--> Shipping Controller
+              +--> Payment Controller
+              +--> Order Controller
+```
+
+### Shipping controller flow
+
+```text
+Checkout
+   |
+   v
+Shipping Controller / Router
+   |
+   +--> Rate
+   |
+   +--> Courier selection
+   |
+   +--> Shipment creation
+   |
+   +--> AWB
+   |
+   +--> Pickup
+   |
+   +--> Label / Manifest / Invoice
+   |
+   +--> Tracking
+   |
+   +--> Provider webhook
+             |
+             v
+       Shipping service
+             |
+             v
+       Order / shipment state
+```
+
+Provider-specific behavior stays inside the shipping integration boundary:
+
+```text
+Shipping Service
+      |
+      v
+Provider Interface
+      |
+      +--> Shiprocket adapter
+      |
+      +--> Future provider adapter
+```
+
+The router/controller remains provider-neutral where possible. Provider-specific API paths, payloads and identifiers belong in the provider integration.
+
+### Authentication / Admin controller flow
+
+```text
+app.luviio.in/admin
+        |
+        v
+Auth Controller
+        |
+        v
+Access token + refresh session
+        |
+        v
+MFA Controller
+        |
+        v
+RBAC / ABAC authorization
+        |
+        v
+Admin Controller
+        |
+        +--> Products
+        +--> Inventory
+        +--> Orders
+        +--> Shipping
+        +--> Customers
+        +--> Settings
+```
+
+### Responsibility rules
+
+```text
+PAGE
+  = presentation + user interaction
+
+CONTROLLER
+  = request/response boundary + orchestration
+
+ROUTER
+  = HTTP route + validation + dependency/auth wiring
+
+DOMAIN SERVICE
+  = business rules + workflow
+
+REPOSITORY
+  = database persistence
+
+INTEGRATION
+  = external provider API
+
+DATABASE
+  = runtime source of truth
+```
+
+Do not move pricing, tax, shipping totals, inventory decisions or order-state rules into React pages. The frontend displays backend results and submits user intent; authoritative business decisions remain in backend domain services.
+
+---
 ## 9. Target Architecture
 
 ```text
