@@ -90,9 +90,16 @@ export default async function handler(req, res) {
     ).slice(0, 300);
     const seoTitle = text(product.seo_title, `${name} | Luviio`);
     const seoCanonical = text(product.canonical_url);
-    const canonicalUrl = /^https:\/\//i.test(seoCanonical)
-      ? seoCanonical
-      : canonical;
+    let canonicalUrl = canonical;
+    if (/^https:\/\//i.test(seoCanonical)) {
+      try {
+        const candidate = new URL(seoCanonical);
+        const site = new URL(SITE_URL);
+        if (candidate.origin === site.origin) canonicalUrl = candidate.href;
+      } catch {
+        // Keep the route-derived canonical when the stored value is invalid.
+      }
+    }
     const indexable = product.robots_index !== false && product.is_active !== false;
     const followable = product.robots_follow !== false;
     const image = firstImage(product);
