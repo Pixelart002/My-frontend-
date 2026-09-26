@@ -128,8 +128,29 @@ export const absoluteUrl = (
   }
 };
 
-export const productImage = () =>
-  DEFAULT_IMAGE;
+export const productImage = (product) => {
+  const candidates = [
+    product?.image_url,
+    ...(Array.isArray(product?.images) ? product.images : []),
+  ];
+
+  for (const item of candidates) {
+    const value =
+      typeof item === 'string'
+        ? item.trim()
+        : normalizeText(
+            item?.url ||
+            item?.image_url ||
+            item?.src,
+          );
+
+    if (/^https:\/\//i.test(value)) {
+      return value;
+    }
+  }
+
+  return DEFAULT_IMAGE;
+};
 
 export const productDescription = (
   product,
