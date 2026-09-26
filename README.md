@@ -31,6 +31,35 @@ npm run build
 
 Never add Stripe secret keys, database credentials, or service-role keys to client environment variables.
 
+## Domain architecture
+
+LUVIIO uses a hybrid public-site + ecommerce-app architecture:
+
+```text
+luviio.in
+|
++-- Marketing / Brand
++-- Product SEO: /product/:slug
++-- Category SEO: /category/:slug
++-- Blog / Guides
+|
++-------- Shop CTA -------->
+                           |
+                           v
+                    app.luviio.in
+                    |
+                    +-- /shop
+                    +-- /product/:slug
+                    +-- /cart
+                    +-- /checkout
+                    +-- /account
+                    +-- /admin
+```
+
+The canonical public product discovery URL remains `luviio.in/product/:slug`. The app subdomain owns transactional ecommerce workflows. Do not remove or blindly replace the public product URLs because they are part of the SEO, structured-data, sitemap, social-preview and backlink architecture.
+
+See [docs/LUVIIO_DOMAIN_ARCHITECTURE.md](docs/LUVIIO_DOMAIN_ARCHITECTURE.md) for the complete page-by-page navigation and domain ownership flow.
+
 ## Architecture
 
 - `src/api/client.js`: authenticated HTTP client, retries, refresh, and normalized `ApiError` handling.
