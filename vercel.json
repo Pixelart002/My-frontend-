@@ -6,14 +6,42 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    {"source": "/shop.html", "destination": "/shop", "permanent": true},
-    {"source": "/cart.html", "destination": "/cart", "permanent": true},
-    {"source": "/checkout.html", "destination": "/checkout", "permanent": true},
-    {"source": "/login.html", "destination": "/login", "permanent": true},
-    {"source": "/register.html", "destination": "/register", "permanent": true},
-    {"source": "/admin.html", "destination": "/admin", "permanent": true}
+    {
+      "source": "/shop.html",
+      "destination": "/shop",
+      "permanent": true
+    },
+    {
+      "source": "/cart.html",
+      "destination": "/cart",
+      "permanent": true
+    },
+    {
+      "source": "/checkout.html",
+      "destination": "/checkout",
+      "permanent": true
+    },
+    {
+      "source": "/login.html",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/register.html",
+      "destination": "/register",
+      "permanent": true
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/admin",
+      "permanent": true
+    }
   ],
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
     {
       "source": "/product/:slug",
       "has": [
