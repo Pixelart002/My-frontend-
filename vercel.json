@@ -48,7 +48,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(googlebot|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot).*"
+          "value": ".*(googlebot|google-inspectiontool|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot).*"
         }
       ],
       "destination": "/api/product?slug=:slug"
