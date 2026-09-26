@@ -85,9 +85,16 @@ export default async function handler(req, res) {
 
     const name = text(product.name, 'Luviio Product');
     const description = text(
-      product.short_description || product.description,
+      product.seo_description || product.short_description || product.description,
       `Shop ${name} on Luviio.`,
     ).slice(0, 300);
+    const seoTitle = text(product.seo_title, `${name} | Luviio`);
+    const seoCanonical = text(product.canonical_url);
+    const canonicalUrl = /^https:\/\//i.test(seoCanonical)
+      ? seoCanonical
+      : canonical;
+    const indexable = product.robots_index !== false && product.is_active !== false;
+    const followable = product.robots_follow !== false;
     const image = firstImage(product);
     const price = Number(product.price);
     const currency = text(
@@ -104,8 +111,9 @@ export default async function handler(req, res) {
       '@type': 'Product',
       name,
       description,
-      url: canonical,
+      url: canonicalUrl,
       image: [image],
+      ...(product.sku ? { sku: text(product.sku) } : {}),
       ...(product.brand ? {
         brand: {
           '@type': 'Brand',
@@ -115,7 +123,7 @@ export default async function handler(req, res) {
       ...(Number.isFinite(price) && price >= 0 ? {
         offers: {
           '@type': 'Offer',
-          url: canonical,
+          url: canonicalUrl,
           priceCurrency: currency,
           price,
           availability: inStock
@@ -125,7 +133,7 @@ export default async function handler(req, res) {
       } : {}),
     };
 
-    const title = `${name} | Luviio`;
+    const title = seoTitle;
     const safeSchema = JSON.stringify(schema)
       .replace(/</g, '\\u003c')
       .replace(/>/g, '\\u003e')
@@ -142,13 +150,13 @@ export default async function handler(req, res) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<meta name="robots" content="index,follow,max-image-preview:large">
-<link rel="canonical" href="${esc(canonical)}">
+<meta name="robots" content="${indexable ? `index,${followable ? 'follow' : 'nofollow'}` : `noindex,${followable ? 'follow' : 'nofollow'}`},max-image-preview:large">
+<link rel="canonical" href="${esc(canonicalUrl)}">
 <meta property="og:type" content="product">
 <meta property="og:site_name" content="Luviio">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:url" content="${esc(canonical)}">
+<meta property="og:url" content="${esc(canonicalUrl)}">
 <meta property="og:image" content="${esc(image)}">
 <meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
@@ -180,11 +188,10 @@ a{color:#d8ad6a}
 <h1>${esc(name)}</h1>
 <p>${esc(description)}</p>
 ${priceMarkup}
-<p><a href="${esc(canonical)}">View product on Luviio</a></p>
+<p><a href="${esc(canonicalUrl)}">View product on Luviio</a></p>
 </section>
 </article>
 </main>
-<script>setTimeout(function(){location.replace(${JSON.stringify(canonical)})},50)</script>
 </body>
 </html>`;
 
@@ -194,7 +201,7 @@ ${priceMarkup}
       'Cache-Control',
       'public, s-maxage=300, stale-while-revalidate=86400',
     );
-    res.setHeader('X-Robots-Tag', 'index, follow');
+    res.setHeader('X-Robots-Tag', `${indexable ? 'index' : 'noindex'}, ${followable ? 'follow' : 'nofollow'}`);
     return res.end(html);
   } catch (error) {
     console.error('[Luviio SSR] product render failed', error);
