@@ -77,8 +77,10 @@ export function getAccessToken() {
 /* -------------------------------------------------------------------------- */
 
 function isPublic(path) {
+  const pathname = String(path || '').split(/[?#]/, 1)[0] || '/';
+
   return PUBLIC_PREFIXES.some(
-    (prefix) => path === prefix || path.startsWith(`${prefix}/`)
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 }
 
