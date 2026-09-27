@@ -2337,3 +2337,93 @@ footer button {
     backdrop-filter: none;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Product detail — mobile specification readability                           */
+/* -------------------------------------------------------------------------- */
+
+.product-parameters {
+  min-width: 0;
+}
+
+.product-parameters .attributes {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.product-parameters .attribute-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr) !important;
+  align-items: start !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid var(--line-soft) !important;
+}
+
+.product-parameters .attribute-row dt,
+.product-parameters .attribute-row dd {
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+.product-parameters .attribute-row dt {
+  color: var(--dim) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  text-transform: capitalize !important;
+}
+
+.product-parameters .attribute-row dd {
+  color: var(--text) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  text-align: left !important;
+}
+
+@media (max-width: 560px) {
+  .product-parameters {
+    margin-top: 20px !important;
+    padding-top: 18px !important;
+  }
+
+  .product-parameters-heading {
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .product-parameters-heading h2 {
+    font-size: 18px !important;
+    line-height: 1.2 !important;
+  }
+
+  .product-parameters .attribute-row {
+    grid-template-columns: minmax(92px, 0.7fr) minmax(0, 1.3fr) !important;
+    gap: 10px !important;
+    padding: 12px 0 !important;
+  }
+
+  .product-parameters .attribute-row dt {
+    font-size: 11px !important;
+  }
+
+  .product-parameters .attribute-row dd {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .product-parameters .attribute-row {
+    grid-template-columns: minmax(84px, 0.66fr) minmax(0, 1.34fr) !important;
+    gap: 8px !important;
+  }
+}
