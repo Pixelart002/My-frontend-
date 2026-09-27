@@ -2427,3 +2427,350 @@ footer button {
     gap: 8px !important;
   }
 }
+
+
+/* ============================================================
+   LUVIIO — HOMEPAGE FINAL UI LAYER
+   Scoped to .home-landing. Visual/layout only.
+   ============================================================ */
+
+.home-landing {
+  --home-max: 1240px;
+  --home-gutter: clamp(16px, 4vw, 56px);
+  background: #080808;
+  color: var(--lm-text);
+}
+
+.home-landing .home-content-width,
+.home-landing .hero-reference-inner {
+  width: min(100%, var(--home-max));
+  margin-inline: auto;
+  padding-inline: var(--home-gutter);
+}
+
+/* Hero: stronger hierarchy, controlled image treatment, no layout jump. */
+.home-landing .hero-reference {
+  min-height: min(700px, calc(100svh - 72px));
+  height: auto;
+  max-height: none;
+  padding: clamp(64px, 9vw, 112px) 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.home-landing .hero-reference-image {
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(90deg, #080808 0%, rgba(8,8,8,.96) 22%, rgba(8,8,8,.60) 48%, rgba(8,8,8,.12) 78%, rgba(8,8,8,.28) 100%),
+    linear-gradient(180deg, rgba(8,8,8,.16), rgba(8,8,8,.35)),
+    url("/luviio-hero-background.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.home-landing .hero-reference::after {
+  background: linear-gradient(180deg, transparent 45%, rgba(8,8,8,.32));
+}
+
+.home-landing .hero-reference-copy {
+  max-width: 650px;
+  padding: 28px 0;
+}
+
+.home-landing .hero-reference-copy .eyebrow {
+  margin-bottom: 20px;
+}
+
+.home-landing .hero-reference-copy h1 {
+  max-width: 9ch;
+  font-size: clamp(52px, 7vw, 88px);
+  line-height: .94;
+  letter-spacing: -.06em;
+}
+
+.home-landing .hero-reference-copy .hero-text {
+  max-width: 48ch;
+  margin: 24px 0 30px;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 1.65;
+}
+
+.home-landing .hero-actions {
+  align-items: center;
+  gap: 18px;
+}
+
+.home-landing .hero-reference-btn {
+  min-height: 46px;
+  padding-inline: 22px;
+  border-radius: 8px;
+}
+
+.home-landing .home-secondary-link {
+  padding-inline: 2px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Trust strip: compact, aligned, breathable. */
+.home-landing .home-trust-grid {
+  width: min(100%, var(--home-max));
+  margin-inline: auto;
+  min-height: 76px;
+  padding-inline: var(--home-gutter);
+}
+
+.home-landing .home-trust-grid > div,
+.home-landing .home-trust-grid > div:first-child,
+.home-landing .home-trust-grid > div:last-child {
+  padding: 15px 22px;
+}
+
+.home-landing .home-trust-grid > div:first-child {
+  padding-left: 0;
+}
+
+.home-landing .home-trust-grid > div:last-child {
+  padding-right: 0;
+}
+
+/* Sections: one consistent content rail. */
+.home-landing .section {
+  margin: 0;
+}
+
+.home-landing .home-products-section {
+  padding-block: clamp(52px, 7vw, 82px);
+  border-top: 0;
+}
+
+.home-landing .home-category-section {
+  padding-block: clamp(52px, 7vw, 82px);
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
+.home-landing .section-heading-row {
+  align-items: end;
+  margin-bottom: clamp(20px, 3vw, 28px);
+}
+
+.home-landing .section-heading-row .eyebrow {
+  margin-bottom: 9px;
+}
+
+.home-landing .section-title {
+  font-size: clamp(27px, 3.2vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -.03em;
+}
+
+.home-landing .section-view-all {
+  flex: 0 0 auto;
+  min-height: 44px;
+  font-size: 12px;
+}
+
+/* Product cards: preserve component behavior, improve grid rhythm. */
+.home-landing .products-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+}
+
+.home-landing .product-card {
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.025);
+}
+
+.home-landing .product-card .product-media {
+  border-radius: 12px !important;
+}
+
+/* Category cards: quieter and more useful than oversized tiles. */
+.home-landing .home-category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-landing .home-category-card {
+  min-height: 124px;
+  padding: 19px 18px 16px;
+  border-radius: 12px;
+}
+
+.home-landing .home-category-card span {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Value section: keep the two-column composition but reduce dead space. */
+.home-landing .home-value-section {
+  padding-block: clamp(56px, 8vw, 96px);
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
+.home-landing .home-value-grid {
+  width: min(100%, var(--home-max));
+  margin-inline: auto;
+  padding-inline: var(--home-gutter);
+  gap: clamp(24px, 5vw, 72px);
+}
+
+.home-landing .luviio-marketing-copy {
+  border-radius: 14px;
+  padding: clamp(22px, 3vw, 32px);
+}
+
+/* Prevent animation from creating a blank/flashy first paint. */
+@media (prefers-reduced-motion: no-preference) {
+  .home-landing [data-rise],
+  .home-landing [data-reveal] {
+    will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 1024px) {
+  .home-landing .hero-reference {
+    min-height: 580px;
+  }
+
+  .home-landing .hero-reference-image {
+    background-image:
+      linear-gradient(90deg, #080808 0%, rgba(8,8,8,.94) 26%, rgba(8,8,8,.50) 58%, rgba(8,8,8,.18) 100%),
+      url("/luviio-hero-background.webp");
+  }
+
+  .home-landing .products-grid,
+  .home-landing .home-category-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .home-landing .home-content-width,
+  .home-landing .hero-reference-inner,
+  .home-landing .home-trust-grid,
+  .home-landing .home-value-grid {
+    padding-inline: 18px;
+  }
+
+  .home-landing .hero-reference {
+    min-height: 610px;
+    padding-block: 54px;
+    align-items: flex-end;
+  }
+
+  .home-landing .hero-reference-image {
+    background-image:
+      linear-gradient(180deg, rgba(8,8,8,.16) 0%, rgba(8,8,8,.60) 48%, #080808 86%),
+      url("/luviio-hero-background.webp");
+    background-position: center top;
+  }
+
+  .home-landing .hero-reference-copy {
+    max-width: 620px;
+    padding: 0;
+  }
+
+  .home-landing .hero-reference-copy h1 {
+    max-width: 10ch;
+    font-size: clamp(48px, 13vw, 72px);
+  }
+
+  .home-landing .hero-reference-copy .hero-text {
+    max-width: 44ch;
+  }
+
+  .home-landing .home-trust-grid {
+    grid-template-columns: 1fr;
+    padding-block: 4px;
+  }
+
+  .home-landing .home-trust-grid > div,
+  .home-landing .home-trust-grid > div:first-child,
+  .home-landing .home-trust-grid > div:last-child {
+    min-height: 64px;
+    padding: 12px 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+
+  .home-landing .home-trust-grid > div:last-child {
+    border-bottom: 0;
+  }
+
+  .home-landing .products-grid,
+  .home-landing .home-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-landing .section-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .home-landing .section-view-all {
+    width: auto;
+  }
+
+  .home-landing .home-value-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-landing .home-content-width,
+  .home-landing .hero-reference-inner,
+  .home-landing .home-trust-grid,
+  .home-landing .home-value-grid {
+    padding-inline: 14px;
+  }
+
+  .home-landing .hero-reference {
+    min-height: 590px;
+    padding-block: 42px;
+  }
+
+  .home-landing .hero-reference-copy h1 {
+    font-size: clamp(46px, 14vw, 62px);
+  }
+
+  .home-landing .hero-reference-copy .hero-text {
+    margin-block: 20px 25px;
+    font-size: 15px;
+  }
+
+  .home-landing .hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .home-landing .hero-reference-btn,
+  .home-landing .home-secondary-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-landing .products-grid,
+  .home-landing .home-category-grid {
+    gap: 10px;
+  }
+
+  .home-landing .home-category-card {
+    min-height: 116px;
+    padding: 16px 14px;
+  }
+
+  .home-landing .home-value-section {
+    padding-block: 54px 64px;
+  }
+}
+
+@media (max-width: 360px) {
+  .home-landing .products-grid,
+  .home-landing .home-category-grid {
+    grid-template-columns: 1fr;
+  }
+}
