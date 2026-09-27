@@ -4,7 +4,8 @@
  * Normal browser → next() → Vercel serves the React SPA.
  * Social crawler → fetch Koyeb /share/products/{slug} → return OG HTML.
  *
- * Search-engine crawlers are intentionally not intercepted.
+ * Search-engine crawlers are served the same server-rendered product metadata
+ * so Google/Bing can discover product images and structured data without SPA JS.
  */
 
 import { next } from '@vercel/functions';
@@ -15,6 +16,9 @@ export const config = {
 };
 
 const PREVIEW_CRAWLERS = [
+  'googlebot',
+  'google-inspectiontool',
+  'bingbot',
   'facebookexternalhit',
   'facebookcatalog',
   'whatsapp',
