@@ -48,7 +48,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*([Gg]ooglebot|[Gg]oogle-inspectiontool|[Bb]ingbot|[Bb]ingpreview|[Ff]acebookexternalhit|[Ff]acebot|[Tt]witterbot|[Ll]inkedinbot|[Ww]hatsapp|[Tt]elegrambot|[Ss]lackbot|[Dd]iscordbot|[Pp]interest|[Aa]pplebot).*"
+          "value": ".*([Gg]ooglebot|[Gg]oogle-inspectiontool|[Bb]ingbot|[Bb]ingpreview|[Ff]acebookexternalhit|[Ff]acebot|[Tt]witterbot|[Ll]inkedinbot|[Ww]hatsapp|[Tt]elegrambot|[Ss]lackbot|[Dd]iscordbot|[Pp]interest|[Aa]pplebot|[Oo]pengraph\.xyz|[Oo]pengraph).*"
         }
       ],
       "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/share/products/:slug"
