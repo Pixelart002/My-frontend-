@@ -1,0 +1,16 @@
+LUVIIO
+
+Luviio is an India-focused hardware and sanitary products brand and ecommerce platform.
+
+Luviio focuses on practical products for everyday home, kitchen, bathroom and drainage needs, with product discovery, useful information and direct online shopping.
+
+Website architecture:
+- Public brand, SEO and product discovery: https://luviio.in
+- Ecommerce application: https://app.luviio.in
+- Blog and guides: https://luviio.in/blog
+
+The public website is intended for brand information, product discovery, categories, guides and SEO-friendly product pages. The ecommerce application is intended for shopping, cart, checkout, account and related transactional workflows.
+
+Luviio aims to make hardware and sanitary product shopping simple, clear and useful for customers in India.
+
+Copyright © Luviio. All rights reserved.
