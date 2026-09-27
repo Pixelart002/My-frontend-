@@ -1,17 +1,17 @@
 # Luviio — machine-readable site guide
 
-Luviio is an ecommerce storefront. The public website is https://app.luviio.in/.
+Luviio is an ecommerce storefront with public SEO content on https://luviio.in/ and transactional shopping on https://app.luviio.in/.
 
 ## Public routes
-- Home: https://app.luviio.in/
+- Home: https://luviio.in/
 - Shop/catalogue: https://app.luviio.in/shop
-- Product detail: https://app.luviio.in/product/{slug}
-- About: https://app.luviio.in/about
-- Privacy policy: https://app.luviio.in/privacy
-- Terms: https://app.luviio.in/terms
-- Shipping: https://app.luviio.in/shipping
-- Refund policy: https://app.luviio.in/refund
-- Returns and cancellation: https://app.luviio.in/returns
+- Product detail: https://luviio.in/product/{slug}
+- About: https://luviio.in/about
+- Privacy policy: https://luviio.in/privacy
+- Terms: https://luviio.in/terms
+- Shipping: https://luviio.in/shipping
+- Refund policy: https://luviio.in/refund
+- Returns and cancellation: https://luviio.in/returns
 
 ## Product entities
 Each product should be represented using its canonical product URL. Prefer live product data for name, description, category, image, price, compare-at price, stock/availability and attributes. Do not manufacture missing product facts.
