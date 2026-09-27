@@ -5,7 +5,7 @@ const API_BASE = (
 
 const SITE_URL = (
   process.env.LUVIIO_SITE_URL ||
-  'https://www.luviio.in'
+  'https://app.luviio.in'
 ).replace(/\/$/, '');
 
 const esc = (value) => String(value ?? '')
