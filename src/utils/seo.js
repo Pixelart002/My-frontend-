@@ -1,4 +1,4 @@
-const SITE = 'https://app.luviio.in';
+const SITE = 'https://luviio.in';
 
 const DEFAULT_IMAGE = `${SITE}/icon-512.png`;
 
