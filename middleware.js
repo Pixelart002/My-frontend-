@@ -26,6 +26,7 @@ const PREVIEW_CRAWLERS = [
   'pinterest',
   'redditbot',
   'orcascan',
+  'opengraphxyzbot',
   'opengraph.xyz',
   'opengraph',
   'open graph',
