@@ -2234,6 +2234,23 @@ footer button {
   }
 }
 
+/* ============================================================
+   RESPONSIVE PRODUCT GRID — final cascade layer
+   ============================================================ */
+
+@media (max-width: 1080px) {
+  .products-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
 @media (max-width: 360px) {
   .products-grid,
   .home-category-grid {
