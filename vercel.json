@@ -7,17 +7,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "luviio.in"
-        }
-      ],
-      "destination": "https://www.luviio.in/$1",
-      "permanent": true
-    },
-    {
       "source": "/shop.html",
       "destination": "/shop",
       "permanent": true
