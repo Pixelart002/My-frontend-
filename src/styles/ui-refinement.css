@@ -1,0 +1,273 @@
+/* Luviio UI refinement — layout, responsive rhythm and breathing room.
+   Presentation-only overrides. No route, API or business logic changes. */
+
+:root {
+  --ui-content-max: 1280px;
+  --ui-gutter: clamp(16px, 3vw, 32px);
+  --ui-section-space: clamp(40px, 6vw, 80px);
+  --ui-card-gap: clamp(12px, 1.8vw, 22px);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.store-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.store-page-frame {
+  width: min(100%, var(--ui-content-max));
+  padding-inline: var(--ui-gutter);
+  padding-block-start: clamp(20px, 3.5vw, 42px);
+  padding-block-end: clamp(40px, 6vw, 76px);
+}
+
+.store-page-frame > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.page {
+  width: 100%;
+  max-width: var(--ui-content-max);
+  margin-inline: auto;
+  padding-inline: 0 !important;
+  padding-block-start: clamp(24px, 4vw, 52px);
+  padding-block-end: clamp(48px, 7vw, 88px);
+}
+
+.page-heading {
+  margin-bottom: clamp(24px, 3.5vw, 40px);
+}
+
+.page-heading h1 {
+  max-width: 20ch;
+  font-size: clamp(30px, 4.5vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.page-heading p {
+  max-width: 62ch;
+  margin-top: 12px;
+  line-height: 1.7;
+}
+
+.section-heading-row {
+  margin-top: var(--ui-section-space);
+  margin-bottom: clamp(16px, 2.4vw, 26px);
+}
+
+.section-heading-row:first-child {
+  margin-top: 0;
+}
+
+.products-grid {
+  width: 100%;
+  gap: var(--ui-card-gap);
+}
+
+.products-grid > * {
+  min-width: 0;
+}
+
+.product-card {
+  min-width: 0;
+  border-radius: 16px;
+}
+
+.product-card > * {
+  min-width: 0;
+}
+
+.product-card .product-media,
+.product-card > a:first-child,
+.product-card > div:first-child {
+  min-width: 0;
+}
+
+.shop-toolbar {
+  margin-bottom: clamp(18px, 2.5vw, 28px) !important;
+}
+
+.filter-panel {
+  margin-bottom: clamp(18px, 2.5vw, 28px);
+}
+
+.product-detail {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-block: clamp(16px, 3vw, 32px);
+}
+
+.product-detail .product-info {
+  gap: 0;
+}
+
+.product-detail .product-info > * + * {
+  margin-top: 0;
+}
+
+.cart-layout-refined,
+.checkout-layout-refined {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.card,
+.checkout-section,
+.address-card,
+.payment-option,
+.shipping-option,
+.summary,
+.state-card {
+  min-width: 0;
+}
+
+.header-reference-inner {
+  max-width: var(--ui-content-max);
+  margin-inline: auto;
+}
+
+@media (max-width: 1024px) {
+  .store-page-frame {
+    padding-inline: clamp(16px, 3.5vw, 24px);
+  }
+
+  .page {
+    padding-block-start: 24px;
+  }
+
+  .products-grid {
+    gap: 14px;
+  }
+
+  .product-detail {
+    gap: clamp(20px, 4vw, 32px);
+  }
+}
+
+@media (max-width: 760px) {
+  .store-page-frame {
+    padding-inline: 14px;
+    padding-block-start: 16px;
+    padding-block-end: 52px;
+  }
+
+  .page {
+    padding-inline: 0 !important;
+    padding-block-start: 20px;
+    padding-block-end: 56px;
+  }
+
+  .page-heading {
+    margin-bottom: 24px;
+    padding-block: 0;
+  }
+
+  .page-heading h1 {
+    font-size: clamp(28px, 8vw, 38px);
+  }
+
+  .section-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 42px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+
+  .product-card {
+    border-radius: 14px;
+  }
+
+  .product-card > div:last-child {
+    padding: 12px;
+  }
+
+  .product-detail {
+    padding-block: 8px 28px;
+  }
+
+  .product-detail .product-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-layout-refined,
+  .checkout-layout-refined {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .store-page-frame {
+    padding-inline: 12px;
+  }
+
+  .page {
+    padding-block-start: 16px;
+    padding-block-end: 48px;
+  }
+
+  .products-grid {
+    gap: 10px;
+  }
+
+  .product-card {
+    border-radius: 12px;
+  }
+
+  .product-card > div:last-child {
+    padding: 10px;
+  }
+
+  .shop-toolbar {
+    align-items: stretch !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .products-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Avoid excessive animation on touch/small screens. */
+@media (hover: none) {
+  .product-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn:hover:not(:disabled),
+  .add-button:hover:not(:disabled),
+  .icon-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
