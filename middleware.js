@@ -26,6 +26,9 @@ const PREVIEW_CRAWLERS = [
   'pinterest',
   'redditbot',
   'orcascan',
+  'opengraph.xyz',
+  'opengraph',
+  'open graph',
 ];
 
 const BACKEND_ORIGIN =
