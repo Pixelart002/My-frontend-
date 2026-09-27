@@ -1165,6 +1165,26 @@
 }
 
 @media (max-width: 760px) {
+  /* System-design guard: the value section must become one readable column on mobile.
+     Higher specificity prevents the generic marketing grid from overriding this rule. */
+  .home-value-section .home-value-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .home-value-section .luviio-marketing-copy {
+    width: 100%;
+    max-width: none;
+  }
+
+  .home-value-section .luviio-marketing-copy h2 {
+    max-width: 20ch;
+  }
+
+  .home-value-section .luviio-marketing-points {
+    width: 100%;
+  }
+
   .hero-reference {
     min-height: 650px;
     height: auto;
