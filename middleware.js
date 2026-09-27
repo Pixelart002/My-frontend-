@@ -25,6 +25,7 @@ const PREVIEW_CRAWLERS = [
   'discordbot',
   'pinterest',
   'redditbot',
+  'orcascan',
 ];
 
 const BACKEND_ORIGIN =
