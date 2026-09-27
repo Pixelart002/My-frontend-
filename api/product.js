@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     }
     const indexable = product.robots_index !== false && product.is_active !== false;
     const followable = product.robots_follow !== false;
-    const images = productImages(product);\n    const image = images[0];
+    const images = productImages(product);\n    const image = `${SITE_URL}/share/products/${encodeURIComponent(slug)}/image`;
     const price = Number(product.price);
     const currency = text(
       product.currency || product.price_currency,
