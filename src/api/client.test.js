@@ -200,6 +200,28 @@ describe('API client', () => {
     );
   });
 
+  it('keeps query-string catalog requests public', async () => {
+    setAccessToken('access-token-123');
+
+    fetch.mockResolvedValueOnce(
+      response({
+        success: true,
+        data: { items: [] },
+      })
+    );
+
+    await request('GET', '/products?page=1&page_size=8');
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/products?page=1&page_size=8'),
+      expect.objectContaining({
+        headers: expect.not.objectContaining({
+          Authorization: expect.any(String),
+        }),
+      })
+    );
+  });
+
   it('does not attach the bearer token to public requests', async () => {
     setAccessToken('access-token-123');
 
