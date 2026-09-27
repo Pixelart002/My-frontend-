@@ -117,6 +117,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/product/:slug",
+      "destination": "/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
