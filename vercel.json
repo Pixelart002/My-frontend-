@@ -48,10 +48,10 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(googlebot|google-inspectiontool|bingbot|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot).*"
+          "value": ".*(googlebot|google-inspectiontool|bingbot|bingpreview|facebookexternalhit|facebot|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterest|applebot).*"
         }
       ],
-      "destination": "/api/product?slug=:slug"
+      "destination": "https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/share/products/:slug"
     },
     {
       "source": "/share/products/:slug/image",
