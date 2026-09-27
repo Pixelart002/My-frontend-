@@ -181,7 +181,7 @@ export default async function handler(req, res) {
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(image)}">
+<meta name="twitter:image" content="${esc(image)}">\n<meta name="twitter:image:alt" content="${esc(name)}">
 <script type="application/ld+json">${safeSchema}</script>
 <style>
 body{margin:0;background:#11100f;color:#f5efe7;font-family:system-ui,sans-serif}
