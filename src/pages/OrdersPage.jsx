@@ -17,17 +17,13 @@ export default function OrdersPage() {
   const load = useCallback(async () => {
     setData(null);
     setError('');
-    try {
-      setData(await orderService.myOrders(page, 10, status || null));
-    } catch (err) {
-      setError(err.message || 'Unable to load your orders.');
-    }
+    try { setData(await orderService.myOrders(page, 10, status || null)); }
+    catch (err) { setError(err.message || 'Unable to load your orders.'); }
   }, [page, status]);
 
   useEffect(() => {
     let active = true;
-    setData(null);
-    setError('');
+    setData(null); setError('');
     orderService.myOrders(page, 10, status || null)
       .then((res) => active && setData(res))
       .catch((err) => active && setError(err.message || 'Unable to load your orders.'));
@@ -45,22 +41,20 @@ export default function OrdersPage() {
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s ? orderStatusLabel(s) : 'All statuses'}</option>)}
         </select>
       </div>
-      {error ? (
-        <ErrorState message={error} onRetry={load} />
-      ) : data === null ? (
-        <Spinner label="Loading orders…" />
-      ) : orders.length === 0 ? (
+      {error ? <ErrorState message={error} onRetry={load} /> : data === null ? <Spinner label="Loading orders…" /> : orders.length === 0 ? (
         <EmptyState title="No orders yet" message="When you place an order it will appear here." action={<Link className="btn" to="/shop">Start shopping</Link>} />
       ) : (
         <>
           <div className="orders-list">
-            {orders.map((order) => (
-              <Link to={`/orders/${order.id}`} className="order-row" key={order.id}>
-                <div><strong>#{order.order_number || order.id.slice(0, 8)}</strong><span>{new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span></div>
+            {orders.map((order) => {
+              const orderNumber = String(order.order_number || '').trim();
+              if (!orderNumber) return null;
+              return <Link to={`/orders/${encodeURIComponent(orderNumber)}`} className="order-row" key={orderNumber}>
+                <div><strong>#{orderNumber}</strong><span>{new Date(order.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span></div>
                 <div className="order-amount">{formatMoney(order.total_amount ?? order.grand_total)}</div>
                 <span className={`status-pill tone-${orderStatusTone(order.status)}`}>{orderStatusLabel(order.status)}</span>
-              </Link>
-            ))}
+              </Link>;
+            })}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>

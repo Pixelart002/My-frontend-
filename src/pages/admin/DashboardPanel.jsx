@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RiRefreshLine } from '@remixicon/react';
+import { RiRefreshLine, RiCoupon3Line } from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { formatMoney } from '../../utils/format';
 import { ErrorState } from '../../components/ui/States';
@@ -9,11 +9,13 @@ export default function DashboardPanel({ onNavigate }) {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [error, setError] = useState('');
+  const [ordersError, setOrdersError] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     setError('');
+    setOrdersError('');
     try {
       const [statsRes, ordersRes] = await Promise.allSettled([
         adminService.stats(),
@@ -26,6 +28,9 @@ export default function DashboardPanel({ onNavigate }) {
       }
       if (ordersRes.status === 'fulfilled') {
         setRecent(itemsOfList(ordersRes.value));
+      } else {
+        setRecent([]);
+        setOrdersError(ordersRes.reason?.message || 'Unable to load recent orders.');
       }
     } finally {
       setLoading(false);
@@ -70,17 +75,31 @@ export default function DashboardPanel({ onNavigate }) {
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('categories')}>Add category</button>
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('orders')}>View orders</button>
         <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('users')}>Manage users</button>
+        <button className="btn btn-quiet btn-sm" onClick={() => onNavigate('coupons')}><RiCoupon3Line size={14} /> Create coupon</button>
         <button className="btn btn-quiet btn-sm" onClick={load}><RiRefreshLine size={14} /> Refresh</button>
       </div>
 
       <div className="admin-section-label">Recent orders</div>
-      {recent.length === 0 ? (
+      {ordersError ? (
+        <div className="admin-table-wrap">
+          <div className="admin-empty">{ordersError}</div>
+          <div className="btn-row" style={{ justifyContent: 'center', paddingBottom: 16 }}>
+            <button className="btn btn-quiet btn-sm" onClick={load}>Retry orders</button>
+          </div>
+        </div>
+      ) : recent.length === 0 ? (
         <div className="admin-table-wrap">
           <div className="admin-empty">No recent orders.</div>
         </div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="admin-table-wrap admin-recent-orders">
+          <table className="admin-table" style={{ tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '42%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '18%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Order</th>
@@ -92,10 +111,10 @@ export default function DashboardPanel({ onNavigate }) {
             <tbody>
               {recent.map((o) => (
                 <tr key={o.id}>
-                  <td className="td-dim">{String(o.id).slice(0, 8).toUpperCase()}</td>
+                  <td className="td-strong">{o.order_number ? `#${String(o.order_number).replace(/^#/, '')}` : '—'}</td>
                   <td className="td-gold">{formatMoney(Number(o.total_amount) || 0)}</td>
                   <td><StatusPill status={o.status} /></td>
-                  <td className="td-dim">{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
+                  <td className="td-dim" style={{ whiteSpace: 'nowrap' }}>{o.created_at ? new Date(o.created_at).toLocaleDateString() : '—'}</td>
                 </tr>
               ))}
             </tbody>

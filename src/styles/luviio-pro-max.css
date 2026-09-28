@@ -1,0 +1,233 @@
+/* ============================================================
+   LUVIIO — UI/UX Pro Max visual contract
+   Scoped as a final override layer so legacy CSS remains intact.
+   Product/API behavior is intentionally unchanged.
+   ============================================================ */
+
+:root {
+  /* Brand */
+  --lm-brand-50: #fbf6ea;
+  --lm-brand-100: #f5e9c9;
+  --lm-brand-200: #ecd39d;
+  --lm-brand-300: #e3bd72;
+  --lm-brand-400: #d9aa5b;
+  --lm-brand-500: #c99a45;
+  --lm-brand-600: #aa7b34;
+  --lm-brand-700: #8a6129;
+  --lm-brand-800: #61431e;
+  --lm-brand-900: #3d2a14;
+
+  /* Neutral — dark-first hardware/sanitary commerce */
+  --lm-neutral-0: #ffffff;
+  --lm-neutral-50: #f8f7f4;
+  --lm-neutral-100: #ebe9e4;
+  --lm-neutral-200: #d5d2ca;
+  --lm-neutral-300: #b6b2aa;
+  --lm-neutral-400: #918d84;
+  --lm-neutral-500: #706b63;
+  --lm-neutral-600: #57534d;
+  --lm-neutral-700: #403d38;
+  --lm-neutral-800: #2b2926;
+  --lm-neutral-900: #191816;
+  --lm-neutral-950: #080808;
+
+  /* Semantic */
+  --lm-success: #4da66c;
+  --lm-success-bg: rgba(77, 166, 108, .12);
+  --lm-warning: #d39a3b;
+  --lm-warning-bg: rgba(211, 154, 59, .12);
+  --lm-danger: #d66357;
+  --lm-danger-bg: rgba(214, 99, 87, .12);
+  --lm-info: #6f9dc6;
+  --lm-info-bg: rgba(111, 157, 198, .12);
+
+  /* Surfaces */
+  --lm-bg: #080808;
+  --lm-surface-1: #10100f;
+  --lm-surface-2: #171614;
+  --lm-surface-3: #211f1c;
+  --lm-border: #302d28;
+  --lm-border-soft: rgba(255,255,255,.075);
+  --lm-text: #f4f1ea;
+  --lm-text-muted: #aaa49b;
+  --lm-text-dim: #756f67;
+
+  /* Radius */
+  --lm-r-sm: 5px;
+  --lm-r-md: 9px;
+  --lm-r-lg: 14px;
+  --lm-r-pill: 999px;
+
+  /* Spacing */
+  --lm-space-1: 4px;
+  --lm-space-2: 8px;
+  --lm-space-3: 12px;
+  --lm-space-4: 16px;
+  --lm-space-5: 20px;
+  --lm-space-6: 24px;
+  --lm-space-8: 32px;
+  --lm-space-10: 40px;
+  --lm-space-12: 48px;
+
+  /* Motion */
+  --lm-ease: cubic-bezier(.22,.61,.36,1);
+  --lm-fast: 140ms;
+  --lm-base: 220ms;
+  --lm-slow: 420ms;
+
+  /* Elevation */
+  --lm-shadow-1: 0 8px 24px rgba(0,0,0,.18);
+  --lm-shadow-2: 0 18px 48px rgba(0,0,0,.30);
+  --lm-shadow-3: 0 28px 80px rgba(0,0,0,.42);
+
+  /* Final aliases used by the existing app */
+  --bg: var(--lm-bg);
+  --surface: var(--lm-surface-1);
+  --surface-2: var(--lm-surface-2);
+  --surface-3: var(--lm-surface-3);
+  --line: var(--lm-border);
+  --line-soft: var(--lm-border-soft);
+  --text: var(--lm-text);
+  --muted: var(--lm-text-muted);
+  --dim: var(--lm-text-dim);
+  --gold: var(--lm-brand-400);
+  --gold-soft: var(--lm-brand-200);
+  --gold-ink: #171109;
+  --gold-dim: rgba(217,170,91,.12);
+  --success: var(--lm-success);
+  --success-dim: var(--lm-success-bg);
+  --danger: var(--lm-danger);
+  --danger-dim: var(--lm-danger-bg);
+  --warn: var(--lm-warning);
+  --info: var(--lm-info);
+  --info-dim: var(--lm-info-bg);
+}
+
+/* Global contrast + surfaces */
+body { background: var(--lm-bg); color: var(--lm-text); }
+::selection { background: rgba(217,170,91,.24); color: var(--lm-neutral-0); }
+
+/* Header: strong hierarchy, quieter chrome, no competing golds */
+.header {
+  background: rgba(8,8,8,.94) !important;
+  border-bottom: 1px solid var(--lm-border-soft) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.02) !important;
+}
+.header .brand { color: var(--lm-brand-400) !important; }
+.header .nav-links a { color: var(--lm-text-muted) !important; }
+.header .nav-links a:hover,
+.header .nav-links a.active,
+.header .nav-links a[aria-current='page'] { color: var(--lm-brand-300) !important; }
+.header .nav-links a.active::after,
+.header .nav-links a[aria-current='page']::after { background: var(--lm-brand-400) !important; }
+.header .search-form { background: rgba(16,16,15,.86) !important; border-color: var(--lm-border) !important; }
+.header .icon-btn { color: var(--lm-text-muted) !important; }
+.header .icon-btn:hover { color: var(--lm-brand-300) !important; }
+.menu-button { border-color: var(--lm-border) !important; background: var(--lm-surface-1) !important; }
+
+/* Buttons */
+.btn {
+  border-radius: var(--lm-r-sm) !important;
+  transition: transform var(--lm-fast) var(--lm-ease), background var(--lm-fast) ease,
+    border-color var(--lm-fast) ease, color var(--lm-fast) ease, box-shadow var(--lm-fast) ease;
+}
+.btn:hover:not(:disabled) { box-shadow: 0 8px 22px rgba(217,170,91,.12); }
+.btn-primary, .btn:not(.btn-quiet):not(.btn-ghost):not(.btn-danger) {
+  background: var(--lm-brand-400) !important;
+  border-color: var(--lm-brand-400) !important;
+  color: var(--gold-ink) !important;
+}
+.btn-primary:hover:not(:disabled), .btn:not(.btn-quiet):not(.btn-ghost):not(.btn-danger):hover:not(:disabled) {
+  background: var(--lm-brand-300) !important;
+  border-color: var(--lm-brand-300) !important;
+}
+.btn-quiet, .btn-ghost { color: var(--lm-text-muted) !important; }
+.btn-quiet:hover:not(:disabled), .btn-ghost:hover:not(:disabled) { color: var(--lm-brand-300) !important; }
+.btn-danger { color: var(--lm-danger) !important; border-color: rgba(214,99,87,.6) !important; }
+
+/* Cards / summaries / form surfaces */
+.card, .checkout-section, .address-card, .payment-option, .summary, .filter-panel, .state-card {
+  background: var(--lm-surface-1);
+  border-color: var(--lm-border);
+  border-radius: var(--lm-r-md);
+}
+input, select, textarea {
+  background: var(--lm-surface-1);
+  border-color: var(--lm-border);
+  color: var(--lm-text);
+}
+input::placeholder, textarea::placeholder { color: var(--lm-text-dim); }
+input:focus, select:focus, textarea:focus { border-color: var(--lm-brand-500) !important; box-shadow: 0 0 0 3px rgba(201,154,69,.10); }
+
+/* Product grid / card — neutral image stage, gold only for action */
+.product-card { min-width: 0; }
+.product-media,
+.gallery-main {
+  background: var(--lm-surface-2) !important;
+  border: 1px solid var(--lm-border-soft);
+  border-radius: var(--lm-r-md) !important;
+}
+.product-media-link img, .gallery-main img { transition: transform var(--lm-slow) var(--lm-ease) !important; }
+.product-card:hover .product-media-link img { transform: scale(1.035) !important; }
+.product-category { color: var(--lm-brand-400) !important; }
+.product-meta h3 { color: var(--lm-text) !important; }
+.product-price-row { color: var(--lm-brand-200) !important; }
+.product-price-row .was { color: var(--lm-text-dim) !important; }
+.badge { border-radius: var(--lm-r-pill) !important; background: var(--lm-brand-400) !important; color: var(--gold-ink) !important; }
+.add-button { border-top-color: var(--lm-border) !important; color: var(--lm-text-muted) !important; }
+.add-button:hover:not(:disabled) { color: var(--lm-brand-300) !important; border-top-color: var(--lm-brand-500) !important; }
+.add-button.done { color: var(--lm-success) !important; border-top-color: var(--lm-success) !important; }
+.product-carousel-arrow {
+  border-color: rgba(255,255,255,.18) !important;
+  background: rgba(8,8,8,.62) !important;
+}
+.product-carousel-arrow:hover { background: rgba(8,8,8,.84) !important; }
+.product-carousel-count, .product-carousel-dots { background: rgba(8,8,8,.66) !important; }
+
+/* Product detail */
+.product-info h1, .page-heading h1, .section-title { text-wrap: balance; }
+.product-price .now { color: var(--lm-text) !important; }
+.product-price .save { color: var(--lm-success) !important; background: var(--lm-success-bg) !important; }
+.stock-note.in { color: var(--lm-success) !important; }
+.stock-note.low { color: var(--lm-warning) !important; }
+.stock-note.out { color: var(--lm-danger) !important; }
+.attributes, .description-block { border-color: var(--lm-border) !important; }
+.attribute-row dt { color: var(--lm-text-dim) !important; }
+.attribute-row dd, .product-summary, .description-block { color: var(--lm-text-muted) !important; }
+.qty-stepper { border-color: var(--lm-border) !important; background: var(--lm-surface-1); }
+.qty-stepper input { background: transparent; }
+
+/* Status semantics — consistent across commerce + admin */
+.success, .status-success, .is-success { color: var(--lm-success); }
+.warning, .status-warning, .is-warning { color: var(--lm-warning); }
+.error, .status-error, .is-error { color: var(--lm-danger); }
+.info, .status-info, .is-info { color: var(--lm-info); }
+
+/* Accessible focus */
+:focus-visible {
+  outline: 2px solid var(--lm-brand-400) !important;
+  outline-offset: 3px !important;
+}
+
+/* Mobile drawer hierarchy */
+@media (max-width: 900px) {
+  .mobile-nav { background: var(--lm-surface-1) !important; border-right-color: var(--lm-border) !important; }
+  .mobile-nav a, .mobile-nav button { color: var(--lm-text) !important; }
+  .mobile-nav a.is-active { background: var(--lm-surface-2) !important; color: var(--lm-brand-300) !important; }
+  .mobile-nav a:hover, .mobile-nav button:hover,
+  .mobile-nav a:focus-visible, .mobile-nav button:focus-visible { background: var(--lm-surface-2) !important; }
+}
+
+/* Responsive density: product catalog stays usable on small phones */
+@media (max-width: 560px) {
+  .products-grid, .products-grid-3 { gap: 16px 12px !important; }
+  .product-meta { padding-top: 11px !important; }
+  .product-meta h3 { font-size: 14px !important; }
+  .product-price-row { font-size: 13px !important; }
+}
+
+/* Respect reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .product-card:hover .product-media-link img { transform: none !important; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}

@@ -1,26 +1,52 @@
 /**
- * Orders service — real backend endpoints.
+ * Orders service — public customer-facing identifiers only.
+ * Internal database UUIDs are never used to construct public URLs.
  */
 import { downloadFile, request } from '../api/client';
+import { asId, asPositiveInteger, asTrimmedString } from '../utils/dataTypes';
+
+function requirePublicNumber(value) {
+  const orderNumber = asTrimmedString(value);
+  if (!orderNumber) throw new TypeError('A valid public order number is required.');
+  return orderNumber;
+}
 
 export const orderService = {
   myOrders: (page = 1, pageSize = 10, statusFilter = null) => {
-    let url = `/orders/my?page=${page}&page_size=${pageSize}`;
-    if (statusFilter) url += `&status_filter=${encodeURIComponent(statusFilter)}`;
+    const safePage = asPositiveInteger(page);
+    const safePageSize = asPositiveInteger(pageSize, 10);
+    let url = `/orders/my?page=${safePage}&page_size=${safePageSize}`;
+    const status = asTrimmedString(statusFilter);
+    if (status) url += `&status_filter=${encodeURIComponent(status)}`;
     return request('GET', url);
   },
 
-  myOrder: (id) => request('GET', `/orders/my/${encodeURIComponent(id)}`),
+  myOrder: (orderNumber) =>
+    request('GET', `/orders/my/${encodeURIComponent(requirePublicNumber(orderNumber))}`),
 
-  cancel: (id) => request('POST', `/orders/my/${encodeURIComponent(id)}/cancel`, {}),
+  cancel: (orderNumber) =>
+    request('POST', `/orders/my/${encodeURIComponent(requirePublicNumber(orderNumber))}/cancel`, {}),
 
-  // Alternative checkout flow: create an order directly from cart without Stripe
-  checkout: (shippingAddressId, notes = '', idempotencyKey = null) =>
-    request('POST', '/orders/checkout', {
-      shipping_address_id: shippingAddressId,
-      notes: notes || undefined,
-      idempotency_key: idempotencyKey || undefined,
-    }),
+  checkout: (shippingAddressId, notes = '', idempotencyKey = null, couponCode = null) => {
+    const addressId = asId(shippingAddressId);
+    if (!addressId) throw new TypeError('A valid shipping address id is required.');
+    const cleanNotes = asTrimmedString(notes);
+    const key = asTrimmedString(idempotencyKey);
+    const coupon = asTrimmedString(couponCode);
+    return request('POST', '/orders/checkout', {
+      shipping_address_id: addressId,
+      notes: cleanNotes || undefined,
+      idempotency_key: key || undefined,
+      coupon_code: coupon || undefined,
+    });
+  },
 
-  invoice: (id) => downloadFile(`/orders/${encodeURIComponent(id)}/invoice`, `invoice-${id}.pdf`),
+  invoice: (orderNumber, invoiceNumber = null) => {
+    const publicOrderNumber = requirePublicNumber(orderNumber);
+    const publicInvoiceNumber = asTrimmedString(invoiceNumber);
+    return downloadFile(
+      `/orders/${encodeURIComponent(publicOrderNumber)}/invoice`,
+      `${publicInvoiceNumber || publicOrderNumber}.pdf`
+    );
+  },
 };

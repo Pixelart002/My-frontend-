@@ -8,7 +8,7 @@ import { Spinner, ErrorState, EmptyState } from '../components/ui/States';
 function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = false }) {
   const [values, setValues] = useState({
     line1: '', line2: '', city: '', state: '', postal_code: '',
-    country: defaultCountry, full_name: '', phone: '', is_default: isDefault,
+    country: defaultCountry, full_name: '', email: '', phone: '', is_default: isDefault,
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -21,8 +21,12 @@ function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = fal
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!values.line1 || !values.city || !values.postal_code) {
-      return setError('Street, city and postal code are required.');
+    const email = values.email.trim().toLowerCase();
+    if (!values.line1 || !values.city || !values.postal_code || !email) {
+      return setError('Street, city, postal code and email are required.');
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      return setError('Enter a valid email address for order updates.');
     }
     setSaving(true);
     try {
@@ -34,6 +38,7 @@ function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = fal
         postal_code: values.postal_code,
         country: values.country.toUpperCase(),
         full_name: values.full_name || undefined,
+        email,
         phone: values.phone || undefined,
         is_default: values.is_default,
       });
@@ -47,17 +52,35 @@ function AddressForm({ onSaved, onCancel, defaultCountry = 'IN', isDefault = fal
 
   return (
     <form className="address-form" onSubmit={onSubmit}>
-      {error && <div className="form-error">{error}</div>}
+      {error && <div className="form-error" role="alert">{error}</div>}
       <div className="field-grid">
         <div className="field">
           <label htmlFor="af-name">Full name (recipient)</label>
-          <input id="af-name" value={values.full_name} onChange={set('full_name')} />
+          <input id="af-name" name="full_name" value={values.full_name} onChange={set('full_name')} autoComplete="name" />
         </div>
         <div className="field">
           <label htmlFor="af-phone">Phone</label>
-          <input id="af-phone" value={values.phone} onChange={set('phone')} />
+          <input id="af-phone" name="phone" value={values.phone} onChange={set('phone')} autoComplete="tel" inputMode="tel" />
         </div>
       </div>
+
+      <div className="field">
+        <label htmlFor="af-email">Email address *</label>
+        <input
+          id="af-email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={set('email')}
+          placeholder="you@example.com"
+          autoComplete="email"
+          inputMode="email"
+          required
+          aria-required="true"
+        />
+        <small className="hint">Used for order confirmations and delivery updates.</small>
+      </div>
+
       <div className="field">
         <label htmlFor="af-line1">Street address *</label>
         <input id="af-line1" value={values.line1} onChange={set('line1')} placeholder="House no, street" />
@@ -151,6 +174,7 @@ export default function AddressesPage() {
                   {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}
                   {addr.state ? `, ${addr.state}` : ''} — {addr.postal_code}, {addr.country}
                 </p>
+                {addr.email && <small className="address-email">{addr.email}</small>}
               </div>
               <button className="btn btn-danger btn-sm" onClick={() => onDelete(addr.id)} aria-label="Delete address">
                 <RiDeleteBinLine size={15} />

@@ -9,6 +9,7 @@ const upsertMeta = (selector, attrs, content) => {
     document.head.appendChild(node);
   }
   node.setAttribute('content', content || '');
+  return node;
 };
 
 const upsertLink = (rel, href) => {
@@ -33,7 +34,6 @@ export function setPageSeo({
   if (typeof document === 'undefined') return;
 
   const url = new URL(path || '/', SITE).href;
-  const safeImage = image || DEFAULT_IMAGE;
   document.title = title;
   upsertMeta('meta[name="description"]', { name: 'description' }, description);
   upsertMeta('meta[name="robots"]', { name: 'robots' }, noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
@@ -42,15 +42,11 @@ export function setPageSeo({
   upsertMeta('meta[property="og:title"]', { property: 'og:title' }, title);
   upsertMeta('meta[property="og:description"]', { property: 'og:description' }, description);
   upsertMeta('meta[property="og:url"]', { property: 'og:url' }, url);
-  upsertMeta('meta[property="og:image"]', { property: 'og:image' }, safeImage);
-  upsertMeta('meta[property="og:image:width"]', { property: 'og:image:width' }, '1200');
-  upsertMeta('meta[property="og:image:height"]', { property: 'og:image:height' }, '630');
-  upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, title);
+  upsertMeta('meta[property="og:image"]', { property: 'og:image' }, image || DEFAULT_IMAGE);
   upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image');
   upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, title);
   upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, description);
-  upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, safeImage);
-  upsertMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt' }, title);
+  upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, image || DEFAULT_IMAGE);
   upsertLink('canonical', url);
 
   const existing = document.getElementById('luviio-jsonld');
