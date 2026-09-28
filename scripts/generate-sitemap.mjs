@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const SITE_URL = 'https://luviio.in';
+const SITE_URL = 'https://www.luviio.in';
 const API_BASE = (process.env.SITEMAP_API_BASE || 'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app/api/v1').replace(/\/$/, '');
 const SITEMAP_PATH = resolve('public/sitemap.xml');
 
