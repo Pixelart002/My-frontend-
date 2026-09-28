@@ -1,16 +1,16 @@
 # Luviio
 
-> Luviio is an online storefront for everyday products, with product, catalogue, account, order and policy pages served from luviio.in.
+> Luviio is an online storefront for everyday products, with product, catalogue, account, order and policy pages served from www.luviio.in.
 
 ## Canonical website
-- https://luviio.in/
-- Shop: https://luviio.in/shop
-- About: https://luviio.in/about
-- Privacy: https://luviio.in/privacy
-- Terms: https://luviio.in/terms
-- Shipping: https://luviio.in/shipping
-- Refunds: https://luviio.in/refund
-- Returns & cancellation: https://luviio.in/returns
+- https://www.luviio.in/
+- Shop: https://www.luviio.in/shop
+- About: https://www.luviio.in/about
+- Privacy: https://www.luviio.in/privacy
+- Terms: https://www.luviio.in/terms
+- Shipping: https://www.luviio.in/shipping
+- Refunds: https://www.luviio.in/refund
+- Returns & cancellation: https://www.luviio.in/returns
 
 ## Product information
 Product pages use the canonical `/product/{slug}` URL pattern. Product names, descriptions, images, prices, availability and attributes should be taken from the live storefront/API rather than inferred.
