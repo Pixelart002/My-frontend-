@@ -12,15 +12,14 @@
 
 import { API_BASE } from '../config/env';
 
-/** Public endpoints — no auth header attached (backend serves them to guests). */
 const PUBLIC_PREFIXES = [
   '/products',
   '/categories',
-  '/pricing/config',
   '/health',
   '/push/vapid-key',
 ];
 
+const PUBLIC_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const IDEMPOTENT = new Set(['GET', 'PUT', 'HEAD']);
 const MAX_RETRIES = 2;
 
@@ -46,6 +45,10 @@ export function getAccessToken() {
 
 function isPublic(path) {
   return PUBLIC_PREFIXES.some((p) => path.startsWith(p));
+}
+
+function isPublicRequest(method, path) {
+  return PUBLIC_METHODS.has(method.toUpperCase()) && isPublic(path);
 }
 
 function backoff(attempt) {
@@ -78,7 +81,6 @@ function readToken() {
   return null;
 }
 
-/** Single-flight refresh so concurrent 401s share one refresh request. */
 async function refreshAccessToken() {
   if (refreshPromise) return refreshPromise;
 
@@ -104,7 +106,22 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
+function normalizeLegacyOrderPath(method, path, body) {
+  if (
+    method.toUpperCase() === 'POST' &&
+    path === '/orders' &&
+    body &&
+    typeof body === 'object' &&
+    !(body instanceof FormData) &&
+    String(body.payment_method || '').toLowerCase() === 'cod'
+  ) {
+    return '/orders/cod';
+  }
+  return path;
+}
+
 async function fetchOnce(method, path, body, headers) {
+  const normalizedPath = normalizeLegacyOrderPath(method, path, body);
   const opts = {
     method,
     headers: { ...headers },
@@ -119,7 +136,7 @@ async function fetchOnce(method, path, body, headers) {
     opts.body = JSON.stringify(body);
   }
 
-  return fetch(`${API_BASE}${path}`, opts);
+  return fetch(`${API_BASE}${normalizedPath}`, opts);
 }
 
 async function parseError(res, parsed = null) {
@@ -137,14 +154,34 @@ async function parseError(res, parsed = null) {
   return new ApiError(String(raw).substring(0, 300), res.status, data?.error_code);
 }
 
+function unwrapResponse(json) {
+  if (!json || json.success === undefined || json.data === undefined) return json;
+
+  const payload = json.data;
+  if (json.meta === undefined) return payload;
+
+  if (Array.isArray(payload)) {
+    payload.meta = json.meta;
+    return payload;
+  }
+
+  if (payload && typeof payload === 'object') {
+    return { ...payload, meta: json.meta };
+  }
+
+  return payload;
+}
+
 export async function request(method, path, body = null, isRetry = false) {
   const headers = {};
   const token = readToken();
-  const protectedPath = !isPublic(path) && !path.startsWith('/auth/');
+  const normalizedMethod = method.toUpperCase();
+  const publicRequest = isPublicRequest(normalizedMethod, path);
+  const protectedPath = !publicRequest && !path.startsWith('/auth/');
 
   if (token && protectedPath) headers.Authorization = `Bearer ${token}`;
 
-  const canRetry = IDEMPOTENT.has(method.toUpperCase());
+  const canRetry = IDEMPOTENT.has(normalizedMethod);
   let attempt = 0;
 
   const performForRefresh = async () => {
@@ -186,7 +223,7 @@ export async function request(method, path, body = null, isRetry = false) {
 
       if (!res.ok) throw await parseError(res, data);
 
-      return data && data.success !== undefined && data.data !== undefined ? data.data : data;
+      return unwrapResponse(data);
     } catch (err) {
       if (err instanceof ApiError) throw err;
       if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
@@ -200,7 +237,6 @@ export async function request(method, path, body = null, isRetry = false) {
   throw new ApiError('Network error — please check your connection.', 0, 'NETWORK_ERROR');
 }
 
-/** Download a binary file (e.g. PDF invoice) and trigger a browser download. */
 export async function downloadFile(path, defaultFilename) {
   const headers = {};
   const token = readToken();
@@ -224,5 +260,5 @@ export async function downloadFile(path, defaultFilename) {
   setTimeout(() => {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-  }, 100);
+  }, 0);
 }

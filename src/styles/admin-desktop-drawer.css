@@ -1,0 +1,95 @@
+/* Desktop admin navigation: use the same drawer pattern as mobile. */
+@media (min-width: 901px) {
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(1480px, 100%);
+  }
+
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-menu-trigger {
+    display: inline-flex;
+  }
+
+  .admin-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: block;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, .58);
+    backdrop-filter: blur(2px);
+    cursor: default;
+  }
+
+  .admin-drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    width: min(380px, 34vw);
+    min-width: 300px;
+    max-width: 100%;
+    height: 100dvh;
+    transform: translateX(-105%);
+    visibility: hidden;
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    box-shadow: 16px 0 48px rgba(0, 0, 0, .28);
+    transition: transform .22s ease, visibility .22s ease;
+  }
+
+  .admin-drawer.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .admin-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .admin-drawer-head > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .admin-drawer-head strong { font-size: 19px; color: var(--text); }
+  .admin-drawer-head span { font-size: 11px; color: var(--dim); }
+
+  .admin-drawer-scroll {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px 14px 22px;
+  }
+
+  .admin-drawer .admin-sb-btn {
+    min-height: 44px;
+  }
+
+  .admin-drawer .admin-account {
+    margin-top: 20px;
+    padding-bottom: 8px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .admin-drawer { width: min(360px, 42vw); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-drawer { transition: none; }
+}

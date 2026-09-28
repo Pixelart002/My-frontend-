@@ -1,0 +1,155 @@
+/* Luviio mobile menu + initial loading polish */
+@media (max-width:900px) {
+  .mobile-nav {
+    border-right:1px solid rgba(216,173,106,.18);
+    background:linear-gradient(180deg,rgba(18,18,18,.99),rgba(10,10,10,.99));
+    box-shadow:24px 0 80px rgba(0,0,0,.58), inset -1px 0 rgba(255,255,255,.025);
+  }
+  .mobile-nav-head {
+    position:absolute;
+    inset:0 0 auto 0;
+    z-index:4;
+    height:70px;
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px 0 20px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    background:rgba(10,10,10,.94);
+  }
+  .mobile-nav-brand {
+    display:inline-flex !important;
+    align-items:center;
+    width:auto !important;
+    min-height:0 !important;
+    padding:0 !important;
+    color:#d9a65c !important;
+    font-family:var(--font-display,'Playfair Display',serif) !important;
+    font-size:29px !important;
+    font-weight:500 !important;
+    letter-spacing:-.035em;
+    line-height:1;
+    text-decoration:none !important;
+  }
+  .mobile-nav-close {
+    position:static !important;
+    width:40px !important;
+    min-width:40px !important;
+    height:40px !important;
+    min-height:40px !important;
+    border:1px solid rgba(255,255,255,.10) !important;
+    border-radius:11px !important;
+    background:rgba(255,255,255,.025) !important;
+    box-shadow:none !important;
+    color:var(--text) !important;
+  }
+  .mobile-nav-inner {
+    padding:86px 18px 28px !important;
+  }
+  .mobile-nav-section {
+    gap:3px;
+  }
+  .mobile-nav-section + .mobile-nav-section {
+    margin-top:18px;
+    padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.09);
+  }
+  .mobile-nav a,
+  .mobile-nav button {
+    min-height:50px;
+    gap:13px;
+    padding:11px 12px;
+    color:rgba(245,242,236,.88);
+    transition:background .16s ease,color .16s ease,transform .16s ease;
+  }
+  .mobile-nav a svg,
+  .mobile-nav button svg {
+    flex:0 0 20px;
+    width:20px;
+    height:20px;
+    color:rgba(216,173,106,.82);
+  }
+  .mobile-nav a span,
+  .mobile-nav button span {
+    font-size:15px;
+    line-height:1.2;
+  }
+  .mobile-nav a:hover,
+  .mobile-nav button:hover,
+  .mobile-nav a:focus-visible,
+  .mobile-nav button:focus-visible {
+    background:rgba(216,173,106,.08);
+    color:#f5f2ec;
+  }
+  .mobile-nav a.is-active {
+    color:var(--gold) !important;
+    background:rgba(216,173,106,.09);
+  }
+  .mobile-nav a.is-active svg {
+    color:var(--gold);
+  }
+  .mobile-search {
+    min-height:48px;
+    margin-bottom:14px;
+    padding:0 13px;
+    border-color:rgba(255,255,255,.14);
+    border-radius:12px;
+    background:rgba(255,255,255,.018);
+  }
+  .mobile-search:focus-within {
+    border-color:rgba(216,173,106,.55);
+    box-shadow:0 0 0 3px rgba(216,173,106,.07);
+  }
+}
+
+/* Initial app boot screen: restrained luxury treatment, no layout jump. */
+.boot-screen {
+  background:
+    radial-gradient(circle at 50% 42%,rgba(216,173,106,.075),transparent 30%),
+    #080808 !important;
+  color:var(--text);
+  gap:22px !important;
+}
+.boot-brand {
+  color:#d9a65c;
+  font-family:var(--font-display,'Playfair Display',serif);
+  font-size:clamp(30px,6vw,42px) !important;
+  font-weight:500 !important;
+  letter-spacing:.08em !important;
+  text-transform:lowercase !important;
+  animation:boot-brand-in .5s ease both;
+}
+.boot-spinner {
+  width:28px !important;
+  height:28px !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  border-top:2px solid var(--gold) !important;
+  box-shadow:0 0 24px rgba(216,173,106,.10);
+  animation:spin .8s linear infinite,boot-spinner-in .5s .08s ease both !important;
+}
+.boot-screen::after {
+  content:'STORE · HARDWARE · SANITARY';
+  position:absolute;
+  bottom:30px;
+  color:rgba(245,242,236,.32);
+  font-family:var(--font-body,'DM Sans',sans-serif);
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.22em;
+  animation:boot-copy-in .6s .12s ease both;
+}
+@keyframes boot-brand-in {
+  from { opacity:0; transform:translateY(6px); letter-spacing:.16em; }
+  to { opacity:1; transform:none; letter-spacing:.08em; }
+}
+@keyframes boot-spinner-in {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes boot-copy-in {
+  from { opacity:0; transform:translateY(4px); }
+  to { opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .boot-brand,.boot-spinner,.boot-screen::after { animation:none !important; }
+}

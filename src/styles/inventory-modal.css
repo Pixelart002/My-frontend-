@@ -1,0 +1,209 @@
+.inventory-modal {
+  width: min(500px, 94vw);
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+}
+
+.inventory-modal > h2,
+.inventory-modal > .modal-sub {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+
+.inventory-modal > h2 {
+  padding-top: 24px;
+  padding-right: 42px;
+  font-size: 21px;
+  letter-spacing: -.01em;
+}
+
+.inventory-modal > .modal-sub {
+  margin-bottom: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-modal-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 24px 16px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.inventory-modal-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+}
+
+.inventory-modal-status div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inventory-modal-status strong { color: var(--text); font-size: 13px; }
+.inventory-modal-status span:not(.inventory-modal-status-icon) { color: var(--dim); font-size: 11px; }
+
+.inventory-editor-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 24px 20px;
+}
+
+.inventory-editor-summary > div {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.inventory-editor-summary .stat-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+
+.inventory-editor-summary strong {
+  display: block;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.inventory-editor-form { padding: 0 24px 24px; }
+
+.inventory-editor-form .admin-field {
+  display: block;
+  margin-bottom: 17px;
+}
+
+.inventory-editor-form .admin-field > span:first-child {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.inventory-adjust-controls {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.inventory-step-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.inventory-step-btn:hover { background: var(--gold-dim); }
+
+.inventory-adjust-controls input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.inventory-adjust-controls input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.inventory-editor-form .admin-field small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.inventory-editor-form textarea {
+  width: 100%;
+  min-height: 82px;
+  resize: vertical;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.inventory-editor-form textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+
+.inventory-modal-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0 0 20px;
+  padding: 10px 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.inventory-modal-note svg { flex: 0 0 auto; margin-top: 1px; }
+
+.inventory-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.inventory-modal-footer .btn {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+@media (max-width: 520px) {
+  .inventory-modal { width: 100%; border-radius: 14px; }
+  .inventory-modal > h2,
+  .inventory-modal > .modal-sub,
+  .inventory-modal-status,
+  .inventory-editor-summary { margin-left: 16px; margin-right: 16px; }
+  .inventory-modal > h2 { padding-top: 20px; }
+  .inventory-editor-form { padding: 0 16px 16px; }
+  .inventory-editor-summary { gap: 8px; }
+  .inventory-editor-summary > div { padding: 11px 12px; }
+  .inventory-editor-summary strong { font-size: 21px; }
+}

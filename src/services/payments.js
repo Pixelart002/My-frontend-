@@ -1,39 +1,86 @@
 /**
  * Payments service — real Stripe-backed backend flow.
  *
- * Flow:
- *   1. POST /payments/create-intent -> { client_secret, payment_intent_id, order_id, order_number }
- *   2. Complete payment in the browser with Stripe Elements using the client_secret.
- *   3. POST /payments/confirm { payment_intent_id } -> { status, order_id, message }
- *   4. On failure, POST /payments/notify-failed (best-effort) so the backend logs it.
+ * Public contract:
+ *   create-intent -> { client_secret, payment_intent_id, order_number }
+ *   confirm      -> { status, order_number, message }
+ *   retry        -> uses the customer-facing order_number in its URL.
+ * Internal database order UUIDs never enter browser URLs or public references.
  */
 import { request } from '../api/client';
+import { asId, asTrimmedString } from '../utils/dataTypes';
+
+function requireId(value, field) {
+  const id = asId(value);
+  if (!id) throw new TypeError(`A valid ${field} is required.`);
+  return id;
+}
+
+function optionalString(value) {
+  const clean = asTrimmedString(value);
+  return clean || null;
+}
 
 export const paymentService = {
-  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
-    const payload = { shipping_address_id: shippingAddressId, idempotency_key: idempotencyKey };
-    if (billingAddressId) payload.billing_address_id = billingAddressId;
+  createIntent: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
+    const payload = {
+      shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
+      idempotency_key: requireId(idempotencyKey, 'idempotency key'),
+    };
+    const billingId = asId(billingAddressId);
+    const coupon = optionalString(couponCode);
+    if (billingId) payload.billing_address_id = billingId;
+    if (coupon) payload.coupon_code = coupon;
     return request('POST', '/payments/create-intent', payload);
   },
 
   confirm: (paymentIntentId) =>
-    request('POST', '/payments/confirm', { payment_intent_id: paymentIntentId }),
+    request('POST', '/payments/confirm', {
+      payment_intent_id: requireId(paymentIntentId, 'payment intent id'),
+    }),
 
   notifyFailed: (paymentIntentId, errorMessage = '') =>
     request('POST', '/payments/notify-failed', {
-      payment_intent_id: paymentIntentId,
-      error_message: errorMessage,
+      payment_intent_id: requireId(paymentIntentId, 'payment intent id'),
+      error_message: asTrimmedString(errorMessage),
     }),
 
-  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null) => {
+  createCodOrder: (shippingAddressId, idempotencyKey, billingAddressId = null, couponCode = null) => {
     const payload = {
-      shipping_address_id: shippingAddressId,
+      shipping_address_id: requireId(shippingAddressId, 'shipping address id'),
       payment_method: 'cod',
-      idempotency_key: idempotencyKey,
+      idempotency_key: requireId(idempotencyKey, 'idempotency key'),
     };
-    if (billingAddressId) payload.billing_address_id = billingAddressId;
-    return request('POST', '/orders', payload);
+    const billingId = asId(billingAddressId);
+    const coupon = optionalString(couponCode);
+    if (billingId) payload.billing_address_id = billingId;
+    if (coupon) payload.coupon_code = coupon;
+    return request('POST', '/orders/cod', payload);
   },
 
-  retry: (orderId) => request('POST', `/payments/retry/${encodeURIComponent(orderId)}`, {}),
+  retry: (orderNumber) => {
+    const number = asTrimmedString(orderNumber);
+    if (!number) throw new TypeError('A valid public order number is required.');
+    return request('POST', `/payments/retry/${encodeURIComponent(number)}`, {});
+  },
+
+  switchMethod: (orderNumber, method) => {
+    const number = asTrimmedString(orderNumber);
+    const target = asTrimmedString(method).toLowerCase();
+    if (!number) throw new TypeError('A valid public order number is required.');
+    if (!['stripe', 'cod'].includes(target)) throw new TypeError('A supported payment method is required.');
+    return request('POST', `/payments/switch-method/${encodeURIComponent(number)}?method=${encodeURIComponent(target)}`, {});
+  },
+
+  cancelCheckout: (orderNumber) => {
+    const number = asTrimmedString(orderNumber);
+    if (!number) throw new TypeError('A valid public order number is required.');
+
+    // The backend cancellation RPC is the single source of truth. It cancels
+    // the pending checkout, restores reserved stock and, for a customer
+    // initiated checkout cancellation, restores the order items into the
+    // customer's cart atomically. Never clear the cart afterwards: doing so
+    // would erase the items that the backend just restored.
+    return request('POST', `/payments/cancel/${encodeURIComponent(number)}`, {});
+  },
 };

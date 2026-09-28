@@ -1,30 +1,43 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RiEqualizerLine, RiSearchLine, RiCloseLine } from '@remixicon/react';
+import { RiEqualizerLine, RiSearchLine, RiCloseLine, RiLoader4Line } from '@remixicon/react';
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
-import Pagination from '../components/ui/Pagination';
 import { ProductSkeletons, ErrorState, EmptyState } from '../components/ui/States';
+import { setPageSeo, siteUrl } from '../utils/seo';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
+
+const normalizeResponse = (response) => ({
+  items: Array.isArray(response) ? response : response?.items || [],
+  meta: response?.meta || {},
+});
 
 export default function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [loadingMore, setLoadingMore] = useState(false);
   const [minPrice, setMinPrice] = useState(searchParams.get('min_price') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') || '');
   const [showFilters, setShowFilters] = useState(false);
+  const loadMoreRef = useRef(null);
+  const loadingMoreRef = useRef(false);
 
   const q = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
   const inStockOnly = searchParams.get('in_stock') === '1';
   const isNew = searchParams.get('new') === '1';
-  const page = Math.max(1, Number(searchParams.get('page')) || 1);
 
   useEffect(() => {
-    productService.categories().then(setCategories).catch(() => {});
+    let active = true;
+    productService.categories()
+      .then((items) => {
+        if (active) setCategories(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {});
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -32,42 +45,117 @@ export default function ShopPage() {
     setMaxPrice(searchParams.get('max_price') || '');
   }, [searchParams]);
 
+  useEffect(() => {
+    const categoryName = category ? categories.find((item) => item.slug === category)?.name : '';
+    const noindexFiltered = Boolean(q || inStockOnly || minPrice || maxPrice || isNew);
+    const title = categoryName
+      ? `${categoryName} — Luviio`
+      : q
+        ? `Search results for “${q}” — Luviio`
+        : 'Shop Hardware, Sanitary & Drainage Products — Luviio';
+    const description = categoryName
+      ? `Browse ${categoryName} products available from Luviio.`
+      : 'Browse Luviio hardware, sanitary, bathroom, drainage and everyday home products.';
+    setPageSeo({
+      title,
+      description,
+      path: category ? `/shop?category=${encodeURIComponent(category)}` : '/shop',
+      image: `${siteUrl}/og-default.svg`,
+      noindex: noindexFiltered,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: title,
+        description,
+        url: category ? `${siteUrl}/shop?category=${encodeURIComponent(category)}` : `${siteUrl}/shop`,
+        isPartOf: { '@type': 'WebSite', name: 'Luviio', url: siteUrl },
+        about: categoryName || 'Hardware, sanitary and drainage products',
+      },
+    });
+  }, [categories, q, category, inStockOnly, minPrice, maxPrice, isNew]);
+
+  const buildParams = useCallback((page) => {
+    const params = { page, page_size: PAGE_SIZE };
+    if (q) params.search = q;
+    if (category) params.category = category;
+    if (inStockOnly) params.in_stock = true;
+    if (minPrice) params.min_price = Number(minPrice);
+    if (maxPrice) params.max_price = Number(maxPrice);
+    return params;
+  }, [q, category, inStockOnly, minPrice, maxPrice]);
+
   const loadProducts = useCallback(async () => {
     setData(null);
     setError('');
+    loadingMoreRef.current = false;
     try {
-      const params = { page, page_size: PAGE_SIZE };
-      if (q) params.search = q;
-      if (category) params.category = category;
-      if (inStockOnly) params.in_stock = true;
-      if (minPrice) params.min_price = Number(minPrice);
-      if (maxPrice) params.max_price = Number(maxPrice);
-      setData(await productService.list(params));
+      setData(normalizeResponse(await productService.list(buildParams(1))));
     } catch (err) {
       setError(err.message || 'Unable to load products.');
     }
-  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+  }, [buildParams]);
 
   useEffect(() => {
     let active = true;
     setData(null);
     setError('');
+    loadingMoreRef.current = false;
+
     (async () => {
       try {
-        const params = { page, page_size: PAGE_SIZE };
-        if (q) params.search = q;
-        if (category) params.category = category;
-        if (inStockOnly) params.in_stock = true;
-        if (minPrice) params.min_price = Number(minPrice);
-        if (maxPrice) params.max_price = Number(maxPrice);
-        const res = await productService.list(params);
+        const res = normalizeResponse(await productService.list(buildParams(1)));
         if (active) setData(res);
       } catch (err) {
         if (active) setError(err.message || 'Unable to load products.');
       }
     })();
+
     return () => { active = false; };
-  }, [page, q, category, inStockOnly, minPrice, maxPrice]);
+  }, [buildParams]);
+
+  const meta = data?.meta || {};
+  const currentPage = Number(meta.page) || 1;
+  const totalPages = Math.max(1, Number(meta.total_pages) || 1);
+  const hasMore = currentPage < totalPages;
+
+  const loadMore = useCallback(async () => {
+    if (!data || !hasMore || loadingMoreRef.current) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    setError('');
+    try {
+      const next = normalizeResponse(await productService.list(buildParams(currentPage + 1)));
+      setData((previous) => {
+        if (!previous) return next;
+        const seen = new Set(previous.items.map((item) => item.id || item.slug));
+        const appended = next.items.filter((item) => !seen.has(item.id || item.slug));
+        return {
+          ...next,
+          items: [...previous.items, ...appended],
+        };
+      });
+    } catch (err) {
+      setError(err.message || 'Unable to load more products.');
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [data, hasMore, buildParams, currentPage]);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasMore) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '320px 0px' },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
@@ -87,7 +175,7 @@ export default function ShopPage() {
   };
 
   const items = useMemo(() => {
-    const list = Array.isArray(data) ? data : data?.items || [];
+    const list = data?.items || [];
     if (!isNew) return list;
     return [...list].sort((a, b) => {
       const ad = Date.parse(a.created_at || a.createdAt || '') || 0;
@@ -95,13 +183,11 @@ export default function ShopPage() {
       return bd - ad;
     });
   }, [data, isNew]);
-  const meta = data?.meta || {};
-  const totalPages = meta.total_pages || 1;
   const hasActiveFilters = Boolean(q || category || inStockOnly || minPrice || maxPrice || isNew);
 
   return (
     <div className="page container">
-      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Everyday, <em>elevated.</em></h1><p>Useful objects and quiet luxuries for the spaces you call home.</p></div>
+      <div className="page-heading"><p className="eyebrow">The collection</p><h1>Shop Hardware, <em>Sanitary & Drainage.</em></h1><p>Practical products for everyday Indian homes, bathrooms and spaces.</p></div>
       <div className="shop-toolbar">
         <form className="shop-search" onSubmit={(e) => { e.preventDefault(); setParam('q', e.currentTarget.q.value.trim()); }}>
           <input name="q" defaultValue={q} placeholder="Search products…" aria-label="Search products" />
@@ -122,10 +208,19 @@ export default function ShopPage() {
       )}
 
       {hasActiveFilters && <button type="button" className="clear-filters" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}><RiCloseLine size={14} /> Clear all filters</button>}
-      {error ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
+      {error && data !== null ? <ErrorState message={error} onRetry={loadProducts} /> : data === null ? <ProductSkeletons count={PAGE_SIZE} /> : items.length === 0 ? (
         <EmptyState title="No products found" message="Try adjusting your filters or search terms." action={<button type="button" className="btn btn-quiet btn-sm" onClick={() => { setSearchParams({}); setMinPrice(''); setMaxPrice(''); }}>Clear filters</button>} />
       ) : (
-        <><div className="products-grid">{items.map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div><Pagination page={page} totalPages={totalPages} onChange={(p) => setParam('page', String(p))} /></>
+        <>
+          <div className="products-grid">{items.map((p) => <ProductCard key={p.id || p.slug} product={p} />)}</div>
+          {hasMore && (
+            <div className="shop-load-more" ref={loadMoreRef}>
+              <button type="button" className="btn btn-quiet" onClick={loadMore} disabled={loadingMore} aria-label="Load more products">
+                {loadingMore ? <><RiLoader4Line size={17} className="spin" /> Loading products…</> : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

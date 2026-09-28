@@ -1,9 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { RiCloseLine } from '@remixicon/react';
 
-export default function AdminModal({ title, sub, onClose, children }) {
+export default function AdminModal({ title, sub, onClose, children, className = '' }) {
   const closeRef = useRef(null);
   const previousFocus = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     previousFocus.current = document.activeElement;
@@ -11,7 +16,7 @@ export default function AdminModal({ title, sub, onClose, children }) {
     const previousOverflow = document.body.style.overflow;
 
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') onClose?.();
+      if (event.key === 'Escape') onCloseRef.current?.();
     };
 
     document.addEventListener('keydown', onKeyDown);
@@ -22,7 +27,7 @@ export default function AdminModal({ title, sub, onClose, children }) {
       document.body.style.overflow = previousOverflow;
       previousFocus.current?.focus?.();
     };
-  }, [onClose]);
+  }, []);
 
   const titleId = 'admin-modal-title';
   const subId = sub ? 'admin-modal-description' : undefined;
@@ -34,8 +39,8 @@ export default function AdminModal({ title, sub, onClose, children }) {
         if (e.target === e.currentTarget) onClose?.();
       }}
     >
-      <div className="admin-modal" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={subId}>
-        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label="Close dialog">
+      <div className={`admin-modal ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={subId}>
+        <button ref={closeRef} type="button" className="modal-close" onClick={onClose} aria-label="Close dialog" title="Close">
           <RiCloseLine size={20} aria-hidden="true" />
         </button>
         <h2 id={titleId}>{title}</h2>
