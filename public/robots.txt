@@ -12,4 +12,4 @@ Disallow: /order/
 # AI/crawler discovery files
 # llms.txt and llms-full.txt are intentionally public.
 
-Sitemap: https://luviio.in/sitemap.xml
+Sitemap: https://www.luviio.in/sitemap.xml
