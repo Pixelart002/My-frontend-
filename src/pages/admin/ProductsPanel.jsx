@@ -205,6 +205,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   const mountedRef = useRef(false);
   const loadRequestRef = useRef(0);
+  const editorRequestRef = useRef(0);
 
   const isCreate = !editingId;
 
@@ -287,6 +288,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const openCreate = () => {
     if (!canCreate || saving) return;
 
+    editorRequestRef.current += 1;
     setEditingId(null);
     setForm({
       ...BLANK_FORM,
@@ -301,6 +303,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
     const productId = product?.id || null;
     const productSlug = product?.slug || null;
+    const requestId = ++editorRequestRef.current;
 
     if (!productId) return;
 
@@ -315,7 +318,11 @@ export default function ProductsPanel({ capabilities = {} }) {
 
       const detail = await adminService.getProductBySlug(productSlug);
 
-      if (!mountedRef.current || String(detail?.id || '') !== String(productId)) {
+      if (
+        !mountedRef.current ||
+        requestId !== editorRequestRef.current ||
+        String(detail?.id || '') !== String(productId)
+      ) {
         return;
       }
 
@@ -334,6 +341,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const closeEditor = () => {
     if (saving) return;
 
+    editorRequestRef.current += 1;
     setEditing(false);
     setEditingId(null);
     setSelectedFiles([]);
@@ -2037,13 +2045,15 @@ export default function ProductsPanel({ capabilities = {} }) {
                   <button
                     type="submit"
                     className="btn"
-                    disabled={saving}
+                    disabled={saving || loadingEditor}
                   >
-                    {saving
-                      ? 'Saving…'
-                      : editingId
-                        ? 'Save changes'
-                        : 'Create product'}
+                    {loadingEditor
+                      ? 'Loading product…'
+                      : saving
+                        ? 'Saving…'
+                        : editingId
+                          ? 'Save changes'
+                          : 'Create product'}
                   </button>
                 </div>
               </div>
