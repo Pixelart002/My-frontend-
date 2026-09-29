@@ -271,6 +271,12 @@ export const adminService = {
       ),
     ),
 
+  getProductBySlug: (slug) =>
+    request(
+      'GET',
+      `/products/${encodeId(slug)}`,
+    ),
+
   measurementCatalog: () =>
     request(
       'GET',
