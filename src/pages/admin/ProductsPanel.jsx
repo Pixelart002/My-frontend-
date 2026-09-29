@@ -199,6 +199,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [loadingEditor, setLoadingEditor] = useState(false);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
 
@@ -295,13 +296,39 @@ export default function ProductsPanel({ capabilities = {} }) {
     setEditing(true);
   };
 
-  const openEdit = (product) => {
-    if (!canUpdate || saving) return;
+  const openEdit = async (product) => {
+    if (!canUpdate || saving || loadingEditor) return;
 
-    setEditingId(product?.id || null);
+    const productId = product?.id || null;
+    const productSlug = product?.slug || null;
+
+    if (!productId) return;
+
+    setEditingId(productId);
     setForm(toForm(product));
     setSelectedFiles([]);
     setEditing(true);
+    setLoadingEditor(true);
+
+    try {
+      if (!productSlug) return;
+
+      const detail = await adminService.getProductBySlug(productSlug);
+
+      if (!mountedRef.current || String(detail?.id || '') !== String(productId)) {
+        return;
+      }
+
+      setForm(toForm(detail));
+    } catch (err) {
+      if (mountedRef.current) {
+        toast.error(err?.message || 'Unable to load complete product details.');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoadingEditor(false);
+      }
+    }
   };
 
   const closeEditor = () => {
@@ -310,6 +337,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     setEditing(false);
     setEditingId(null);
     setSelectedFiles([]);
+    setLoadingEditor(false);
   };
 
   const setField = (name, value) => {
