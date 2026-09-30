@@ -151,7 +151,7 @@ export default function DPDPNoticePage() {
         <p>
           Luviio may use third-party service providers where necessary to
           operate the store and provide requested services. These may include
-          payment processors, logistics and delivery partners, communications
+          payment processors, shipping and delivery providers, communications
           providers, hosting and infrastructure providers, security providers,
           and other operational service providers.
         </p>
