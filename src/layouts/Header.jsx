@@ -152,9 +152,9 @@ function MenuLink({
   className = '',
 }) {
   const accentStyles = {
-    gold: 'bg-[rgb(212_175_55_/_0.10)] text-gold group-hover:bg-[rgb(212_175_55_/_0.16)] [&_svg]:text-gold',
-    green: 'bg-emerald-500/10 text-emerald-300 group-hover:bg-emerald-500/15 [&_svg]:text-emerald-300',
-    blue: 'bg-sky-500/10 text-sky-300 group-hover:bg-sky-500/15 [&_svg]:text-sky-300',
+    gold: 'bg-gold/10 text-gold group-hover:bg-gold/15',
+    green: 'bg-emerald-400/10 text-emerald-300 group-hover:bg-emerald-400/15',
+    blue: 'bg-sky-400/10 text-sky-300 group-hover:bg-sky-400/15',
   };
 
   return (
@@ -162,27 +162,24 @@ function MenuLink({
       to={to}
       className={
         className ||
-        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-text transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold'
+        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none'
       }
       onClick={onClick}
     >
       {Icon && (
-        <span
-          className={`grid size-9 shrink-0 place-items-center rounded-lg ${accentStyles[accent] || accentStyles.gold} transition-colors duration-150`}
-        >
-          <Icon size={18} aria-hidden="true" />
+        <span className={`grid size-10 shrink-0 place-items-center rounded-xl transition-colors duration-150 ${accentStyles[accent] || accentStyles.gold}`}>
+          <Icon size={19} aria-hidden="true" />
         </span>
       )}
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
       <RiArrowRightSLine
-        className="ml-auto shrink-0 text-dim transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-muted"
-        size={16}
+        className="shrink-0 text-dim transition-[transform,color] duration-150 group-hover:translate-x-0.5 group-hover:text-muted"
+        size={17}
         aria-hidden="true"
       />
     </Link>
   );
 }
-
 function AdminMenuLink({
   item,
   active,
@@ -523,6 +520,7 @@ export default function Header() {
             to="/"
             label="View storefront"
             Icon={RiHomeLine}
+            accent="gold"
             onClick={closeAll}
           />
         </div>
@@ -540,6 +538,7 @@ export default function Header() {
             to="/"
             label="Home"
             Icon={RiHomeLine}
+            accent="gold"
             onClick={closeAll}
           />
 
@@ -547,6 +546,7 @@ export default function Header() {
             to="/shop"
             label="Shop"
             Icon={RiStore2Line}
+            accent="gold"
             onClick={closeAll}
           />
 
@@ -554,6 +554,7 @@ export default function Header() {
             to="/shop"
             label="Categories"
             Icon={RiGridLine}
+            accent="gold"
             onClick={closeAll}
           />
         </nav>
@@ -573,6 +574,7 @@ export default function Header() {
                 : 'Shopping bag'
             }
             Icon={RiShoppingBagLine}
+            accent="green"
             onClick={closeAll}
           />
 
@@ -580,6 +582,7 @@ export default function Header() {
             to="/orders"
             label="Orders"
             Icon={RiArchive2Line}
+            accent="green"
             onClick={closeAll}
           />
 
@@ -587,6 +590,7 @@ export default function Header() {
             to="/account"
             label="Account"
             Icon={RiUser3Line}
+            accent="green"
             onClick={closeAll}
           />
         </nav>
@@ -602,29 +606,30 @@ export default function Header() {
             to="/about"
             label="About"
             Icon={RiInformationLine}
+            accent="blue"
             onClick={closeAll}
           />
 
           <a
             href="mailto:support@luviio.in"
             onClick={closeAll}
+            className="group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none"
           >
-            <RiMailLine
-              size={18}
-              aria-hidden="true"
-            />
-            <span>
-              Contact
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-400/10 text-sky-300 transition-colors duration-150 group-hover:bg-sky-400/15">
+              <RiMailLine size={19} aria-hidden="true" />
             </span>
+            <span className="min-w-0 flex-1 truncate">Contact</span>
+            <RiArrowRightSLine className="shrink-0 text-dim transition-[transform,color] duration-150 group-hover:translate-x-0.5 group-hover:text-muted" size={17} aria-hidden="true" />
           </a>
         </nav>
 
-        <div className="mobile-nav-section mobile-account-actions flex min-w-0 flex-col gap-1">
+        <div className="mobile-nav-section mobile-account-actions mt-3 flex min-w-0 flex-col gap-1 border-t border-line pt-4">
           {isAdmin && (
             <MenuLink
               to="/admin"
               label="Admin dashboard"
               Icon={RiShieldStarLine}
+              accent="gold"
               onClick={closeAll}
             />
           )}
@@ -633,14 +638,13 @@ export default function Header() {
             <button
               type="button"
               onClick={onLogout}
+              className="group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-left text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none"
             >
-              <RiLogoutBoxRLine
-                size={18}
-                aria-hidden="true"
-              />
-              <span>
-                Sign out
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-400/10 text-rose-300 transition-colors duration-150 group-hover:bg-rose-400/15">
+                <RiLogoutBoxRLine size={19} aria-hidden="true" />
               </span>
+              <span className="min-w-0 flex-1 truncate">Sign out</span>
+              <RiArrowRightSLine className="shrink-0 text-dim transition-[transform,color] duration-150 group-hover:translate-x-0.5 group-hover:text-muted" size={17} aria-hidden="true" />
             </button>
           )}
         </div>
