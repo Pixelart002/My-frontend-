@@ -634,6 +634,8 @@ export default function CheckoutPage() {
     shippingQuoteError,
     setShippingQuoteError,
   ] = useState('');
+  const [shippingQuoteStale, setShippingQuoteStale] =
+    useState(false);
   const [
     shippingRetryKey,
     setShippingRetryKey,
@@ -832,12 +834,14 @@ export default function CheckoutPage() {
       setShippingOptions([]);
       setSelectedCourierId('');
       setShippingQuoteError('');
+      setShippingQuoteStale(false);
       setShippingQuoteLoading(false);
       return undefined;
     }
 
     setShippingQuoteLoading(true);
     setShippingQuoteError('');
+    setShippingQuoteStale(false);
     setShippingQuote(null);
     setShippingOptions([]);
     setSelectedCourierId('');
@@ -927,6 +931,7 @@ export default function CheckoutPage() {
           String(next.courier_id),
         );
         setShippingQuote(next);
+        setShippingQuoteStale(data?.stale === true);
 
         /*
          * Any new shipping quote invalidates a
@@ -947,6 +952,7 @@ export default function CheckoutPage() {
         setShippingQuote(null);
         setShippingOptions([]);
         setSelectedCourierId('');
+        setShippingQuoteStale(false);
 
         const detail =
           err?.details ||
@@ -1877,8 +1883,18 @@ export default function CheckoutPage() {
                 </h2>
               </div>
 
-              <span className="checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border border-success/40 bg-success-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-success">
-                Live delivery rates
+              <span
+                className={`checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] ${
+                  shippingQuoteStale
+                    ? 'border-[rgba(216,173,106,.40)] bg-gold-dim text-gold-soft'
+                    : 'border-success/40 bg-success-dim text-success'
+                }`}
+                role="status"
+                aria-live="polite"
+              >
+                {shippingQuoteStale
+                  ? 'Recent cached rate'
+                  : 'Live delivery rates'}
               </span>
             </div>
 
@@ -2004,6 +2020,30 @@ export default function CheckoutPage() {
                   )}
                 </div>
               )}
+
+            {shippingQuoteStale && shippingQuote && (
+              <div
+                className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft"
+                role="status"
+                aria-live="polite"
+              >
+                <p className="m-0 min-w-0 flex-1">
+                  The shipping provider is temporarily unavailable. This is a recent cached rate; LUVIIO will revalidate the selected courier before creating the order.
+                </p>
+                <button
+                  type="button"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-[rgba(216,173,106,.35)] bg-bg px-3.5 text-xs font-semibold text-text transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => {
+                    setShippingQuoteError('');
+                    setShippingRetryKey((value) => value + 1);
+                  }}
+                  disabled={shippingQuoteLoading || Boolean(activeOrder)}
+                >
+                  <RiRefreshLine size={15} aria-hidden="true" />
+                  Refresh rate
+                </button>
+              </div>
+            )}
 
             {shippingQuote && (
               <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
