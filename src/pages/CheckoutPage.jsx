@@ -25,7 +25,6 @@ import { getStripePromise } from '../services/stripeConfig';
 import { useCart } from '../context/CartContext';
 import { userService } from '../services/users';
 import { couponService } from '../services/coupons';
-import { shippingService } from '../services/shipping';
 import { paymentService } from '../services/payments';
 import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
@@ -193,7 +192,7 @@ const getApiErrorMessage = (error) => {
     }
   }
 
-  return 'Live delivery rates are temporarily unavailable. Please retry.';
+  return 'Manual shipping are temporarily unavailable. Please retry.';
 };
 
 const normalizeCourierOptions = (data) => {
@@ -887,144 +886,33 @@ export default function CheckoutPage() {
     setShippingOptions([]);
     setSelectedCourierId('');
 
-    const loadLiveShipping = async () => {
-      try {
-        const result =
-          await shippingService.providerRate({
-            deliveryPostcode:
-              selectedAddress.postal_code,
-            weightKg: shipmentWeightKg,
-            cod:
-              paymentMethod === 'cod',
-            declaredValue:
-              Number(cart?.subtotal) || 0,
-          });
-
-        if (
-          !mountedRef.current ||
-          requestId !==
-            shippingRequestRef.current
-        ) {
-          return;
-        }
-
-        const data =
-          result?.data || result || {};
-
-        const options =
-          normalizeCourierOptions(data);
-
-        const serverSelected =
-          data?.selected;
-
-        const validServerSelected =
-          serverSelected &&
-          String(
-            serverSelected.courier_id || '',
-          ) &&
-          Number.isFinite(
-            Number(
-              serverSelected.shipping_cost,
-            ),
-          ) &&
-          Number(
-            serverSelected.shipping_cost,
-          ) >= 0
-            ? serverSelected
-            : null;
-
-        const nextOptions =
-          options.length
-            ? options
-            : validServerSelected
-              ? [validServerSelected]
-              : [];
-
-        if (!nextOptions.length) {
-          throw new Error(
-            'Live delivery options are not available for this PIN code yet.',
-          );
-        }
-
-        const preferredId =
-          validServerSelected
-            ? String(
-                validServerSelected.courier_id,
-              )
-            : '';
-
-        const next =
-          nextOptions.find(
-            (courier) =>
-              String(
-                courier.courier_id,
-              ) === preferredId,
-          ) || nextOptions[0];
-
-        if (!next) {
-          throw new Error(
-            'Live delivery options are incomplete.',
-          );
-        }
-
-        setShippingOptions(nextOptions);
-        setSelectedCourierId(
-          String(next.courier_id),
-        );
-        setShippingQuote(next);
-        setShippingQuoteStale(data?.stale === true);
-
-        /*
-         * Any new shipping quote invalidates a
-         * previously created payment session.
-         */
-        setIntent(null);
-        setIntentError('');
-        setPaymentReview(false);
-      } catch (err) {
-        if (
-          !mountedRef.current ||
-          requestId !==
-            shippingRequestRef.current
-        ) {
-          return;
-        }
-
-        setShippingQuote(null);
-        setShippingOptions([]);
-        setSelectedCourierId('');
-        setShippingQuoteStale(false);
-
-        setShippingQuoteError(
-          getApiErrorMessage(err),
-        );
-      } finally {
-        if (
-          mountedRef.current &&
-          requestId ===
-            shippingRequestRef.current
-        ) {
-          setShippingQuoteLoading(false);
-        }
-      }
+    const manualShipping = {
+      courier_id: 'manual',
+      courier_name: 'Manual shipping',
+      service_type: 'manual',
+      delivery_mode: 'manual',
+      shipping_cost:
+        (Number(cart?.subtotal) || 0) >= 1499
+          ? 0
+          : 45.9,
     };
 
-    loadLiveShipping();
+    setShippingOptions([manualShipping]);
+    setSelectedCourierId('manual');
+    setShippingQuote(manualShipping);
+    setShippingQuoteStale(false);
+    setShippingQuoteError('');
+    setShippingQuoteLoading(false);
 
-    return () => {
-      /*
-       * requestId invalidates the response.
-       * No stale quote can overwrite a newer
-       * address/payment/cart selection.
-       */
-    };
+    // Shipping mode changes invalidate an unfinished payment session.
+    setIntent(null);
+    setIntentError('');
+    setPaymentReview(false);
+
   }, [
-    selectedAddress?.postal_code,
-    shipmentWeightKg,
     cart?.subtotal,
     items.length,
     canProceed,
-    shippingRetryKey,
   ]);
 
   const resetPayment = useCallback(() => {
@@ -1909,7 +1797,7 @@ export default function CheckoutPage() {
                 </p>
 
                 <h2>
-                  Choose delivery partner
+                  Shipping method
                 </h2>
               </div>
 
@@ -1965,7 +1853,7 @@ export default function CheckoutPage() {
                   disabled={shippingQuoteLoading}
                 >
                   <RiRefreshLine size={15} aria-hidden="true" />
-                  Retry shipping
+                  Refresh shipping
                 </button>
               </div>
             )}
@@ -2001,7 +1889,7 @@ export default function CheckoutPage() {
                           ? `Estimated delivery: ${courier.estimated_delivery_days} days`
                           : courier?.etd_hours
                             ? `Estimated delivery: ${courier.etd_hours} hours`
-                            : 'Delivery estimate provided by the shipping service';
+                            : 'Courier and tracking are arranged manually';
 
                       return (
                         <label
@@ -2062,7 +1950,7 @@ export default function CheckoutPage() {
                 aria-live="polite"
               >
                 <p className="m-0 min-w-0 flex-1">
-                  The shipping provider is temporarily unavailable. This is a recent cached rate; LUVIIO will revalidate the selected courier before creating the order.
+                  Manual shipping is used for this order. Courier and tracking details are added by LUVIIO after dispatch.
                 </p>
                 <button
                   type="button"
@@ -2074,7 +1962,7 @@ export default function CheckoutPage() {
                   disabled={shippingQuoteLoading || Boolean(activeOrder)}
                 >
                   <RiRefreshLine size={15} aria-hidden="true" />
-                  Refresh rate
+                  Refresh shipping
                 </button>
               </div>
             )}
@@ -2086,7 +1974,7 @@ export default function CheckoutPage() {
                   aria-hidden="true"
                 />
 
-                Selected:{' '}
+                Shipping:{' '}
                 <b>
                   {text(
                     shippingQuote.courier_name,
