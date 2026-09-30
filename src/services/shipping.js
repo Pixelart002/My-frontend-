@@ -1,117 +1,26 @@
 /**
- * Shipping service — real backend/provider rate endpoint.
+ * Shipping service — Luviio manual shipping.
  *
- * Backend remains authoritative for:
- * - courier availability
- * - shipping rate
- * - COD charges
- * - declared-value rules
- * - weight validation
- * - final shipping amount
- *
- * Frontend performs input validation only.
+ * Checkout pricing is owned by the backend. This helper only mirrors the
+ * configured storefront policy for UI previews; it never calls a courier API.
  */
-import { request } from '../api/client';
 
-function requirePostcode(value) {
-  const postcode =
-    String(value ?? '').trim();
-
-  if (!postcode) {
-    throw new TypeError(
-      'A valid delivery postcode is required.',
-    );
-  }
-
-  return postcode;
-}
-
-function requireWeight(value) {
-  const weight =
-    Number(value);
-
-  if (
-    !Number.isFinite(weight) ||
-    weight <= 0
-  ) {
-    throw new TypeError(
-      'A valid shipment weight is required.',
-    );
-  }
-
-  return weight;
-}
-
-function optionalDeclaredValue(
-  value,
-) {
-  if (
-    value === null ||
-    value === undefined ||
-    value === ''
-  ) {
-    return null;
-  }
-
-  const declaredValue =
-    Number(value);
-
-  if (
-    !Number.isFinite(
-      declaredValue,
-    ) ||
-    declaredValue < 0
-  ) {
-    throw new TypeError(
-      'A valid declared value is required.',
-    );
-  }
-
-  return declaredValue;
-}
+const FREE_SHIPPING_THRESHOLD = 1499;
+const FLAT_SHIPPING_RATE = 45.9;
 
 export const shippingService = {
-  providerRate: ({
-    deliveryPostcode,
-    weightKg,
-    cod = false,
-    declaredValue = null,
-  } = {}) => {
-    const postcode =
-      requirePostcode(
-        deliveryPostcode,
-      );
+  manualRate: (subtotal = 0) => {
+    const value = Number(subtotal) || 0;
 
-    const weight =
-      requireWeight(weightKg);
-
-    const value =
-      optionalDeclaredValue(
-        declaredValue,
-      );
-
-    const params =
-      new URLSearchParams({
-        delivery_postcode:
-          postcode,
-
-        weight_kg:
-          String(weight),
-
-        cod:
-          String(Boolean(cod)),
-      });
-
-    if (value !== null) {
-      params.set(
-        'declared_value',
-        String(value),
-      );
-    }
-
-    return request(
-      'GET',
-      `/shipping/provider/rate?${params.toString()}`,
-    );
+    return {
+      shipping_cost:
+        value >= FREE_SHIPPING_THRESHOLD
+          ? 0
+          : FLAT_SHIPPING_RATE,
+      courier_name: 'Manual shipping',
+      service_type: 'manual',
+      delivery_mode: 'manual',
+      free_shipping_threshold: FREE_SHIPPING_THRESHOLD,
+    };
   },
 };
