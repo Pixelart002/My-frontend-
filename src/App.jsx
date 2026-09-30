@@ -19,87 +19,129 @@ import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
-const LoginPage = lazy(() => import('./pages/LoginPage'));
+const isChunkLoadError = (error) => {
+  const message = String(error?.message || error || '');
+  return /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|dynamically imported module/i.test(
+    message,
+  );
+};
 
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const lazyWithRetry = (importer) =>
+  lazy(() => {
+    const retryKey = 'luviio:lazy-chunk-retry';
+    const canUseSessionStorage =
+      typeof window !== 'undefined' &&
+      typeof window.sessionStorage !== 'undefined';
 
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+    const wasRetried =
+      canUseSessionStorage &&
+      window.sessionStorage.getItem(retryKey) === '1';
 
-const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
+    return importer()
+      .then((module) => {
+        if (canUseSessionStorage) {
+          window.sessionStorage.removeItem(retryKey);
+        }
 
-const CartPage = lazy(() =>
+        return module;
+      })
+      .catch((error) => {
+        if (!isChunkLoadError(error) || wasRetried) {
+          throw error;
+        }
+
+        try {
+          window.sessionStorage.setItem(retryKey, '1');
+        } catch {
+          // Ignore storage failures and let the boundary render the error.
+        }
+
+        window.location.reload();
+        return new Promise(() => {});
+      });
+  });
+
+const LoginPage = lazyWithRetry(() => import('./pages/LoginPage'));
+
+const RegisterPage = lazyWithRetry(() => import('./pages/RegisterPage'));
+
+const ForgotPasswordPage = lazyWithRetry(() => import('./pages/ForgotPasswordPage'));
+
+const ChangePasswordPage = lazyWithRetry(() => import('./pages/ChangePasswordPage'));
+
+const CartPage = lazyWithRetry(() =>
   import('./pages/CartPage'),
 );
 
-const CheckoutPage = lazy(() =>
+const CheckoutPage = lazyWithRetry(() =>
   import('./pages/CheckoutPage'),
 );
 
-const OrderSuccessPage = lazy(() =>
+const OrderSuccessPage = lazyWithRetry(() =>
   import('./pages/OrderSuccessPage'),
 );
 
-const OrderFailedPage = lazy(() =>
+const OrderFailedPage = lazyWithRetry(() =>
   import('./pages/OrderFailedPage'),
 );
 
-const OrdersPage = lazy(() =>
+const OrdersPage = lazyWithRetry(() =>
   import('./pages/OrdersPage'),
 );
 
-const OrderDetailPage = lazy(() =>
+const OrderDetailPage = lazyWithRetry(() =>
   import('./pages/OrderDetailPage'),
 );
 
-const ProfilePage = lazy(() =>
+const ProfilePage = lazyWithRetry(() =>
   import('./pages/ProfilePage'),
 );
 
-const AddressesPage = lazy(() =>
+const AddressesPage = lazyWithRetry(() =>
   import('./pages/AddressesPage'),
 );
 
-const SettingsPage = lazy(() =>
+const SettingsPage = lazyWithRetry(() =>
   import('./pages/SettingsPage'),
 );
 
-const PrivacyPage = lazy(() =>
+const PrivacyPage = lazyWithRetry(() =>
   import('./pages/policies/PrivacyPage'),
 );
 
-const DPDPNoticePage = lazy(() =>
+const DPDPNoticePage = lazyWithRetry(() =>
   import('./pages/policies/DPDPNoticePage'),
 );
 
-const TermsPage = lazy(() =>
+const TermsPage = lazyWithRetry(() =>
   import('./pages/policies/TermsPage'),
 );
 
-const ShippingPage = lazy(() =>
+const ShippingPage = lazyWithRetry(() =>
   import('./pages/policies/ShippingPage'),
 );
 
-const RefundPage = lazy(() =>
+const RefundPage = lazyWithRetry(() =>
   import('./pages/policies/RefundPage'),
 );
 
-const ReturnCancelPage = lazy(() =>
+const ReturnCancelPage = lazyWithRetry(() =>
   import('./pages/policies/ReturnCancelPage'),
 );
 
-const AboutPage = lazy(() =>
+const AboutPage = lazyWithRetry(() =>
   import('./pages/policies/AboutPage'),
 );
 
-const ReviewsPage = lazy(() =>
+const ReviewsPage = lazyWithRetry(() =>
   import('./pages/ReviewsPage'),
 );
 
-const NotFoundPage = lazy(() =>
+const NotFoundPage = lazyWithRetry(() =>
   import('./pages/NotFoundPage'),
 );
 
-const AdminPage = lazy(() =>
+const AdminPage = lazyWithRetry(() =>
   import('./pages/admin/AdminPage'),
 );
 
