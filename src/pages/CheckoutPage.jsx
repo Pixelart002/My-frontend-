@@ -155,6 +155,47 @@ const text = (value, fallback = '') => {
   return result || fallback;
 };
 
+const getApiErrorMessage = (error) => {
+  const candidates = [
+    error?.details?.message,
+    error?.details?.detail,
+    error?.details?.error,
+    error?.response?.data?.detail?.message,
+    error?.response?.data?.detail,
+    error?.response?.detail?.message,
+    error?.response?.detail,
+    error?.message,
+  ];
+
+  for (const candidate of candidates) {
+    if (
+      typeof candidate === 'string' &&
+      candidate.trim()
+    ) {
+      return candidate.trim();
+    }
+
+    if (
+      candidate &&
+      typeof candidate === 'object'
+    ) {
+      const nested =
+        candidate.message ||
+        candidate.detail ||
+        candidate.error;
+
+      if (
+        typeof nested === 'string' &&
+        nested.trim()
+      ) {
+        return nested.trim();
+      }
+    }
+  }
+
+  return 'Live delivery rates are temporarily unavailable. Please retry.';
+};
+
 const normalizeCourierOptions = (data) => {
   const quotes = Array.isArray(data?.couriers)
     ? data.couriers
@@ -954,20 +995,9 @@ export default function CheckoutPage() {
         setSelectedCourierId('');
         setShippingQuoteStale(false);
 
-        const detail =
-          err?.details ||
-          err?.response?.data?.detail ||
-          err?.response?.detail ||
-          null;
-        const message =
-          typeof detail === 'object' && detail?.message
-            ? detail.message
-            : typeof detail === 'string'
-              ? detail
-              : err?.message ||
-                'Live delivery rates are temporarily unavailable. Please retry.';
-
-        setShippingQuoteError(message);
+        setShippingQuoteError(
+          getApiErrorMessage(err),
+        );
       } finally {
         if (
           mountedRef.current &&
