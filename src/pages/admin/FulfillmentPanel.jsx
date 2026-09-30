@@ -245,7 +245,7 @@ export default function FulfillmentPanel() {
               id: `order:${String(order.id)}`,
               order_id: order.id,
               status: 'ready_to_create',
-              provider_key: 'shiprocket',
+              provider_key: 'manual',
               courier_name: null,
               service_type: null,
               tracking_number: null,
@@ -452,7 +452,7 @@ export default function FulfillmentPanel() {
               <h2>Courier fulfillment</h2>
 
               <span className="admin-pill pill-gold">
-                Shiprocket · Sandbox
+                Manual shipping
               </span>
             </div>
 
@@ -752,7 +752,7 @@ export default function FulfillmentPanel() {
                                 parcel dimensions are
                                 filled server-side from
                                 the order/product data
-                                and Shiprocket
+                                and Manual shipping
                                 configuration.
                               </span>
                             </div>
@@ -772,7 +772,7 @@ export default function FulfillmentPanel() {
                               {busy ===
                               `${order.id}:create`
                                 ? 'Creating…'
-                                : 'Create Shiprocket shipment'}
+                                : 'Create Manual shipping shipment'}
                             </button>
                           </div>
                         )}
