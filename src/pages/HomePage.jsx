@@ -516,7 +516,7 @@ export default function HomePage() {
               <span>
                 <strong>Local-friendly delivery</strong>
                 <small>
-                  Courier rates and order updates
+                  Manual shipping and order updates
                 </small>
               </span>
             </div>
