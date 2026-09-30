@@ -1612,7 +1612,7 @@ export default function CheckoutPage() {
     <div className="page container checkout">
       <button
         type="button"
-        className="checkout-back mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+        className="checkout-back mb-5 inline-flex rounded-xl border border-transparent px-2 py-2 min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         onClick={() => {
           if (!activeOrder) {
             navigate('/cart');
@@ -1646,7 +1646,7 @@ export default function CheckoutPage() {
       </div>
 
       <div
-        className="checkout-steps mb-7 flex min-w-0 items-center gap-2 text-xs text-dim max-[560px]:gap-1.5 [&_span]:inline-flex [&_span]:min-h-10 [&_span]:items-center [&_span]:gap-1.5 [&_span]:rounded-full [&_span]:border [&_span]:border-line [&_span]:px-3 [&_span]:font-semibold [&_span]:whitespace-nowrap [&_span]:max-[560px]:px-2.5 [&_.is-complete]:border-[rgba(111,191,138,.45)] [&_.is-complete]:bg-success-dim [&_.is-complete]:text-success [&_.is-current]:border-gold [&_.is-current]:bg-gold-dim [&_.is-current]:text-gold-soft [&_i]:h-px [&_i]:min-w-4 [&_i]:flex-1 [&_i]:bg-line"
+        className="checkout-steps mb-7 flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-xs text-dim max-[560px]:gap-1.5 [&_span]:inline-flex [&_span]:min-h-10 [&_span]:items-center [&_span]:gap-1.5 [&_span]:rounded-full [&_span]:border [&_span]:border-line [&_span]:px-3 [&_span]:font-semibold [&_span]:whitespace-nowrap [&_span]:max-[560px]:px-2.5 [&_.is-complete]:border-[rgba(111,191,138,.45)] [&_.is-complete]:bg-success-dim [&_.is-complete]:text-success [&_.is-current]:border-gold [&_.is-current]:bg-gold-dim [&_.is-current]:text-gold-soft [&_i]:h-px [&_i]:min-w-4 [&_i]:flex-1 [&_i]:bg-line"
         aria-label="Checkout progress"
       >
         <span className="is-complete">
@@ -1671,7 +1671,7 @@ export default function CheckoutPage() {
 
       <div className="checkout-layout checkout-layout-refined grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(300px,380px)] items-start gap-6 max-[900px]:grid-cols-1">
         <div className="checkout-main min-w-0 space-y-4">
-          <section className="checkout-section min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
+          <section className="checkout-section min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
             <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
               <div>
                 <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
@@ -1849,7 +1849,7 @@ export default function CheckoutPage() {
             )}
           </section>
 
-          <section className="checkout-section checkout-shipping-options min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
+          <section className="checkout-section checkout-shipping-options min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
             <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
               <div>
                 <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
@@ -2133,7 +2133,7 @@ export default function CheckoutPage() {
             )}
           </section>
 
-          <section className="checkout-section checkout-payment-launch min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
+          <section className="checkout-section checkout-payment-launch min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
             <h2>3 · Payment</h2>
 
             {intentError && (
@@ -2213,7 +2213,7 @@ export default function CheckoutPage() {
         </div>
 
         <aside
-          className="summary checkout-summary sticky top-[92px] min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static max-[560px]:p-4"
+          className="summary checkout-summary sticky top-[92px] min-w-0 overflow-hidden rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static max-[560px]:rounded-2xl max-[560px]:p-4"
           aria-label="Order summary"
         >
           <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
