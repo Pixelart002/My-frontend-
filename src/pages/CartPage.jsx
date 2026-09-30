@@ -129,8 +129,8 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
     <article
       className={[
         'group grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] gap-3 border-b border-line p-4 transition-colors sm:gap-5 sm:p-5',
-        'last:border-b-0 hover:bg-surface-2/30',
-        unavailable ? 'bg-danger-dim/40' : '',
+        'last:border-b-0 hover:bg-surface-2',
+        unavailable ? 'bg-danger-dim' : '',
       ].join(' ')}
       aria-busy={itemBusy}
     >
@@ -501,7 +501,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="border-t border-line bg-surface-2/40 px-4 py-4 sm:px-5">
+          <div className="border-t border-line bg-surface-2 px-4 py-4 sm:px-5">
             <Link
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
