@@ -43,7 +43,7 @@ export default function ShippingPage() {
 
       <Section title="4. Order tracking">
         <p>
-          After dispatch, we will provide tracking information when a courier or local delivery service is assigned. You can also view the status of your order from your account where available.
+          After dispatch, we will provide tracking information when manual shipping is arranged. You can also view the status of your order from your account where available.
         </p>
       </Section>
 
