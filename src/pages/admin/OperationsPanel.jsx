@@ -332,7 +332,7 @@ function ShippingPanel() {
         <div className="admin-stats">
           <div className="admin-stat">
             <div className="stat-label">Checkout shipping</div>
-            <div className="stat-value ops-stat-value-sm">Manual shipping</g/div>
+            <div className="stat-value ops-stat-value-sm">Manual shipping</div>
           </div>
 
           <div className="admin-stat">
@@ -351,9 +351,7 @@ function ShippingPanel() {
         </div>
 
         <div className="admin-page-note">
-          Rate is calculated server-side from delivery PIN, parcel weight,
-          payment method and Manual shipping serviceability. No admin-entered flat
-          shipping amount is applied to customer checkout.
+          Customer checkout uses the Luviio manual-shipping policy: ₹45.90 below ₹1,499 and free shipping at ₹1,499+. Dispatch and tracking are managed manually.
         </div>
       </div>
 
