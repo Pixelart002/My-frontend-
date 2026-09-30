@@ -1885,16 +1885,20 @@ export default function CheckoutPage() {
 
               <span
                 className={`checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] ${
-                  shippingQuoteStale
-                    ? 'border-[rgba(216,173,106,.40)] bg-gold-dim text-gold-soft'
-                    : 'border-success/40 bg-success-dim text-success'
+                  shippingQuoteError
+                    ? 'border-danger/40 bg-danger-dim text-danger'
+                    : shippingQuoteStale
+                      ? 'border-[rgba(216,173,106,.40)] bg-gold-dim text-gold-soft'
+                      : 'border-success/40 bg-success-dim text-success'
                 }`}
                 role="status"
                 aria-live="polite"
               >
-                {shippingQuoteStale
-                  ? 'Recent cached rate'
-                  : 'Live delivery rates'}
+                {shippingQuoteError
+                  ? 'Rates unavailable'
+                  : shippingQuoteStale
+                    ? 'Recent cached rate'
+                    : 'Live delivery rates'}
               </span>
             </div>
 
