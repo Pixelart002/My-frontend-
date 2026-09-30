@@ -7,6 +7,7 @@ import {
   RiDeleteBinLine,
   RiLockLine,
   RiLoader4Line,
+  RiStore2Line,
   RiSubtractLine,
   RiTruckLine,
 } from '@remixicon/react';
@@ -15,7 +16,6 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { formatMoney } from '../utils/format';
 import {
-  EmptyState,
   ErrorState,
   Spinner,
 } from '../components/ui/States';
@@ -97,6 +97,35 @@ function QuantityEditor({ item, disabled, onUpdate }) {
         />
       )}
     </div>
+  );
+}
+
+function CartEmptyState({
+  title,
+  message,
+  action,
+}) {
+  return (
+    <section
+      className="max-w-xl border-t border-line pt-8 sm:pt-10"
+      aria-labelledby="cart-empty-title"
+      role="status"
+      aria-live="polite"
+    >
+      <RiStore2Line className="text-gold" size={30} aria-hidden="true" />
+      <h2
+        id="cart-empty-title"
+        className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-text sm:text-3xl"
+      >
+        {title}
+      </h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted sm:text-base">
+        {message}
+      </p>
+      <div className="mt-6">
+        {action}
+      </div>
+    </section>
   );
 }
 
@@ -364,12 +393,12 @@ export default function CartPage() {
     return (
       <main className={pageShell}>
         <CartHeader description="Sign in to view and manage the items saved to your bag." />
-        <EmptyState
+        <CartEmptyState
           title="Your bag is waiting"
           message="Sign in to see the items in your bag."
           action={
             <Link
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-5 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/login"
             >
               Sign in
@@ -402,12 +431,12 @@ export default function CartPage() {
     return (
       <main className={pageShell}>
         <CartHeader description="Your bag is ready when you are." />
-        <EmptyState
+        <CartEmptyState
           title="Your bag is empty"
           message="Explore the shop and add something you need."
           action={
             <Link
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-5 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
             >
               Continue shopping
