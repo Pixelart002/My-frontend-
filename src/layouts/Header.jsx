@@ -516,26 +516,6 @@ export default function Header() {
       </>
     ) : (
       <>
-        <form
-          className="mobile-search mb-3 flex min-h-11 w-full min-w-0 items-center gap-2.5 rounded-xl border border-line bg-bg px-3 text-dim transition-colors focus-within:border-[rgb(216_173_106_/_0.5)] focus-within:bg-surface focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-gold [&_input]:min-h-10 [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-dim"
-          onSubmit={onSearch}
-          role="search"
-        >
-          <RiSearchLine
-            size={19}
-            aria-hidden="true"
-          />
-
-          <input
-            name="query"
-            type="search"
-            placeholder="Search for products..."
-            aria-label="Search for products"
-            autoComplete="off"
-            enterKeyHint="search"
-          />
-        </form>
-
         <nav
           className="mobile-nav-section mobile-primary-nav flex min-w-0 flex-col gap-1"
           aria-label="Explore"
