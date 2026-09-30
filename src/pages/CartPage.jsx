@@ -4,7 +4,6 @@ import {
   RiAddLine,
   RiArrowLeftLine,
   RiArrowRightLine,
-  RiCloseLine,
   RiDeleteBinLine,
   RiLockLine,
   RiLoader4Line,
@@ -12,8 +11,8 @@ import {
   RiTruckLine,
 } from '@remixicon/react';
 
-import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { formatMoney } from '../utils/format';
 import {
   EmptyState,
@@ -21,77 +20,59 @@ import {
   Spinner,
 } from '../components/ui/States';
 
-function QuantityEditor({
-  item,
-  disabled,
-  onUpdate,
-}) {
-  const [value, setValue] = useState(
-    String(item.quantity),
-  );
+const pageShell =
+  'mx-auto w-full max-w-[1240px] px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:px-8 lg:pb-24 lg:pt-10';
 
-  useEffect(() => {
-    setValue(String(item.quantity));
-  }, [item.quantity]);
+const mutedText =
+  'text-sm leading-6 text-muted';
 
+function QuantityEditor({ item, disabled, onUpdate }) {
+  const [value, setValue] = useState(String(item.quantity));
+  const quantity = Number(item.quantity) || 1;
   const stock = Number(item.stock);
   const max =
     Number.isFinite(stock) && stock > 0
       ? stock
       : 9999;
 
-  const commit = (requested) => {
-    const parsed = Number.parseInt(
-      requested,
-      10,
-    );
+  useEffect(() => {
+    setValue(String(item.quantity));
+  }, [item.quantity]);
 
+  const commit = (requested) => {
+    const parsed = Number.parseInt(requested, 10);
     const next = Math.min(
       max,
-      Math.max(
-        1,
-        Number.isFinite(parsed) ? parsed : 1,
-      ),
+      Math.max(1, Number.isFinite(parsed) ? parsed : 1),
     );
 
     setValue(String(next));
 
-    if (next !== Number(item.quantity)) {
+    if (next !== quantity) {
       onUpdate(next);
     }
   };
 
-  const quantity = Number(item.quantity) || 1;
-
   return (
     <div
-      className={`qty-stepper cart-qty ${
-        disabled ? 'is-updating' : ''
-      }`}
-      aria-label={`Quantity for ${
-        item.name || 'product'
-      }`}
+      className={[
+        'inline-flex h-10 items-center overflow-hidden rounded-xl border border-line bg-bg',
+        disabled ? 'opacity-60' : '',
+      ].join(' ')}
+      aria-label={`Quantity for ${item.name || 'product'}`}
     >
       <button
         type="button"
-        onClick={() =>
-          commit(quantity - 1)
-        }
-        disabled={
-          disabled || quantity <= 1
-        }
-        aria-label={`Decrease quantity for ${
-          item.name || 'product'
-        }`}
+        className="inline-flex h-10 w-10 items-center justify-center text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={() => commit(quantity - 1)}
+        disabled={disabled || quantity <= 1}
+        aria-label={`Decrease quantity for ${item.name || 'product'}`}
       >
-        <RiSubtractLine
-          size={15}
-          aria-hidden="true"
-        />
+        <RiSubtractLine size={15} aria-hidden="true" />
       </button>
 
       <span
-        className="cart-qty-value inline-flex min-w-12 items-center justify-center text-sm font-semibold tabular-nums text-text"
+        className="flex h-10 min-w-11 items-center justify-center border-x border-line px-2 text-sm font-semibold tabular-nums text-text"
         aria-live="polite"
         aria-atomic="true"
       >
@@ -100,30 +81,213 @@ function QuantityEditor({
 
       <button
         type="button"
-        onClick={() =>
-          commit(quantity + 1)
-        }
-        disabled={
-          disabled || quantity >= max
-        }
-        aria-label={`Increase quantity for ${
-          item.name || 'product'
-        }`}
+        className="inline-flex h-10 w-10 items-center justify-center text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={() => commit(quantity + 1)}
+        disabled={disabled || quantity >= max}
+        aria-label={`Increase quantity for ${item.name || 'product'}`}
       >
-        <RiAddLine
-          size={15}
-          aria-hidden="true"
-        />
+        <RiAddLine size={15} aria-hidden="true" />
       </button>
 
       {disabled && (
         <RiLoader4Line
-          className="cart-qty-spinner spin animate-spin text-gold"
+          className="mr-2 animate-spin text-gold"
           size={13}
           aria-hidden="true"
         />
       )}
     </div>
+  );
+}
+
+function CartHeader({ description }) {
+  return (
+    <header className="mb-8 min-w-0 sm:mb-10">
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
+        Your selection
+      </p>
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-semibold tracking-[-0.04em] text-text sm:text-4xl lg:text-5xl">
+            Your Cart
+          </h1>
+          <p className={`mt-2 max-w-2xl ${mutedText}`}>
+            {description}
+          </p>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }) {
+  const unavailable = !item.in_stock || item.is_active === false;
+  const productPath = `/product/${item.slug || item.product_id}`;
+  const itemBusy = updating || removing;
+
+  return (
+    <article
+      className={[
+        'group grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] gap-3 border-b border-line p-4 transition-colors sm:gap-5 sm:p-5',
+        'last:border-b-0 hover:bg-bg/60',
+        unavailable ? 'bg-danger-dim/40' : '',
+      ].join(' ')}
+      aria-busy={itemBusy}
+    >
+      <Link
+        to={productPath}
+        className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-bg sm:h-24 sm:w-24"
+        aria-label={`View ${item.name || 'product'}`}
+      >
+        {item.image_url ? (
+          <img
+            src={item.image_url}
+            alt={item.name || 'Product'}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-lg font-semibold text-dim" aria-hidden="true">
+            {(item.name || 'L').slice(0, 1).toUpperCase()}
+          </span>
+        )}
+      </Link>
+
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-dim">
+              {item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}
+            </p>
+            <h2 className="min-w-0 text-sm font-semibold leading-5 text-text sm:text-base">
+              <Link
+                to={productPath}
+                className="line-clamp-2 transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              >
+                {item.name || 'Product'}
+              </Link>
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-danger-dim hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+            onClick={() => onRemove(item.product_id)}
+            disabled={actionBusy}
+            aria-label={`Remove ${item.name || 'product'}`}
+            aria-busy={removing}
+          >
+            {removing ? (
+              <RiLoader4Line className="animate-spin" size={17} aria-hidden="true" />
+            ) : (
+              <RiDeleteBinLine size={17} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="text-xs font-medium text-muted">
+            {formatMoney(item.unit_price)} each
+          </span>
+
+          {unavailable && (
+            <span className="rounded-full border border-danger/40 bg-danger-dim px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-danger">
+              Unavailable
+            </span>
+          )}
+
+          {item.price_changed && (
+            <span className="rounded-full border border-warn/40 bg-warn/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-warn">
+              Price updated
+            </span>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <QuantityEditor
+            item={item}
+            disabled={unavailable || actionBusy}
+            onUpdate={(quantity) => onQuantity(item.product_id, quantity)}
+          />
+
+          <strong className="text-sm font-semibold tabular-nums text-text sm:text-base">
+            {formatMoney(item.line_total)}
+          </strong>
+        </div>
+      </div>
+
+      <div className="hidden sm:block" aria-hidden="true" />
+    </article>
+  );
+}
+
+function OrderSummary({ cart, disabled, onCheckout }) {
+  return (
+    <aside
+      className="min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6"
+      aria-label="Order summary"
+    >
+      <div className="mb-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gold">
+          Order summary
+        </p>
+        <h2 className="mt-2 text-lg font-semibold tracking-tight text-text">
+          Review & checkout
+        </h2>
+      </div>
+
+      <dl className="space-y-3 text-sm">
+        <div className="flex items-center justify-between gap-4 text-muted">
+          <dt>Subtotal</dt>
+          <dd className="font-medium tabular-nums text-text">
+            {formatMoney(cart.subtotal)}
+          </dd>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 text-muted">
+          <dt>Taxes</dt>
+          <dd className="font-medium tabular-nums text-text">
+            {formatMoney(cart.tax_amount)}
+          </dd>
+        </div>
+
+        <div className="flex items-start justify-between gap-4 text-muted">
+          <dt>Shipping</dt>
+          <dd className="max-w-[160px] text-right text-xs leading-5 text-dim">
+            Calculated at checkout
+          </dd>
+        </div>
+
+        <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
+          <dt className="text-sm font-semibold text-text">Before shipping</dt>
+          <dd className="text-lg font-bold tabular-nums text-text">
+            {formatMoney(cart.total_amount)}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-5 flex gap-3 rounded-xl border border-gold/25 bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
+        <RiTruckLine className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
+        <p>
+          Live shipping is calculated at checkout after your delivery PIN is selected.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[0.06em] text-gold-ink shadow-sm transition-[transform,background-color,box-shadow] hover:bg-gold-soft hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-sm"
+        onClick={onCheckout}
+        disabled={disabled}
+      >
+        <RiLockLine size={17} aria-hidden="true" />
+        Checkout securely
+        <RiArrowRightLine size={17} aria-hidden="true" />
+      </button>
+
+      <p className="mt-3 text-center text-[11px] leading-5 text-dim">
+        Secure checkout · Payment details are protected.
+      </p>
+    </aside>
   );
 }
 
@@ -141,550 +305,221 @@ export default function CartPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [updatingId, setUpdatingId] =
-    useState(null);
-  const [removingId, setRemovingId] =
-    useState(null);
-  const [clearing, setClearing] =
-    useState(false);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
+  const [clearing, setClearing] = useState(false);
 
   const items = cart?.items || [];
 
   const handleQuantity = useCallback(
     async (productId, quantity) => {
-      if (
-        !productId ||
-        updatingId ||
-        removingId ||
-        clearing
-      ) {
-        return;
-      }
+      if (!productId || updatingId || removingId || clearing) return;
 
       setUpdatingId(productId);
-
       try {
-        await updateItem(
-          productId,
-          quantity,
-        );
+        await updateItem(productId, quantity);
       } finally {
         setUpdatingId(null);
       }
     },
-    [
-      clearing,
-      removingId,
-      updateItem,
-      updatingId,
-    ],
+    [clearing, removingId, updateItem, updatingId],
   );
 
   const handleRemove = useCallback(
     async (productId) => {
-      if (
-        !productId ||
-        updatingId ||
-        removingId ||
-        clearing
-      ) {
-        return;
-      }
+      if (!productId || updatingId || removingId || clearing) return;
 
       setRemovingId(productId);
-
       try {
         await removeItem(productId);
       } finally {
         setRemovingId(null);
       }
     },
-    [
-      clearing,
-      removeItem,
-      removingId,
-      updatingId,
-    ],
+    [clearing, removeItem, removingId, updatingId],
   );
 
   const handleClear = useCallback(
     async () => {
-      if (
-        clearing ||
-        updatingId ||
-        removingId ||
-        items.length === 0
-      ) {
-        return;
-      }
+      if (clearing || updatingId || removingId || items.length === 0) return;
 
       setClearing(true);
-
       try {
         await clearCart();
       } finally {
         setClearing(false);
       }
     },
-    [
-      clearing,
-      clearCart,
-      items.length,
-      removingId,
-      updatingId,
-    ],
+    [clearing, clearCart, items.length, removingId, updatingId],
   );
+
+  const hasUnavailableItems =
+    Boolean(cart?.has_unavailable_items) ||
+    items.some((item) => !item.in_stock || item.is_active === false);
+
+  const actionBusy =
+    loading || Boolean(updatingId) || Boolean(removingId) || clearing;
 
   if (!isAuthenticated) {
     return (
-      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
-        <div className="cart-page-heading mb-7 min-w-0">
-          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-            Your selection
-          </p>
-
-          <h1>Your Cart</h1>
-
-          <p>
-            Review your items before checkout.
-          </p>
-        </div>
-
+      <main className={pageShell}>
+        <CartHeader description="Sign in to view and manage the items saved to your bag." />
         <EmptyState
           title="Your bag is waiting"
           message="Sign in to see the items in your bag."
           action={
             <Link
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/login"
             >
               Sign in
             </Link>
           }
         />
-      </div>
+      </main>
     );
   }
 
-  if (
-    loading &&
-    items.length === 0
-  ) {
+  if (loading && items.length === 0) {
     return (
-      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
+      <main className={pageShell}>
+        <CartHeader description="Loading your saved items…" />
         <Spinner label="Loading your bag…" />
-      </div>
+      </main>
     );
   }
 
-  if (
-    error &&
-    items.length === 0
-  ) {
+  if (error && items.length === 0) {
     return (
-      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
-        <div className="cart-page-heading mb-7 min-w-0">
-          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-            Your selection
-          </p>
-
-          <h1>Your Cart</h1>
-
-          <p>
-            Review your items before checkout.
-          </p>
-        </div>
-
-        <ErrorState
-          message={error}
-          onRetry={reload}
-        />
-      </div>
+      <main className={pageShell}>
+        <CartHeader description="We couldn't load your saved items." />
+        <ErrorState message={error} onRetry={reload} />
+      </main>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
-        <div className="cart-page-heading mb-7 min-w-0">
-          <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-            Your selection
-          </p>
-
-          <h1>Your Cart</h1>
-
-          <p>
-            Your bag is ready when you are.
-          </p>
-        </div>
-
+      <main className={pageShell}>
+        <CartHeader description="Your bag is ready when you are." />
         <EmptyState
           title="Your bag is empty"
-          message="Find something good to add."
+          message="Explore the shop and add something you need."
           action={
             <Link
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
             >
               Continue shopping
-              <RiArrowRightLine
-                size={16}
-                aria-hidden="true"
-              />
+              <RiArrowRightLine size={16} aria-hidden="true" />
             </Link>
           }
         />
-      </div>
+      </main>
     );
   }
 
-  const hasUnavailableItems =
-    Boolean(cart?.has_unavailable_items) ||
-    items.some(
-      (item) =>
-        !item.in_stock ||
-        item.is_active === false,
-    );
-
-  const actionBusy =
-    loading ||
-    Boolean(updatingId) ||
-    Boolean(removingId) ||
-    clearing;
-
   return (
-    <div className="page container cart-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
-      <Link
-        className="cart-back mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-        to="/shop"
-      >
-        <RiArrowLeftLine
-          size={17}
-          aria-hidden="true"
-        />
-        Continue shopping
-      </Link>
-
-      <div className="cart-page-heading mb-7 min-w-0">
-        <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-          Your selection
-        </p>
-
-        <h1>Your Cart</h1>
-
-        <p>
-          Review your items before checkout.
-        </p>
+    <main className={pageShell}>
+      <div className="mb-5">
+        <Link
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+          to="/shop"
+        >
+          <RiArrowLeftLine size={17} aria-hidden="true" />
+          Continue shopping
+        </Link>
       </div>
+
+      <CartHeader description="Review your items, adjust quantities, and continue when everything looks right." />
 
       {error && (
         <div
-          className="notice error cart-action-notice mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
+          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-danger/40 bg-danger-dim px-4 py-3 text-sm leading-6 text-danger"
           role="alert"
         >
-          {error}
+          <span className="min-w-0">{error}</span>
         </div>
       )}
 
-      <div className="cart-layout cart-layout-refined grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(300px,380px)] items-start gap-6 max-[900px]:grid-cols-1">
+      {hasUnavailableItems && (
+        <div
+          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-warn/40 bg-warn/10 px-4 py-3 text-sm leading-6 text-warn"
+          role="alert"
+        >
+          <span className="min-w-0">
+            Some items are no longer available. Remove unavailable items before checkout.
+          </span>
+        </div>
+      )}
+
+      <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
         <section
-          className="cart-items min-w-0 overflow-hidden rounded-2xl border border-line bg-surface"
+          className="min-w-0 overflow-hidden rounded-2xl border border-line bg-surface"
           aria-label="Cart items"
         >
-          {hasUnavailableItems && (
-            <div
-              className="notice warn mb-4 rounded-xl border border-[rgb(224_169_82_/_0.5)] bg-[rgb(224_169_82_/_0.08)] px-3.5 py-3 text-sm text-warn"
-              role="alert"
-            >
-              Some items are no longer available.
-              Please remove them to check out.
+          <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-text">
+                {items.length} {items.length === 1 ? 'item' : 'items'}
+              </h2>
+              <p className="mt-1 text-xs text-dim">
+                Quantities and availability are checked by the store.
+              </p>
             </div>
-          )}
 
-          {items.map((item) => {
-            const unavailable =
-              !item.in_stock ||
-              item.is_active === false;
-
-            const updating =
-              updatingId ===
-              item.product_id;
-
-            const removing =
-              removingId ===
-              item.product_id;
-
-            const itemBusy =
-              updating || removing;
-
-            const productPath = `/product/${
-              item.slug ||
-              item.product_id
-            }`;
-
-            return (
-              <article
-                className={[
-                  'cart-card',
-                  unavailable
-                    ? 'is-unavailable'
-                    : '',
-                  itemBusy
-                    ? 'is-updating'
-                    : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                key={
-                  item.product_id ||
-                  item.id
-                }
-              >
-                <Link
-                  to={productPath}
-                  className="cart-card-thumb flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-bg max-[560px]:h-20 max-[560px]:w-20"
-                  aria-label={`View ${
-                    item.name ||
-                    'product'
-                  }`}
-                >
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={
-                        item.name ||
-                        'Product'
-                      }
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span aria-hidden="true">
-                      {(
-                        item.name ||
-                        'L'
-                      ).slice(0, 1)}
-                    </span>
-                  )}
-                </Link>
-
-                <div className="cart-card-main min-w-0 flex-1">
-                  <div className="cart-card-copy min-w-0">
-                    <p className="product-category mb-1 block text-[10px] font-semibold uppercase tracking-[.12em] text-dim">
-                      {item.hsn_code
-                        ? `HSN ${item.hsn_code}`
-                        : 'Product'}
-                    </p>
-
-                    <h2>
-                      <Link to={productPath}>
-                        {item.name}
-                      </Link>
-                    </h2>
-
-                    {unavailable && (
-                      <p className="cart-unavailable mt-2 inline-flex min-h-8 items-center rounded-full border border-[rgba(224,115,95,.40)] bg-danger-dim px-2.5 text-[11px] font-semibold text-danger">
-                        Unavailable
-                      </p>
-                    )}
-
-                    {item.price_changed && (
-                      <p className="cart-changed mt-2 inline-flex min-h-8 items-center rounded-full border border-[rgb(224_169_82_/_0.5)] bg-[rgb(224_169_82_/_0.08)] px-2.5 text-[11px] font-semibold text-warn">
-                        Price updated since added
-                      </p>
-                    )}
-
-                    <p className="cart-unit mt-2 text-xs text-muted">
-                      {formatMoney(
-                        item.unit_price,
-                      )}{' '}
-                      each
-                    </p>
-                  </div>
-
-                  <div className="cart-card-controls mt-3 flex min-w-0 flex-wrap items-center gap-3 max-[560px]:gap-2">
-                    <QuantityEditor
-                      item={item}
-                      disabled={
-                        unavailable ||
-                        actionBusy
-                      }
-                      onUpdate={(quantity) =>
-                        handleQuantity(
-                          item.product_id,
-                          quantity,
-                        )
-                      }
-                    />
-
-                    <strong className="cart-line-total ml-auto min-w-20 text-right text-sm font-semibold tabular-nums text-text">
-                      {formatMoney(
-                        item.line_total,
-                      )}
-                    </strong>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="cart-remove inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-transparent text-muted transition-colors hover:bg-danger-dim hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-                  onClick={() =>
-                    handleRemove(
-                      item.product_id,
-                    )
-                  }
-                  aria-label={`Remove ${
-                    item.name ||
-                    'product'
-                  }`}
-                  disabled={
-                    actionBusy
-                  }
-                  aria-busy={removing}
-                >
-                  {removing ? (
-                    <RiLoader4Line
-                      className="spin animate-spin"
-                      size={18}
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <RiCloseLine
-                      size={18}
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              </article>
-            );
-          })}
-
-          <div className="cart-utilities mt-5 flex min-w-0 flex-wrap items-center gap-2">
             <button
               type="button"
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40"
               onClick={handleClear}
-              disabled={
-                actionBusy
-              }
+              disabled={actionBusy}
               aria-busy={clearing}
             >
               {clearing ? (
-                <RiLoader4Line
-                  className="spin animate-spin"
-                  size={15}
-                  aria-hidden="true"
-                />
+                <RiLoader4Line className="animate-spin" size={15} aria-hidden="true" />
               ) : (
-                <RiDeleteBinLine
-                  size={15}
-                  aria-hidden="true"
-                />
+                <RiDeleteBinLine size={15} aria-hidden="true" />
               )}
-
-              {clearing
-                ? 'Clearing…'
-                : 'Clear bag'}
+              <span className="hidden sm:inline">
+                {clearing ? 'Clearing…' : 'Clear bag'}
+              </span>
+              <span className="sm:hidden">Clear</span>
             </button>
+          </div>
 
+          <div>
+            {items.map((item) => (
+              <CartItem
+                key={item.product_id || item.id}
+                item={item}
+                actionBusy={actionBusy}
+                updating={updatingId === item.product_id}
+                removing={removingId === item.product_id}
+                onQuantity={handleQuantity}
+                onRemove={handleRemove}
+              />
+            ))}
+          </div>
+
+          <div className="border-t border-line bg-bg/40 px-4 py-4 sm:px-5">
             <Link
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
             >
               Keep shopping
-              <RiArrowRightLine
-                size={15}
-                aria-hidden="true"
-              />
+              <RiArrowRightLine size={15} aria-hidden="true" />
             </Link>
           </div>
         </section>
 
-        <aside
-          className="summary cart-summary sticky top-[92px] min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static"
-          aria-label="Order summary"
-        >
-          <div className="summary-heading mb-4 text-base font-semibold text-text">
-            <p className="eyebrow mb-3 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-              Order summary
-            </p>
-          </div>
-
-          <dl className="summary-lines space-y-3 text-sm text-muted">
-            <div>
-              <dt>Subtotal</dt>
-              <dd>
-                {formatMoney(
-                  cart.subtotal,
-                )}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Shipping</dt>
-              <dd className="shipping-at-checkout mt-3 text-xs text-dim">
-                Calculated at checkout
-              </dd>
-            </div>
-
-            <div>
-              <dt>Taxes</dt>
-              <dd>
-                {formatMoney(
-                  cart.tax_amount,
-                )}
-              </dd>
-            </div>
-
-            <div className="total mt-4 flex items-center justify-between border-t border-line pt-4 text-base font-semibold text-text">
-              <dt>Before shipping</dt>
-              <dd>
-                {formatMoney(
-                  cart.total_amount,
-                )}
-              </dd>
-            </div>
-          </dl>
-
-          <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
-            <RiTruckLine
-              size={16}
-              aria-hidden="true"
-            />
-            Live shipping is calculated at
-            checkout after your delivery PIN is
-            selected.
-          </p>
-
-          <button
-            type="button"
-            className="btn btn-block cart-checkout mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.06em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-            onClick={() =>
-              navigate('/checkout')
-            }
-            disabled={
-              actionBusy ||
-              hasUnavailableItems
-            }
-          >
-            <RiLockLine
-              size={17}
-              aria-hidden="true"
-            />
-
-            Checkout securely
-
-            <RiArrowRightLine
-              size={17}
-              aria-hidden="true"
-            />
-          </button>
-
-          <p className="cart-secure-note mt-3 flex items-center gap-2 text-[11px] leading-5 text-dim">
-            Secure checkout · Your payment details
-            are protected.
-          </p>
-        </aside>
+        <div className="min-w-0 lg:sticky lg:top-24">
+          <OrderSummary
+            cart={cart}
+            disabled={actionBusy || hasUnavailableItems}
+            onCheckout={() => navigate('/checkout')}
+          />
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
