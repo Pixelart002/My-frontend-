@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  fireEvent,
   render,
   screen,
 } from '@testing-library/react';
@@ -83,31 +84,20 @@ describe('RegisterPage', () => {
   });
   
   it('does not call register with an invalid password', async () => {
-    const user = (
-      await import('@testing-library/user-event')
-    ).default.setup();
-    
     renderRegisterPage();
-    
-    await user.type(
-      screen.getByLabelText(/full name/i),
-      'Test User',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/email/i),
-      'test@example.com',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/^password$/i),
-      'weakpassword',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/confirm password/i),
-      'weakpassword',
-    );
+
+    fireEvent.change(screen.getByLabelText(/full name/i), {
+      target: { value: 'Test User' },
+    });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^password$/i), {
+      target: { value: 'weakpassword' },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: 'weakpassword' },
+    });
     
     const submitButton =
       screen.getByRole('button', {
@@ -121,31 +111,20 @@ describe('RegisterPage', () => {
   it('allows submission when password requirements are satisfied', async () => {
     registerMock.mockResolvedValueOnce({});
     
-    const user = (
-      await import('@testing-library/user-event')
-    ).default.setup();
-    
     renderRegisterPage();
-    
-    await user.type(
-      screen.getByLabelText(/full name/i),
-      'Test User',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/email/i),
-      'TEST@example.com',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/^password$/i),
-      'StrongPass1',
-    );
-    
-    await user.type(
-      screen.getByLabelText(/confirm password/i),
-      'StrongPass1',
-    );
+
+    fireEvent.change(screen.getByLabelText(/full name/i), {
+      target: { value: 'Test User' },
+    });
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'TEST@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^password$/i), {
+      target: { value: 'StrongPass1' },
+    });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), {
+      target: { value: 'StrongPass1' },
+    });
     
     const submitButton =
       screen.getByRole('button', {
@@ -154,7 +133,7 @@ describe('RegisterPage', () => {
     
     expect(submitButton).toBeEnabled();
     
-    await user.click(submitButton);
+    fireEvent.click(submitButton);
     
     expect(registerMock).toHaveBeenCalledWith(
       'test@example.com',
