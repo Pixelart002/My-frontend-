@@ -1830,7 +1830,7 @@ const loadAddresses = useCallback(
                           ? `Estimated delivery: ${courier.estimated_delivery_days} days`
                           : courier?.etd_hours
                             ? `Estimated delivery: ${courier.etd_hours} hours`
-                            : 'Courier and tracking are arranged manually by Luviio';
+                            : 'Shipping is arranged manually by Luviio';
 
                       return (
                         <label
@@ -2314,8 +2314,7 @@ const loadAddresses = useCallback(
 
               Shipping method:{' '}
               {text(
-                shippingQuote.courier_name,
-                'Delivery partner',
+                'Manual shipping',
               )}
               . Final payable amount is
               confirmed by LUVIIO's backend
