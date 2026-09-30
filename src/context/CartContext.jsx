@@ -57,16 +57,11 @@ const normalizeCart = (data) => {
   return {
     ...EMPTY_CART,
     ...data,
-    items: Array.isArray(data.items)
-      ? data.items
-      : [],
+    items: Array.isArray(data.items) ? data.items : [],
   };
 };
 
-const getErrorMessage = (
-  error,
-  fallback,
-) => {
+const getErrorMessage = (error, fallback) => {
   if (
     error &&
     typeof error.message === 'string' &&
@@ -81,37 +76,23 @@ const getErrorMessage = (
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const {
-    isAuthenticated,
-    token,
-  } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [cart, setCart] = useState(EMPTY_CART);
-  const [loadingCount, setLoadingCount] =
-    useState(0);
+  const [loadingCount, setLoadingCount] = useState(0);
   const [error, setError] = useState(null);
 
   const sessionVersion = useRef(0);
-
   const loading = loadingCount > 0;
 
-  /**
-   * Track async cart operations without allowing
-   * one completed request to hide another active request.
-   */
   const startOperation = useCallback(() => {
     setLoadingCount((count) => count + 1);
 
     return () => {
-      setLoadingCount((count) =>
-        Math.max(0, count - 1),
-      );
+      setLoadingCount((count) => Math.max(0, count - 1));
     };
   }, []);
 
-  /**
-   * Load the authoritative cart from the backend.
-   */
   const load = useCallback(async () => {
     if (!isAuthenticated) {
       setCart(EMPTY_CART);
@@ -119,44 +100,26 @@ export function CartProvider({ children }) {
       return EMPTY_CART;
     }
 
-    const version =
-      sessionVersion.current;
-
+    const version = sessionVersion.current;
     const stopLoading = startOperation();
 
     setError(null);
 
     try {
-      const data =
-        await cartService.get();
+      const data = await cartService.get();
 
-      /*
-       * The user may have logged out or changed
-       * session while the request was in flight.
-       */
-      if (
-        version !==
-        sessionVersion.current
-      ) {
+      if (version !== sessionVersion.current) {
         return EMPTY_CART;
       }
 
-      const next =
-        normalizeCart(data);
-
+      const next = normalizeCart(data);
       setCart(next);
 
       return next;
     } catch (err) {
-      if (
-        version ===
-        sessionVersion.current
-      ) {
+      if (version === sessionVersion.current) {
         setError(
-          getErrorMessage(
-            err,
-            'Unable to load your cart.',
-          ),
+          getErrorMessage(err, 'Unable to load your cart.'),
         );
       }
 
@@ -164,85 +127,49 @@ export function CartProvider({ children }) {
     } finally {
       stopLoading();
     }
-  }, [
-    isAuthenticated,
-    startOperation,
-  ]);
+  }, [isAuthenticated, startOperation]);
 
-  /**
-   * Reset cart whenever the authenticated session changes.
-   *
-   * Token is intentionally included because the API client
-   * can receive a refreshed access token for the same user.
+  /*
+   * Authentication identity changes reset the cart.
+   * Access-token rotation must not reload the cart: the same
+   * authenticated user still owns the same server-side cart.
    */
   useEffect(() => {
     sessionVersion.current += 1;
-
     setCart(EMPTY_CART);
     setError(null);
 
     if (isAuthenticated) {
       load();
     }
-  }, [
-    isAuthenticated,
-    token,
-    load,
-  ]);
+  }, [isAuthenticated, load]);
 
-  /**
-   * Add product to cart.
-   */
   const addItem = useCallback(
-    async (
-      productId,
-      quantity = 1,
-    ) => {
+    async (productId, quantity = 1) => {
       if (!isAuthenticated) {
-        throw new Error(
-          'Please sign in to add items to your bag.',
-        );
+        throw new Error('Please sign in to add items to your bag.');
       }
 
       if (!productId) {
-        throw new Error(
-          'A valid product is required.',
-        );
+        throw new Error('A valid product is required.');
       }
 
-      const version =
-        sessionVersion.current;
-
-      const stopLoading =
-        startOperation();
-
+      const version = sessionVersion.current;
+      const stopLoading = startOperation();
       setError(null);
 
       try {
-        const data =
-          await cartService.addItem(
-            productId,
-            quantity,
-          );
+        const data = await cartService.addItem(productId, quantity);
 
-        if (
-          version !==
-          sessionVersion.current
-        ) {
+        if (version !== sessionVersion.current) {
           return EMPTY_CART;
         }
 
-        const next =
-          normalizeCart(data);
-
+        const next = normalizeCart(data);
         setCart(next);
-
         return next;
       } catch (err) {
-        if (
-          version ===
-          sessionVersion.current
-        ) {
+        if (version === sessionVersion.current) {
           setError(
             getErrorMessage(
               err,
@@ -256,70 +183,37 @@ export function CartProvider({ children }) {
         stopLoading();
       }
     },
-    [
-      isAuthenticated,
-      startOperation,
-    ],
+    [isAuthenticated, startOperation],
   );
 
-  /**
-   * Update product quantity.
-   */
   const updateItem = useCallback(
-    async (
-      productId,
-      quantity,
-    ) => {
+    async (productId, quantity) => {
       if (!isAuthenticated) {
-        throw new Error(
-          'Please sign in to update your bag.',
-        );
+        throw new Error('Please sign in to update your bag.');
       }
 
       if (!productId) {
-        throw new Error(
-          'A valid product is required.',
-        );
+        throw new Error('A valid product is required.');
       }
 
-      const version =
-        sessionVersion.current;
-
-      const stopLoading =
-        startOperation();
-
+      const version = sessionVersion.current;
+      const stopLoading = startOperation();
       setError(null);
 
       try {
-        const data =
-          await cartService.updateItem(
-            productId,
-            quantity,
-          );
+        const data = await cartService.updateItem(productId, quantity);
 
-        if (
-          version !==
-          sessionVersion.current
-        ) {
+        if (version !== sessionVersion.current) {
           return EMPTY_CART;
         }
 
-        const next =
-          normalizeCart(data);
-
+        const next = normalizeCart(data);
         setCart(next);
-
         return next;
       } catch (err) {
-        if (
-          version ===
-          sessionVersion.current
-        ) {
+        if (version === sessionVersion.current) {
           setError(
-            getErrorMessage(
-              err,
-              'Unable to update your bag.',
-            ),
+            getErrorMessage(err, 'Unable to update your bag.'),
           );
         }
 
@@ -328,66 +222,37 @@ export function CartProvider({ children }) {
         stopLoading();
       }
     },
-    [
-      isAuthenticated,
-      startOperation,
-    ],
+    [isAuthenticated, startOperation],
   );
 
-  /**
-   * Remove product from cart.
-   */
   const removeItem = useCallback(
     async (productId) => {
       if (!isAuthenticated) {
-        throw new Error(
-          'Please sign in to update your bag.',
-        );
+        throw new Error('Please sign in to update your bag.');
       }
 
       if (!productId) {
-        throw new Error(
-          'A valid product is required.',
-        );
+        throw new Error('A valid product is required.');
       }
 
-      const version =
-        sessionVersion.current;
-
-      const stopLoading =
-        startOperation();
-
+      const version = sessionVersion.current;
+      const stopLoading = startOperation();
       setError(null);
 
       try {
-        const data =
-          await cartService.removeItem(
-            productId,
-          );
+        const data = await cartService.removeItem(productId);
 
-        if (
-          version !==
-          sessionVersion.current
-        ) {
+        if (version !== sessionVersion.current) {
           return EMPTY_CART;
         }
 
-        const next =
-          normalizeCart(data);
-
+        const next = normalizeCart(data);
         setCart(next);
-
         return next;
       } catch (err) {
-        if (
-          version ===
-          sessionVersion.current
-        ) {
+        if (version === sessionVersion.current) {
           setError(
-            getErrorMessage(
-              err,
-              'Unable to remove this item.',
-            ),
+            getErrorMessage(err, 'Unable to remove this item.'),
           );
         }
 
@@ -396,120 +261,67 @@ export function CartProvider({ children }) {
         stopLoading();
       }
     },
-    [
-      isAuthenticated,
-      startOperation,
-    ],
+    [isAuthenticated, startOperation],
   );
 
-  /**
-   * Clear cart and verify the backend state.
-   *
-   * DELETE alone is not treated as proof that the cart
-   * is empty. A fresh GET confirms the final state.
-   */
-  const clearCart = useCallback(
-    async () => {
-      if (!isAuthenticated) {
-        throw new Error(
-          'Please sign in to clear your bag.',
-        );
-      }
+  const clearCart = useCallback(async () => {
+    if (!isAuthenticated) {
+      throw new Error('Please sign in to clear your bag.');
+    }
 
-      const version =
-        sessionVersion.current;
+    const version = sessionVersion.current;
+    const stopLoading = startOperation();
 
-      const stopLoading =
-        startOperation();
+    setError(null);
 
-      setError(null);
+    let lastError = null;
+    let verifiedCart = null;
 
-      let lastError = null;
-      let verifiedCart = null;
+    try {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          await cartService.clear();
 
-      try {
-        for (
-          let attempt = 0;
-          attempt < 2;
-          attempt += 1
-        ) {
-          try {
-            await cartService.clear();
+          verifiedCart = normalizeCart(await cartService.get());
 
-            verifiedCart =
-              normalizeCart(
-                await cartService.get(),
-              );
-
-            if (
-              version !==
-              sessionVersion.current
-            ) {
-              return EMPTY_CART;
-            }
-
-            if (
-              verifiedCart.items.length ===
-              0
-            ) {
-              setCart(EMPTY_CART);
-              return EMPTY_CART;
-            }
-          } catch (err) {
-            lastError = err;
+          if (version !== sessionVersion.current) {
+            return EMPTY_CART;
           }
+
+          if (verifiedCart.items.length === 0) {
+            setCart(EMPTY_CART);
+            return EMPTY_CART;
+          }
+        } catch (err) {
+          lastError = err;
         }
-
-        /*
-         * Backend still reports items after both
-         * clear attempts. Keep the actual backend
-         * response visible rather than pretending
-         * the cart is empty.
-         */
-        if (
-          verifiedCart?.items?.length
-        ) {
-          setCart(verifiedCart);
-
-          throw new Error(
-            'Unable to clear the cart completely. Please try again.',
-          );
-        }
-
-        throw (
-          lastError ||
-          new Error(
-            'Unable to clear the cart. Please try again.',
-          )
-        );
-      } catch (err) {
-        if (
-          version ===
-          sessionVersion.current
-        ) {
-          setError(
-            getErrorMessage(
-              err,
-              'Unable to clear the cart.',
-            ),
-          );
-        }
-
-        throw err;
-      } finally {
-        stopLoading();
       }
-    },
-    [
-      isAuthenticated,
-      startOperation,
-    ],
-  );
 
-  const itemCount = useMemo(
-    () => getItemCount(cart),
-    [cart],
-  );
+      if (verifiedCart?.items?.length) {
+        setCart(verifiedCart);
+        throw new Error(
+          'Unable to clear the cart completely. Please try again.',
+        );
+      }
+
+      throw (
+        lastError ||
+        new Error('Unable to clear the cart. Please try again.')
+      );
+    } catch (err) {
+      if (version === sessionVersion.current) {
+        setError(
+          getErrorMessage(err, 'Unable to clear the cart.'),
+        );
+      }
+
+      throw err;
+    } finally {
+      stopLoading();
+    }
+  }, [isAuthenticated, startOperation]);
+
+  const itemCount = useMemo(() => getItemCount(cart), [cart]);
 
   const value = useMemo(
     () => ({
@@ -517,12 +329,10 @@ export function CartProvider({ children }) {
       loading,
       error,
       itemCount,
-
       addItem,
       updateItem,
       removeItem,
       clearCart,
-
       reload: load,
     }),
     [
@@ -546,13 +356,10 @@ export function CartProvider({ children }) {
 }
 
 export function useCart() {
-  const context =
-    useContext(CartContext);
+  const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error(
-      'useCart must be used within CartProvider.',
-    );
+    throw new Error('useCart must be used within CartProvider.');
   }
 
   return context;
