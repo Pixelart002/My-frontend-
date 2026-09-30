@@ -741,54 +741,7 @@ export default function CheckoutPage() {
       ? Number(coupon.discount)
       : 0;
 
-  const backendCartTotal =
-    cart?.total_amount;
-
-  /*
-   * This is display-only shipment input for the
-   * existing providerRate service contract.
-   *
-   * The backend MUST recalculate package weight
-   * from the authoritative cart/product data before
-   * creating the actual shipment/order.
-   */
-  const shipmentWeightKg = useMemo(() => {
-    let total = 0;
-
-    for (const item of items) {
-      const rawWeight = Number(item?.weight);
-
-      if (
-        !Number.isFinite(rawWeight) ||
-        rawWeight <= 0
-      ) {
-        continue;
-      }
-
-      const unit = String(
-        item?.weight_unit || 'g',
-      ).toLowerCase();
-
-      let kg = 0;
-
-      if (unit === 'kg') {
-        kg = rawWeight;
-      } else if (unit === 'g') {
-        kg = rawWeight / 1000;
-      }
-
-      const quantity = Math.max(
-        0,
-        Number(item?.quantity) || 0,
-      );
-
-      total += kg * quantity;
-    }
-
-    return total > 0 ? total : 0.5;
-  }, [items]);
-
-  const loadAddresses = useCallback(
+const loadAddresses = useCallback(
     async () => {
       const requestId =
         ++addressRequestRef.current;
