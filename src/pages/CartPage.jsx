@@ -129,7 +129,7 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
     <article
       className={[
         'group grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] gap-3 border-b border-line p-4 transition-colors sm:gap-5 sm:p-5',
-        'last:border-b-0 hover:bg-bg/60',
+        'last:border-b-0 hover:bg-surface-2/30',
         unavailable ? 'bg-danger-dim/40' : '',
       ].join(' ')}
       aria-busy={itemBusy}
@@ -266,7 +266,7 @@ function OrderSummary({ cart, disabled, onCheckout }) {
         </div>
       </dl>
 
-      <div className="mt-5 flex gap-3 rounded-xl border border-gold/25 bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
+      <div className="mt-5 flex gap-3 rounded-xl border border-gold bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
         <RiTruckLine className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
         <p>
           Live shipping is calculated at checkout after your delivery PIN is selected.
