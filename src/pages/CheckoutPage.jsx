@@ -943,10 +943,20 @@ export default function CheckoutPage() {
         setShippingOptions([]);
         setSelectedCourierId('');
 
-        setShippingQuoteError(
-          err?.message ||
-            'Live delivery rates could not be calculated yet.',
-        );
+        const detail =
+          err?.details ||
+          err?.response?.data?.detail ||
+          err?.response?.detail ||
+          null;
+        const message =
+          typeof detail === 'object' && detail?.message
+            ? detail.message
+            : typeof detail === 'string'
+              ? detail
+              : err?.message ||
+                'Live delivery rates are temporarily unavailable. Please retry.';
+
+        setShippingQuoteError(message);
       } finally {
         if (
           mountedRef.current &&
