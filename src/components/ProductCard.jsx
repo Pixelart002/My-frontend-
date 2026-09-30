@@ -290,30 +290,34 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-3 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1.5">
-          <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
-            {formatMoney(price)}
-          </span>
+        <div className="mt-3 flex min-w-0 items-end justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
+                {formatMoney(price)}
+              </span>
 
-          {comparePrice > price && price > 0 && (
-            <span className="text-[10px] font-medium tabular-nums text-dim line-through sm:text-[11px]">
-              {formatMoney(comparePrice)}
-            </span>
-          )}
+              {comparePrice > price && price > 0 && (
+                <span className="text-[10px] font-medium tabular-nums text-dim line-through sm:text-[11px]">
+                  {formatMoney(comparePrice)}
+                </span>
+              )}
+            </div>
+
+            <p
+              className={`m-0 mt-0.5 min-h-4 text-[9px] leading-4 text-muted${savings > 0 ? '' : ' opacity-0'}`}
+              aria-hidden={savings <= 0}
+            >
+              You save {formatMoney(savings)}
+            </p>
+          </div>
 
           {discount > 0 && (
-            <span className="rounded bg-success-dim px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-success">
+            <span className="shrink-0 rounded-full border border-success/20 bg-success-dim px-2 py-1 text-[8px] font-bold uppercase tracking-[0.06em] text-success">
               {discount}% off
             </span>
           )}
         </div>
-
-        <p
-          className={`m-0 mt-1 min-h-4 text-[9px] leading-4 text-muted${savings > 0 ? '' : ' opacity-0'}`}
-          aria-hidden={savings <= 0}
-        >
-          You save {formatMoney(savings)}
-        </p>
 
         <button
           type="button"
