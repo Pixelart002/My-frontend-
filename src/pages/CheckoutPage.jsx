@@ -25,6 +25,7 @@ import { useCart } from '../context/CartContext';
 import { userService } from '../services/users';
 import { couponService } from '../services/coupons';
 import { paymentService } from '../services/payments';
+import { shippingService } from '../services/shipping';
 import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import { ErrorState, Spinner } from '../components/ui/States';
@@ -49,68 +50,6 @@ const EMPTY_ADDRESS = {
   gstin: '',
   is_default: false,
 };
-
-const normalizeDeliveryMode = (value) => {
-  const raw = String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[-_]+/g, ' ');
-
-  if (!raw) return '';
-
-  if (
-    raw.includes('quick') ||
-    raw.includes('hyperlocal') ||
-    raw.includes('instant')
-  ) {
-    return 'Quick delivery';
-  }
-
-  if (
-    raw.includes('2 wheel') ||
-    raw.includes('two wheel') ||
-    raw === '2w'
-  ) {
-    return '2-wheeler';
-  }
-
-  if (
-    raw.includes('3 wheel') ||
-    raw.includes('three wheel') ||
-    raw === '3w'
-  ) {
-    return '3-wheeler';
-  }
-
-  if (
-    raw.includes('4 wheel') ||
-    raw.includes('four wheel') ||
-    raw === '4w'
-  ) {
-    return '4-wheeler';
-  }
-
-  if (raw.includes('surface')) return 'Surface';
-  if (raw.includes('air')) return 'Air';
-
-  return String(value).trim();
-};
-
-const getDeliveryMode = (courier) =>
-  normalizeDeliveryMode(
-    courier?.vehicle_type ||
-      courier?.vehicle ||
-      courier?.vehicle_mode ||
-      courier?.delivery_mode ||
-      courier?.delivery_type ||
-      courier?.mode,
-  ) ||
-  normalizeDeliveryMode(
-    courier?.service_type ||
-      courier?.service ||
-      courier?.shipment_type ||
-      courier?.courier_type,
-  );
 
 const isValidIndianPhone = (value) => {
   const raw = String(value || '').replace(/[\s()-]/g, '');
@@ -192,40 +131,6 @@ const getApiErrorMessage = (error) => {
   }
 
   return 'Manual shipping are temporarily unavailable. Please retry.';
-};
-
-const normalizeCourierOptions = (data) => {
-  const quotes = Array.isArray(data?.couriers)
-    ? data.couriers
-    : Array.isArray(data?.quotes)
-      ? data.quotes
-      : [];
-
-  const serverSelected = data?.selected;
-
-  const candidates = quotes.length
-    ? quotes
-    : serverSelected
-      ? [serverSelected]
-      : [];
-
-  const seen = new Set();
-
-  return candidates.filter((courier) => {
-    const id = String(courier?.courier_id || '').trim();
-    const cost = Number(courier?.shipping_cost);
-
-    if (!id || !Number.isFinite(cost) || cost < 0) {
-      return false;
-    }
-
-    if (seen.has(id)) {
-      return false;
-    }
-
-    seen.add(id);
-    return true;
-  });
 };
 
 function AddressForm({ onSaved, onCancel }) {
@@ -661,24 +566,12 @@ export default function CheckoutPage() {
 
   const [shippingQuote, setShippingQuote] =
     useState(null);
-  const [shippingOptions, setShippingOptions] =
-    useState([]);
   const [selectedCourierId, setSelectedCourierId] =
     useState('');
   const [
     shippingQuoteLoading,
     setShippingQuoteLoading,
   ] = useState(false);
-  const [
-    shippingQuoteError,
-    setShippingQuoteError,
-  ] = useState('');
-  const [shippingQuoteStale, setShippingQuoteStale] =
-    useState(false);
-  const [
-    shippingRetryKey,
-    setShippingRetryKey,
-  ] = useState(0);
 
   const [
     cancelConfirmOpen,
@@ -691,7 +584,6 @@ export default function CheckoutPage() {
 
   const mountedRef = useRef(false);
   const addressRequestRef = useRef(0);
-  const shippingRequestRef = useRef(0);
   const paymentRequestRef = useRef(0);
 
   const creatingRef = useRef(false);
@@ -731,9 +623,6 @@ export default function CheckoutPage() {
     isValidIndianPhone(
       selectedAddress?.phone,
     );
-
-  const selectedDeliveryMode =
-    getDeliveryMode(shippingQuote);
 
   const couponDiscount =
     Number(coupon?.discount) > 0
@@ -809,60 +698,34 @@ const loadAddresses = useCallback(
   /*
    * Manual shipping quote.
    *
-   * Luviio owns the storefront shipping policy. No courier/provider
-   * rate API is called from checkout.
+   * Luviio owns the shipping policy. The UI uses the shared shipping
+   * service for the preview; payment/order totals remain backend-authoritative.
    */
   useEffect(() => {
-    const requestId =
-      ++shippingRequestRef.current;
-
-    if (
-      !selectedAddress?.postal_code ||
-      !items.length ||
-      !canProceed
-    ) {
+    if (!selectedAddress?.postal_code || !canProceed) {
       setShippingQuote(null);
-      setShippingOptions([]);
       setSelectedCourierId('');
-      setShippingQuoteError('');
-      setShippingQuoteStale(false);
       setShippingQuoteLoading(false);
-      return undefined;
+      return;
     }
 
     setShippingQuoteLoading(true);
-    setShippingQuoteError('');
-    setShippingQuoteStale(false);
-    setShippingQuote(null);
-    setShippingOptions([]);
-    setSelectedCourierId('');
 
     const manualShipping = {
       courier_id: 'manual',
-      courier_name: 'Manual shipping',
-      service_type: 'manual',
-      delivery_mode: 'manual',
-      shipping_cost:
-        (Number(cart?.subtotal) || 0) >= 1499
-          ? 0
-          : 45.9,
+      ...shippingService.manualRate(cart?.subtotal),
     };
 
-    setShippingOptions([manualShipping]);
-    setSelectedCourierId('manual');
     setShippingQuote(manualShipping);
-    setShippingQuoteStale(false);
-    setShippingQuoteError('');
+    setSelectedCourierId('manual');
     setShippingQuoteLoading(false);
 
-    // Shipping mode changes invalidate an unfinished payment session.
+    // Shipping/cart changes invalidate an unfinished payment session.
     setIntent(null);
     setIntentError('');
     setPaymentReview(false);
-
   }, [
     cart?.subtotal,
-    items.length,
     canProceed,
     selectedAddress?.postal_code,
   ]);
@@ -876,35 +739,6 @@ const loadAddresses = useCallback(
     setPaymentModalOpen(false);
     setPaymentSessionKey('');
   }, []);
-
-  const selectCourier = useCallback(
-    (courier) => {
-      if (
-        activeOrder ||
-        !courier?.courier_id
-      ) {
-        return;
-      }
-
-      const cost = Number(
-        courier.shipping_cost,
-      );
-
-      if (
-        !Number.isFinite(cost) ||
-        cost < 0
-      ) {
-        return;
-      }
-
-      setSelectedCourierId(
-        String(courier.courier_id),
-      );
-      setShippingQuote(courier);
-      resetPayment();
-    },
-    [activeOrder, resetPayment],
-  );
 
   const applyCoupon = useCallback(
     async () => {
