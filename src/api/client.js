@@ -381,7 +381,11 @@ function unwrapResponse(json) {
   }
 
   if (Array.isArray(payload)) {
-    payload.meta = json.meta;
+    Object.defineProperty(payload, 'meta', {
+      value: json.meta,
+      enumerable: false,
+      configurable: true,
+    });
     return payload;
   }
 
