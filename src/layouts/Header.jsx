@@ -148,24 +148,37 @@ function MenuLink({
   label,
   Icon,
   onClick,
+  accent = 'gold',
   className = '',
 }) {
+  const accentStyles = {
+    gold: 'bg-[rgb(212_175_55_/_0.10)] text-gold group-hover:bg-[rgb(212_175_55_/_0.16)] [&_svg]:text-gold',
+    green: 'bg-emerald-500/10 text-emerald-300 group-hover:bg-emerald-500/15 [&_svg]:text-emerald-300',
+    blue: 'bg-sky-500/10 text-sky-300 group-hover:bg-sky-500/15 [&_svg]:text-sky-300',
+  };
+
   return (
     <Link
       to={to}
       className={
         className ||
-        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-text transition-[background-color,color,transform] duration-150 hover:bg-surface-2 hover:text-gold active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&_svg]:shrink-0 [&_svg]:text-muted [&_svg]:transition-colors [&_svg]:duration-150 [&:hover_svg]:text-gold'
+        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-text transition-[background-color,color,transform] duration-150 hover:bg-surface-2 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold'
       }
       onClick={onClick}
     >
       {Icon && (
-        <Icon
-          size={18}
-          aria-hidden="true"
-        />
+        <span
+          className={`grid size-9 shrink-0 place-items-center rounded-lg ${accentStyles[accent] || accentStyles.gold} transition-colors duration-150`}
+        >
+          <Icon size={18} aria-hidden="true" />
+        </span>
       )}
-      <span>{label}</span>
+      <span className="min-w-0 truncate">{label}</span>
+      <RiArrowRightSLine
+        className="ml-auto shrink-0 text-dim transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-muted"
+        size={16}
+        aria-hidden="true"
+      />
     </Link>
   );
 }
