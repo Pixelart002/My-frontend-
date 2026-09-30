@@ -35,6 +35,32 @@ export default class AppErrorBoundary extends Component {
   }
   
   handleReset = () => {
+    const { error } = this.state;
+    const message = String(error?.message || error || '');
+
+    /*
+     * A failed dynamic import leaves React.lazy's promise rejected.
+     * Re-rendering the same boundary cannot repair that module state.
+     * Hard-reload once so a stale/missing Vercel chunk can be recovered.
+     */
+    if (
+      /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|dynamically imported module/i.test(
+        message,
+      )
+    ) {
+      try {
+        window.sessionStorage.setItem(
+          'luviio:lazy-chunk-retry',
+          '1',
+        );
+      } catch {
+        // Ignore storage failures.
+      }
+
+      window.location.reload();
+      return;
+    }
+
     this.setState((state) => ({
       error: null,
       errorId: null,
