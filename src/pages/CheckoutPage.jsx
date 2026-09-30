@@ -2134,7 +2134,7 @@ export default function CheckoutPage() {
           </section>
 
           <section className="checkout-section checkout-payment-launch min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
-            <h2>3 · Payment</h2>
+            <h2>3 · Payment method</h2>
 
             {intentError && (
               <div
@@ -2187,7 +2187,7 @@ export default function CheckoutPage() {
               >
                 {creating
                   ? 'Preparing…'
-                  : 'Choose Payment Method'}
+                  : 'Continue to payment'}
 
                 <RiArrowRightLine
                   size={17}
@@ -2216,9 +2216,15 @@ export default function CheckoutPage() {
           className="summary checkout-summary sticky top-[92px] min-w-0 overflow-hidden rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static max-[560px]:rounded-2xl max-[560px]:p-4"
           aria-label="Order summary"
         >
-          <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-            Order summary
-          </p>
+          <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="eyebrow mb-1 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
+                Order summary
+              </p>
+              <p className="m-0 text-xs leading-5 text-dim">Live totals from LUVIIO</p>
+            </div>
+            <span className="shrink-0 rounded-full border border-success/20 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">Secure</span>
+          </div>
 
           <ul className="summary-items mb-4 space-y-2.5 border-b border-line pb-4 text-xs text-muted [&_li]:flex [&_li]:items-start [&_li]:justify-between [&_li]:gap-3 [&_strong]:text-text">
             {items
