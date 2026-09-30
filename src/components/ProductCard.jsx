@@ -182,11 +182,11 @@ export default function ProductCard({ product }) {
 
   return (
     <article
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-luviio-card transition-all duration-200 hover:-translate-y-0.5 hover:border-gold"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[18px] border border-line bg-surface shadow-luviio-card transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-gold/60 hover:shadow-[0_22px_52px_rgba(0,0,0,.26)] motion-reduce:transform-none"
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-2xl bg-[#f2f0eb]"
+        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -198,7 +198,7 @@ export default function ProductCard({ product }) {
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -207,7 +207,7 @@ export default function ProductCard({ product }) {
               onError={() => setImageFailed(true)}
             />
           ) : (
-            <span className="flex h-full w-full items-center justify-center bg-[#211e1a] font-display text-5xl text-gold">
+            <span className="flex h-full w-full items-center justify-center bg-surface-2 font-display text-5xl text-gold">
               {name.trim().slice(0, 1).toUpperCase() || 'L'}
             </span>
           )}
@@ -219,7 +219,7 @@ export default function ProductCard({ product }) {
         </Link>
 
         {discount > 0 && (
-          <span className="absolute left-3 top-3 z-10 inline-flex min-h-7 items-center rounded-full border border-gold/30 bg-[#11100f]/85 px-2.5 text-[9px] font-bold uppercase tracking-[0.08em] text-gold-soft shadow-lg backdrop-blur-md">
+          <span className="absolute left-3 top-3 z-10 inline-flex min-h-7 items-center rounded-full border border-gold/30 bg-black/75 px-2.5 text-[9px] font-bold uppercase tracking-[0.08em] text-gold-soft shadow-lg backdrop-blur-md">
             Save {discount}%
           </span>
         )}
@@ -276,11 +276,11 @@ export default function ProductCard({ product }) {
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <div className="min-w-0">
-          <p className="m-0 mb-1.5 truncate text-[9px] font-bold uppercase tracking-[0.11em] text-muted">
+          <p className="m-0 mb-1.5 truncate text-[9px] font-bold uppercase tracking-[0.13em] text-dim">
             {category}
           </p>
 
-          <h3 className="m-0 line-clamp-2 min-h-[2.7rem] text-[13px] font-semibold leading-[1.4] tracking-[-0.005em] text-text sm:text-[14px]">
+          <h3 className="m-0 line-clamp-2 min-h-[2.7rem] text-[13px] font-semibold leading-[1.42] tracking-[-0.005em] text-text sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -290,8 +290,8 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-3 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-          <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-text sm:text-base">
+        <div className="mt-3 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1.5">
+          <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
             {formatMoney(price)}
           </span>
 
@@ -317,7 +317,7 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className={`mt-3 flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`mt-3 flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
             added
               ? 'border-[rgba(111,191,138,.45)] bg-success-dim text-success'
               : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
