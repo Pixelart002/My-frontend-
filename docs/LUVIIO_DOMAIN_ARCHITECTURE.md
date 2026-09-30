@@ -636,7 +636,7 @@ Shipping Controller / Router
    |
    +--> Rate
    |
-   +--> Courier selection
+   +--> Manual shipping selection
    |
    +--> Shipment creation
    |
@@ -648,7 +648,7 @@ Shipping Controller / Router
    |
    +--> Tracking
    |
-   +--> Provider webhook
+   +--> Manual tracking update
              |
              v
        Shipping service
@@ -663,11 +663,11 @@ Provider-specific behavior stays inside the shipping integration boundary:
 Shipping Service
       |
       v
-Provider Interface
+Manual Shipping Policy
       |
-      +--> Shiprocket adapter
+      +--> Manual shipping
       |
-      +--> Future provider adapter
+      +--> Manual fulfillment
 ```
 
 The router/controller remains provider-neutral where possible. Provider-specific API paths, payloads and identifiers belong in the provider integration.
