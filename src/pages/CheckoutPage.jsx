@@ -670,16 +670,6 @@ export default function CheckoutPage() {
     shippingQuoteLoading,
     setShippingQuoteLoading,
   ] = useState(false);
-  const [
-    shippingQuoteError,
-    setShippingQuoteError,
-  ] = useState('');
-  const [shippingQuoteStale, setShippingQuoteStale] =
-    useState(false);
-  const [
-    shippingRetryKey,
-    setShippingRetryKey,
-  ] = useState(0);
 
   const [
     cancelConfirmOpen,
@@ -825,15 +815,11 @@ const loadAddresses = useCallback(
       setShippingQuote(null);
       setShippingOptions([]);
       setSelectedCourierId('');
-      setShippingQuoteError('');
-      setShippingQuoteStale(false);
       setShippingQuoteLoading(false);
       return undefined;
     }
 
     setShippingQuoteLoading(true);
-    setShippingQuoteError('');
-    setShippingQuoteStale(false);
     setShippingQuote(null);
     setShippingOptions([]);
     setSelectedCourierId('');
@@ -852,8 +838,6 @@ const loadAddresses = useCallback(
     setShippingOptions([manualShipping]);
     setSelectedCourierId('manual');
     setShippingQuote(manualShipping);
-    setShippingQuoteStale(false);
-    setShippingQuoteError('');
     setShippingQuoteLoading(false);
 
     // Shipping mode changes invalidate an unfinished payment session.
@@ -1762,7 +1746,7 @@ const loadAddresses = useCallback(
               </span>
             </div>
 
-            {shippingQuoteLoading && (
+            {shippingQuoteLoading ? (
               <p
                 className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft"
                 role="status"
@@ -1774,139 +1758,40 @@ const loadAddresses = useCallback(
                 />
                 Applying Luviio shipping policy…
               </p>
-            )}
-
-            {shippingQuoteError && (
+            ) : (
               <div
-                className="mb-4 flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
-                role="alert"
+                className="shipping-manual-card mt-3 rounded-2xl border border-[rgba(216,173,106,.28)] bg-bg p-4"
+                aria-label="Manual shipping"
               >
-                <p className="m-0 min-w-0 flex-1 leading-6">
-                  {shippingQuoteError}
-                </p>
-                <button
-                  type="button"
-                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-danger/30 bg-bg px-3.5 text-xs font-semibold text-text transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-60"
-                  onClick={() => {
-                    setShippingQuoteError('');
-                    setShippingRetryKey((value) => value + 1);
-                  }}
-                  disabled={shippingQuoteLoading}
-                >
-                  <RiRefreshLine size={15} aria-hidden="true" />
-                  Refresh shipping
-                </button>
-              </div>
-            )}
+                <div className="flex min-w-0 items-start justify-between gap-4 max-[480px]:flex-col">
+                  <div className="min-w-0">
+                    <strong className="block text-sm font-semibold text-text">
+                      Manual shipping
+                    </strong>
+                    <p className="mt-1 text-xs leading-5 text-muted">
+                      Luviio will arrange dispatch manually after your order is confirmed.
+                    </p>
+                  </div>
 
-            {!shippingQuoteLoading &&
-              !shippingQuoteError &&
-              shippingOptions.length > 0 && (
-                <div
-                  className="shipping-courier-list grid min-w-0 gap-2.5"
-                  role="radiogroup"
-                  aria-label="Manual shipping option"
-                >
-                  {shippingOptions.map(
-                    (courier) => {
-                      const id = String(
-                        courier?.courier_id ||
-                          '',
-                      );
-
-                      const checked =
-                        id ===
-                        String(
-                          selectedCourierId,
-                        );
-
-                      const deliveryMode =
-                        getDeliveryMode(
-                          courier,
-                        );
-
-                      const estimate =
-                        courier?.estimated_delivery_days
-                          ? `Estimated delivery: ${courier.estimated_delivery_days} days`
-                          : courier?.etd_hours
-                            ? `Estimated delivery: ${courier.etd_hours} hours`
-                            : 'Shipping is arranged manually by Luviio';
-
-                      return (
-                        <label
-                          key={id}
-                          className={`shipping-courier-card ${
-                            checked
-                              ? 'is-selected'
-                              : ''
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="shipping-courier"
-                            value={id}
-                            checked={checked}
-                            disabled={Boolean(
-                              activeOrder,
-                            )}
-                            onChange={() =>
-                              selectCourier(
-                                courier,
-                              )
-                            }
-                          />
-
-                          <span className="shipping-courier-copy flex min-w-0 flex-1 flex-col gap-1">
-                            <strong>
-                              {text(
-                                courier.courier_name,
-                                'Manual shipping',
-                              )}
-                            </strong>
-
-                            <small>
-                              {deliveryMode
-                                ? `${deliveryMode} · `
-                                : ''}
-                              {estimate}
-                            </small>
-                          </span>
-
-                          <span className="shipping-courier-price shrink-0 text-sm font-semibold tabular-nums text-text">
-                            {formatMoney(
-                              courier.shipping_cost,
-                            )}
-                          </span>
-                        </label>
-                      );
-                    },
-                  )}
+                  <span className="shrink-0 rounded-full border border-gold/30 bg-gold-dim px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
+                    {shippingQuote
+                      ? Number(shippingQuote.shipping_cost) > 0
+                        ? formatMoney(shippingQuote.shipping_cost)
+                        : 'Free shipping'
+                      : 'Shipping'}
+                  </span>
                 </div>
-              )}
 
-            {shippingQuoteStale && shippingQuote && (
-              <div
-                className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft"
-                role="status"
-                aria-live="polite"
-              >
-                <p className="m-0 min-w-0 flex-1">
-                  Manual shipping is used for this order. Courier and tracking details are added by LUVIIO after dispatch.
-                </p>
-                <button
-                  type="button"
-                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-[rgba(216,173,106,.35)] bg-bg px-3.5 text-xs font-semibold text-text transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-60"
-                  onClick={() => {
-                    setShippingQuoteError('');
-                    setShippingRetryKey((value) => value + 1);
-                  }}
-                  disabled={shippingQuoteLoading || Boolean(activeOrder)}
-                >
-                  <RiRefreshLine size={15} aria-hidden="true" />
-                  Refresh shipping
-                </button>
+                <div className="mt-3 border-t border-line pt-3 text-xs leading-5 text-dim">
+                  {shippingQuote &&
+                  Number(shippingQuote.shipping_cost) > 0
+                    ? 'Flat manual shipping rate applies below ₹1,499.'
+                    : 'Free shipping applies on orders of ₹1,499 or more.'}
+                </div>
               </div>
             )}
+
+
 
             {shippingQuote && (
               <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
