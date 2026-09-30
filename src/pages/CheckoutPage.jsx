@@ -727,7 +727,7 @@ const loadAddresses = useCallback(
   }, [
     cart?.subtotal,
     canProceed,
-    selectedAddress?.postal_code,
+    selected,
   ]);
 
   const resetPayment = useCallback(() => {
