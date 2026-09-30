@@ -352,7 +352,7 @@ function ShippingPanel() {
 
         <div className="admin-page-note">
           Rate is calculated server-side from delivery PIN, parcel weight,
-          payment method and Shiprocket serviceability. No admin-entered flat
+          payment method and Manual shipping serviceability. No admin-entered flat
           shipping amount is applied to customer checkout.
         </div>
       </div>
