@@ -324,15 +324,15 @@ function ShippingPanel() {
       <div className="admin-card">
         <Toolbar
           title="Shipping"
-          description="Customer checkout uses live Shiprocket courier pricing. Legacy flat/free-threshold methods are inactive and are not used for new orders."
+          description="Customer checkout uses Luviio manual shipping: ₹45.90 below ₹1,499 and free shipping at ₹1,499+."
           onRefresh={load}
           refreshing={loading}
         />
 
         <div className="admin-stats">
           <div className="admin-stat">
-            <div className="stat-label">Checkout provider</div>
-            <div className="stat-value ops-stat-value-sm">Shiprocket</div>
+            <div className="stat-label">Checkout shipping</div>
+            <div className="stat-value ops-stat-value-sm">Manual shipping</g/div>
           </div>
 
           <div className="admin-stat">
