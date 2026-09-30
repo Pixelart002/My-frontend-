@@ -52,11 +52,20 @@ const DOWNLOAD_TIMEOUT_MS = 30_000;
 const REFRESH_TIMEOUT_MS = 8_000;
 
 export class ApiError extends Error {
-  constructor(message, status = 0, code = null) {
-    super(message || 'Something went wrong. Please try again.');
+  constructor(
+    message,
+    status = 0,
+    code = null,
+    details = null,
+  ) {
+    super(
+      message ||
+        'Something went wrong. Please try again.',
+    );
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -299,29 +308,55 @@ async function parseError(response, parsed = null) {
     }
   }
 
+  const detail = data?.detail;
   let raw;
 
-  if (Array.isArray(data?.detail)) {
-    raw = data.detail
+  if (Array.isArray(detail)) {
+    raw = detail
       .map(
         (item) =>
           item?.msg ||
           item?.message ||
-          'Validation error'
+          (typeof item === 'string'
+            ? item
+            : 'Validation error')
       )
       .join('; ');
+  } else if (
+    detail &&
+    typeof detail === 'object'
+  ) {
+    /*
+     * FastAPI HTTPException responses may put a structured
+     * error contract in detail. Never stringify that object
+     * directly: doing so produces "[object Object]" in the UI.
+     */
+    raw =
+      detail?.message ||
+      detail?.msg ||
+      detail?.detail ||
+      detail?.error ||
+      data?.message ||
+      data?.error_code;
   } else {
     raw =
       data?.message ||
-      data?.detail ||
-      data?.error_code ||
-      `Error ${response.status}`;
+      detail ||
+      data?.error_code;
   }
 
+  const message =
+    typeof raw === 'string' && raw.trim()
+      ? raw.trim()
+      : `Error ${response.status}`;
+
   return new ApiError(
-    String(raw).substring(0, 300),
+    message.substring(0, 300),
     response.status,
-    data?.error_code || null
+    data?.error_code ||
+      detail?.code ||
+      null,
+    detail ?? data
   );
 }
 
