@@ -808,11 +808,10 @@ const loadAddresses = useCallback(
   }, [loadAddresses]);
 
   /*
-   * Live shipping quote.
+   * Manual shipping quote.
    *
-   * Provider-specific implementation remains inside
-   * shippingService/backend. The UI only consumes the
-   * normalized courier quote.
+   * Luviio owns the storefront shipping policy. No courier/provider
+   * rate API is called from checkout.
    */
   useEffect(() => {
     const requestId =
@@ -1750,7 +1749,7 @@ const loadAddresses = useCallback(
                 </p>
 
                 <h2>
-                  Shipping method
+                  Manual shipping
                 </h2>
               </div>
 
@@ -1783,8 +1782,7 @@ const loadAddresses = useCallback(
                   size={15}
                   aria-hidden="true"
                 />
-                Loading available delivery
-                partners…
+                Applying Luviio shipping policy…
               </p>
             )}
 
@@ -1817,7 +1815,7 @@ const loadAddresses = useCallback(
                 <div
                   className="shipping-courier-list grid min-w-0 gap-2.5"
                   role="radiogroup"
-                  aria-label="Choose delivery partner"
+                  aria-label="Manual shipping option"
                 >
                   {shippingOptions.map(
                     (courier) => {
@@ -1842,7 +1840,7 @@ const loadAddresses = useCallback(
                           ? `Estimated delivery: ${courier.estimated_delivery_days} days`
                           : courier?.etd_hours
                             ? `Estimated delivery: ${courier.etd_hours} hours`
-                            : 'Courier and tracking are arranged manually';
+                            : 'Courier and tracking are arranged manually by Luviio';
 
                       return (
                         <label
@@ -1872,7 +1870,7 @@ const loadAddresses = useCallback(
                             <strong>
                               {text(
                                 courier.courier_name,
-                                'Delivery partner',
+                                'Manual shipping',
                               )}
                             </strong>
 
@@ -1931,7 +1929,7 @@ const loadAddresses = useCallback(
                 <b>
                   {text(
                     shippingQuote.courier_name,
-                    'Delivery partner',
+                    'Manual shipping',
                   )}
                 </b>
 
@@ -2235,7 +2233,7 @@ const loadAddresses = useCallback(
                   <b>
                     {text(
                       shippingQuote.courier_name,
-                      'Delivery partner',
+                      'Manual shipping',
                     )}
                   </b>
 
@@ -2258,7 +2256,7 @@ const loadAddresses = useCallback(
                   ) : null}
                 </span>
 
-                <em>Live rate</em>
+                <em>Manual rate</em>
               </div>
             )}
 
@@ -2313,8 +2311,7 @@ const loadAddresses = useCallback(
                 size={15}
                 aria-hidden="true"
               />
-              Calculating live delivery
-              rates…
+              Applying manual shipping policy…
             </p>
           )}
 
@@ -2325,7 +2322,7 @@ const loadAddresses = useCallback(
                 aria-hidden="true"
               />
 
-              Selected delivery partner:{' '}
+              Shipping method:{' '}
               {text(
                 shippingQuote.courier_name,
                 'Delivery partner',
