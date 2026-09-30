@@ -881,7 +881,7 @@ export default function Header() {
 
           <button
             type="button"
-            className="menu-button relative z-[1100] inline-flex h-11 w-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] border border-line bg-surface p-0 text-text transition-colors duration-150 hover:border-[rgb(216_173_106_/_0.38)] hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
+            className="menu-button relative z-[1] inline-flex h-11 w-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] border border-line bg-surface p-0 text-text transition-colors duration-150 hover:border-[rgb(216_173_106_/_0.38)] hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
             onClick={() => {
               setMobileOpen(
                 (current) =>
