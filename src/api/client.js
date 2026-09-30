@@ -490,10 +490,19 @@ export async function request(
           ensuredToken = freshToken;
 
           /*
-           * Retry the same request exactly once with the fresh token.
-           * No recursive request() call.
+           * Mutating requests are never replayed automatically after a 401.
+           * The refresh is still completed so the next user action can use
+           * the fresh token, but the original mutation is not duplicated.
            */
-          continue;
+          if (retryable) {
+            continue;
+          }
+
+          throw new ApiError(
+            'Your session has expired. Please sign in again.',
+            401,
+            'AUTH_REQUIRED'
+          );
         }
 
         clearPublishedToken();
