@@ -338,7 +338,7 @@ function ShippingPanel() {
           <div className="admin-stat">
             <div className="stat-label">Customer rate</div>
             <div className="stat-value ops-stat-value-sm">
-              Live courier
+              Manual shipping
             </div>
           </div>
 
