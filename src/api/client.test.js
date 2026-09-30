@@ -13,7 +13,7 @@ const response = (
 
 describe('API client', () => {
   beforeEach(() => {
-    setAccessToken(null);
+    setAccessToken('test-access-token');
     vi.stubGlobal('fetch', vi.fn());
 
     try {
