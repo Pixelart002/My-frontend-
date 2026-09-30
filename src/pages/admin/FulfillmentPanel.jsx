@@ -449,7 +449,7 @@ export default function FulfillmentPanel() {
         <div className="admin-toolbar fulfillment-toolbar">
           <div className="fulfillment-heading">
             <div className="fulfillment-title-row">
-              <h2>Courier fulfillment</h2>
+              <h2>Manual fulfillment</h2>
 
               <span className="admin-pill pill-gold">
                 Manual shipping
@@ -546,7 +546,7 @@ export default function FulfillmentPanel() {
         <div className="fulfillment-table-scroll">
           <table className="admin-table fulfillment-table">
             <caption className="sr-only">
-              Courier fulfillment shipments
+              Manual fulfillment shipments
             </caption>
 
             <thead>
