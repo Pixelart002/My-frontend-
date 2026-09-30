@@ -153,7 +153,10 @@ function MenuLink({
   return (
     <Link
       to={to}
-      className={className || undefined}
+      className={
+        className ||
+        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium text-text transition-[background-color,color,transform] duration-150 hover:bg-surface-2 hover:text-gold active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&_svg]:shrink-0 [&_svg]:text-muted [&_svg]:transition-colors [&_svg]:duration-150 [&:hover_svg]:text-gold'
+      }
       onClick={onClick}
     >
       {Icon && (
@@ -502,7 +505,7 @@ export default function Header() {
           )}
         </div>
 
-        <div className="mobile-nav-section mobile-account-actions flex min-w-0 flex-col gap-1">
+        <div className="mobile-nav-section mobile-account-actions mt-2 flex min-w-0 flex-col gap-1 border-t border-line pt-4">
           <MenuLink
             to="/"
             label="View storefront"
@@ -535,8 +538,11 @@ export default function Header() {
 
         <nav
           className="mobile-nav-section mobile-primary-nav flex min-w-0 flex-col gap-1"
-          aria-label="Main navigation"
+          aria-label="Explore"
         >
+          <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dim">
+            Explore
+          </p>
           <MenuLink
             to="/"
             label="Home"
@@ -560,9 +566,12 @@ export default function Header() {
         </nav>
 
         <nav
-          className="mobile-nav-section mobile-shopping-nav flex min-w-0 flex-col gap-1 border-t border-line pt-3"
-          aria-label="Shopping navigation"
+          className="mobile-nav-section mobile-shopping-nav flex min-w-0 flex-col gap-1 border-t border-line pt-4"
+          aria-label="Shopping"
         >
+          <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dim">
+            Shopping
+          </p>
           <MenuLink
             to="/cart"
             label={
@@ -590,9 +599,12 @@ export default function Header() {
         </nav>
 
         <nav
-          className="mobile-nav-section mobile-info-nav flex min-w-0 flex-col gap-1 border-t border-line pt-3"
-          aria-label="Information"
+          className="mobile-nav-section mobile-info-nav flex min-w-0 flex-col gap-1 border-t border-line pt-4"
+          aria-label="Support"
         >
+          <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-dim">
+            Support
+          </p>
           <MenuLink
             to="/about"
             label="About"
@@ -927,7 +939,7 @@ export default function Header() {
         aria-label="Navigation menu"
         aria-hidden={!mobileOpen}
       >
-        <div className="mobile-nav-head absolute left-0 right-0 top-0 z-[3] flex h-14 min-w-0 items-center justify-between border-b border-line bg-surface px-3.5 py-2 max-[900px]:h-14 min-[901px]:static min-[901px]:h-[58px] min-[901px]:shrink-0 min-[901px]:border-b min-[901px]:px-[18px]">
+        <div className="mobile-nav-head absolute left-0 right-0 top-0 z-[3] flex h-14 min-w-0 items-center justify-between border-b border-line bg-surface px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,.12)] max-[900px]:h-14 min-[901px]:static min-[901px]:h-[58px] min-[901px]:shrink-0 min-[901px]:border-b min-[901px]:px-[18px]">
           <Link
             className="mobile-nav-brand min-w-0 overflow-hidden whitespace-nowrap font-display text-[22px] leading-none text-gold min-[901px]:text-[28px]"
             to="/"
@@ -960,7 +972,7 @@ export default function Header() {
           </button>
         </div>
 
-        <div className="mobile-nav-inner min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-6 pt-[68px] [scrollbar-gutter:stable] max-[640px]:px-4 max-[640px]:pb-5 max-[640px]:pt-[66px] min-[901px]:px-[18px] min-[901px]:pb-6 min-[901px]:pt-[18px]">
+        <div className="mobile-nav-inner min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-3 pb-6 pt-[68px] [scrollbar-gutter:stable] max-[640px]:px-4 max-[640px]:pb-5 max-[640px]:pt-[66px] min-[901px]:px-[18px] min-[901px]:pb-6 min-[901px]:pt-[18px]">
           {mobileContent}
         </div>
       </aside>
