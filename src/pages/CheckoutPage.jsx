@@ -17,6 +17,7 @@ import {
   RiCoupon3Line,
   RiErrorWarningLine,
   RiLoader4Line,
+  RiRefreshLine,
   RiLockLine,
 } from '@remixicon/react';
 
@@ -633,6 +634,10 @@ export default function CheckoutPage() {
     shippingQuoteError,
     setShippingQuoteError,
   ] = useState('');
+  const [
+    shippingRetryKey,
+    setShippingRetryKey,
+  ] = useState(0);
 
   const [
     cancelConfirmOpen,
@@ -983,6 +988,7 @@ export default function CheckoutPage() {
     cart?.subtotal,
     items.length,
     canProceed,
+    shippingRetryKey,
   ]);
 
   const resetPayment = useCallback(() => {
@@ -1893,10 +1899,24 @@ export default function CheckoutPage() {
 
             {shippingQuoteError && (
               <div
-                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
+                className="mb-4 flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
                 role="alert"
               >
-                {shippingQuoteError}
+                <p className="m-0 min-w-0 flex-1 leading-6">
+                  {shippingQuoteError}
+                </p>
+                <button
+                  type="button"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-danger/30 bg-bg px-3.5 text-xs font-semibold text-text transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => {
+                    setShippingQuoteError('');
+                    setShippingRetryKey((value) => value + 1);
+                  }}
+                  disabled={shippingQuoteLoading}
+                >
+                  <RiRefreshLine size={15} aria-hidden="true" />
+                  Retry shipping
+                </button>
               </div>
             )}
 
