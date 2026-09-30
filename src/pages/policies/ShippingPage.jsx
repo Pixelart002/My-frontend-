@@ -37,16 +37,13 @@ export default function ShippingPage() {
 
       <Section title="3. Shipping charges">
         <p>
-          Shipping charges are calculated from the live Shiprocket courier quote for the selected delivery PIN,
-          payment method, shipment weight, and declared value. The live rate is shown at checkout; legacy
-          flat-rate and free-shipping threshold settings are not used.
+          Shipping charges follow Luviio's manual shipping policy: ₹45.90 below ₹1,499 and free shipping at ₹1,499 or above. Courier selection and tracking are handled manually after the order is placed.
         </p>
       </Section>
 
       <Section title="4. Order tracking">
         <p>
-          After dispatch, we will provide tracking information where the selected delivery service
-          supports tracking. You can also view the status of your order from your account where available.
+          After dispatch, we will provide tracking information when a courier or local delivery service is assigned. You can also view the status of your order from your account where available.
         </p>
       </Section>
 
