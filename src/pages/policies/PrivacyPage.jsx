@@ -78,7 +78,7 @@ export default function PrivacyPage() {
         <p>
           Payments are processed through our payment provider, Stripe. Card payment credentials are
           handled by the payment provider and are not stored on Luviio servers. We may share the minimum
-          information necessary with service providers such as payment processors, delivery partners,
+          information necessary with service providers such as payment processors, shipping providers,
           communications providers, and infrastructure providers to operate the store.
         </p>
       </Section>
