@@ -459,18 +459,13 @@ export default function CartPage() {
           aria-label="Cart items"
         >
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
-            <div>
-              <h2 className="text-sm font-semibold text-text">
-                {items.length} {items.length === 1 ? 'item' : 'items'}
-              </h2>
-              <p className="mt-1 text-xs text-dim">
-                Quantities and availability are checked by the store.
-              </p>
-            </div>
+            <p className="text-sm font-semibold text-text">
+              {items.length} {items.length === 1 ? 'item' : 'items'}
+            </p>
 
             <button
               type="button"
-              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg px-2.5 text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 px-2 text-xs font-semibold text-muted transition-colors hover:text-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-40"
               onClick={handleClear}
               disabled={actionBusy}
               aria-busy={clearing}
@@ -501,7 +496,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="border-t border-line bg-surface-2 px-4 py-4 sm:px-5">
+          <div className="border-t border-line px-4 py-4 sm:px-5">
             <Link
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
