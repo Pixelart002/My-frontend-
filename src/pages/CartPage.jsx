@@ -56,7 +56,7 @@ function QuantityEditor({ item, disabled, onUpdate }) {
   return (
     <div
       className={[
-        'inline-flex h-10 items-center overflow-hidden rounded-xl border border-line bg-bg',
+        'inline-flex h-10 items-center overflow-hidden rounded-xl border border-line bg-surface-2',
         disabled ? 'opacity-60' : '',
       ].join(' ')}
       aria-label={`Quantity for ${item.name || 'product'}`}
@@ -136,7 +136,7 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
     >
       <Link
         to={productPath}
-        className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-bg sm:h-24 sm:w-24"
+        className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-2 sm:h-24 sm:w-24"
         aria-label={`View ${item.name || 'product'}`}
       >
         {item.image_url ? (
@@ -191,13 +191,13 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
           </span>
 
           {unavailable && (
-            <span className="rounded-full border border-danger/40 bg-danger-dim px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-danger">
+            <span className="rounded-full border border-danger bg-danger-dim px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-danger">
               Unavailable
             </span>
           )}
 
           {item.price_changed && (
-            <span className="rounded-full border border-warn/40 bg-warn/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-warn">
+            <span className="rounded-full border border-gold bg-gold-dim px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-gold">
               Price updated
             </span>
           )}
@@ -435,7 +435,7 @@ export default function CartPage() {
 
       {error && (
         <div
-          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-danger/40 bg-danger-dim px-4 py-3 text-sm leading-6 text-danger"
+          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-danger bg-danger-dim px-4 py-3 text-sm leading-6 text-danger"
           role="alert"
         >
           <span className="min-w-0">{error}</span>
@@ -444,7 +444,7 @@ export default function CartPage() {
 
       {hasUnavailableItems && (
         <div
-          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-warn/40 bg-warn/10 px-4 py-3 text-sm leading-6 text-warn"
+          className="mb-5 flex min-w-0 items-start gap-3 rounded-xl border border-gold bg-gold-dim px-4 py-3 text-sm leading-6 text-gold"
           role="alert"
         >
           <span className="min-w-0">
@@ -501,7 +501,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="border-t border-line bg-bg/40 px-4 py-4 sm:px-5">
+          <div className="border-t border-line bg-surface-2/40 px-4 py-4 sm:px-5">
             <Link
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
               to="/shop"
