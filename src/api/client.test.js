@@ -136,6 +136,8 @@ describe('API client', () => {
   });
 
   it('does not retry POST requests after a network failure', async () => {
+    setAccessToken('test-access-token');
+
     fetch.mockRejectedValue(
       new TypeError('Failed to fetch')
     );
@@ -169,6 +171,8 @@ describe('API client', () => {
   });
 
   it('returns null for 204 responses', async () => {
+    setAccessToken('test-access-token');
+
     fetch.mockResolvedValueOnce(
       response(null, 204)
     );
@@ -369,6 +373,8 @@ describe('API client', () => {
   });
 
   it('normalizes legacy COD order requests to /orders/cod', async () => {
+    setAccessToken('test-access-token');
+
     fetch.mockResolvedValueOnce(
       response({
         success: true,
@@ -392,6 +398,8 @@ describe('API client', () => {
   });
 
   it('does not normalize non-COD order requests', async () => {
+    setAccessToken('test-access-token');
+
     fetch.mockResolvedValueOnce(
       response({
         success: true,
