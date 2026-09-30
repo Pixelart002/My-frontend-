@@ -164,8 +164,7 @@ export default function ShipmentTimeline({ shipment }) {
     );
   }
 
-  const providerEvent = shipment?.metadata?.last_provider_event || {};
-  const trackingData = providerEvent?.tracking_data || {};
+  const trackingData = {};
 
   const trackRow = Array.isArray(trackingData?.shipment_track)
     ? trackingData.shipment_track[0]
@@ -221,19 +220,19 @@ export default function ShipmentTimeline({ shipment }) {
             rel="noopener noreferrer"
           >
             <RiTruckLine size={15} aria-hidden="true" />
-            <span>Track courier</span>
+            <span>Track shipment</span>
           </a>
         )}
       </header>
 
       <div className="shipment-summary" aria-label="Shipment details">
         <div className="shipment-summary-item">
-          <span>Courier</span>
-          <strong>{shipment.courier_name || 'Courier partner'}</strong>
+          <span>Shipping</span>
+          <strong>Manual shipping</strong>
         </div>
 
         <div className="shipment-summary-item">
-          <span>AWB</span>
+          <span>Tracking</span>
           <strong>
             {shipment.tracking_number ||
               trackRow?.awb_code ||
@@ -339,7 +338,7 @@ export default function ShipmentTimeline({ shipment }) {
         <div className="shipment-activity-list">
           <div className="shipment-activity-header">
             <div className="order-section-label">
-              Courier updates
+              Shipping updates
             </div>
 
             <span className="shipment-activity-count">
