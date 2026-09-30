@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       colors: {
         gold: 'var(--gold, #d8ad6a)',
+        'gold-ink': 'var(--gold-ink, #17130e)',
         'gold-soft': 'var(--gold-soft, #f0cf97)',
         'gold-dim': 'var(--gold-dim, rgba(216,173,106,.12))',
         surface: 'var(--surface, #1b1917)',
