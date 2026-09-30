@@ -37,7 +37,7 @@ export default function ShippingPage() {
 
       <Section title="3. Shipping charges">
         <p>
-          Shipping charges follow Luviio's manual shipping policy: ₹45.90 below ₹1,499 and free shipping at ₹1,499 or above. Courier selection and tracking are handled manually after the order is placed.
+          Shipping charges follow Luviio's manual shipping policy: ₹45.90 below ₹1,499 and free shipping at ₹1,499 or above. Shipping and tracking are handled manually after the order is placed.
         </p>
       </Section>
 
@@ -51,7 +51,7 @@ export default function ShippingPage() {
         <p>
           Please provide a complete and accurate delivery address, including the correct PIN code and
           contact details. Delays or failed delivery caused by an incorrect or incomplete address may
-          require additional courier arrangements.
+          require additional manual shipping arrangements.
         </p>
       </Section>
 
@@ -59,7 +59,7 @@ export default function ShippingPage() {
         <p>
           If a parcel arrives damaged or does not arrive within a reasonable period after dispatch,
           contact support with your order number and relevant details. We will investigate with the
-          delivery partner and provide the applicable resolution under our policies and applicable law.
+          shipping team and provide the applicable resolution under our policies and applicable law.
         </p>
       </Section>
 
