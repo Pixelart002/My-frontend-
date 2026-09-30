@@ -15,7 +15,7 @@ const label = (value) =>
 
 const STEPS = [
   ['created', 'Shipment created', RiFileTextLine],
-  ['awb_assigned', 'Courier assigned', RiTruckLine],
+  ['awb_assigned', 'Delivery partner assigned', RiTruckLine],
   ['pickup_scheduled', 'Pickup scheduled', RiMapPinLine],
   ['picked_up', 'Picked up', RiTruckLine],
   ['in_transit', 'In transit', RiTruckLine],
@@ -154,10 +154,9 @@ export default function ShipmentTimeline({ shipment }) {
           </span>
 
           <div>
-            <strong>Shipment not booked yet</strong>
+            <strong>Shipment pending</strong>
             <p className="td-dim">
-              Your courier shipment will appear here once the order is booked
-              for dispatch.
+              Your shipment will appear here once Luviio has arranged dispatch.
             </p>
           </div>
         </div>
@@ -210,7 +209,7 @@ export default function ShipmentTimeline({ shipment }) {
           </div>
 
           <p className="shipment-header-copy">
-            Follow your shipment status and courier updates.
+            Follow your manual shipment status and tracking updates.
           </p>
         </div>
 
@@ -278,7 +277,7 @@ export default function ShipmentTimeline({ shipment }) {
         </div>
 
         <div className="shipment-current-status-content">
-          <span>Live courier status</span>
+          <span>Shipment status</span>
           <strong>{statusMeta.title}</strong>
 
           {trackRow?.location && (
@@ -416,7 +415,7 @@ export default function ShipmentTimeline({ shipment }) {
             rel="noopener noreferrer"
           >
             <RiTruckLine size={15} aria-hidden="true" />
-            Track with courier
+            Track shipment
           </a>
         </footer>
       )}
