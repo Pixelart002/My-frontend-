@@ -17,7 +17,6 @@ import {
   RiCoupon3Line,
   RiErrorWarningLine,
   RiLoader4Line,
-  RiRefreshLine,
   RiLockLine,
 } from '@remixicon/react';
 
@@ -670,6 +669,16 @@ export default function CheckoutPage() {
     shippingQuoteLoading,
     setShippingQuoteLoading,
   ] = useState(false);
+  const [
+    shippingQuoteError,
+    setShippingQuoteError,
+  ] = useState('');
+  const [shippingQuoteStale, setShippingQuoteStale] =
+    useState(false);
+  const [
+    shippingRetryKey,
+    setShippingRetryKey,
+  ] = useState(0);
 
   const [
     cancelConfirmOpen,
@@ -815,11 +824,15 @@ const loadAddresses = useCallback(
       setShippingQuote(null);
       setShippingOptions([]);
       setSelectedCourierId('');
+      setShippingQuoteError('');
+      setShippingQuoteStale(false);
       setShippingQuoteLoading(false);
       return undefined;
     }
 
     setShippingQuoteLoading(true);
+    setShippingQuoteError('');
+    setShippingQuoteStale(false);
     setShippingQuote(null);
     setShippingOptions([]);
     setSelectedCourierId('');
@@ -838,6 +851,8 @@ const loadAddresses = useCallback(
     setShippingOptions([manualShipping]);
     setSelectedCourierId('manual');
     setShippingQuote(manualShipping);
+    setShippingQuoteStale(false);
+    setShippingQuoteError('');
     setShippingQuoteLoading(false);
 
     // Shipping mode changes invalidate an unfinished payment session.
@@ -1758,7 +1773,7 @@ const loadAddresses = useCallback(
                 />
                 Applying Luviio shipping policy…
               </p>
-            ) : (
+            ) : shippingQuote ? (
               <div
                 className="shipping-manual-card mt-3 rounded-2xl border border-[rgba(216,173,106,.28)] bg-bg p-4"
                 aria-label="Manual shipping"
@@ -1774,65 +1789,24 @@ const loadAddresses = useCallback(
                   </div>
 
                   <span className="shrink-0 rounded-full border border-gold/30 bg-gold-dim px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
-                    {shippingQuote
-                      ? Number(shippingQuote.shipping_cost) > 0
-                        ? formatMoney(shippingQuote.shipping_cost)
-                        : 'Free shipping'
-                      : 'Shipping'}
+                    {Number(shippingQuote.shipping_cost) > 0
+                      ? formatMoney(shippingQuote.shipping_cost)
+                      : 'Free shipping'}
                   </span>
                 </div>
 
                 <div className="mt-3 border-t border-line pt-3 text-xs leading-5 text-dim">
-                  {shippingQuote &&
-                  Number(shippingQuote.shipping_cost) > 0
+                  {Number(shippingQuote.shipping_cost) > 0
                     ? 'Flat manual shipping rate applies below ₹1,499.'
                     : 'Free shipping applies on orders of ₹1,499 or more.'}
                 </div>
               </div>
-            )}
-
-
-
-            {shippingQuote && (
-              <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
-                <RiArrowRightLine
-                  size={15}
-                  aria-hidden="true"
-                />
-
-                Shipping:{' '}
-                <b>
-                  {text(
-                    shippingQuote.courier_name,
-                    'Manual shipping',
-                  )}
-                </b>
-
-                {selectedDeliveryMode
-                  ? ` · ${selectedDeliveryMode}`
-                  : ''}
-
-                {' · '}
-
-                {formatMoney(
-                  shippingQuote.shipping_cost,
-                )}
+            ) : (
+              <p className="mt-3 rounded-xl border border-line bg-bg px-3.5 py-3 text-xs leading-5 text-dim">
+                Select a delivery address to apply Luviio manual shipping.
               </p>
             )}
 
-            {shippingQuote &&
-              !selectedDeliveryMode && (
-                <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
-                  Delivery mode is shown only
-                  when the shipping service
-                  provides it. LUVIIO does not
-                  guess the vehicle or delivery
-                  mode from a courier name.
-                </p>
-              )}
-          </section>
-
-          <section className="checkout-section min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card max-[560px]:p-4">
             <h2>2 · Coupon</h2>
 
             {coupon ? (
@@ -2199,7 +2173,8 @@ const loadAddresses = useCallback(
 
               Shipping method:{' '}
               {text(
-                'Manual shipping',
+                shippingQuote.courier_name,
+                'Delivery partner',
               )}
               . Final payable amount is
               confirmed by LUVIIO's backend
