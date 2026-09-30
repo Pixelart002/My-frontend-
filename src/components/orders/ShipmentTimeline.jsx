@@ -15,7 +15,7 @@ const label = (value) =>
 
 const STEPS = [
   ['created', 'Shipment created', RiFileTextLine],
-  ['awb_assigned', 'Delivery partner assigned', RiTruckLine],
+  ['awb_assigned', 'Manual dispatch assigned', RiTruckLine],
   ['pickup_scheduled', 'Pickup scheduled', RiMapPinLine],
   ['picked_up', 'Picked up', RiTruckLine],
   ['in_transit', 'In transit', RiTruckLine],
