@@ -15,7 +15,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { formatMoney } from '../utils/format';
-import { shippingService } from '../services/shipping';
 import {
   ErrorState,
   Spinner,
@@ -252,9 +251,9 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
 }
 
 function OrderSummary({ cart, disabled, onCheckout }) {
-  const shipping = shippingService.manualRate(cart?.subtotal);
-  const shippingCost = Number(shipping.shipping_cost) || 0;
-  const orderTotal = (Number(cart?.total_amount) || 0) + shippingCost;
+  const shippingCost = Number(cart?.shipping_cost) || 0;
+  const freeShippingThreshold = Number(cart?.free_shipping_threshold) || 1499;
+  const isFreeShipping = Boolean(cart?.free_shipping_eligible) || shippingCost === 0;
 
   return (
     <aside
@@ -288,14 +287,14 @@ function OrderSummary({ cart, disabled, onCheckout }) {
         <div className="flex items-center justify-between gap-4 text-muted">
           <dt>Shipping</dt>
           <dd className="font-medium tabular-nums text-text">
-            {shippingCost > 0 ? formatMoney(shippingCost) : 'Free'}
+            {isFreeShipping ? 'Free' : formatMoney(shippingCost)}
           </dd>
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
           <dt className="text-sm font-semibold text-text">Total</dt>
           <dd className="text-lg font-bold tabular-nums text-text">
-            {formatMoney(orderTotal)}
+            {formatMoney(cart.total_amount)}
           </dd>
         </div>
       </dl>
@@ -303,7 +302,7 @@ function OrderSummary({ cart, disabled, onCheckout }) {
       <div className="mt-5 flex gap-3 rounded-xl border border-gold bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
         <RiTruckLine className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
         <p>
-          Manual shipping: {shippingCost > 0 ? `${formatMoney(shippingCost)} below ${formatMoney(shipping.free_shipping_threshold)}` : `Free above ${formatMoney(shipping.free_shipping_threshold)}`}.
+          Manual shipping: {isFreeShipping ? `Free at or above ${formatMoney(freeShippingThreshold)}` : `${formatMoney(shippingCost)} below ${formatMoney(freeShippingThreshold)}`}.
         </p>
       </div>
 
