@@ -1050,7 +1050,7 @@ export default function CheckoutPage() {
 
 
             <Section
-              number="03"
+              number="02"
               icon={RiCoupon3Line}
               title="Coupon"
               description="Apply one valid coupon before order creation."
@@ -1126,7 +1126,7 @@ export default function CheckoutPage() {
             </Section>
 
             <Section
-              number="04"
+              number="03"
               icon={RiMoneyRupeeCircleLine}
               title="Payment"
               description="Choose how you want to pay. Final pricing and inventory stay backend-authoritative."
