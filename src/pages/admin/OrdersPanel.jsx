@@ -30,6 +30,16 @@ const STATUSES = [
   'refunded',
 ];
 
+const STATUS_TRANSITIONS = Object.freeze({
+  pending: ['paid', 'cancelled'],
+  paid: ['processing', 'shipped', 'refunded'],
+  processing: ['shipped', 'refunded'],
+  shipped: ['delivered', 'refunded'],
+  delivered: ['refunded'],
+  cancelled: [],
+  refunded: [],
+});
+
 const displayOrderNumber = (order) => {
   const value = String(
     order?.order_number ?? ''
@@ -302,6 +312,22 @@ export default function OrdersPanel({
     setTracking('');
     setNotes('');
   }, [saving]);
+
+  const editableStatuses = useMemo(() => {
+    const current = String(editing?.status ?? '').trim().toLowerCase();
+
+    if (!current) {
+      return [];
+    }
+
+    return [
+      current,
+      ...(STATUS_TRANSITIONS[current] || []),
+    ].filter(
+      (value, index, values) =>
+        values.indexOf(value) === index,
+    );
+  }, [editing?.status]);
 
   const save = async (event) => {
     event.preventDefault();
@@ -773,7 +799,7 @@ export default function OrdersPanel({
                 }
                 disabled={saving}
               >
-                {STATUSES.map(
+                {editableStatuses.map(
                   (value) => (
                     <option
                       key={value}
