@@ -1167,3 +1167,154 @@
 .products-admin .product-editor>.editor-footer .btn-row{flex-direction:column}
 .products-admin .product-editor>.editor-footer .btn{width:100%}
 }
+
+
+/* Add-product final interaction layer */
+.products-admin .product-editor-modal {
+  position: relative;
+  isolation: isolate;
+}
+
+.products-admin .product-editor-modal > h2 {
+  padding-top: 26px;
+  padding-right: 78px;
+}
+
+.products-admin .product-editor-modal > .modal-sub {
+  max-width: 78ch;
+  padding-bottom: 18px;
+}
+
+.products-admin .product-editor {
+  scroll-padding-bottom: 110px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.products-admin .product-editor > .editor-section {
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+.products-admin .product-editor > .editor-section + .editor-section {
+  margin-top: 0;
+}
+
+.products-admin .product-editor .field {
+  gap: 7px;
+}
+
+.products-admin .product-editor .field > label {
+  min-height: 17px;
+}
+
+.products-admin .product-editor .field > label .td-dim {
+  margin-left: 2px;
+  font-weight: 500;
+}
+
+.products-admin .product-editor .field input,
+.products-admin .product-editor .field select,
+.products-admin .product-editor .field textarea {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.products-admin .product-editor .field input:focus-visible,
+.products-admin .product-editor .field select:focus-visible,
+.products-admin .product-editor .field textarea:focus-visible,
+.products-admin .product-editor .btn:focus-visible,
+.products-admin .product-editor .check-line:focus-within,
+.products-admin .product-editor-modal .modal-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.products-admin .product-editor .check-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: 11px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.products-admin .product-editor .check-line input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--gold);
+}
+
+.products-admin .product-editor .check-line > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.products-admin .product-editor .check-line strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.products-admin .product-editor .check-line small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.products-admin .product-editor > .editor-footer {
+  gap: 18px;
+  margin-top: 2px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+.products-admin .product-editor > .editor-footer .btn-row {
+  flex: 0 0 auto;
+}
+
+.products-admin .product-editor > .editor-footer .btn {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .products-admin .product-editor-modal > h2 {
+    padding-top: 20px;
+    padding-right: 64px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    box-shadow: none;
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    margin-top: 0;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .products-admin .product-editor-modal > h2 {
+    padding: 18px 58px 0 16px;
+  }
+
+  .products-admin .product-editor-modal > .modal-sub {
+    padding-right: 58px;
+  }
+
+  .products-admin .product-editor {
+    scroll-padding-bottom: 150px;
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    gap: 10px;
+  }
+
+  .products-admin .product-editor > .editor-footer .btn-row {
+    gap: 8px;
+  }
+}
