@@ -36,58 +36,123 @@ const getIntentStatus = (intent) =>
   String(intent?.status || '').toLowerCase();
 
 function ProcessingPayment() {
+  const steps = [
+    { label: 'Card details verified', state: 'complete' },
+    { label: 'Confirming with bank', state: 'active' },
+    { label: 'Verifying payment', state: 'pending' },
+    { label: 'Finalizing order', state: 'pending' },
+  ];
+
   return (
     <div
-      className="payment-processing-screen"
+      className="mx-auto w-full max-w-lg rounded-3xl border border-line bg-surface p-5 shadow-2xl sm:p-7"
       role="status"
       aria-live="polite"
     >
-      <div
-        className="payment-processing-ring"
-        aria-hidden="true"
-      />
+      <div className="flex items-start gap-4">
+        <span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gold/30 bg-gold-dim text-gold-soft"
+          aria-hidden="true"
+        >
+          <RiLockLine size={21} />
+        </span>
 
-      <h3>Confirming card payment...</h3>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[.14em] text-gold-soft">
+            Secure payment
+          </p>
+          <h3 className="mt-1.5 text-lg font-semibold tracking-[-.02em] text-text sm:text-xl">
+            Confirming card payment…
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Your payment is being verified securely. Please keep this window open.
+          </p>
+        </div>
 
-      <p>
-        Please don’t close this page. We’re waiting for your card
-        payment to finish confirmation.
-      </p>
+        <span
+          className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-bg"
+          aria-hidden="true"
+        >
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted/30 border-t-gold" />
+        </span>
+      </div>
 
-      <div
-        className="payment-processing-steps"
-        aria-label="Payment progress"
-      >
-        <div className="payment-processing-step is-done">
-          <span className="payment-processing-dot">
-            <RiCheckboxCircleLine size={18} />
+      <div className="mt-6 rounded-2xl border border-line bg-bg p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs font-semibold text-text">
+            Payment verification
+          </p>
+          <span className="text-[10px] font-bold uppercase tracking-[.1em] text-gold-soft">
+            In progress
           </span>
-          <span>Card details validated</span>
         </div>
 
-        <div className="payment-processing-step is-active">
-          <span className="payment-processing-dot" />
-          <span>Confirming with bank</span>
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-surface-2">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-gold" />
         </div>
 
-        <div className="payment-processing-step">
-          <span className="payment-processing-dot" />
-          <span>Verifying card payment</span>
-        </div>
+        <div className="mt-5 space-y-4">
+          {steps.map((step, index) => {
+            const isComplete = step.state === 'complete';
+            const isActive = step.state === 'active';
 
-        <div className="payment-processing-step">
-          <span className="payment-processing-dot" />
-          <span>Finalizing order</span>
+            return (
+              <div key={step.label} className="flex items-center gap-3">
+                <span
+                  className={[
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold',
+                    isComplete
+                      ? 'border-success/30 bg-success-dim text-success'
+                      : isActive
+                        ? 'border-gold/30 bg-gold-dim text-gold-soft'
+                        : 'border-line bg-surface text-dim',
+                  ].join(' ')}
+                  aria-hidden="true"
+                >
+                  {isComplete ? (
+                    <RiCheckboxCircleLine size={16} />
+                  ) : isActive ? (
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-gold" />
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+
+                <span
+                  className={[
+                    'text-sm',
+                    isComplete || isActive
+                      ? 'font-semibold text-text'
+                      : 'text-dim',
+                  ].join(' ')}
+                >
+                  {step.label}
+                </span>
+
+                {isActive && (
+                  <span className="ml-auto text-[10px] font-semibold text-gold-soft">
+                    Verifying
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <span className="payment-processing-brand">
-        LUVIIO
-      </span>
+      <div className="mt-4 flex items-start gap-2 rounded-2xl border border-success/20 bg-success-dim px-3.5 py-3 text-xs leading-5 text-success">
+        <RiShieldCheckLine size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+        <span>
+          Your card details are handled by Stripe. Luviio is waiting for the verified payment result before completing the order.
+        </span>
+      </div>
+
+      <p className="mt-5 text-center text-[10px] font-bold uppercase tracking-[.18em] text-dim">
+        LUVIIO · Secure checkout
+      </p>
     </div>
   );
 }
-
 function PaymentPendingState({
   orderNumber,
   onViewOrder,
