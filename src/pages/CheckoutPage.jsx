@@ -696,12 +696,11 @@ export default function CheckoutPage() {
           );
         }
 
-        navigate(
-          '/order/success?order=' +
-            encodeURIComponent(orderNumber) +
-            '&payment=cod',
-          { replace: true },
-        );
+        setActiveOrder({
+          orderNumber,
+          paymentMethod: 'cod',
+        });
+        toast.success(`Order #${orderNumber} placed successfully.`);
         return;
       }
 
