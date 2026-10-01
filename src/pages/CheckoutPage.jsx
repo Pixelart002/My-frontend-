@@ -1133,169 +1133,60 @@ export default function CheckoutPage() {
             </div>
 
             <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
-                  <RiMoneyRupeeCircleLine size={17} aria-hidden="true" />
-                </span>
-                <div>
-                  <h2 className="text-base font-semibold text-text">Payment</h2>
-                  <p className="mt-0.5 text-sm text-muted">Choose how you want to pay.</p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold-dim text-gold-soft">
+                    <RiMoneyRupeeCircleLine size={18} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[.12em] text-gold-soft">
+                      Final step
+                    </p>
+                    <h2 className="mt-1 text-base font-semibold text-text">
+                      Choose payment method
+                    </h2>
+                    <p className="mt-1 text-sm leading-5 text-muted">
+                      Your address, cart and server-calculated total are ready.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2 rounded-full border border-line bg-bg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.08em] text-muted">
+                  <RiShieldCheckLine size={14} className="text-success" aria-hidden="true" />
+                  Secure
                 </div>
               </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    id: 'stripe',
-                    title: 'Online payment',
-                    body: 'Pay securely with Stripe-supported payment methods.',
-                  },
-                  {
-                    id: 'cod',
-                    title: 'Cash on Delivery',
-                    body: 'Place the order now and pay when it arrives.',
-                  },
-                ].map((option) => {
-                  const selected = paymentMethod === option.id;
 
-                  return (
-                    <label
-                      key={option.id}
-                      className={[
-                        'block rounded-2xl border p-4 transition',
-                        selected
-                          ? 'border-gold bg-gold-dim'
-                          : 'border-line bg-bg hover:border-[rgba(216,173,106,.35)]',
-                        locked
-                          ? 'cursor-default opacity-70'
-                          : 'cursor-pointer',
-                      ].join(' ')}
-                    >
-                      <input
-                        type="radio"
-                        name="checkout-payment-method"
-                        value={option.id}
-                        checked={selected}
-                        onChange={() => setPaymentMethod(option.id)}
-                        disabled={locked}
-                        className="sr-only"
-                      />
-                      <strong className="block text-sm text-text">
-                        {option.title}
-                      </strong>
-                      <span className="mt-1 block text-xs leading-5 text-muted">
-                        {option.body}
-                      </span>
-                    </label>
-                  );
-                })}
+              <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-line bg-bg p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-text">
+                    Payment is selected in a secure dialog
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-muted">
+                    Select Online payment or Cash on Delivery, then follow the method-specific flow.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                  onClick={openPaymentSelection}
+                  disabled={placing || locked || !addressReady}
+                >
+                  Choose payment
+                  <RiArrowRightLine size={17} aria-hidden="true" />
+                </button>
               </div>
 
-              {intent && activeOrder ? (
-                <div className="mt-5 rounded-2xl border border-gold/30 bg-bg p-4 sm:p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[.1em] text-gold-soft">
-                        Payment session
-                      </p>
-                      <h3 className="mt-1 text-base font-semibold text-text">
-                        Order #{activeOrder.orderNumber}
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      className="min-h-10 rounded-xl border border-line px-3 text-xs font-semibold text-text transition hover:border-danger hover:text-danger disabled:opacity-50"
-                      onClick={() => void cancelPayment()}
-                      disabled={cancelling}
-                    >
-                      {cancelling ? 'Cancelling…' : 'Cancel payment'}
-                    </button>
-                  </div>
-
-                  {orderPreviewLoading ? (
-                    <div className="mt-4 rounded-xl border border-line bg-surface px-4 py-3 text-xs text-muted">
-                      Confirming the server-side order total…
-                    </div>
-                  ) : orderPreview ? (
-                    <div className="mt-4 rounded-xl border border-line bg-surface p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm text-muted">
-                          Final order total
-                        </span>
-                        <strong className="text-lg text-text">
-                          {serverOrderTotal === null ||
-                          serverOrderTotal === undefined
-                            ? 'Calculated'
-                            : formatMoney(serverOrderTotal)}
-                        </strong>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-4 rounded-2xl border border-line bg-surface p-3 sm:p-4">
-                    <Elements
-                      key={paymentSessionKey}
-                      stripe={stripePromise}
-                      options={stripeOptions}
-                    >
-                      <StripePaymentForm
-                        orderNumber={activeOrder.orderNumber}
-                        clientSecret={intent.client_secret}
-                        onSuccess={handlePaymentSuccess}
-                        onRetry={retryPayment}
-                      />
-                    </Elements>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-5 rounded-2xl border border-line bg-bg p-4 sm:p-5">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-gold-soft">
-                      <RiShieldCheckLine size={18} aria-hidden="true" />
-                    </span>
-                    <div>
-                      <strong className="block text-sm text-text">
-                        Ready to place the order
-                      </strong>
-                      <p className="mt-1 text-xs leading-5 text-muted">
-                        Select a valid address, choose a payment method, and continue.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={() => void createCheckout()}
-                    disabled={placing || locked || !addressReady}
-                  >
-                    {placing ? (
-                      <>
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gold-ink/30 border-t-gold-ink motion-reduce:animate-none" />
-                        {paymentMethod === 'cod'
-                          ? 'Creating order…'
-                          : 'Starting secure payment…'}
-                      </>
-                    ) : (
-                      <>
-                        {paymentButtonLabel}
-                        <RiArrowRightLine size={17} aria-hidden="true" />
-                      </>
-                    )}
-                  </button>
-
-                  {!selectedAddress && (
-                    <p className="mt-3 text-center text-xs text-dim">
-                      Select a delivery address to continue.
-                    </p>
-                  )}
-
-                  {selectedAddress && !addressReady && (
-                    <p className="mt-3 text-center text-xs text-danger">
-                      Add a valid email and Indian mobile number to this address.
-                    </p>
-                  )}
-                </div>
+              {!selectedAddress && (
+                <p className="mt-3 text-center text-xs text-dim">
+                  Select a delivery address to continue.
+                </p>
               )}
+              {selectedAddress && !addressReady && (
+                <p className="mt-3 text-center text-xs text-danger">
+                  Add a valid email and Indian mobile number to this address.
+                </p>
+              )}
+            </div>
             </div>
           </main>
 
