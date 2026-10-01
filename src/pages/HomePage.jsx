@@ -34,8 +34,7 @@ function categoryIcon(name) {
         aria-labelledby="home-title"
       >
         <div
-          className="absolute inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-90"
-          style={{ backgroundImage: "linear-gradient(90deg, #080808 0%, rgba(8,8,8,.94) 26%, rgba(8,8,8,.50) 58%, rgba(8,8,8,.18) 100%), url('/luviio-hero-background.webp')" }}
+          className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#080808_0%,rgba(8,8,8,.94)_26%,rgba(8,8,8,.50)_58%,rgba(8,8,8,.18)_100%),url('/luviio-hero-background.webp')] bg-cover bg-center bg-no-repeat opacity-90"
           aria-hidden="true"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-bg/10 via-bg/25 to-bg/80" aria-hidden="true" />
