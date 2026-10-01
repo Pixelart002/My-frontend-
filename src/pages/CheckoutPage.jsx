@@ -22,7 +22,6 @@ import { userService } from '../services/users';
 import { couponService } from '../services/coupons';
 import { paymentService } from '../services/payments';
 import { orderService } from '../services/orders';
-import { shippingService } from '../services/shipping';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
@@ -464,10 +463,6 @@ export default function CheckoutPage() {
     [user?.full_name, user?.name, user?.email, user?.phone],
   );
 
-  const shippingPolicy = useMemo(
-    () => shippingService.manualRate(cart?.subtotal),
-    [cart?.subtotal],
-  );
 
   const shippingAmount =
     cart?.shipping_cost === null || cart?.shipping_cost === undefined
@@ -1053,44 +1048,6 @@ export default function CheckoutPage() {
               )}
             </Section>
 
-            <Section
-              number="02"
-              icon={RiTruckLine}
-              title="Shipping"
-              description="Luviio currently arranges dispatch manually."
-            >
-              <div className="mt-5 rounded-2xl border border-[rgba(216,173,106,.25)] bg-bg p-4 sm:p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-gold-soft">
-                      <RiTruckLine size={18} aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <strong className="block text-sm text-text">
-                        Manual shipping
-                      </strong>
-                      <p className="mt-1 text-xs leading-5 text-muted">
-                        Dispatch is arranged after the order is confirmed.
-                      </p>
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-full border border-success/30 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">
-                    {shippingAmount === null
-                      ? 'Server'
-                      : shippingAmount === 0
-                        ? 'Free'
-                        : formatMoney(shippingAmount)}
-                  </span>
-                </div>
-                <p className="mt-4 border-t border-line pt-4 text-xs leading-5 text-dim">
-                  Orders at ₹
-                  {shippingPolicy.free_shipping_threshold.toLocaleString(
-                    'en-IN',
-                  )}{' '}
-                  or more get free shipping. The backend remains authoritative for the final amount.
-                </p>
-              </div>
-            </Section>
 
             <Section
               number="03"
