@@ -813,7 +813,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   return (
     <>
-      <div className="w-full min-w-0 space-y-5">
+      <div className="products-admin w-full min-w-0 space-y-6">
         <div className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <h1 className="font-display text-2xl font-semibold tracking-tight text-text sm:text-3xl">Products</h1>
@@ -1083,7 +1083,7 @@ export default function ProductsPanel({ capabilities = {} }) {
             onClose={closeEditor}
           >
             <form
-              className="product-editor space-y-4 p-1 sm:space-y-5 [&_.field]:min-w-0 [&_.field-grid]:grid [&_.field-grid]:gap-4 [&_.field-grid]:sm:grid-cols-2 [&_.field_label]:text-sm [&_.field_label]:font-semibold [&_.field_label]:text-text [&_.field_input]:min-h-11 [&_.field_input]:w-full [&_input]:border [&_input]:border-line [&_input]:bg-surface-2 [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input]:transition [&_input]:focus:border-gold [&_input]:focus:ring-2 [&_input]:focus:ring-gold/20 [&_select]:border [&_select]:border-line [&_select]:bg-surface-2 [&_select]:px-3 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select]:focus:border-gold [&_select]:focus:ring-2 [&_select]:focus:ring-gold/20 [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-surface-2 [&_textarea]:px-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea]:focus:border-gold [&_textarea]:focus:ring-2 [&_textarea]:focus:ring-gold/20"
+              className="product-editor"
               onSubmit={save}
             >
               <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
@@ -1505,14 +1505,14 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </p>
                   </div>
 
-                  <span className="shrink-0 rounded-full bg-gold-dim px-2.5 py-1 text-xs font-bold text-gold">
+                  <span className="image-count">
                     {form.images.length +
                       selectedFiles.length}
                     /{MAX_IMAGES}
                   </span>
                 </div>
 
-                <label className="flex min-h-28 cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-line bg-surface-2 p-4 text-muted transition hover:border-gold hover:text-gold sm:p-5">
+                <label className="upload-drop">
                   <RiImageAddLine
                     size={20}
                     aria-hidden="true"
