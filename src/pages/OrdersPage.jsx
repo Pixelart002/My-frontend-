@@ -154,50 +154,48 @@ export default function OrdersPage() {
   };
   
   return (
-    <div className="page container">
-      <div className="page-heading compact">
-        <p className="eyebrow">Your account</p>
+    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <header className="mb-6 sm:mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-gold">Your account</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-text sm:text-4xl">Orders</h1>
+            <p className="mt-2 text-sm leading-6 text-muted">Track purchases, payment status and delivery progress.</p>
+          </div>
+          <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" to="/shop">
+            Continue shopping
+            <RiArrowRightLine size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      </header>
 
-        <h1>Order history.</h1>
-      </div>
-
-      <div className="orders-toolbar">
-        <label
-          className="sr-only"
-          htmlFor="order-status-filter"
-        >
-          Filter orders by status
-        </label>
-
-        <select
-          id="order-status-filter"
-          value={status}
-          onChange={handleStatusChange}
-          aria-label="Filter orders by status"
-        >
-          {STATUS_OPTIONS.map((value) => (
-            <option
-              key={value || 'all'}
-              value={value}
-            >
-              {value
-                ? orderStatusLabel(value)
-                : 'All statuses'}
-            </option>
-          ))}
-        </select>
-      </div>
+      <section className="mb-5 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4" aria-label="Order filters">
+        <div>
+          <p className="text-sm font-semibold text-text">Order history</p>
+          <p className="mt-0.5 text-xs text-muted">Filter by current order status.</p>
+        </div>
+        <div className="relative">
+          <label className="sr-only" htmlFor="order-status-filter">Filter orders by status</label>
+          <select
+            className="min-h-11 w-full appearance-none rounded-xl border border-line bg-bg px-3 pr-10 text-sm font-semibold text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20 sm:w-48"
+            id="order-status-filter"
+            value={status}
+            onChange={handleStatusChange}
+            aria-label="Filter orders by status"
+          >
+            {STATUS_OPTIONS.map((value) => (
+              <option key={value || 'all'} value={value}>
+                {value ? orderStatusLabel(value) : 'All statuses'}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
 
       {error ? (
-        <ErrorState
-          message={error}
-          onRetry={load}
-        />
+        <ErrorState message={error} onRetry={load} />
       ) : data === null ? (
-        <div
-          role="status"
-          aria-live="polite"
-        >
+        <div className="flex min-h-48 items-center justify-center rounded-3xl border border-line bg-surface" role="status" aria-live="polite">
           <Spinner label="Loading orders…" />
         </div>
       ) : orders.length === 0 ? (
@@ -205,84 +203,58 @@ export default function OrdersPage() {
           title="No orders yet"
           message="When you place an order it will appear here."
           action={
-            <Link
-              className="btn"
-              to="/shop"
-            >
+            <Link className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gold px-5 text-sm font-bold text-gold-ink transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" to="/shop">
               Start shopping
             </Link>
           }
         />
       ) : (
         <>
-          <div
-            className="orders-list"
-            role="list"
-            aria-label="Your orders"
-          >
+          <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-luviio-card" role="list" aria-label="Your orders">
+            <div className="hidden grid-cols-[minmax(0,1fr)_120px_120px_36px] gap-4 border-b border-line bg-surface-2 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted sm:grid">
+              <span>Order</span>
+              <span>Date</span>
+              <span>Amount</span>
+              <span aria-hidden="true" />
+            </div>
             {orders.map((order) => {
-              const orderNumber = text(
-                order.order_number,
-              );
-
-              const statusValue = text(
-                order.status,
-                'pending',
-              ).toLowerCase();
-
+              const orderNumber = text(order.order_number);
+              const statusValue = text(order.status, 'pending').toLowerCase();
+              const tone = orderStatusTone(statusValue);
               return (
                 <Link
-                  to={`/orders/${encodeURIComponent(
-                    orderNumber,
-                  )}`}
-                  className="order-row"
+                  to={`/orders/${encodeURIComponent(orderNumber)}`}
+                  className="group grid gap-3 border-b border-line px-4 py-4 transition last:border-b-0 hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_120px_120px_36px] sm:items-center sm:gap-4 sm:px-5"
                   key={orderNumber}
                   role="listitem"
-                  aria-label={`Order ${orderNumber}, ${orderStatusLabel(
-                    statusValue,
-                  )}`}
+                  aria-label={`Order ${orderNumber}, ${orderStatusLabel(statusValue)}`}
                 >
-                  <div>
-                    <strong>
-                      #{orderNumber}
-                    </strong>
-
-                    <span>
-                      {formatOrderDate(
-                        order.created_at,
-                      )}
-                    </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-3 sm:justify-start">
+                      <strong className="truncate text-sm font-semibold text-text sm:text-base">#{orderNumber}</strong>
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone === 'success' ? 'bg-success-dim text-success' : tone === 'danger' ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'} sm:hidden`}>
+                        {orderStatusLabel(statusValue)}
+                      </span>
+                    </div>
+                    <span className="mt-1 block text-xs text-muted sm:hidden">{formatOrderDate(order.created_at)}</span>
                   </div>
-
-                  <div className="order-amount">
-                    {formatMoney(
-                      order.total_amount ??
-                        order.grand_total ??
-                        0,
-                    )}
-                  </div>
-
-                  <span
-                    className={`status-pill tone-${orderStatusTone(
-                      statusValue,
-                    )}`}
-                  >
-                    {orderStatusLabel(
-                      statusValue,
-                    )}
+                  <span className="hidden text-sm text-muted sm:block">{formatOrderDate(order.created_at)}</span>
+                  <span className="text-sm font-bold text-text sm:text-right">{formatMoney(order.total_amount ?? order.grand_total ?? 0)}</span>
+                  <span className="hidden items-center justify-center text-muted transition group-hover:text-gold sm:flex" aria-hidden="true">
+                    <RiArrowRightLine size={18} />
+                  </span>
+                  <span className={`hidden w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone === 'success' ? 'bg-success-dim text-success' : tone === 'danger' ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'} sm:inline-flex`}>
+                    {orderStatusLabel(statusValue)}
                   </span>
                 </Link>
               );
             })}
           </div>
-
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onChange={setPage}
-          />
+          <div className="mt-5">
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+          </div>
         </>
       )}
-    </div>
+    </main>
   );
 }
