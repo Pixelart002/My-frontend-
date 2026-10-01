@@ -1314,7 +1314,25 @@ export default function CheckoutPage() {
           onCancelOrder={cancelPayment}
           cancellingOrder={cancelling}
           review={false}
-        />
+        >
+          {intent &&
+          activeOrder?.paymentMethod === 'stripe' ? (
+            <div className="rounded-2xl border border-line bg-bg p-3 sm:p-4">
+              <Elements
+                key={paymentSessionKey}
+                stripe={stripePromise}
+                options={stripeOptions}
+              >
+                <StripePaymentForm
+                  orderNumber={activeOrder.orderNumber}
+                  clientSecret={intent.client_secret}
+                  onSuccess={handlePaymentSuccess}
+                  onRetry={retryPayment}
+                />
+              </Elements>
+            </div>
+          ) : null}
+        </PaymentMethodModal>
       </div>
     </div>
   );
