@@ -1186,7 +1186,6 @@ export default function CheckoutPage() {
                 </p>
               )}
             </div>
-            </div>
           </main>
 
           <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
