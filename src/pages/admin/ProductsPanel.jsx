@@ -1083,11 +1083,11 @@ export default function ProductsPanel({ capabilities = {} }) {
             onClose={closeEditor}
           >
             <form
-              className="space-y-4 p-1 sm:space-y-5 [&_.field]:min-w-0 [&_.field-grid]:grid [&_.field-grid]:gap-4 [&_.field-grid]:sm:grid-cols-2 [&_.field_label]:text-sm [&_.field_label]:font-semibold [&_.field_label]:text-text [&_.field_input]:min-h-11 [&_.field_input]:w-full"
+              className="product-editor space-y-4 p-1 sm:space-y-5 [&_.field]:min-w-0 [&_.field-grid]:grid [&_.field-grid]:gap-4 [&_.field-grid]:sm:grid-cols-2 [&_.field_label]:text-sm [&_.field_label]:font-semibold [&_.field_label]:text-text [&_.field_input]:min-h-11 [&_.field_input]:w-full [&_input]:border [&_input]:border-line [&_input]:bg-surface-2 [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input]:transition [&_input]:focus:border-gold [&_input]:focus:ring-2 [&_input]:focus:ring-gold/20 [&_select]:border [&_select]:border-line [&_select]:bg-surface-2 [&_select]:px-3 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select]:focus:border-gold [&_select]:focus:ring-2 [&_select]:focus:ring-gold/20 [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-surface-2 [&_textarea]:px-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea]:focus:border-gold [&_textarea]:focus:ring-2 [&_textarea]:focus:ring-gold/20"
               onSubmit={save}
             >
-              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
                     <h3 className="text-base font-bold text-text">
                       Basic information
@@ -1209,15 +1209,14 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3>
-                      Pricing, tax &
+                    <h3 className="text-base font-bold text-text">Pricing, tax &
                       inventory
                     </h3>
 
-                    <p>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
                       Create requires price,
                       GST and HSN. Final
                       validation remains
@@ -1492,11 +1491,10 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3>
-                      Product media
+                    <h3 className="text-base font-bold text-text">Product media
                     </h3>
 
                     <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
@@ -1671,11 +1669,10 @@ export default function ProductsPanel({ capabilities = {} }) {
                 )}
               </section>
 
-              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3>
-                      Descriptions
+                    <h3 className="text-base font-bold text-text">Descriptions
                     </h3>
 
                     <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
@@ -1724,11 +1721,10 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3>
-                      Hardware details
+                    <h3 className="text-base font-bold text-text">Hardware details
                     </h3>
 
                     <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
@@ -2032,7 +2028,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </span>
                 </label>
 
-                <div className="btn-row">
+                <div className="editor-footer btn-row">
                   <button
                     type="button"
                     className="btn btn-quiet"
