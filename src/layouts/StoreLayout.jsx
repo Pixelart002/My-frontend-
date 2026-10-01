@@ -72,7 +72,6 @@ function BootScreen() {
     </div>
   );
 }
-}
 
 export default function StoreLayout() {
   const { initializing } = useAuth();
