@@ -14,7 +14,6 @@ import { useToast } from '../../context/ToastContext';
 import { formatMoney } from '../../utils/format';
 import { ErrorState, Spinner } from '../../components/ui/States';
 import AdminModal from './Modal';
-import '../../styles/product-admin.css';
 
 const PAGE_SIZE = 100;
 const MAX_IMAGES = 10;
@@ -813,11 +812,11 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   return (
     <>
-      <div className="products-admin">
-        <div className="admin-head">
+      <div className="w-full min-w-0 space-y-5">
+        <div className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
-            <h1>Products</h1>
-            <p className="admin-sub">
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-text sm:text-3xl">Products</h1>
+            <p className="mt-1.5 text-sm leading-6 text-muted">
               {filtered.length} of {items.length} shown ·
               catalogue, pricing, inventory & hardware
               specifications
@@ -827,22 +826,22 @@ export default function ProductsPanel({ capabilities = {} }) {
           {canCreate && (
             <button
               type="button"
-              className="btn btn-sm"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-sm font-bold text-gold-ink shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50"
               onClick={openCreate}
               disabled={saving}
             >
               <RiAddLine
-                size={16}
+                size={18}
                 aria-hidden="true"
               />
-              Add product
+              <span>Add product</span>
             </button>
           )}
         </div>
 
-        <div className="admin-table-wrap">
-          <div className="admin-toolbar">
-            <label className="admin-search">
+        <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-luviio-card" aria-label="Product catalogue">
+          <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row sm:items-center sm:p-5">
+            <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3.5 text-muted transition focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/20">
               <RiSearchLine
                 size={16}
                 aria-hidden="true"
@@ -863,13 +862,13 @@ export default function ProductsPanel({ capabilities = {} }) {
               />
             </label>
 
-            <label className="admin-filter">
+            <label className="w-full sm:w-52">
               <span className="sr-only">
                 Filter by category
               </span>
 
               <select
-                className="admin-select"
+                className="min-h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm font-medium text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
                 value={catFilter}
                 onChange={(event) =>
                   setCatFilter(event.target.value)
@@ -898,19 +897,19 @@ export default function ProductsPanel({ capabilities = {} }) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="admin-empty">
+            <div className="px-5 py-14 text-center text-sm font-medium text-muted">
               No products match.
             </div>
           ) : (
-            <div className="admin-table-scroll">
-              <table className="admin-table">
+            <div className="w-full overflow-x-auto">
+              <table className="min-w-[900px] w-full border-collapse text-left text-sm">
                 <caption className="sr-only">
                   Product catalogue
                 </caption>
 
-                <thead>
+                <thead className="border-b border-line bg-surface-2/60">
                   <tr>
-                    <th scope="col">Product</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Product</th>
                     <th scope="col">SKU</th>
                     <th scope="col">Price</th>
                     <th scope="col">Stock</th>
@@ -924,7 +923,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </tr>
                 </thead>
 
-                <tbody>
+                <tbody className="divide-y divide-line">
                   {filtered.map((product) => {
                     const category =
                       categories.find(
@@ -934,9 +933,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                       );
 
                     return (
-                      <tr key={product.id}>
-                        <td>
-                          <div className="product-cell">
+                      <tr key={product.id} className="transition hover:bg-surface-2/45">
+                        <td className="px-4 py-3.5 align-middle">
+                          <div className="flex min-w-0 items-center gap-3">
                             {product.image_url ? (
                               <img
                                 src={product.image_url}
@@ -957,33 +956,33 @@ export default function ProductsPanel({ capabilities = {} }) {
                             )}
 
                             <div>
-                              <div className="td-strong">
+                              <div className="truncate font-semibold text-text">
                                 {product.name}
                               </div>
 
-                              <div className="td-dim">
+                              <div className="truncate text-xs text-muted">
                                 {product.slug}
                               </div>
                             </div>
                           </div>
                         </td>
 
-                        <td className="td-dim">
+                        <td className="px-4 py-3.5 align-middle text-muted">
                           {product.sku || '—'}
                         </td>
 
-                        <td className="td-gold">
+                        <td className="px-4 py-3.5 align-middle font-bold text-gold tabular-nums">
                           {formatMoney(
                             Number(product.price) ||
                               0,
                           )}
                         </td>
 
-                        <td>
+                        <td className="px-4 py-3.5 align-middle font-semibold tabular-nums text-text">
                           {product.stock ?? 0}
                         </td>
 
-                        <td>
+                        <td className="px-4 py-3.5 align-middle font-semibold tabular-nums text-text">
                           {product.gst_percentage ??
                             '—'}
                           %
@@ -996,11 +995,11 @@ export default function ProductsPanel({ capabilities = {} }) {
                         <td>
                           {product.is_active ===
                           false ? (
-                            <span className="admin-pill pill-danger">
+                            <span className="inline-flex w-fit items-center rounded-full bg-danger-dim px-2.5 py-1 text-xs font-bold text-danger">
                               Inactive
                             </span>
                           ) : (
-                            <span className="admin-pill pill-success">
+                            <span className="inline-flex w-fit items-center rounded-full bg-success-dim px-2.5 py-1 text-xs font-bold text-success">
                               Active
                             </span>
                           )}
@@ -1008,12 +1007,12 @@ export default function ProductsPanel({ capabilities = {} }) {
 
                         {(canUpdate ||
                           canDelete) && (
-                          <td>
-                            <div className="btn-row">
+                          <td className="px-4 py-3.5 align-middle">
+                            <div className="flex items-center gap-1.5">
                               {canUpdate && (
                                 <button
                                   type="button"
-                                  className="icon-btn"
+                                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2 text-muted transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-40"
                                   onClick={() =>
                                     openEdit(
                                       product,
@@ -1036,7 +1035,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                               {canDelete && (
                                 <button
                                   type="button"
-                                  className="icon-btn danger-action"
+                                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-danger/20 bg-danger-dim text-danger transition hover:border-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-40"
                                   onClick={() =>
                                     setDeleteTarget(
                                       product,
@@ -1083,17 +1082,17 @@ export default function ProductsPanel({ capabilities = {} }) {
             onClose={closeEditor}
           >
             <form
-              className="product-editor"
+              className="space-y-4 p-1 sm:space-y-5 [&_.field]:min-w-0 [&_.field-grid]:grid [&_.field-grid]:gap-4 [&_.field-grid]:sm:grid-cols-2 [&_.field_label]:text-sm [&_.field_label]:font-semibold [&_.field_label]:text-text [&_.field_input]:min-h-11 [&_.field_input]:w-full"
               onSubmit={save}
             >
-              <div className="editor-section">
-                <div className="editor-section-head">
+              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3>
+                    <h3 className="text-base font-bold text-text">
                       Basic information
                     </h3>
 
-                    <p>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
                       Required on create: name.
                       SKU is optional and locked
                       after creation. Slug is
@@ -1207,9 +1206,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </select>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div className="editor-section">
+              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="editor-section-head">
                   <div>
                     <h3>
@@ -1490,16 +1489,16 @@ export default function ProductsPanel({ capabilities = {} }) {
                     />
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div className="editor-section">
+              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="editor-section-head">
                   <div>
                     <h3>
                       Product media
                     </h3>
 
-                    <p>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
                       Up to 10 images. First
                       image is primary; existing
                       images can be reordered or
@@ -1507,14 +1506,14 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </p>
                   </div>
 
-                  <span className="image-count">
+                  <span className="shrink-0 rounded-full bg-gold-dim px-2.5 py-1 text-xs font-bold text-gold">
                     {form.images.length +
                       selectedFiles.length}
                     /{MAX_IMAGES}
                   </span>
                 </div>
 
-                <label className="upload-drop">
+                <label className="flex min-h-28 cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-line bg-surface-2 p-4 text-muted transition hover:border-gold hover:text-gold sm:p-5">
                   <RiImageAddLine
                     size={20}
                     aria-hidden="true"
@@ -1669,16 +1668,16 @@ export default function ProductsPanel({ capabilities = {} }) {
                     )}
                   </div>
                 )}
-              </div>
+              </section>
 
-              <div className="editor-section">
+              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="editor-section-head">
                   <div>
                     <h3>
                       Descriptions
                     </h3>
 
-                    <p>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
                       Customer-facing product
                       copy.
                     </p>
@@ -1731,7 +1730,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                       Hardware details
                     </h3>
 
-                    <p>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
                       Common hardware catalogue
                       fields and technical
                       dimensions.
