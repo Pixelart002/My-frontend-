@@ -940,7 +940,7 @@ export default function ShopPage() {
                   <>
                     <RiLoader4Line
                       size={17}
-                      className="spin animate-spin"
+                      className="animate-spin motion-reduce:animate-none"
                       aria-hidden="true"
                     />
                     Loading products…
