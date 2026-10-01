@@ -290,23 +290,22 @@ function ShippingPanel() {
   const { toast } = useToast();
   const { mountedRef, startRequest, isCurrent } = useAsyncGuard();
 
-  const [methods, setMethods] = useState([]);
+  const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const requestId = startRequest();
-
     setLoading(true);
 
     try {
-      const result = await adminService.shippingMethods(false);
-
+      const result = await adminService.settings();
       if (!isCurrent(requestId)) return;
-
-      setMethods(itemsOfList(result));
+      setSettings(itemsOfList(result));
     } catch (error) {
       if (mountedRef.current) {
-        toast.error(errorMessage(error, 'Unable to load shipping history.'));
+        toast.error(
+          errorMessage(error, 'Unable to load shipping settings.'),
+        );
       }
     } finally {
       if (mountedRef.current && isCurrent(requestId)) {
@@ -319,93 +318,139 @@ function ShippingPanel() {
     load();
   }, [load]);
 
+  const settingValue = useMemo(() => {
+    const map = new Map(
+      settings.map((setting) => [setting.key, setting.value]),
+    );
+
+    return {
+      enabled: map.get('shipping_enabled'),
+      threshold: map.get('free_shipping_threshold'),
+      rate: map.get('flat_shipping_rate'),
+    };
+  }, [settings]);
+
+  const formatSetting = (value, suffix = '') => {
+    if (value === null || value === undefined || value === '') {
+      return 'Not configured';
+    }
+
+    return `${pretty(value)}${suffix}`;
+  };
+
   return (
-    <section className="admin-panel" aria-labelledby="ops-shipping-title">
+    <section className="admin-panel min-w-0" aria-labelledby="ops-shipping-title">
       <div className="admin-card">
         <Toolbar
           title="Shipping"
-          description="Customer checkout uses Luviio manual shipping: ₹45.90 below ₹1,499 and free shipping at ₹1,499+."
+          description="Luviio uses manual shipping. Checkout pricing and shipping configuration are read from server-side settings."
           onRefresh={load}
           refreshing={loading}
         />
 
-        <div className="admin-stats">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="admin-stat">
-            <div className="stat-label">Checkout shipping</div>
-            <div className="stat-value ops-stat-value-sm">Manual shipping</div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Customer rate</div>
+            <div className="stat-label">Shipping mode</div>
             <div className="stat-value ops-stat-value-sm">
-              Manual shipping
+              Manual
             </div>
           </div>
 
           <div className="admin-stat">
-            <div className="stat-label">Legacy methods</div>
+            <div className="stat-label">Shipping status</div>
             <div className="stat-value ops-stat-value-sm">
-              {loading ? '…' : methods.length}
+              {loading
+                ? '…'
+                : settingValue.enabled === true ||
+                    String(settingValue.enabled).toLowerCase() === 'true'
+                  ? 'Enabled'
+                  : 'Disabled'}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Flat rate</div>
+            <div className="stat-value ops-stat-value-sm">
+              {loading
+                ? '…'
+                : `₹${formatSetting(settingValue.rate)}`}
+            </div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Free shipping threshold</div>
+            <div className="stat-value ops-stat-value-sm">
+              {loading
+                ? '…'
+                : `₹${formatSetting(settingValue.threshold)}`}
             </div>
           </div>
         </div>
 
-        <div className="admin-page-note">
-          Customer checkout uses the Luviio manual-shipping policy: ₹45.90 below ₹1,499 and free shipping at ₹1,499+. Dispatch and tracking are managed manually.
+        <div className="mt-5 rounded-xl border border-line-soft bg-surface-2 px-4 py-4 text-sm leading-6 text-muted">
+          <strong className="font-semibold text-text">
+            Fulfillment is separate from pricing:
+          </strong>{' '}
+          checkout uses the configured manual shipping rate, while staff
+          records dispatch, tracking and delivery status in
+          <span className="font-semibold text-text"> Fulfillment</span>.
+          No external courier rate is requested from this panel.
         </div>
       </div>
 
       <div className="admin-card">
-        <div className="admin-toolbar">
-          <div className="ops-toolbar-copy">
-            <h2>Legacy shipping methods</h2>
-            <p>
-              Historical records retained for audit/admin visibility. They
-              should remain inactive.
-            </p>
-          </div>
-        </div>
+        <Toolbar
+          title="Shipping configuration"
+          description="Read-only operational view. Change values from System settings so the server remains the single source of truth."
+          onRefresh={load}
+          refreshing={loading}
+        />
 
         <div className="admin-table-wrap">
           <table className="admin-table">
             <caption className="sr-only">
-              Historical shipping methods
+              Current shipping configuration
             </caption>
-
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
+                <th scope="col">Setting</th>
+                <th scope="col">Value</th>
+                <th scope="col">Purpose</th>
               </tr>
             </thead>
-
             <tbody>
-              {methods.length ? (
-                methods.map((method) => (
-                  <tr key={method.id}>
-                    <td className="td-strong">{pretty(method.name)}</td>
-                    <td>{pretty(method.type)}</td>
-                    <td>
-                      <span className="admin-pill pill-muted">
-                        Archived / ignored
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3">
-                    <div className="admin-empty">
-                      {loading
-                        ? 'Loading shipping history…'
-                        : 'No legacy shipping methods found.'}
-                    </div>
-                  </td>
-                </tr>
-              )}
+              <tr>
+                <td className="td-strong">shipping_enabled</td>
+                <td className="td-gold">
+                  {loading ? '…' : pretty(settingValue.enabled)}
+                </td>
+                <td>Controls whether a shipping charge is applied.</td>
+              </tr>
+              <tr>
+                <td className="td-strong">flat_shipping_rate</td>
+                <td className="td-gold">
+                  {loading
+                    ? '…'
+                    : `₹${formatSetting(settingValue.rate)}`}
+                </td>
+                <td>Canonical manual shipping charge below the threshold.</td>
+              </tr>
+              <tr>
+                <td className="td-strong">free_shipping_threshold</td>
+                <td className="td-gold">
+                  {loading
+                    ? '…'
+                    : `₹${formatSetting(settingValue.threshold)}`}
+                </td>
+                <td>Subtotal at or above this value receives free shipping.</td>
+              </tr>
             </tbody>
           </table>
+        </div>
+
+        <div className="admin-page-note mt-4">
+          Shipping values are displayed from the backend. This panel does not
+          calculate, override or duplicate checkout pricing logic.
         </div>
       </div>
     </section>
