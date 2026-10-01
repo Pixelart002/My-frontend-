@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RiArrowRightLine } from '@remixicon/react';
+import {
+  RiArrowRightLine,
+  RiCalendarLine,
+  RiMoneyRupeeCircleLine,
+  RiShoppingBag3Line,
+} from '@remixicon/react';
 import { orderService } from '../services/orders';
 import {
   orderStatusLabel,
@@ -170,19 +175,26 @@ export default function OrdersPage() {
         </div>
       </header>
 
-      <section className="mb-5 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4" aria-label="Order filters">
-        <div>
-          <p className="text-sm font-semibold text-text">Order history</p>
-          <p className="mt-0.5 text-xs text-muted">Filter by current order status.</p>
+      <section
+        className="mb-5 flex flex-col gap-4 rounded-2xl border border-line bg-surface p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        aria-label="Order filters"
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold-dim text-gold" aria-hidden="true">
+            <RiShoppingBag3Line size={19} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-text">Order history</p>
+            <p className="mt-0.5 text-xs leading-5 text-muted">Filter your purchases by status.</p>
+          </div>
         </div>
-        <div className="relative">
+        <div className="relative w-full sm:w-52">
           <label className="sr-only" htmlFor="order-status-filter">Filter orders by status</label>
           <select
-            className="min-h-11 w-full appearance-none rounded-xl border border-line bg-bg px-3 pr-10 text-sm font-semibold text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20 sm:w-48"
+            className="min-h-11 w-full appearance-none rounded-xl border border-line bg-bg px-3 pr-10 text-sm font-semibold text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
             id="order-status-filter"
             value={status}
             onChange={handleStatusChange}
-            aria-label="Filter orders by status"
           >
             {STATUS_OPTIONS.map((value) => (
               <option key={value || 'all'} value={value}>
@@ -190,6 +202,7 @@ export default function OrdersPage() {
               </option>
             ))}
           </select>
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted" aria-hidden="true">⌄</span>
         </div>
       </section>
 
@@ -212,40 +225,55 @@ export default function OrdersPage() {
       ) : (
         <>
           <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-luviio-card" role="list" aria-label="Your orders">
-            <div className="hidden grid-cols-[minmax(0,1fr)_120px_120px_36px] gap-4 border-b border-line bg-surface-2 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted sm:grid">
-              <span>Order</span>
-              <span>Date</span>
-              <span>Amount</span>
+            <div className="hidden grid-cols-[minmax(0,1fr)_140px_120px_120px_36px] items-center gap-4 border-b border-line bg-surface-2 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted sm:grid">
+              <span className="flex items-center gap-2"><RiShoppingBag3Line size={14} aria-hidden="true" />Order</span>
+              <span className="flex items-center gap-2"><RiCalendarLine size={14} aria-hidden="true" />Date</span>
+              <span className="flex items-center justify-end gap-2"><RiMoneyRupeeCircleLine size={14} aria-hidden="true" />Amount</span>
+              <span>Status</span>
               <span aria-hidden="true" />
             </div>
             {orders.map((order) => {
               const orderNumber = text(order.order_number);
               const statusValue = text(order.status, 'pending').toLowerCase();
               const tone = orderStatusTone(statusValue);
+              const statusClass =
+                tone === 'success'
+                  ? 'bg-success-dim text-success'
+                  : tone === 'danger'
+                    ? 'bg-danger-dim text-danger'
+                    : 'bg-gold-dim text-gold';
+
               return (
                 <Link
                   to={`/orders/${encodeURIComponent(orderNumber)}`}
-                  className="group grid gap-3 border-b border-line px-4 py-4 transition last:border-b-0 hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_120px_120px_120px_36px] sm:items-center sm:gap-4 sm:px-5"
+                  className="group grid gap-3 border-b border-line px-4 py-4 transition last:border-b-0 hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold sm:grid-cols-[minmax(0,1fr)_140px_120px_120px_36px] sm:items-center sm:gap-4 sm:px-5 sm:py-4"
                   key={orderNumber}
                   role="listitem"
                   aria-label={`Order ${orderNumber}, ${orderStatusLabel(statusValue)}`}
                 >
                   <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-3 sm:justify-start">
-                      <strong className="truncate text-sm font-semibold text-text sm:text-base">#{orderNumber}</strong>
-                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone === 'success' ? 'bg-success-dim text-success' : tone === 'danger' ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'} sm:hidden`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="hidden size-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-2 text-muted sm:flex" aria-hidden="true">
+                          <RiShoppingBag3Line size={17} />
+                        </span>
+                        <span className="min-w-0">
+                          <strong className="block truncate text-sm font-semibold text-text sm:text-base">#{orderNumber}</strong>
+                          <span className="mt-0.5 block text-xs text-muted sm:hidden">{formatOrderDate(order.created_at)}</span>
+                        </span>
+                      </span>
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass} sm:hidden`}>
                         {orderStatusLabel(statusValue)}
                       </span>
                     </div>
-                    <span className="mt-1 block text-xs text-muted sm:hidden">{formatOrderDate(order.created_at)}</span>
                   </div>
                   <span className="hidden text-sm text-muted sm:block">{formatOrderDate(order.created_at)}</span>
-                  <span className="text-sm font-bold text-text sm:text-right">{formatMoney(order.total_amount ?? order.grand_total ?? 0)}</span>
-                  <span className="hidden items-center justify-center text-muted transition group-hover:text-gold sm:flex" aria-hidden="true">
-                    <RiArrowRightLine size={18} />
-                  </span>
-                  <span className={`hidden w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold ${tone === 'success' ? 'bg-success-dim text-success' : tone === 'danger' ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'} sm:inline-flex`}>
+                  <span className="text-sm font-bold tabular-nums text-text sm:text-right">{formatMoney(order.total_amount ?? order.grand_total ?? 0)}</span>
+                  <span className={`hidden w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass} sm:inline-flex`}>
                     {orderStatusLabel(statusValue)}
+                  </span>
+                  <span className="hidden items-center justify-center text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-gold sm:flex" aria-hidden="true">
+                    <RiArrowRightLine size={18} />
                   </span>
                 </Link>
               );
