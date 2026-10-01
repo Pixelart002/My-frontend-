@@ -936,9 +936,10 @@ export default function ProductsPanel({ capabilities = {} }) {
                     return (
                       <tr key={product.id} className="transition hover:bg-surface-2/45">
                         <td className="px-4 py-3.5 align-middle">
-                          <div className="flex min-w-0 items-center gap-3">
+                          <div className="product-cell flex min-w-0 items-center gap-3">
                             {product.image_url ? (
                               <img
+                                className="product-thumb"
                                 src={product.image_url}
                                 alt={
                                   product.name || ''
