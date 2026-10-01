@@ -1,36 +1,31 @@
 import { Elements } from '@stripe/react-stripe-js';
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   RiAddLine,
-  RiAlertLine,
   RiArrowLeftLine,
   RiArrowRightLine,
-  RiCloseLine,
+  RiCheckLine,
   RiCoupon3Line,
-  RiErrorWarningLine,
-  RiLoader4Line,
   RiLockLine,
+  RiMapPinLine,
+  RiMoneyRupeeCircleLine,
+  RiShieldCheckLine,
+  RiTruckLine,
+  RiUser3Line,
 } from '@remixicon/react';
 
-import { getStripePromise } from '../services/stripeConfig';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { getStripePromise } from '../services/stripeConfig';
 import { userService } from '../services/users';
 import { couponService } from '../services/coupons';
 import { paymentService } from '../services/payments';
+import { orderService } from '../services/orders';
 import { shippingService } from '../services/shipping';
-import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
-import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const stripePromise = getStripePromise();
 
@@ -53,7 +48,6 @@ const EMPTY_ADDRESS = {
 
 const isValidIndianPhone = (value) => {
   const raw = String(value || '').replace(/[\s()-]/g, '');
-
   const digits =
     raw.startsWith('+91')
       ? raw.slice(3)
@@ -62,7 +56,6 @@ const isValidIndianPhone = (value) => {
         : raw.startsWith('0') && raw.length === 11
           ? raw.slice(1)
           : raw;
-
   return /^[6-9]\d{9}$/.test(digits);
 };
 
@@ -70,2143 +63,1366 @@ const isValidIndianPin = (value) =>
   /^\d{6}$/.test(String(value || '').trim());
 
 const isValidEmail = (value) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-    String(value || '').trim(),
-  );
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 
-const makeIdempotencyKey = () => {
-  if (
-    typeof crypto !== 'undefined' &&
-    typeof crypto.randomUUID === 'function'
-  ) {
-    return crypto.randomUUID();
-  }
+const makeIdempotencyKey = () =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : 'checkout-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 
-  return `checkout-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}`;
-};
-
-const text = (value, fallback = '') => {
-  const result = String(value ?? '').trim();
-  return result || fallback;
-};
-
-const getApiErrorMessage = (error) => {
+const getErrorMessage = (error, fallback) => {
   const candidates = [
     error?.details?.message,
     error?.details?.detail,
     error?.details?.error,
     error?.response?.data?.detail?.message,
     error?.response?.data?.detail,
-    error?.response?.detail?.message,
-    error?.response?.detail,
     error?.message,
   ];
 
   for (const candidate of candidates) {
-    if (
-      typeof candidate === 'string' &&
-      candidate.trim()
-    ) {
+    if (typeof candidate === 'string' && candidate.trim()) {
       return candidate.trim();
     }
-
-    if (
-      candidate &&
-      typeof candidate === 'object'
-    ) {
-      const nested =
-        candidate.message ||
-        candidate.detail ||
-        candidate.error;
-
-      if (
-        typeof nested === 'string' &&
-        nested.trim()
-      ) {
+    if (candidate && typeof candidate === 'object') {
+      const nested = candidate.message || candidate.detail || candidate.error;
+      if (typeof nested === 'string' && nested.trim()) {
         return nested.trim();
       }
     }
   }
 
-  return 'Manual shipping are temporarily unavailable. Please retry.';
+  return fallback;
 };
 
-function AddressForm({ onSaved, onCancel }) {
-  const [form, setForm] = useState(EMPTY_ADDRESS);
+function Field({ label, className = '', ...props }) {
+  return (
+    <label className={'block ' + className}>
+      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[.08em] text-muted">
+        {label}
+      </span>
+      <input
+        {...props}
+        className="min-h-11 w-full rounded-xl border border-line bg-bg px-3.5 text-sm text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-[rgba(216,173,106,.12)] disabled:cursor-not-allowed disabled:opacity-60"
+      />
+    </label>
+  );
+}
+
+function AddressForm({ initialValues, onSaved, onCancel }) {
+  const [form, setForm] = useState(() => ({
+    ...EMPTY_ADDRESS,
+    ...(initialValues || {}),
+  }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const mountedRef = useRef(false);
-  const submittingRef = useRef(false);
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
   const setField = useCallback((name, value) => {
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-
+    setForm((current) => ({ ...current, [name]: value }));
     setError('');
   }, []);
 
   const submit = async (event) => {
     event.preventDefault();
 
-    if (submittingRef.current) {
-      return;
-    }
-
-    const email = form.email.trim();
-    const phone = form.phone.trim();
-    const line1 = form.line1.trim();
-    const city = form.city.trim();
-    const postalCode = form.postal_code.trim();
-
-    if (!email || !isValidEmail(email)) {
+    if (!isValidEmail(form.email)) {
       setError('Enter a valid email address.');
       return;
     }
-
-    if (!isValidIndianPhone(phone)) {
-      setError(
-        'Enter a valid 10-digit Indian mobile number.',
-      );
+    if (!isValidIndianPhone(form.phone)) {
+      setError('Enter a valid 10-digit Indian mobile number.');
       return;
     }
-
-    if (!line1) {
+    if (!String(form.line1 || '').trim()) {
       setError('Address line 1 is required.');
       return;
     }
-
-    if (!city) {
+    if (!String(form.city || '').trim()) {
       setError('City is required.');
       return;
     }
-
-    if (!isValidIndianPin(postalCode)) {
+    if (!isValidIndianPin(form.postal_code)) {
       setError('Enter a valid 6-digit PIN code.');
       return;
     }
 
-    submittingRef.current = true;
     setBusy(true);
-    setError('');
 
     try {
       const payload = Object.fromEntries(
         Object.entries({
           ...form,
           country: 'IN',
-          email,
-          phone,
-          line1,
-          city,
-          postal_code: postalCode,
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          line1: form.line1.trim(),
+          line2: form.line2.trim(),
+          city: form.city.trim(),
+          state: form.state.trim(),
+          postal_code: form.postal_code.trim(),
         }).map(([key, value]) => [
           key,
-          typeof value === 'string'
-            ? value.trim()
-            : value,
+          typeof value === 'string' ? value.trim() : value,
         ]),
       );
 
-      await userService.addAddress(payload);
-
-      if (mountedRef.current) {
-        onSaved?.();
-      }
-    } catch (err) {
-      if (mountedRef.current) {
-        setError(
-          err?.message ||
-            'Unable to save the address.',
-        );
-      }
+      const saved = await userService.addAddress(payload);
+      onSaved?.(saved);
+    } catch (error) {
+      setError(
+        getErrorMessage(
+          error,
+          'Unable to save the address. Please try again.',
+        ),
+      );
     } finally {
-      submittingRef.current = false;
-
-      if (mountedRef.current) {
-        setBusy(false);
-      }
+      setBusy(false);
     }
   };
 
   return (
     <form
-      className="address-form min-w-0"
+      className="mt-5 rounded-2xl border border-line bg-bg/70 p-4 sm:p-5"
       onSubmit={submit}
       noValidate
     >
-      {error && (
-        <div
-          className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
-          role="alert"
-          aria-live="assertive"
-        >
-          {error}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[.12em] text-gold-soft">
+            New address
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-text">
+            Delivery details
+          </h3>
         </div>
-      )}
-
-      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-full-name">
-            Full name
-          </label>
-          <input
-            id="checkout-full-name"
-            name="full_name"
-            value={form.full_name}
-            onChange={(event) =>
-              setField(
-                'full_name',
-                event.target.value,
-              )
-            }
-            autoComplete="name"
-            disabled={busy}
-            maxLength={120}
-          />
-        </div>
-
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-email">
-            Email *
-          </label>
-          <input
-            id="checkout-email"
-            name="email"
-            type="email"
-            required
-            value={form.email}
-            onChange={(event) =>
-              setField(
-                'email',
-                event.target.value,
-              )
-            }
-            autoComplete="email"
-            disabled={busy}
-            maxLength={254}
-          />
-        </div>
-      </div>
-
-      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-phone">
-            Phone *
-          </label>
-          <input
-            id="checkout-phone"
-            name="phone"
-            required
-            value={form.phone}
-            onChange={(event) =>
-              setField(
-                'phone',
-                event.target.value,
-              )
-            }
-            autoComplete="tel"
-            inputMode="tel"
-            maxLength={16}
-            placeholder="+91 9876543210"
-            disabled={busy}
-          />
-        </div>
-
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-pin">
-            PIN code *
-          </label>
-          <input
-            id="checkout-pin"
-            name="postal_code"
-            required
-            value={form.postal_code}
-            onChange={(event) =>
-              setField(
-                'postal_code',
-                event.target.value,
-              )
-            }
-            autoComplete="postal-code"
-            inputMode="numeric"
-            maxLength={6}
-            disabled={busy}
-          />
-        </div>
-      </div>
-
-      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-        <label htmlFor="checkout-line1">
-          Address line 1 *
-        </label>
-        <input
-          id="checkout-line1"
-          name="line1"
-          required
-          value={form.line1}
-          onChange={(event) =>
-            setField(
-              'line1',
-              event.target.value,
-            )
-          }
-          autoComplete="address-line1"
-          maxLength={250}
-          disabled={busy}
-        />
-      </div>
-
-      <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-        <label htmlFor="checkout-line2">
-          Address line 2
-        </label>
-        <input
-          id="checkout-line2"
-          name="line2"
-          value={form.line2}
-          onChange={(event) =>
-            setField(
-              'line2',
-              event.target.value,
-            )
-          }
-          autoComplete="address-line2"
-          maxLength={250}
-          disabled={busy}
-        />
-      </div>
-
-      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-city">
-            City *
-          </label>
-          <input
-            id="checkout-city"
-            name="city"
-            required
-            value={form.city}
-            onChange={(event) =>
-              setField(
-                'city',
-                event.target.value,
-              )
-            }
-            autoComplete="address-level2"
-            maxLength={100}
-            disabled={busy}
-          />
-        </div>
-
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-state">
-            State
-          </label>
-          <input
-            id="checkout-state"
-            name="state"
-            value={form.state}
-            onChange={(event) =>
-              setField(
-                'state',
-                event.target.value,
-              )
-            }
-            autoComplete="address-level1"
-            maxLength={100}
-            disabled={busy}
-          />
-        </div>
-      </div>
-
-      <div className="field-grid grid min-w-0 grid-cols-2 gap-x-4 gap-y-0 max-[560px]:grid-cols-1">
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-landmark">
-            Landmark
-          </label>
-          <input
-            id="checkout-landmark"
-            name="landmark"
-            value={form.landmark}
-            onChange={(event) =>
-              setField(
-                'landmark',
-                event.target.value,
-              )
-            }
-            maxLength={150}
-            disabled={busy}
-          />
-        </div>
-
-        <div className="field mb-4 flex min-w-0 flex-col gap-1.5 [&>label]:text-[11px] [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[.06em] [&>label]:text-muted [&_input]:min-h-11 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3.5 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_select]:min-h-11 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3.5 [&_select]:text-sm [&_select]:text-text [&_select]:outline-none [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)] [&_textarea]:min-h-24 [&_textarea]:w-full [&_textarea]:resize-y [&_textarea]:rounded-xl [&_textarea]:border [&_textarea]:border-line [&_textarea]:bg-bg [&_textarea]:px-3.5 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-text [&_textarea]:outline-none [&_textarea:focus]:border-gold [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-[rgba(216,173,106,.10)]">
-          <label htmlFor="checkout-address-type">
-            Address type
-          </label>
-          <select
-            id="checkout-address-type"
-            name="address_type"
-            value={form.address_type}
-            onChange={(event) =>
-              setField(
-                'address_type',
-                event.target.value,
-              )
-            }
-            disabled={busy}
-          >
-            <option value="home">Home</option>
-            <option value="office">Office</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <label className="check-line inline-flex min-h-11 cursor-pointer select-none items-center gap-2.5 rounded-xl border border-line bg-bg px-3.5 text-sm text-text transition-colors hover:border-[rgba(216,173,106,.60)] has-[:checked]:border-gold has-[:checked]:bg-gold-dim has-[:checked]:text-gold-soft [&_input]:h-4 [&_input]:w-4 [&_input]:accent-gold">
-        <input
-          type="checkbox"
-          checked={form.is_default}
-          onChange={(event) =>
-            setField(
-              'is_default',
-              event.target.checked,
-            )
-          }
-          disabled={busy}
-        />
-        <span>Make this my default address</span>
-      </label>
-
-      <div className="btn-row mt-5 flex min-w-0 flex-wrap items-center gap-2.5 max-[480px]:flex-col max-[480px]:items-stretch">
         <button
           type="button"
-          className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-10 rounded-xl border border-line px-3 text-xs font-semibold text-muted transition hover:border-gold hover:text-text"
           onClick={onCancel}
           disabled={busy}
         >
           Cancel
         </button>
-
-        <button
-          type="submit"
-          className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={busy}
-          aria-busy={busy}
-        >
-          {busy && (
-            <RiLoader4Line
-              className="spin animate-spin"
-              size={17}
-              aria-hidden="true"
-            />
-          )}
-          {busy ? 'Saving…' : 'Save address'}
-        </button>
       </div>
+
+      {error && (
+        <p
+          className="mt-4 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Full name"
+          name="full_name"
+          autoComplete="name"
+          value={form.full_name}
+          onChange={(event) => setField('full_name', event.target.value)}
+          maxLength={120}
+          disabled={busy}
+        />
+        <Field
+          label="Email *"
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={form.email}
+          onChange={(event) => setField('email', event.target.value)}
+          maxLength={254}
+          disabled={busy}
+          required
+        />
+        <Field
+          label="Mobile *"
+          name="phone"
+          autoComplete="tel"
+          inputMode="tel"
+          placeholder="+91 9876543210"
+          value={form.phone}
+          onChange={(event) => setField('phone', event.target.value)}
+          maxLength={16}
+          disabled={busy}
+          required
+        />
+        <Field
+          label="PIN code *"
+          name="postal_code"
+          autoComplete="postal-code"
+          inputMode="numeric"
+          value={form.postal_code}
+          onChange={(event) => setField('postal_code', event.target.value)}
+          maxLength={6}
+          disabled={busy}
+          required
+        />
+        <Field
+          label="Address line 1 *"
+          name="line1"
+          className="sm:col-span-2"
+          autoComplete="address-line1"
+          value={form.line1}
+          onChange={(event) => setField('line1', event.target.value)}
+          maxLength={255}
+          disabled={busy}
+          required
+        />
+        <Field
+          label="Address line 2"
+          name="line2"
+          className="sm:col-span-2"
+          autoComplete="address-line2"
+          value={form.line2}
+          onChange={(event) => setField('line2', event.target.value)}
+          maxLength={255}
+          disabled={busy}
+        />
+        <Field
+          label="City *"
+          name="city"
+          autoComplete="address-level2"
+          value={form.city}
+          onChange={(event) => setField('city', event.target.value)}
+          maxLength={100}
+          disabled={busy}
+          required
+        />
+        <Field
+          label="State"
+          name="state"
+          autoComplete="address-level1"
+          value={form.state}
+          onChange={(event) => setField('state', event.target.value)}
+          maxLength={100}
+          disabled={busy}
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        disabled={busy}
+      >
+        {busy ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-gold-ink/30 border-t-gold-ink motion-reduce:animate-none" />
+            Saving…
+          </>
+        ) : (
+          <>
+            <RiCheckLine size={16} aria-hidden="true" />
+            Save address
+          </>
+        )}
+      </button>
     </form>
+  );
+}
+
+function AddressCard({ address, selected, disabled, onSelect }) {
+  return (
+    <label
+      className={[
+        'block rounded-2xl border p-4 transition',
+        selected
+          ? 'border-gold bg-gold-dim shadow-[0_0_0_1px_rgba(216,173,106,.10)]'
+          : 'border-line bg-bg hover:border-[rgba(216,173,106,.35)]',
+        disabled ? 'cursor-default opacity-70' : 'cursor-pointer',
+      ].join(' ')}
+    >
+      <input
+        type="radio"
+        name="delivery-address"
+        value={String(address?.id || '')}
+        checked={selected}
+        onChange={() => onSelect(String(address.id))}
+        disabled={disabled}
+        className="sr-only"
+      />
+      <div className="flex items-start gap-3">
+        <span
+          className={[
+            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border',
+            selected
+              ? 'border-gold bg-gold text-gold-ink'
+              : 'border-line text-transparent',
+          ].join(' ')}
+          aria-hidden="true"
+        >
+          <span className="h-2 w-2 rounded-full bg-current" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-2">
+            <strong className="text-sm text-text">
+              {address?.full_name || 'Delivery address'}
+            </strong>
+            {address?.is_default && (
+              <span className="rounded-full border border-success/30 bg-success-dim px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">
+                Default
+              </span>
+            )}
+          </span>
+          <span className="mt-1 block break-words text-sm leading-6 text-muted">
+            {address?.line1}
+            {address?.line2 ? ', ' + address.line2 : ''}
+          </span>
+          <span className="block text-sm leading-6 text-muted">
+            {[address?.city, address?.state, address?.postal_code]
+              .filter(Boolean)
+              .join(', ')}
+          </span>
+          <span className="mt-1 block text-xs text-dim">
+            {address?.phone || 'Mobile number missing'}
+          </span>
+        </span>
+      </div>
+    </label>
+  );
+}
+
+function Section({ number, icon: Icon, title, description, children }) {
+  return (
+    <section className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
+          <Icon size={17} aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-line bg-bg px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-dim">
+              {number}
+            </span>
+            <h2 className="text-base font-semibold text-text">{title}</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   const {
     cart,
     loading: cartLoading,
+    error: cartError,
     reload: reloadCart,
   } = useCart();
 
   const [addresses, setAddresses] = useState([]);
-  const [selected, setSelected] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [addressError, setAddressError] =
-    useState('');
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [addressesLoading, setAddressesLoading] = useState(true);
+  const [addressError, setAddressError] = useState('');
+  const [showAddressForm, setShowAddressForm] = useState(false);
 
-  const [paymentMethod, setPaymentMethod] =
-    useState('');
-  const [paymentModalOpen, setPaymentModalOpen] =
-    useState(false);
-  const [paymentReview, setPaymentReview] =
-    useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
 
   const [intent, setIntent] = useState(null);
-  const [intentError, setIntentError] =
-    useState('');
+  const [activeOrder, setActiveOrder] = useState(null);
+  const [orderPreview, setOrderPreview] = useState(null);
+  const [orderPreviewLoading, setOrderPreviewLoading] = useState(false);
+  const [placing, setPlacing] = useState(false);
+  const [pageError, setPageError] = useState('');
+  const [cancelling, setCancelling] = useState(false);
+  const [paymentSessionKey, setPaymentSessionKey] = useState('');
 
-  const [creating, setCreating] = useState(false);
-  const [activeOrder, setActiveOrder] =
-    useState(null);
-
-  const [checkoutKey, setCheckoutKey] =
-    useState('');
-
-  const [paymentSessionKey, setPaymentSessionKey] =
-    useState('');
-
-  const [couponInput, setCouponInput] =
-    useState('');
-  const [coupon, setCoupon] = useState(null);
-  const [couponError, setCouponError] =
-    useState('');
-  const [couponLoading, setCouponLoading] =
-    useState(false);
-
-  const [shippingQuote, setShippingQuote] =
-    useState(null);
-  const [selectedCourierId, setSelectedCourierId] =
-    useState('');
-  const [
-    shippingQuoteLoading,
-    setShippingQuoteLoading,
-  ] = useState(false);
-
-  const [
-    cancelConfirmOpen,
-    setCancelConfirmOpen,
-  ] = useState(false);
-  const [
-    cancellingOrder,
-    setCancellingOrder,
-  ] = useState(false);
-
-  const mountedRef = useRef(false);
-  const addressRequestRef = useRef(0);
-  const paymentRequestRef = useRef(0);
-
+  const requestVersion = useRef(0);
   const creatingRef = useRef(false);
-  const couponLoadingRef = useRef(false);
+  const couponRef = useRef(false);
   const cancellingRef = useRef(false);
-  const retryingRef = useRef(false);
+  const idempotencyKeyRef = useRef('');
 
-  const cancelModalRef = useRef(null);
-  const cancelCloseRef = useRef(null);
-  const cancelTitleId = useId();
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  const items = cart?.items || [];
-
-  const canProceed =
-    items.length > 0 &&
-    !cart?.has_unavailable_items;
+  const items = Array.isArray(cart?.items) ? cart.items : [];
+  const canCheckout = items.length > 0 && !cart?.has_unavailable_items;
+  const locked = Boolean(intent || activeOrder);
 
   const selectedAddress = useMemo(
     () =>
       addresses.find(
         (address) =>
-          String(address.id) ===
-          String(selected),
+          String(address?.id) === String(selectedAddressId),
       ) || null,
-    [addresses, selected],
+    [addresses, selectedAddressId],
   );
 
-  const selectedPhoneValid =
-    isValidIndianPhone(
-      selectedAddress?.phone,
-    );
-
-  const couponDiscount =
-    Number(coupon?.discount) > 0
-      ? Number(coupon.discount)
-      : 0;
-
-const loadAddresses = useCallback(
-    async () => {
-      const requestId =
-        ++addressRequestRef.current;
-
-      setAddressError('');
-
-      try {
-        const list =
-          await userService.getAddresses();
-
-        if (
-          !mountedRef.current ||
-          requestId !==
-            addressRequestRef.current
-        ) {
-          return;
-        }
-
-        const next = Array.isArray(list)
-          ? list
-          : [];
-
-        setAddresses(next);
-
-        setSelected((current) => {
-          if (
-            current &&
-            next.some(
-              (address) =>
-                String(address.id) ===
-                String(current),
-            )
-          ) {
-            return current;
-          }
-
-          return (
-            next.find(
-              (address) =>
-                address.is_default,
-            )?.id ||
-            next[0]?.id ||
-            ''
-          );
-        });
-      } catch (err) {
-        if (
-          mountedRef.current &&
-          requestId ===
-            addressRequestRef.current
-        ) {
-          setAddressError(
-            err?.message ||
-              'Unable to load your addresses.',
-          );
-        }
-      }
-    },
-    [],
+  const addressSeed = useMemo(
+    () => ({
+      ...EMPTY_ADDRESS,
+      full_name: user?.full_name || user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+    }),
+    [user?.full_name, user?.name, user?.email, user?.phone],
   );
 
-  useEffect(() => {
-    loadAddresses();
-  }, [loadAddresses]);
+  const shippingPolicy = useMemo(
+    () => shippingService.manualRate(cart?.subtotal),
+    [cart?.subtotal],
+  );
 
-  /*
-   * Manual shipping quote.
-   *
-   * Luviio owns the shipping policy. The UI uses the shared shipping
-   * service for the preview; payment/order totals remain backend-authoritative.
-   */
-  useEffect(() => {
-    if (!selectedAddress?.postal_code || !canProceed) {
-      setShippingQuote(null);
-      setSelectedCourierId('');
-      setShippingQuoteLoading(false);
-      return;
-    }
+  const shippingAmount =
+    cart?.shipping_cost === null || cart?.shipping_cost === undefined
+      ? null
+      : Number(cart.shipping_cost);
 
-    setShippingQuoteLoading(true);
+  const cartTotal =
+    cart?.total_amount === null || cart?.total_amount === undefined
+      ? null
+      : Number(cart.total_amount);
 
-    const manualShipping = {
-      courier_id: 'manual',
-      ...shippingService.manualRate(cart?.subtotal),
-    };
+  const serverOrderTotal =
+    orderPreview?.total_amount ?? orderPreview?.grand_total;
 
-    setShippingQuote(manualShipping);
-    setSelectedCourierId('manual');
-    setShippingQuoteLoading(false);
+  const displayedTotal =
+    serverOrderTotal !== null && serverOrderTotal !== undefined
+      ? Number(serverOrderTotal)
+      : cartTotal;
 
-    // Shipping/cart changes invalidate an unfinished payment session.
-    setIntent(null);
-    setIntentError('');
-    setPaymentReview(false);
-  }, [
-    cart?.subtotal,
-    canProceed,
-    selected,
-  ]);
+  const loadAddresses = useCallback(async () => {
+    const version = ++requestVersion.current;
+    setAddressesLoading(true);
+    setAddressError('');
 
-  const resetPayment = useCallback(() => {
-    ++paymentRequestRef.current;
+    try {
+      const data = await userService.getAddresses();
 
-    setIntent(null);
-    setIntentError('');
-    setPaymentReview(false);
-    setPaymentModalOpen(false);
-    setPaymentSessionKey('');
-  }, []);
-
-  const applyCoupon = useCallback(
-    async () => {
-      const code = couponInput
-        .trim()
-        .toUpperCase();
-
-      if (
-        !code ||
-        couponLoadingRef.current ||
-        coupon ||
-        activeOrder
-      ) {
+      if (version !== requestVersion.current) {
         return;
       }
 
-      couponLoadingRef.current = true;
-      setCouponLoading(true);
-      setCouponError('');
+      const next = Array.isArray(data) ? data : [];
+      setAddresses(next);
 
-      try {
-        const result =
-          await couponService.apply(
-            code,
-            cart?.subtotal,
-          );
-
-        const discount = Number(
-          result?.discount,
-        );
-
+      setSelectedAddressId((current) => {
         if (
-          !Number.isFinite(discount) ||
-          discount <= 0
+          current &&
+          next.some(
+            (address) => String(address?.id) === String(current),
+          )
         ) {
-          throw new Error(
-            'This coupon does not provide a discount for the current cart.',
-          );
+          return current;
         }
 
-        if (!mountedRef.current) {
-          return;
-        }
-
-        setCoupon({
-          ...result,
-          subtotal:
-            Number(cart?.subtotal) || 0,
-        });
-
-        setCouponInput('');
-        resetPayment();
-      } catch (err) {
-        if (mountedRef.current) {
-          setCouponError(
-            err?.message ||
-              'Unable to apply this coupon.',
-          );
-        }
-      } finally {
-        couponLoadingRef.current = false;
-
-        if (mountedRef.current) {
-          setCouponLoading(false);
-        }
+        return String(
+          next.find((address) => address?.is_default)?.id ||
+            next[0]?.id ||
+            '',
+        );
+      });
+    } catch (error) {
+      if (version === requestVersion.current) {
+        setAddressError(
+          getErrorMessage(
+            error,
+            'Unable to load your saved addresses.',
+          ),
+        );
       }
-    },
-    [
-      activeOrder,
-      cart?.subtotal,
-      coupon,
-      couponInput,
-      resetPayment,
-    ],
-  );
+    } finally {
+      if (version === requestVersion.current) {
+        setAddressesLoading(false);
+      }
+    }
+  }, []);
 
-  const removeCoupon = useCallback(() => {
-    if (activeOrder) {
+  useEffect(() => {
+    void loadAddresses();
+  }, [loadAddresses]);
+
+  const resetPaymentSession = useCallback(() => {
+    setIntent(null);
+    setActiveOrder(null);
+    setOrderPreview(null);
+    setPaymentSessionKey('');
+    setPageError('');
+    idempotencyKeyRef.current = '';
+  }, []);
+
+  const applyCoupon = useCallback(async () => {
+    const code = couponInput.trim().toUpperCase();
+
+    if (!code || couponRef.current || coupon || locked) {
       return;
     }
 
-    setCoupon(null);
+    couponRef.current = true;
+    setCouponLoading(true);
     setCouponError('');
-    setCouponInput('');
-    resetPayment();
-  }, [activeOrder, resetPayment]);
+
+    try {
+      const result = await couponService.apply(code, cart?.subtotal);
+      const discount = Number(result?.discount);
+
+      if (!Number.isFinite(discount) || discount <= 0) {
+        throw new Error(
+          'This coupon does not provide a discount for the current cart.',
+        );
+      }
+
+      setCoupon({ ...result, discount });
+      setCouponInput('');
+    } catch (error) {
+      setCouponError(
+        getErrorMessage(error, 'Unable to apply this coupon.'),
+      );
+    } finally {
+      couponRef.current = false;
+      setCouponLoading(false);
+    }
+  }, [cart?.subtotal, coupon, couponInput, locked]);
 
   useEffect(() => {
     if (
-      !coupon ||
-      activeOrder
-    ) {
-      return;
-    }
-
-    if (
-      Number(coupon.subtotal) !==
-      Number(cart?.subtotal || 0)
+      coupon &&
+      !locked &&
+      Number(coupon.subtotal) !== Number(cart?.subtotal || 0)
     ) {
       setCoupon(null);
       setCouponError('');
       setCouponInput('');
-      resetPayment();
     }
-  }, [
-    cart?.subtotal,
-    coupon,
-    activeOrder,
-    resetPayment,
-  ]);
+  }, [cart?.subtotal, coupon, locked]);
 
-  const openPaymentChooser =
-    useCallback(() => {
-      if (
-        !selected ||
-        !selectedCourierId ||
-        !shippingQuote ||
-        creatingRef.current ||
-        activeOrder
-      ) {
-        return;
-      }
+  const handleAddressSaved = useCallback(
+    async (saved) => {
+      setShowAddressForm(false);
+      await loadAddresses();
 
-      if (!selectedAddress) {
-        setIntentError(
-          'Please select a delivery address before continuing.',
-        );
-        return;
-      }
-
-      if (!selectedPhoneValid) {
-        setIntentError(
-          'Please update this delivery address with a valid 10-digit Indian mobile number before payment.',
-        );
-        return;
-      }
-
-      setIntentError('');
-      setPaymentReview(false);
-      setIntent(null);
-      setPaymentModalOpen(true);
-    }, [
-      activeOrder,
-      selected,
-      selectedAddress,
-      selectedCourierId,
-      selectedPhoneValid,
-      shippingQuote,
-    ]);
-
-  const startPayment = useCallback(
-    async () => {
-      if (
-        creatingRef.current ||
-        !selected ||
-        !selectedAddress ||
-        !selectedCourierId ||
-        !shippingQuote ||
-        !paymentMethod ||
-        activeOrder
-      ) {
-        return;
-      }
-
-      if (!selectedPhoneValid) {
-        setIntentError(
-          'Please update the delivery address with a valid Indian mobile number.',
-        );
-        return;
-      }
-
-      if (
-        paymentMethod === 'stripe' &&
-        !(await stripePromise)
-      ) {
-        setIntentError(
-          'Online payment is temporarily unavailable. Please use another payment method.',
-        );
-        return;
-      }
-
-      creatingRef.current = true;
-      const requestId =
-        ++paymentRequestRef.current;
-
-      setCreating(true);
-      setIntentError('');
-
-      try {
-        const key =
-          checkoutKey || makeIdempotencyKey();
-
-        if (!checkoutKey) {
-          setCheckoutKey(key);
-        }
-
-        if (paymentMethod === 'cod') {
-          const order =
-            await paymentService.createCodOrder(
-              selected,
-              key,
-              null,
-              coupon?.code || null,
-              selectedCourierId,
-            );
-
-          if (
-            !mountedRef.current ||
-            requestId !==
-              paymentRequestRef.current
-          ) {
-            return;
-          }
-
-          const orderNumber = text(
-            order?.order_number,
-          );
-
-          if (!orderNumber) {
-            throw new Error(
-              'COD order could not be created. Please try again.',
-            );
-          }
-
-          setActiveOrder({
-            orderNumber,
-            orderId: order?.order_id,
-            paymentMethod: 'cod',
-          });
-
-          setPaymentReview(true);
-          return;
-        }
-
-        const data =
-          await paymentService.createIntent(
-            selected,
-            key,
-            null,
-            coupon?.code || null,
-            selectedCourierId,
-          );
-
-        if (
-          !data?.client_secret ||
-          !data?.payment_intent_id ||
-          !data?.order_number
-        ) {
-          throw new Error(
-            'Payment session was not created correctly. Please try again.',
-          );
-        }
-
-        if (
-          !mountedRef.current ||
-          requestId !==
-            paymentRequestRef.current
-        ) {
-          return;
-        }
-
-        setIntent(data);
-        setPaymentSessionKey(
-          `${data.payment_intent_id}:${Date.now()}`,
-        );
-
-        setActiveOrder({
-          orderNumber: data.order_number,
-          orderId: data.order_id,
-          paymentMethod: 'stripe',
-          paymentIntentId:
-            data.payment_intent_id,
-        });
-
-        setPaymentReview(true);
-      } catch (err) {
-        if (
-          !mountedRef.current ||
-          requestId !==
-            paymentRequestRef.current
-        ) {
-          return;
-        }
-
-        const message =
-          err?.code === 'NETWORK_ERROR'
-            ? 'We could not reach the order service. Check your connection and try again.'
-            : err?.code === 'TIMEOUT'
-              ? 'The order service took too long to respond. Please retry.'
-              : err?.status === 401
-                ? 'Your session has expired. Please sign in again.'
-                : err?.message ||
-                  'Unable to place your order. Please try again.';
-
-        setIntentError(message);
-      } finally {
-        creatingRef.current = false;
-
-        if (mountedRef.current) {
-          setCreating(false);
-        }
+      if (saved?.id) {
+        setSelectedAddressId(String(saved.id));
       }
     },
-    [
-      activeOrder,
-      checkoutKey,
-      coupon?.code,
-      paymentMethod,
-      selected,
-      selectedAddress,
-      selectedCourierId,
-      selectedPhoneValid,
-      shippingQuote,
-    ],
+    [loadAddresses],
   );
 
-  const handleModalContinue =
-    useCallback(() => {
-      if (activeOrder) {
-        return;
-      }
+  const addressReady =
+    Boolean(selectedAddress) &&
+    isValidIndianPhone(selectedAddress?.phone) &&
+    isValidEmail(selectedAddress?.email);
 
-      if (!paymentReview) {
-        setPaymentReview(true);
-        return;
-      }
+  const validateCheckout = useCallback(() => {
+    if (!canCheckout) {
+      setPageError(
+        cart?.has_unavailable_items
+          ? 'One or more cart items are unavailable. Update your cart and try again.'
+          : 'Your cart is empty.',
+      );
+      return false;
+    }
 
-      startPayment();
-    }, [
-      activeOrder,
-      paymentReview,
-      startPayment,
-    ]);
+    if (!selectedAddress) {
+      setPageError('Select a delivery address before continuing.');
+      return false;
+    }
 
-  const handleModalBack = useCallback(() => {
-    if (activeOrder) {
+    if (!isValidIndianPhone(selectedAddress.phone)) {
+      setPageError(
+        'This address needs a valid 10-digit Indian mobile number.',
+      );
+      return false;
+    }
+
+    if (!isValidEmail(selectedAddress.email)) {
+      setPageError('This address needs a valid email address.');
+      return false;
+    }
+
+    return true;
+  }, [canCheckout, cart?.has_unavailable_items, selectedAddress]);
+
+  const loadOrderPreview = useCallback(async (orderNumber) => {
+    if (!orderNumber) {
       return;
     }
 
-    if (intent) {
-      setIntent(null);
-      setIntentError('');
-      setPaymentSessionKey('');
+    setOrderPreviewLoading(true);
+
+    try {
+      const data = await orderService.myOrder(orderNumber);
+      setOrderPreview(data || null);
+    } catch {
+      setOrderPreview(null);
+    } finally {
+      setOrderPreviewLoading(false);
+    }
+  }, []);
+
+  const createCheckout = useCallback(async () => {
+    if (creatingRef.current || locked) {
       return;
     }
 
-    setPaymentReview(false);
-    setIntentError('');
-  }, [activeOrder, intent]);
+    setPageError('');
 
-  const requestCancelOrder =
-    useCallback(() => {
-      if (
-        activeOrder &&
-        !cancellingRef.current
-      ) {
-        setCancelConfirmOpen(true);
-      }
-    }, [activeOrder]);
+    if (!validateCheckout()) {
+      return;
+    }
 
-  useFocusTrap({
-    enabled: cancelConfirmOpen,
-    containerRef: cancelModalRef,
-    initialFocusRef: cancelCloseRef,
-    onEscape: () => {
-      if (!cancellingRef.current) {
-        setCancelConfirmOpen(false);
-      }
-    },
-  });
+    if (paymentMethod === 'stripe' && !(await stripePromise)) {
+      setPageError(
+        'Online payment is temporarily unavailable. Please try again later or choose Cash on Delivery.',
+      );
+      return;
+    }
 
-  const cancelActiveOrder =
-    useCallback(async () => {
-      if (
-        !activeOrder?.orderNumber ||
-        cancellingRef.current
-      ) {
-        return;
-      }
+    creatingRef.current = true;
+    setPlacing(true);
 
-      cancellingRef.current = true;
-      setCancellingOrder(true);
-      setIntentError('');
+    try {
+      const idempotencyKey =
+        idempotencyKeyRef.current || makeIdempotencyKey();
 
-      try {
-        await paymentService.cancelCheckout(
-          activeOrder.orderNumber,
+      idempotencyKeyRef.current = idempotencyKey;
+
+      if (paymentMethod === 'cod') {
+        const result = await paymentService.createCodOrder(
+          selectedAddress.id,
+          idempotencyKey,
+          null,
+          coupon?.code || null,
         );
 
-        if (!mountedRef.current) {
-          return;
-        }
+        const orderNumber = String(result?.order_number || '').trim();
 
-        setCancelConfirmOpen(false);
-        resetPayment();
-        setActiveOrder(null);
-        setCheckoutKey('');
-        setPaymentSessionKey('');
-
-        await reloadCart();
-
-        if (mountedRef.current) {
-          navigate('/cart', {
-            replace: true,
-          });
-        }
-      } catch (err) {
-        if (mountedRef.current) {
-          setIntentError(
-            err?.message ||
-              'We could not cancel this order safely. Please try again.',
+        if (!orderNumber) {
+          throw new Error(
+            'The COD order reference was not returned. Please check My Orders.',
           );
-          setCancelConfirmOpen(false);
         }
-      } finally {
-        cancellingRef.current = false;
 
-        if (mountedRef.current) {
-          setCancellingOrder(false);
-        }
+        navigate(
+          '/order/success?order=' +
+            encodeURIComponent(orderNumber) +
+            '&payment=cod',
+          { replace: true },
+        );
+        return;
       }
-    }, [
-      activeOrder,
-      navigate,
-      reloadCart,
-      resetPayment,
-    ]);
+
+      const result = await paymentService.createIntent(
+        selectedAddress.id,
+        idempotencyKey,
+        null,
+        coupon?.code || null,
+      );
+
+      if (
+        !result?.client_secret ||
+        !result?.payment_intent_id ||
+        !result?.order_number
+      ) {
+        throw new Error(
+          'The payment session was not created correctly. Please try again.',
+        );
+      }
+
+      setIntent(result);
+      setActiveOrder({
+        orderNumber: result.order_number,
+        paymentIntentId: result.payment_intent_id,
+        paymentMethod: 'stripe',
+      });
+      setPaymentSessionKey(
+        result.payment_intent_id + ':' + Date.now(),
+      );
+
+      void loadOrderPreview(result.order_number);
+    } catch (error) {
+      setPageError(
+        getErrorMessage(
+          error,
+          'Unable to start checkout. Please try again.',
+        ),
+      );
+    } finally {
+      creatingRef.current = false;
+      setPlacing(false);
+    }
+  }, [
+    coupon?.code,
+    loadOrderPreview,
+    locked,
+    navigate,
+    paymentMethod,
+    selectedAddress,
+    validateCheckout,
+  ]);
+
+  const cancelPayment = useCallback(async () => {
+    const orderNumber = activeOrder?.orderNumber;
+
+    if (!orderNumber || cancellingRef.current) {
+      return;
+    }
+
+    cancellingRef.current = true;
+    setCancelling(true);
+    setPageError('');
+
+    try {
+      await paymentService.cancelCheckout(orderNumber);
+      resetPaymentSession();
+      await reloadCart();
+    } catch (error) {
+      setPageError(
+        getErrorMessage(
+          error,
+          'We could not safely cancel this payment session. Please try again.',
+        ),
+      );
+    } finally {
+      cancellingRef.current = false;
+      setCancelling(false);
+    }
+  }, [activeOrder?.orderNumber, reloadCart, resetPaymentSession]);
 
   const retryPayment = useCallback(
     async (orderNumber) => {
-      if (
-        retryingRef.current ||
-        !orderNumber
-      ) {
-        return;
+      const result = await paymentService.retry(orderNumber);
+
+      if (!result?.client_secret || !result?.payment_intent_id) {
+        throw new Error('A fresh payment session could not be created.');
       }
 
-      retryingRef.current = true;
-      setIntentError('');
-
-      try {
-        const data =
-          await paymentService.retry(
-            orderNumber,
-          );
-
-        if (!mountedRef.current) {
-          return;
-        }
-
-        if (
-          !data?.client_secret ||
-          !data?.payment_intent_id
-        ) {
-          throw new Error(
-            'A fresh payment session could not be created.',
-          );
-        }
-
-        setPaymentSessionKey(
-          `${data.payment_intent_id}:${Date.now()}`,
-        );
-
-        setIntent(data);
-
-        setActiveOrder((current) => ({
-          ...(current || {}),
-          orderNumber:
-            data.order_number ||
-            orderNumber,
-          orderId: data.order_id,
-          paymentMethod: 'stripe',
-          paymentIntentId:
-            data.payment_intent_id,
-        }));
-      } catch (err) {
-        if (mountedRef.current) {
-          setIntentError(
-            err?.message ||
-              'Unable to retry the payment.',
-          );
-        }
-
-        throw err;
-      } finally {
-        retryingRef.current = false;
-      }
+      setIntent(result);
+      setActiveOrder((current) => ({
+        ...(current || {}),
+        orderNumber: result.order_number || orderNumber,
+        paymentIntentId: result.payment_intent_id,
+        paymentMethod: 'stripe',
+      }));
+      setPaymentSessionKey(
+        result.payment_intent_id + ':' + Date.now(),
+      );
+      void loadOrderPreview(result.order_number || orderNumber);
     },
-    [],
+    [loadOrderPreview],
   );
 
-  const goToOrderSuccess = useCallback(
-    (orderNumber, method) => {
-      const number = text(orderNumber);
+  const handlePaymentSuccess = useCallback(
+    (result) => {
+      const orderNumber = String(
+        result?.order_number || activeOrder?.orderNumber || '',
+      ).trim();
 
-      if (!number) {
-        navigate('/orders', {
-          replace: true,
-        });
+      if (!orderNumber) {
+        setPageError(
+          'Payment completed, but no order reference was returned. Check My Orders.',
+        );
         return;
       }
 
-      const params =
-        new URLSearchParams({
-          order: number,
-          payment: method,
-        });
-
       navigate(
-        `/order/success?${params.toString()}`,
+        '/order/success?order=' +
+          encodeURIComponent(orderNumber) +
+          '&payment=stripe',
         { replace: true },
       );
     },
-    [navigate],
+    [activeOrder?.orderNumber, navigate],
   );
 
-  /*
-   * COD creation is already a completed order
-   * creation on the backend. The modal can expose
-   * the success action through PaymentMethodModal.
-   */
-  const handleCodSuccess =
-    useCallback(() => {
-      goToOrderSuccess(
-        activeOrder?.orderNumber,
-        'cod',
-      );
-    }, [
-      activeOrder?.orderNumber,
-      goToOrderSuccess,
-    ]);
+  const stripeOptions = useMemo(() => {
+    if (!intent?.client_secret) {
+      return undefined;
+    }
 
-  if (cartLoading) {
+    return {
+      clientSecret: intent.client_secret,
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#d8ad6a',
+          colorBackground: '#0e0e0e',
+          colorText: '#f2f0ea',
+          colorTextSecondary: '#a7a4a0',
+          colorDanger: '#e07a7a',
+          borderRadius: '12px',
+          fontFamily:
+            'DM Sans, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+        },
+      },
+    };
+  }, [intent?.client_secret]);
+
+  if (cartLoading && items.length === 0) {
     return (
-      <div className="page container checkout-loading-page mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px]">
-        <Spinner label="Preparing your checkout…" />
+      <div className="page container py-10">
+        <Spinner label="Loading your cart…" />
       </div>
     );
   }
 
-  if (!canProceed && !activeOrder) {
+  if (cartError && items.length === 0) {
     return (
-      <div className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] pb-[clamp(64px,9vw,120px)] pt-[clamp(48px,7vw,96px)] max-[760px]:px-[18px] max-[760px]:pt-10 max-[760px]:pb-16 max-[480px]:px-4">
-        <div className="page-heading compact mb-5 min-w-0 max-w-[760px]">
-          <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">Checkout</p>
-          <h1>Your bag is empty.</h1>
-        </div>
-
-        <button
-          className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-          type="button"
-          onClick={() =>
-            navigate('/shop')
-          }
-        >
-          Continue shopping
-        </button>
+      <div className="page container py-10">
+        <ErrorState message={cartError} onRetry={reloadCart} />
       </div>
     );
   }
 
-  const paymentContent =
-    intent?.client_secret ? (
-      <Elements
-        key={
-          paymentSessionKey ||
-          intent.payment_intent_id
-        }
-        stripe={stripePromise}
-        options={{
-          clientSecret:
-            intent.client_secret,
-          loader: 'auto',
-        }}
-      >
-        <StripePaymentForm
-          orderNumber={
-            intent.order_number ||
-            activeOrder?.orderNumber
-          }
-          clientSecret={
-            intent.client_secret
-          }
-          onSuccess={() =>
-            goToOrderSuccess(
-              intent.order_number ||
-                activeOrder?.orderNumber,
-              'stripe',
-            )
-          }
-          onRetry={retryPayment}
-        />
-      </Elements>
-    ) : null;
-
-  return (
-    <div className="page container checkout">
-      <button
-        type="button"
-        className="checkout-back mb-5 inline-flex rounded-xl border border-transparent px-2 py-2 min-h-10 items-center gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold text-muted transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-        onClick={() => {
-          if (!activeOrder) {
-            navigate('/cart');
-          }
-        }}
-        disabled={Boolean(activeOrder)}
-      >
-        <RiArrowLeftLine
-          size={16}
-          aria-hidden="true"
-        />
-        Back to cart
-      </button>
-
-      <div className="checkout-heading page-heading compact mb-6 min-w-0 max-w-[760px]">
-        <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-          <RiLockLine
-            size={13}
+  if (!canCheckout) {
+    return (
+      <div className="page container py-10">
+        <section className="mx-auto max-w-xl rounded-3xl border border-line bg-surface p-6 text-center shadow-luviio-card sm:p-8">
+          <RiMoneyRupeeCircleLine
+            size={26}
+            className="mx-auto text-gold-soft"
             aria-hidden="true"
           />
-          Secure checkout
-        </p>
-
-        <h1>Complete your order.</h1>
-
-        <p className="checkout-subtitle mt-3 max-w-[58ch] text-sm leading-6 text-muted">
-          Your address, payment and order
-          details stay protected throughout
-          checkout.
-        </p>
+          <p className="mt-4 text-[10px] font-bold uppercase tracking-[.12em] text-gold-soft">
+            Checkout
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold text-text sm:text-3xl">
+            {cart?.has_unavailable_items
+              ? 'Your cart needs an update.'
+              : 'Your cart is empty.'}
+          </h1>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted">
+            {cart?.has_unavailable_items
+              ? 'Review the unavailable items in your cart before checkout.'
+              : 'Add a product to your bag before starting checkout.'}
+          </p>
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft"
+              to="/shop"
+            >
+              Browse products
+              <RiArrowRightLine size={16} aria-hidden="true" />
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-line px-4 text-xs font-semibold text-text transition hover:border-gold"
+              to="/cart"
+            >
+              Back to cart
+            </Link>
+          </div>
+        </section>
       </div>
+    );
+  }
 
-      <div
-        className="checkout-steps mb-7 flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-xs text-dim max-[560px]:gap-1.5 [&_span]:inline-flex [&_span]:min-h-10 [&_span]:items-center [&_span]:gap-1.5 [&_span]:rounded-full [&_span]:border [&_span]:border-line [&_span]:px-3 [&_span]:font-semibold [&_span]:whitespace-nowrap [&_span]:max-[560px]:px-2.5 [&_.is-complete]:border-[rgba(111,191,138,.45)] [&_.is-complete]:bg-success-dim [&_.is-complete]:text-success [&_.is-current]:border-gold [&_.is-current]:bg-gold-dim [&_.is-current]:text-gold-soft [&_i]:h-px [&_i]:min-w-4 [&_i]:flex-1 [&_i]:bg-line"
-        aria-label="Checkout progress"
-      >
-        <span className="is-complete">
-          <b>1</b> Shipping
-        </span>
+  const paymentButtonLabel =
+    paymentMethod === 'cod'
+      ? 'Place COD order'
+      : 'Continue to secure payment';
 
-        <i aria-hidden="true" />
+  const cartItems = items.map((item, index) => ({
+    id: String(item?.id || item?.product_id || index),
+    name: item?.product_name || item?.name || 'Product',
+    quantity: Number(item?.quantity) || 0,
+  }));
 
-        <span
-          className="is-current"
-          aria-current="step"
+  return (
+    <div className="page container py-7 sm:py-10">
+      <div className="mx-auto max-w-6xl">
+        <button
+          type="button"
+          className="mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition hover:text-gold disabled:opacity-50"
+          onClick={() => navigate('/cart')}
+          disabled={locked}
         >
-          <b>2</b> Payment
-        </span>
+          <RiArrowLeftLine size={16} aria-hidden="true" />
+          Back to cart
+        </button>
 
-        <i aria-hidden="true" />
+        <header className="max-w-2xl">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.13em] text-gold-soft">
+            <RiLockLine size={14} aria-hidden="true" />
+            Secure checkout
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-[-.03em] text-text sm:text-4xl">
+            Complete your order.
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Delivery first, server-verified order next, then secure payment.
+          </p>
+        </header>
 
-        <span>
-          <b>3</b> Review
-        </span>
-      </div>
+        {pageError && (
+          <div
+            className="mt-5 rounded-2xl border border-danger bg-danger-dim px-4 py-3 text-sm leading-6 text-danger"
+            role="alert"
+          >
+            {pageError}
+          </div>
+        )}
 
-      <div className="checkout-layout checkout-layout-refined grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(300px,380px)] items-start gap-6 max-[900px]:grid-cols-1">
-        <div className="checkout-main min-w-0 space-y-4">
-          <section className="checkout-section min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
-            <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
-              <div>
-                <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
-                  Delivery
+        <div className="mt-7 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <main className="min-w-0 space-y-5">
+            <Section
+              number="01"
+              icon={RiMapPinLine}
+              title="Delivery address"
+              description="Select a saved Indian address or add a new one."
+            >
+              {addressesLoading ? (
+                <div className="mt-5 rounded-2xl border border-line bg-bg px-4 py-8 text-center">
+                  <Spinner inline label="Loading saved addresses" />
+                  <p className="mt-2 text-xs text-muted">
+                    Loading saved addresses…
+                  </p>
+                </div>
+              ) : addressError ? (
+                <div className="mt-5">
+                  <ErrorState message={addressError} onRetry={loadAddresses} />
+                </div>
+              ) : (
+                <>
+                  {addresses.length > 0 && (
+                    <div className="mt-5 grid gap-3">
+                      {addresses.map((address) => (
+                        <AddressCard
+                          key={String(address.id)}
+                          address={address}
+                          selected={
+                            String(address.id) ===
+                            String(selectedAddressId)
+                          }
+                          disabled={locked}
+                          onSelect={setSelectedAddressId}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {!locked && (
+                    <button
+                      type="button"
+                      className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-bg px-4 text-xs font-semibold text-text transition hover:border-gold hover:bg-surface-2"
+                      onClick={() => setShowAddressForm(true)}
+                    >
+                      <RiAddLine size={17} aria-hidden="true" />
+                      Add address
+                    </button>
+                  )}
+
+                  {addresses.length === 0 && !showAddressForm && (
+                    <div className="mt-5 rounded-2xl border border-line bg-bg p-5 text-center">
+                      <RiUser3Line
+                        size={24}
+                        className="mx-auto text-dim"
+                        aria-hidden="true"
+                      />
+                      <h3 className="mt-3 text-sm font-semibold text-text">
+                        No saved address
+                      </h3>
+                      <p className="mt-1 text-xs leading-5 text-muted">
+                        Add your delivery details to continue.
+                      </p>
+                    </div>
+                  )}
+
+                  {showAddressForm && !locked && (
+                    <AddressForm
+                      initialValues={addressSeed}
+                      onSaved={handleAddressSaved}
+                      onCancel={() => setShowAddressForm(false)}
+                    />
+                  )}
+
+                  {selectedAddress && (
+                    <div className="mt-4 flex items-start gap-2 rounded-2xl border border-success/20 bg-success-dim px-4 py-3 text-xs leading-5 text-success">
+                      <RiCheckLine
+                        size={16}
+                        className="mt-0.5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        {addressReady
+                          ? 'This address is ready for checkout.'
+                          : 'Update this address with a valid email and Indian mobile number.'}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </Section>
+
+            <Section
+              number="02"
+              icon={RiTruckLine}
+              title="Shipping"
+              description="Luviio currently arranges dispatch manually."
+            >
+              <div className="mt-5 rounded-2xl border border-[rgba(216,173,106,.25)] bg-bg p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-gold-soft">
+                      <RiTruckLine size={18} aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <strong className="block text-sm text-text">
+                        Manual shipping
+                      </strong>
+                      <p className="mt-1 text-xs leading-5 text-muted">
+                        Dispatch is arranged after the order is confirmed.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-success/30 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">
+                    {shippingAmount === null
+                      ? 'Server'
+                      : shippingAmount === 0
+                        ? 'Free'
+                        : formatMoney(shippingAmount)}
+                  </span>
+                </div>
+                <p className="mt-4 border-t border-line pt-4 text-xs leading-5 text-dim">
+                  Orders at ₹
+                  {shippingPolicy.free_shipping_threshold.toLocaleString(
+                    'en-IN',
+                  )}{' '}
+                  or more get free shipping. The backend remains authoritative for the final amount.
                 </p>
-                <h2>
-                  1 · Delivery address
-                </h2>
               </div>
+            </Section>
 
-              <span className="checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border border-[rgba(111,191,138,.40)] bg-success-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-success">
-                Used for shipping
-              </span>
-            </div>
+            <Section
+              number="03"
+              icon={RiCoupon3Line}
+              title="Coupon"
+              description="Apply one valid coupon before order creation."
+            >
+              <div className="mt-5">
+                {coupon ? (
+                  <div className="flex flex-col gap-3 rounded-2xl border border-success/20 bg-success-dim p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[.1em] text-success">
+                        Applied coupon
+                      </p>
+                      <strong className="mt-1 block text-sm text-text">
+                        {coupon.code}
+                      </strong>
+                      <span className="mt-1 block text-xs text-muted">
+                        Discount: {formatMoney(coupon.discount)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="min-h-10 rounded-xl border border-success/30 px-3 text-xs font-semibold text-text transition hover:border-gold disabled:opacity-50"
+                      onClick={() => {
+                        setCoupon(null);
+                        setCouponInput('');
+                        setCouponError('');
+                      }}
+                      disabled={locked}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                    <label className="sr-only" htmlFor="checkout-coupon">
+                      Coupon code
+                    </label>
+                    <input
+                      id="checkout-coupon"
+                      className="min-h-11 w-full rounded-xl border border-line bg-bg px-3.5 text-sm font-semibold uppercase tracking-[.08em] text-text outline-none transition focus:border-gold focus:ring-2 focus:ring-[rgba(216,173,106,.12)]"
+                      value={couponInput}
+                      onChange={(event) => {
+                        setCouponInput(event.target.value.toUpperCase());
+                        setCouponError('');
+                      }}
+                      placeholder="Enter coupon code"
+                      maxLength={40}
+                      disabled={locked}
+                    />
+                    <button
+                      type="button"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() => void applyCoupon()}
+                      disabled={
+                        locked ||
+                        couponLoading ||
+                        !couponInput.trim()
+                      }
+                    >
+                      {couponLoading ? 'Checking…' : 'Apply'}
+                    </button>
+                  </div>
+                )}
 
-            {addressError && (
-              <ErrorState
-                message={addressError}
-                onRetry={loadAddresses}
-              />
-            )}
+                {couponError && (
+                  <p
+                    className="mt-3 rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm text-danger"
+                    role="alert"
+                  >
+                    {couponError}
+                  </p>
+                )}
+              </div>
+            </Section>
 
-            {addresses.length > 0 &&
-              !showForm && (
-                <div className="address-list grid min-w-0 gap-3">
-                  {addresses.map((addr) => (
+            <Section
+              number="04"
+              icon={RiMoneyRupeeCircleLine}
+              title="Payment"
+              description="Choose how you want to pay. Final pricing and inventory stay backend-authoritative."
+            >
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {[
+                  {
+                    id: 'stripe',
+                    title: 'Online payment',
+                    body: 'Pay securely with Stripe-supported payment methods.',
+                  },
+                  {
+                    id: 'cod',
+                    title: 'Cash on Delivery',
+                    body: 'Place the order now and pay when it arrives.',
+                  },
+                ].map((option) => {
+                  const selected = paymentMethod === option.id;
+
+                  return (
                     <label
-                      key={addr.id}
-                      className={`address-card ${
-                        String(selected) ===
-                        String(addr.id)
-                          ? 'is-selected'
-                          : ''
-                      }`}
+                      key={option.id}
+                      className={[
+                        'block rounded-2xl border p-4 transition',
+                        selected
+                          ? 'border-gold bg-gold-dim'
+                          : 'border-line bg-bg hover:border-[rgba(216,173,106,.35)]',
+                        locked
+                          ? 'cursor-default opacity-70'
+                          : 'cursor-pointer',
+                      ].join(' ')}
                     >
                       <input
                         type="radio"
-                        name="address"
-                        disabled={Boolean(
-                          activeOrder,
-                        )}
-                        checked={
-                          String(selected) ===
-                          String(addr.id)
-                        }
-                        onChange={() => {
-                          setSelected(
-                            addr.id,
-                          );
-                          resetPayment();
-                        }}
+                        name="checkout-payment-method"
+                        value={option.id}
+                        checked={selected}
+                        onChange={() => setPaymentMethod(option.id)}
+                        disabled={locked}
+                        className="sr-only"
                       />
-
-                      <div>
-                        <strong>
-                          {text(
-                            addr.full_name,
-                            'Delivery',
-                          )}
-                        </strong>
-
-                        <p>
-                          {text(addr.line1)}
-
-                          {addr.line2
-                            ? `, ${addr.line2}`
-                            : ''}
-
-                          {addr.city
-                            ? `, ${addr.city}`
-                            : ''}
-
-                          {addr.state
-                            ? `, ${addr.state}`
-                            : ''}
-
-                          {addr.postal_code
-                            ? ` — ${addr.postal_code}`
-                            : ''}
-
-                          {addr.country
-                            ? `, ${addr.country}`
-                            : ''}
-                        </p>
-
-                        {addr.email && (
-                          <p>
-                            {addr.email}
-                          </p>
-                        )}
-
-                        {addr.is_default && (
-                          <span className="chip chip-sm inline-flex min-h-8 items-center rounded-full border border-gold bg-gold-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
-                            Default
-                          </span>
-                        )}
-                      </div>
+                      <strong className="block text-sm text-text">
+                        {option.title}
+                      </strong>
+                      <span className="mt-1 block text-xs leading-5 text-muted">
+                        {option.body}
+                      </span>
                     </label>
-                  ))}
-
-                  <button
-                    className="btn btn-quiet btn-sm inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-transparent px-3 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-                    type="button"
-                    disabled={Boolean(
-                      activeOrder,
-                    )}
-                    onClick={() =>
-                      setShowForm(true)
-                    }
-                  >
-                    <RiAddLine
-                      size={15}
-                      aria-hidden="true"
-                    />
-                    Add a new address
-                  </button>
-                </div>
-              )}
-
-            {addresses.length === 0 &&
-              !showForm && (
-                <div className="state flex min-w-0 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-bg px-5 py-12 text-center text-muted">
-                  <p>
-                    You’ll need a delivery
-                    address to check out.
-                  </p>
-
-                  <button
-                    type="button"
-                    className="btn btn-sm inline-flex min-h-10 items-center justify-center rounded-lg border border-transparent bg-gold px-3.5 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-                    onClick={() =>
-                      setShowForm(true)
-                    }
-                  >
-                    <RiAddLine
-                      size={15}
-                      aria-hidden="true"
-                    />
-                    Add address
-                  </button>
-                </div>
-              )}
-
-            {showForm && !activeOrder && (
-              <AddressForm
-                onSaved={async () => {
-                  setShowForm(false);
-                  await loadAddresses();
-                }}
-                onCancel={() =>
-                  setShowForm(false)
-                }
-              />
-            )}
-
-            {selectedAddress && (
-              <div className="address-flow-note mt-3 rounded-xl border border-line-soft bg-bg px-3.5 py-3 text-xs leading-5 text-dim">
-                <RiLockLine
-                  size={15}
-                  aria-hidden="true"
-                />
-
-                <div>
-                  <strong>
-                    Billing address
-                  </strong>
-
-                  <span>
-                    Same as your delivery
-                    address. It will be mapped
-                    automatically to the order.
-                  </span>
-                </div>
-              </div>
-            )}
-          </section>
-
-          <section className="checkout-section checkout-shipping-options min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
-            <div className="checkout-section-heading mb-5 flex min-w-0 items-start justify-between gap-4 max-[560px]:flex-col">
-              <div>
-                <p className="section-kicker mb-1 text-[10px] font-semibold uppercase tracking-[.16em] text-gold">
-                  Shipping
-                </p>
-
-                <h2>
-                  Manual shipping
-                </h2>
+                  );
+                })}
               </div>
 
-              <span
-                className="checkout-live-badge inline-flex min-h-8 shrink-0 items-center rounded-full border border-success/40 bg-success-dim px-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-success"
-                role="status"
-                aria-live="polite"
-              >
-                Manual shipping
-              </span>
-            </div>
-
-            {shippingQuoteLoading ? (
-              <p
-                className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft"
-                role="status"
-              >
-                <RiLoader4Line
-                  className="spin animate-spin"
-                  size={15}
-                  aria-hidden="true"
-                />
-                Applying Luviio shipping policy…
-              </p>
-            ) : shippingQuote ? (
-              <div
-                className="shipping-manual-card mt-3 rounded-2xl border border-[rgba(216,173,106,.28)] bg-bg p-4"
-                aria-label="Manual shipping"
-              >
-                <div className="flex min-w-0 items-start justify-between gap-4 max-[480px]:flex-col">
-                  <div className="min-w-0">
-                    <strong className="block text-sm font-semibold text-text">
-                      Manual shipping
-                    </strong>
-                    <p className="mt-1 text-xs leading-5 text-muted">
-                      Luviio will arrange dispatch manually after your order is confirmed.
-                    </p>
+              {intent && activeOrder ? (
+                <div className="mt-5 rounded-2xl border border-gold/30 bg-bg p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[.1em] text-gold-soft">
+                        Payment session
+                      </p>
+                      <h3 className="mt-1 text-base font-semibold text-text">
+                        Order #{activeOrder.orderNumber}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      className="min-h-10 rounded-xl border border-line px-3 text-xs font-semibold text-text transition hover:border-danger hover:text-danger disabled:opacity-50"
+                      onClick={() => void cancelPayment()}
+                      disabled={cancelling}
+                    >
+                      {cancelling ? 'Cancelling…' : 'Cancel payment'}
+                    </button>
                   </div>
 
-                  <span className="shrink-0 rounded-full border border-gold/30 bg-gold-dim px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] text-gold-soft">
-                    {Number(shippingQuote.shipping_cost) > 0
-                      ? formatMoney(shippingQuote.shipping_cost)
-                      : 'Free shipping'}
-                  </span>
+                  {orderPreviewLoading ? (
+                    <div className="mt-4 rounded-xl border border-line bg-surface px-4 py-3 text-xs text-muted">
+                      Confirming the server-side order total…
+                    </div>
+                  ) : orderPreview ? (
+                    <div className="mt-4 rounded-xl border border-line bg-surface p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-muted">
+                          Final order total
+                        </span>
+                        <strong className="text-lg text-text">
+                          {serverOrderTotal === null ||
+                          serverOrderTotal === undefined
+                            ? 'Calculated'
+                            : formatMoney(serverOrderTotal)}
+                        </strong>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 rounded-2xl border border-line bg-surface p-3 sm:p-4">
+                    <Elements
+                      key={paymentSessionKey}
+                      stripe={stripePromise}
+                      options={stripeOptions}
+                    >
+                      <StripePaymentForm
+                        orderNumber={activeOrder.orderNumber}
+                        clientSecret={intent.client_secret}
+                        onSuccess={handlePaymentSuccess}
+                        onRetry={retryPayment}
+                      />
+                    </Elements>
+                  </div>
                 </div>
-
-                <div className="mt-3 border-t border-line pt-3 text-xs leading-5 text-dim">
-                  {Number(shippingQuote.shipping_cost) > 0
-                    ? 'Flat manual shipping rate applies below ₹1,499.'
-                    : 'Free shipping applies on orders of ₹1,499 or more.'}
-                </div>
-              </div>
-            ) : (
-              <p className="mt-3 rounded-xl border border-line bg-bg px-3.5 py-3 text-xs leading-5 text-dim">
-                Select a delivery address to apply Luviio manual shipping.
-              </p>
-            )}
-
-            <h2>2 · Coupon</h2>
-
-            {coupon ? (
-              <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
-                <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
-                  <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
-                    <RiCoupon3Line
-                      size={15}
-                      aria-hidden="true"
-                    />
-                    Applied coupon
-                  </span>
-
-                  <strong>
-                    {coupon.code}
-                  </strong>
-
-                  <small>
-                    You saved{' '}
-                    {formatMoney(
-                      couponDiscount,
-                    )}{' '}
-                    on this order.
-                  </small>
-                </div>
-
-                <button
-                  className="btn btn-quiet btn-sm inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-transparent px-3 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-                  type="button"
-                  disabled={Boolean(
-                    activeOrder,
-                  )}
-                  onClick={removeCoupon}
-                >
-                  <RiCloseLine
-                    size={15}
-                    aria-hidden="true"
-                  />
-                  Remove
-                </button>
-              </div>
-            ) : (
-              <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
-                <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
-                  <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
-                    <RiCoupon3Line
-                      size={15}
-                      aria-hidden="true"
-                    />
-                    Have a coupon?
-                  </span>
-
-                  <small>
-                    Enter a valid promo code
-                    to apply the
-                    backend-calculated
-                    discount.
-                  </small>
-                </div>
-
-                <div className="coupon-input-row grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 max-[480px]:grid-cols-1 [&_input]:min-h-11 [&_input]:min-w-0 [&_input]:rounded-xl [&_input]:border [&_input]:border-line [&_input]:bg-surface [&_input]:px-3.5 [&_input]:text-sm [&_input]:font-semibold [&_input]:tracking-[.08em] [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)]">
-                  <input
-                    disabled={Boolean(
-                      activeOrder,
-                    )}
-                    value={couponInput}
-                    onChange={(event) => {
-                      setCouponInput(
-                        event.target.value.toUpperCase(),
-                      );
-                      setCouponError('');
-                    }}
-                    onKeyDown={(event) => {
-                      if (
-                        event.key ===
-                        'Enter'
-                      ) {
-                        event.preventDefault();
-                        applyCoupon();
-                      }
-                    }}
-                    placeholder="PROMO CODE"
-                    maxLength={40}
-                    autoComplete="off"
-                    aria-label="Coupon code"
-                  />
+              ) : (
+                <div className="mt-5 rounded-2xl border border-line bg-bg p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-gold-soft">
+                      <RiShieldCheckLine size={18} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <strong className="block text-sm text-text">
+                        Ready to place the order
+                      </strong>
+                      <p className="mt-1 text-xs leading-5 text-muted">
+                        Select a valid address, choose a payment method, and continue.
+                      </p>
+                    </div>
+                  </div>
 
                   <button
-                    className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
                     type="button"
-                    onClick={applyCoupon}
-                    disabled={
-                      couponLoading ||
-                      !couponInput.trim() ||
-                      Boolean(activeOrder)
-                    }
-                    aria-busy={
-                      couponLoading
-                    }
+                    className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.05em] text-gold-ink transition hover:bg-gold-soft disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => void createCheckout()}
+                    disabled={placing || locked || !addressReady}
                   >
-                    {couponLoading
-                      ? 'Applying…'
-                      : 'Apply'}
+                    {placing ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gold-ink/30 border-t-gold-ink motion-reduce:animate-none" />
+                        {paymentMethod === 'cod'
+                          ? 'Creating order…'
+                          : 'Starting secure payment…'}
+                      </>
+                    ) : (
+                      <>
+                        {paymentButtonLabel}
+                        <RiArrowRightLine size={17} aria-hidden="true" />
+                      </>
+                    )}
                   </button>
-                </div>
-              </div>
-            )}
 
-            {couponError && (
-              <div
-                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
-                role="alert"
-              >
-                {couponError}
-              </div>
-            )}
-          </section>
-
-          <section className="checkout-section checkout-payment-launch min-w-0 rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card transition-[border-color,box-shadow] duration-200 hover:border-[rgba(216,173,106,.22)] max-[560px]:rounded-2xl max-[560px]:p-4">
-            <h2>3 · Payment method</h2>
-
-            {intentError && (
-              <div
-                className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
-                role="alert"
-                aria-live="assertive"
-              >
-                {intentError}
-              </div>
-            )}
-
-            <div className="payment-selector flex min-w-0 items-start justify-between gap-4 rounded-xl border border-line bg-bg p-4 max-[560px]:flex-col">
-              <div className="payment-selector-copy flex min-w-0 flex-col gap-1.5">
-                <span className="payment-selector-label inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.08em] text-text">
-                  Payment &amp; review
-                </span>
-
-                <strong>
-                  {paymentMethod ===
-                  'stripe'
-                    ? 'Stripe'
-                    : paymentMethod ===
-                        'cod'
-                      ? 'Cash on Delivery'
-                      : 'Choose payment method'}
-                </strong>
-
-                <small>
-                  {activeOrder
-                    ? `Order ${activeOrder.orderNumber} is active. Finish payment or cancel this order.`
-                    : 'Select your payment method, review the selected address and complete payment securely.'}
-                </small>
-              </div>
-
-              <button
-                className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-                type="button"
-                onClick={
-                  openPaymentChooser
-                }
-                disabled={
-                  creating ||
-                  !selected ||
-                  !selectedPhoneValid ||
-                  !selectedCourierId ||
-                  !shippingQuote ||
-                  Boolean(activeOrder)
-                }
-                aria-busy={creating}
-              >
-                {creating
-                  ? 'Preparing…'
-                  : 'Continue to payment'}
-
-                <RiArrowRightLine
-                  size={17}
-                  aria-hidden="true"
-                />
-              </button>
-
-              {!selectedPhoneValid &&
-                selectedAddress && (
-                  <p
-                    className="form-error mb-4 w-full rounded-xl border border-danger bg-danger-dim px-3.5 py-3 text-sm leading-6 text-danger"
-                    role="alert"
-                  >
-                    A valid Indian mobile
-                    number is required for
-                    delivery booking. Edit
-                    this address before
-                    continuing.
-                  </p>
-                )}
-            </div>
-          </section>
-        </div>
-
-        <aside
-          className="summary checkout-summary sticky top-[92px] min-w-0 overflow-hidden rounded-[22px] border border-line bg-surface p-5 shadow-luviio-card max-[900px]:static max-[560px]:rounded-2xl max-[560px]:p-4"
-          aria-label="Order summary"
-        >
-          <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="eyebrow mb-1 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-                Order summary
-              </p>
-              <p className="m-0 text-xs leading-5 text-dim">Live totals from LUVIIO</p>
-            </div>
-            <span className="shrink-0 rounded-full border border-success/20 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">Secure</span>
-          </div>
-
-          <ul className="summary-items mb-4 space-y-2.5 border-b border-line pb-4 text-xs text-muted [&_li]:flex [&_li]:items-start [&_li]:justify-between [&_li]:gap-3 [&_strong]:text-text">
-            {items
-              .slice(0, 6)
-              .map((item) => (
-                <li
-                  key={
-                    item.product_id
-                  }
-                >
-                  <span>
-                    {text(
-                      item.name,
-                      'Product',
-                    )}{' '}
-                    × {item.quantity}
-                  </span>
-
-                  <strong>
-                    {formatMoney(
-                      item.line_total,
-                    )}
-                  </strong>
-                </li>
-              ))}
-
-            {items.length > 6 && (
-              <li>
-                <span>
-                  + {items.length - 6}{' '}
-                  more
-                </span>
-              </li>
-            )}
-          </ul>
-
-          <dl className="summary-lines space-y-3 text-sm text-muted [&_div]:flex [&_div]:items-start [&_div]:justify-between [&_dd]:m-0 [&_dd]:font-medium [&_dd]:text-text">
-            <div>
-              <dt>Subtotal</dt>
-              <dd>
-                {formatMoney(
-                  cart?.subtotal,
-                )}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Shipping</dt>
-              <dd>
-                {shippingQuote
-                  ? formatMoney(
-                      shippingQuote.shipping_cost,
-                    )
-                  : shippingQuoteLoading
-                    ? 'Calculating…'
-                    : 'Calculated at checkout'}
-              </dd>
-            </div>
-
-            {shippingQuote && (
-              <div className="checkout-shipping-detail mt-1 text-xs leading-5 text-dim">
-                <span>
-                  <b>
-                    {text(
-                      shippingQuote.courier_name,
-                      'Manual shipping',
-                    )}
-                  </b>
-
-                  {shippingQuote.estimated_delivery_days ? (
-                    <small>
-                      Estimated delivery:{' '}
-                      {
-                        shippingQuote.estimated_delivery_days
-                      }{' '}
-                      days
-                    </small>
-                  ) : shippingQuote.etd_hours ? (
-                    <small>
-                      Estimated delivery:{' '}
-                      {
-                        shippingQuote.etd_hours
-                      }{' '}
-                      hours
-                    </small>
-                  ) : null}
-                </span>
-
-                <em>Manual rate</em>
-              </div>
-            )}
-
-            <div>
-              <dt>Product GST</dt>
-              <dd>
-                {formatMoney(
-                  cart?.tax_amount,
-                )}
-              </dd>
-            </div>
-
-            {couponDiscount > 0 && (
-              <div>
-                <dt>Coupon</dt>
-                <dd>
-                  −
-                  {formatMoney(
-                    couponDiscount,
+                  {!selectedAddress && (
+                    <p className="mt-3 text-center text-xs text-dim">
+                      Select a delivery address to continue.
+                    </p>
                   )}
-                </dd>
-              </div>
-            )}
 
-            <div>
-              <dt>Current cart total</dt>
-              <dd>
-                {backendCartTotal != null
-                  ? formatMoney(
-                      backendCartTotal,
-                    )
-                  : '—'}
-              </dd>
-            </div>
-
-            <div className="total mt-4 flex items-center justify-between border-t border-line pt-4 text-base font-semibold text-text">
-              <dt>Final order total</dt>
-              <dd>
-                Confirmed securely at
-                payment
-              </dd>
-            </div>
-          </dl>
-
-          {shippingQuoteLoading && (
-            <p
-              className="free-ship-note shipping-loading-note mt-3 rounded-xl border border-line-soft bg-bg px-3 py-2.5 text-xs leading-5 text-dim"
-              role="status"
-            >
-              <RiLoader4Line
-                className="spin animate-spin"
-                size={15}
-                aria-hidden="true"
-              />
-              Applying manual shipping policy…
-            </p>
-          )}
-
-          {shippingQuote && (
-            <p className="free-ship-note mt-3 rounded-xl border border-[rgba(216,173,106,.30)] bg-gold-dim px-3 py-2.5 text-xs leading-5 text-gold-soft">
-              <RiArrowRightLine
-                size={15}
-                aria-hidden="true"
-              />
-
-              Shipping method:{' '}
-              {text(
-                shippingQuote.courier_name,
-                'Delivery partner',
+                  {selectedAddress && !addressReady && (
+                    <p className="mt-3 text-center text-xs text-danger">
+                      Add a valid email and Indian mobile number to this address.
+                    </p>
+                  )}
+                </div>
               )}
-              . Final payable amount is
-              confirmed by LUVIIO's backend
-              during order/payment creation.
-            </p>
-          )}
-        </aside>
-      </div>
+            </Section>
+          </main>
 
-      <PaymentMethodModal
-        open={paymentModalOpen}
-        value={paymentMethod}
-        onChange={(method) => {
-          if (activeOrder || creating) {
-            return;
-          }
+          <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[.12em] text-gold-soft">
+                    Order summary
+                  </p>
+                  <h2 className="mt-1 text-lg font-semibold text-text">
+                    Your bag
+                  </h2>
+                </div>
+                <span className="rounded-full border border-success/20 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-success">
+                  Secure
+                </span>
+              </div>
 
-          setPaymentMethod(method);
-          setIntent(null);
-          setIntentError('');
-          setPaymentSessionKey('');
+              <div className="mt-5 space-y-3">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start justify-between gap-4 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-words font-medium text-text">
+                        {item.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-dim">
+                        Qty {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-          /*
-           * Selecting a payment method is the first step of this
-           * dialog. Advance immediately to review so the same
-           * selection cannot be requested a second time.
-           * "Back" remains the single path to change the method.
-           */
-          setPaymentReview(true);
-        }}
-        onClose={() => {
-          if (
-            !creating &&
-            !activeOrder
-          ) {
-            resetPayment();
-          }
-        }}
-        onContinue={
-          handleModalContinue
-        }
-        loading={creating}
-        review={paymentReview}
-        address={selectedAddress}
-        total="Confirmed securely by Luviio at payment"
-        onBack={handleModalBack}
-        activeOrder={activeOrder}
-        onCancelOrder={
-          requestCancelOrder
-        }
-        cancellingOrder={
-          cancellingOrder
-        }
-      >
-        {paymentContent ||
-          (activeOrder?.paymentMethod ===
-          'cod' ? (
-            <div className="payment-review mt-4 min-w-0">
-              <div className="payment-review-card min-w-0 rounded-xl border border-line bg-bg p-4">
-                <RiAlertLine
-                  size={20}
+              <dl className="mt-5 space-y-3 border-t border-line pt-5 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted">Subtotal</dt>
+                  <dd className="font-semibold text-text">
+                    {formatMoney(cart.subtotal)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted">Shipping</dt>
+                  <dd className="font-semibold text-text">
+                    {shippingAmount === null
+                      ? 'Calculated'
+                      : shippingAmount === 0
+                        ? 'Free'
+                        : formatMoney(shippingAmount)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted">GST</dt>
+                  <dd className="font-semibold text-text">
+                    {formatMoney(cart.tax_amount)}
+                  </dd>
+                </div>
+                {coupon && (
+                  <div className="flex items-center justify-between gap-4 text-success">
+                    <dt>Coupon</dt>
+                    <dd className="font-semibold">
+                      −{formatMoney(coupon.discount)}
+                    </dd>
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-4 border-t border-line pt-4">
+                  <dt className="font-semibold text-text">
+                    {intent ? 'Final order total' : 'Current total'}
+                  </dt>
+                  <dd className="text-xl font-semibold text-text">
+                    {displayedTotal !== null &&
+                    Number.isFinite(displayedTotal)
+                      ? formatMoney(displayedTotal)
+                      : 'Calculated'}
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="mt-4 rounded-xl border border-gold/20 bg-gold-dim px-3 py-2.5 text-[11px] leading-5 text-gold-soft">
+                The backend is the source of truth for price, GST, shipping, coupon validity and inventory.
+              </p>
+
+              <p className="mt-3 flex items-start gap-2 rounded-xl border border-line bg-bg px-3.5 py-3 text-[11px] leading-5 text-dim">
+                <RiShieldCheckLine
+                  size={16}
+                  className="mt-0.5 shrink-0 text-gold-soft"
                   aria-hidden="true"
                 />
-
-                <strong>
-                  COD order created
-                </strong>
-
-                <p>
-                  Order{' '}
-                  <b>
-                    {
-                      activeOrder.orderNumber
-                    }
-                  </b>{' '}
-                  is reserved for you.
-                </p>
-
-                <button
-                  type="button"
-                  className="btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold uppercase tracking-[.04em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={
-                    handleCodSuccess
-                  }
-                >
-                  View order
-                  <RiArrowRightLine
-                    size={17}
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-            </div>
-          ) : null)}
-      </PaymentMethodModal>
-
-      {cancelConfirmOpen && (
-        <div
-          className="checkout-cancel-modal-backdrop fixed inset-0 z-[500] grid place-items-center bg-black/70 p-5 backdrop-blur-sm"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (
-              event.target ===
-                event.currentTarget &&
-              !cancellingRef.current
-            ) {
-              setCancelConfirmOpen(
-                false,
-              );
-            }
-          }}
-        >
-          <div
-            ref={cancelModalRef}
-            className="checkout-cancel-modal w-full max-w-[460px] overflow-auto rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_80px_rgba(0,0,0,.45)] max-[480px]:p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={
-              cancelTitleId
-            }
-            tabIndex={-1}
-          >
-            <div
-              className="checkout-cancel-modal-icon mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(224,115,95,.12)] text-danger"
-              aria-hidden="true"
-            >
-              <RiErrorWarningLine
-                size={26}
-              />
-            </div>
-
-            <div className="checkout-cancel-modal-copy min-w-0 text-sm leading-6 text-muted">
-              <p className="eyebrow mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[.2em] text-gold">
-                Payment checkout
-              </p>
-
-              <h3 id={cancelTitleId}>
-                Are you sure you want to
-                cancel this order?
-              </h3>
-
-              <p>
-                This will cancel order{' '}
-                <b>
-                  #
-                  {
-                    activeOrder?.orderNumber
-                  }
-                </b>{' '}
-                and release any backend
-                reservation associated
-                with it. The cancelled
-                order items will not be
-                added back to your cart
-                unless the backend
-                explicitly restores them.
+                <span>
+                  Stripe handles online payment details. Luviio receives only the payment result required to complete the order.
+                </span>
               </p>
             </div>
-
-            <div className="checkout-cancel-modal-actions mt-5 flex flex-wrap justify-end gap-2 max-[480px]:flex-col">
-              <button
-                ref={cancelCloseRef}
-                type="button"
-                className="btn btn-quiet inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-transparent px-4 text-xs font-semibold text-text transition-colors hover:border-gold hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() =>
-                  setCancelConfirmOpen(
-                    false,
-                  )
-                }
-                disabled={
-                  cancellingOrder
-                }
-              >
-                Keep order
-              </button>
-
-              <button
-                type="button"
-                className="btn checkout-cancel-danger inline-flex min-h-11 items-center justify-center rounded-xl border border-danger bg-transparent px-4 text-xs font-bold uppercase tracking-[.04em] text-danger transition-colors hover:bg-danger-dim focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[480px]:w-full"
-                onClick={
-                  cancelActiveOrder
-                }
-                disabled={
-                  cancellingOrder
-                }
-                aria-busy={
-                  cancellingOrder
-                }
-              >
-                {cancellingOrder
-                  ? 'Cancelling…'
-                  : 'Yes, cancel order'}
-              </button>
-            </div>
-          </div>
+          </aside>
         </div>
-      )}
+      </div>
     </div>
   );
 }
