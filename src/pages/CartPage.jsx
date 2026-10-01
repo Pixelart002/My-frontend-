@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { formatMoney } from '../utils/format';
+import { shippingService } from '../services/shipping';
 import {
   ErrorState,
   Spinner,
@@ -251,6 +252,10 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
 }
 
 function OrderSummary({ cart, disabled, onCheckout }) {
+  const shipping = shippingService.manualRate(cart?.subtotal);
+  const shippingCost = Number(shipping.shipping_cost) || 0;
+  const orderTotal = (Number(cart?.total_amount) || 0) + shippingCost;
+
   return (
     <aside
       className="min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6"
@@ -280,17 +285,17 @@ function OrderSummary({ cart, disabled, onCheckout }) {
           </dd>
         </div>
 
-        <div className="flex items-start justify-between gap-4 text-muted">
+        <div className="flex items-center justify-between gap-4 text-muted">
           <dt>Shipping</dt>
-          <dd className="max-w-[160px] text-right text-xs leading-5 text-dim">
-            Calculated at checkout
+          <dd className="font-medium tabular-nums text-text">
+            {shippingCost > 0 ? formatMoney(shippingCost) : 'Free'}
           </dd>
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
-          <dt className="text-sm font-semibold text-text">Before shipping</dt>
+          <dt className="text-sm font-semibold text-text">Total</dt>
           <dd className="text-lg font-bold tabular-nums text-text">
-            {formatMoney(cart.total_amount)}
+            {formatMoney(orderTotal)}
           </dd>
         </div>
       </dl>
@@ -298,7 +303,7 @@ function OrderSummary({ cart, disabled, onCheckout }) {
       <div className="mt-5 flex gap-3 rounded-xl border border-gold bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
         <RiTruckLine className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
         <p>
-          Live shipping is calculated at checkout after your delivery PIN is selected.
+          Manual shipping: {shippingCost > 0 ? `${formatMoney(shippingCost)} below ${formatMoney(shipping.free_shipping_threshold)}` : `Free above ${formatMoney(shipping.free_shipping_threshold)}`}.
         </p>
       </div>
 
