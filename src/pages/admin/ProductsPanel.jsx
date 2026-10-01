@@ -1722,8 +1722,6 @@ export default function ProductsPanel({ capabilities = {} }) {
                     }
                   />
                 </div>
-              </div>
-
               </section>
 
               <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
