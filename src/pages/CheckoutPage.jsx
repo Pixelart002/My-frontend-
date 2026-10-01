@@ -768,7 +768,9 @@ export default function CheckoutPage() {
     try {
       await paymentService.cancelCheckout(orderNumber);
       resetPaymentSession();
+      setPaymentModalOpen(false);
       await reloadCart();
+      toast.info('Payment session cancelled. Your cart is still safe.');
     } catch (error) {
       setPageError(
         getErrorMessage(
@@ -780,7 +782,7 @@ export default function CheckoutPage() {
       cancellingRef.current = false;
       setCancelling(false);
     }
-  }, [activeOrder?.orderNumber, reloadCart, resetPaymentSession]);
+  }, [activeOrder?.orderNumber, reloadCart, resetPaymentSession, toast]);
 
   const retryPayment = useCallback(
     async (orderNumber) => {
