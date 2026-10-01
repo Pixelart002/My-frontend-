@@ -5,6 +5,8 @@ import {
   RiArrowLeftLine,
   RiCloseCircleLine,
   RiFileTextLine,
+  RiMapPin2Line,
+  RiShieldCheckLine,
 } from '@remixicon/react';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { orderService } from '../services/orders';
@@ -683,206 +685,171 @@ export default function OrderDetailPage() {
                 : null;
 
               return (
-                <article
-                  className="order-item"
-                  key={
-                    item.id ||
-                    item.product_id ||
-                    `${name}-${index}`
-                  }
-                >
-                  {imageUrl && productHref ? (
-                    <Link
-                      to={productHref}
-                      className="order-item-thumb"
-                      aria-label={`View ${name}`}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </Link>
-                  ) : (
-                    <div
-                      className="order-item-thumb"
-                      aria-hidden="true"
-                    >
-                      <span>
-                        {name.slice(0, 1)}
-                      </span>
-                    </div>
-                  )}
+    <main className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-5 flex items-center justify-between gap-3 sm:mb-7">
+        <Link className="inline-flex min-h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-muted transition hover:bg-surface hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" to="/orders">
+          <RiArrowLeftLine size={17} aria-hidden="true" /> Back to orders
+        </Link>
+        <Link className="hidden min-h-10 items-center rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:inline-flex" to="/shop">
+          Continue shopping
+        </Link>
+      </div>
 
-                  <div className="order-item-info">
-                    <h3>{name}</h3>
-
-                    <p>
-                      {item.hsn_code
-                        ? `HSN ${item.hsn_code}`
-                        : 'Product'}
-                    </p>
-
-                    <span>
-                      {formatMoney(unitPrice)} ×{' '}
-                      {quantity}
-                    </span>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="min-w-0 space-y-5">
+          <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-luviio-card" aria-labelledby="order-detail-title">
+            <header className="border-b border-line p-5 sm:p-6">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">Order details</p>
+                  <h1 id="order-detail-title" className="break-words font-display text-2xl font-semibold tracking-tight text-text sm:text-3xl">Order #{publicOrderNumber}</h1>
+                  <div className="mt-2 space-y-1 text-sm text-muted">
+                    <p>Placed {formatOrderDate(order.created_at)}</p>
+                    {publicInvoiceNumber && <p>Invoice #{publicInvoiceNumber}</p>}
                   </div>
+                </div>
+                <span
+                  className={`inline-flex w-fit shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-bold ${orderStatusTone(status) === 'success' ? 'bg-success-dim text-success' : orderStatusTone(status) === 'danger' ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'}`}
+                  aria-label={`Order status: ${orderStatusLabel(status)}`}
+                >
+                  {orderStatusLabel(status)}
+                </span>
+              </div>
 
-                  <strong className="order-item-total">
-                    {formatMoney(lineTotal)}
-                  </strong>
-                </article>
-              );
-            })
-          )}
+              <div className="mt-5 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center" aria-label="Order actions">
+                {isRetryable && (
+                  <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-gold px-4 text-sm font-bold text-gold-ink transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50" type="button" onClick={openRetry} disabled={busy || retryLoading}>
+                    Retry payment
+                  </button>
+                )}
+                {canDownloadInvoice(status) && (
+                  <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-4 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50" type="button" onClick={onInvoice} disabled={busy}>
+                    <RiFileTextLine size={17} aria-hidden="true" /> Download invoice
+                  </button>
+                )}
+                {canCancelOrder(status) && (
+                  <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger-dim px-4 text-sm font-semibold text-danger transition hover:border-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-50" type="button" onClick={() => setCancelOpen(true)} disabled={busy}>
+                    <RiCloseCircleLine size={17} aria-hidden="true" /> Cancel order
+                  </button>
+                )}
+              </div>
+
+              {retryError && <div className="mt-4 rounded-xl border border-danger/30 bg-danger-dim px-4 py-3 text-sm font-medium text-danger" role="alert" aria-live="assertive">{retryError}</div>}
+            </header>
+
+            <div className="border-b border-line p-5 sm:p-6">
+              <ShipmentTimeline shipment={shipment} />
+            </div>
+
+            <section className="p-5 sm:p-6" aria-labelledby="order-items-title">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Order contents</p>
+                  <h2 id="order-items-title" className="mt-1 text-lg font-bold text-text">Items</h2>
+                </div>
+                <span className="text-xs font-medium text-muted">{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+              </div>
+
+              {items.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-line bg-surface-2 px-4 py-8 text-center text-sm text-muted">No item details are available for this order.</div>
+              ) : (
+                <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line">
+                  {items.map((item, index) => {
+                    const name = getItemName(item);
+                    const slug = getItemSlug(item);
+                    const imageUrl = getItemImage(item);
+                    const quantity = getQuantity(item);
+                    const unitPrice = getStoredUnitPrice(item, quantity);
+                    const lineTotal = getStoredLineTotal(item, quantity);
+                    const productHref = slug ? `/product/${encodeURIComponent(slug)}` : null;
+
+                    return (
+                      <article className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 bg-surface px-3 py-3.5 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:gap-4 sm:px-4" key={item.id || item.product_id || `${name}-${index}`}>
+                        {imageUrl && productHref ? (
+                          <Link to={productHref} className="flex aspect-square size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-2 sm:size-[72px]" aria-label={`View ${name}`}>
+                            <img className="size-full object-cover" src={imageUrl} alt={name} loading="lazy" decoding="async" />
+                          </Link>
+                        ) : (
+                          <div className="flex aspect-square size-14 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2 text-lg font-bold text-muted sm:size-[72px]" aria-hidden="true">{name.slice(0, 1)}</div>
+                        )}
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-bold text-text sm:text-base">{name}</h3>
+                          <p className="mt-1 truncate text-xs text-muted">{item.hsn_code ? `HSN ${item.hsn_code}` : 'Product'}</p>
+                          <p className="mt-1 text-xs font-medium text-muted">{formatMoney(unitPrice)} × {quantity}</p>
+                        </div>
+                        <strong className="text-right text-sm font-bold text-text sm:text-base">{formatMoney(lineTotal)}</strong>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </section>
+
+          <section className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6" aria-labelledby="delivery-title">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold-dim text-gold" aria-hidden="true"><RiMapPin2Line size={19} /></span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Delivery</p>
+                <h2 id="delivery-title" className="mt-1 text-lg font-bold text-text">Shipping address</h2>
+              </div>
+            </div>
+            {hasAddressValue(nestedShippingAddress) ? (
+              <div className="mt-4 rounded-2xl border border-line bg-surface-2 p-4 text-sm leading-6 text-muted">
+                <p className="font-semibold text-text">{text(nestedShippingAddress.full_name, nestedShippingAddress.name)}</p>
+                <p>{text(nestedShippingAddress.line1, 'Address unavailable')}</p>
+                {nestedShippingAddress.line2 && <p>{nestedShippingAddress.line2}</p>}
+                <p>{[nestedShippingAddress.city, nestedShippingAddress.state].filter(Boolean).join(', ')}{nestedShippingAddress.postal_code ? ` — ${nestedShippingAddress.postal_code}` : ''}</p>
+                {nestedShippingAddress.phone && <p className="mt-2">{nestedShippingAddress.phone}</p>}
+              </div>
+            ) : (
+              <p className="mt-4 rounded-2xl border border-dashed border-line bg-surface-2 px-4 py-5 text-sm text-muted">Shipping address details are unavailable.</p>
+            )}
+          </section>
         </div>
 
-        <aside
-          className="summary order-summary"
-          aria-labelledby="order-summary-title"
-        >
-          <p
-            id="order-summary-title"
-            className="eyebrow"
-          >
-            Summary
-          </p>
-
-          <dl className="summary-lines">
-            <div>
-              <dt>Subtotal</dt>
-              <dd>
-                {formatMoney(
-                  order.subtotal ??
-                    order.items_subtotal ??
-                    0,
-                )}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Shipping</dt>
-              <dd>
-                {safeNumber(
-                  order.shipping_cost,
-                ) > 0
-                  ? formatMoney(
-                      order.shipping_cost,
-                    )
-                  : 'Free'}
-              </dd>
-            </div>
-
-            <div>
-              <dt>Taxes</dt>
-              <dd>
-                {formatMoney(
-                  order.tax_amount ?? 0,
-                )}
-              </dd>
-            </div>
-
-            {safeNumber(
-              order.discount_amount,
-            ) > 0 && (
+        <aside className="min-w-0 space-y-5 lg:sticky lg:top-24" aria-label="Order summary">
+          <section className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6" aria-labelledby="order-summary-title">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <dt>Discount</dt>
-                <dd>
-                  −
-                  {formatMoney(
-                    order.discount_amount,
-                  )}
-                </dd>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Payment</p>
+                <h2 id="order-summary-title" className="mt-1 text-lg font-bold text-text">Order summary</h2>
               </div>
-            )}
-
-            <div className="total">
-              <dt>Total</dt>
-              <dd>
-                {formatMoney(
-                  order.total_amount ??
-                    order.grand_total ??
-                    0,
-                )}
-              </dd>
+              <span className="flex size-9 items-center justify-center rounded-lg bg-success-dim text-success" title="Backend total" aria-label="Backend total verified"><RiShieldCheckLine size={18} /></span>
             </div>
-          </dl>
-
-          {hasAddressValue(
-            nestedShippingAddress,
-          ) && (
-            <div className="summary-address">
-              <strong>Deliver to</strong>
-
-              <p>
-                {text(
-                  nestedShippingAddress.line1,
-                  'Address unavailable',
-                )}
-
-                {nestedShippingAddress.city
-                  ? `, ${nestedShippingAddress.city}`
-                  : ''}
-
-                {nestedShippingAddress.state
-                  ? `, ${nestedShippingAddress.state}`
-                  : ''}
-
-                {nestedShippingAddress.postal_code
-                  ? ` — ${nestedShippingAddress.postal_code}`
-                  : ''}
-              </p>
+            <dl className="mt-5 space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-4"><dt className="text-muted">Subtotal</dt><dd className="font-semibold text-text">{formatMoney(order.subtotal ?? order.items_subtotal ?? 0)}</dd></div>
+              <div className="flex items-center justify-between gap-4"><dt className="text-muted">Shipping</dt><dd className="font-semibold text-text">{safeNumber(order.shipping_cost) > 0 ? formatMoney(order.shipping_cost) : 'Free'}</dd></div>
+              <div className="flex items-center justify-between gap-4"><dt className="text-muted">Taxes</dt><dd className="font-semibold text-text">{formatMoney(order.tax_amount ?? 0)}</dd></div>
+              {safeNumber(order.discount_amount) > 0 && <div className="flex items-center justify-between gap-4"><dt className="text-muted">Discount</dt><dd className="font-semibold text-success">−{formatMoney(order.discount_amount)}</dd></div>}
+              <div className="my-4 border-t border-line" />
+              <div className="flex items-end justify-between gap-4"><dt className="font-bold text-text">Total</dt><dd className="font-display text-2xl font-semibold text-text">{formatMoney(order.total_amount ?? order.grand_total ?? 0)}</dd></div>
+            </dl>
+            <div className="mt-5 rounded-2xl border border-line bg-surface-2 px-4 py-3 text-xs text-muted">
+              <div className="flex items-center justify-between gap-3"><span>Payment method</span><span className="font-semibold uppercase text-text">{paymentMethod || (isCodOrder ? 'COD' : 'Card')}</span></div>
             </div>
-          )}
+          </section>
+          <div className="rounded-2xl border border-line bg-surface px-4 py-3 text-xs leading-5 text-muted">
+            Your order total is the amount confirmed by Luviio's backend. No frontend recalculation is used for the final total.
+          </div>
         </aside>
-      </section>
+      </div>
 
-      <PaymentMethodModal
-        open={retryOpen}
-        value="stripe"
-        onChange={() => {}}
-        onClose={closeRetry}
-        onContinue={prepareRetry}
-        loading={retryLoading}
-        review
-        address={retryAddress}
-        total={formatMoney(
-          order.total_amount ??
-            order.grand_total ??
-            0,
-        )}
-        onBack={closeRetry}
-      >
-        {retryLoading && !retryIntent ? (
-          <Spinner label="Preparing secure payment…" />
-        ) : (
-          paymentContent
-        )}
+      <PaymentMethodModal open={retryOpen} value="stripe" onChange={() => {}} onClose={closeRetry} onContinue={prepareRetry} loading={retryLoading} review address={retryAddress} total={formatMoney(order.total_amount ?? order.grand_total ?? 0)} onBack={closeRetry}>
+        {retryLoading && !retryIntent ? <Spinner label="Preparing secure payment…" /> : paymentContent}
       </PaymentMethodModal>
 
       <ConfirmDialog
         open={cancelOpen}
         title="Cancel order?"
-        message={
-          status === 'pending'
-            ? 'Reserved stock will be released.'
-            : isCodOrder
-              ? 'No online payment refund will be initiated for this COD order.'
-              : 'Your payment will be refunded according to the payment flow.'
-        }
+        message={status === 'pending' ? 'Reserved stock will be released.' : isCodOrder ? 'No online payment refund will be initiated for this COD order.' : 'Your payment will be refunded according to the payment flow.'}
         confirmLabel="Cancel order"
         cancelLabel="Keep order"
         danger
         busy={busy}
-        onCancel={() => {
-          if (!busy) {
-            setCancelOpen(false);
-          }
-        }}
+        onCancel={() => { if (!busy) setCancelOpen(false); }}
         onConfirm={onCancel}
       />
-    </div>
+    </main>
   );
 }
