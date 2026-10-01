@@ -446,5 +446,3 @@ export default function ProfilePage() {
     </main>
   );
 }
-
-export default ProfilePage;
