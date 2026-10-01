@@ -582,7 +582,10 @@ export default function OrderDetailPage() {
             </header>
 
             <div className="border-b border-line p-5 sm:p-6">
-              <ShipmentTimeline shipment={shipment} />
+              <ShipmentTimeline
+                shipment={shipment}
+                orderStatus={order?.status}
+              />
             </div>
 
             <section className="p-5 sm:p-6" aria-labelledby="order-items-title">
