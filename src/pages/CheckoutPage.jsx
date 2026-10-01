@@ -568,7 +568,11 @@ export default function CheckoutPage() {
         );
       }
 
-      setCoupon({\n        ...result,\n        discount,\n        subtotal: Number(cart?.subtotal) || 0,\n      });
+      setCoupon({
+        ...result,
+        discount,
+        subtotal: Number(cart?.subtotal) || 0,
+      });
       setCouponInput('');
     } catch (error) {
       setCouponError(
