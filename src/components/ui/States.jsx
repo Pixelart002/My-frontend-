@@ -7,11 +7,11 @@ import {
 
 const clampCount = (value, fallback = 8) => {
   const parsed = Number(value);
-  
+
   if (!Number.isFinite(parsed)) {
     return fallback;
   }
-  
+
   return Math.min(24, Math.max(1, Math.floor(parsed)));
 };
 
@@ -22,38 +22,44 @@ export function Spinner({
   if (inline) {
     return (
       <span
-        className="spinner-inline"
+        className="inline-flex size-5 items-center justify-center text-gold"
         role="status"
         aria-label={label}
       >
         <RiLoader4Line
-          className="spin"
+          className="animate-spin"
           size={18}
           aria-hidden="true"
         />
       </span>
     );
   }
-  
+
   return (
     <div
-      className="state state--loading"
+      className="flex min-h-48 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-line bg-surface px-5 py-10 text-center shadow-sm"
       role="status"
       aria-live="polite"
       aria-label={label}
     >
-      <div className="spinner-orbit" aria-hidden="true">
-        <span className="spinner-orbit-ring" />
+      <span className="relative flex size-12 items-center justify-center" aria-hidden="true">
+        <span className="absolute inset-0 rounded-full border border-line" />
+        <span className="absolute inset-0 rounded-full border-2 border-transparent border-t-gold animate-spin motion-reduce:animate-none" />
         <RiLoader4Line
-          className="spin spinner-core"
+          className="text-gold"
           size={19}
+          aria-hidden="true"
         />
-      </div>
+      </span>
 
-      <div className="spinner-copy">
-        <strong>LUVIIO</strong>
-        <span>{label}</span>
-      </div>
+      <span className="space-y-1">
+        <strong className="block font-display text-sm font-semibold tracking-[0.16em] text-text">
+          LUVIIO
+        </strong>
+        <span className="block text-xs font-medium text-muted">
+          {label}
+        </span>
+      </span>
     </div>
   );
 }
@@ -65,25 +71,25 @@ export function EmptyState({
 }) {
   return (
     <div
-      className="state state--empty"
+      className="flex min-h-56 w-full flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-surface px-5 py-10 text-center"
       role="status"
       aria-live="polite"
     >
-      <div className="state-icon" aria-hidden="true">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-gold-dim text-gold" aria-hidden="true">
         <RiStore2Line size={22} />
       </div>
 
-      <div className="state-content">
-        <h2 className="state-title">{title}</h2>
+      <div className="mt-4 max-w-md">
+        <h2 className="text-lg font-bold text-text">{title}</h2>
 
         {message && (
-          <p className="state-message">
+          <p className="mt-1.5 text-sm leading-6 text-muted">
             {message}
           </p>
         )}
 
         {action && (
-          <div className="state-action">
+          <div className="mt-5">
             {action}
           </div>
         )}
@@ -98,34 +104,31 @@ export function ErrorState({
 }) {
   return (
     <div
-      className="state state--error"
+      className="flex min-h-56 w-full flex-col items-center justify-center rounded-3xl border border-danger/25 bg-danger-dim px-5 py-10 text-center"
       role="alert"
       aria-live="assertive"
     >
-      <div className="state-icon" aria-hidden="true">
+      <div className="flex size-12 items-center justify-center rounded-2xl bg-danger/10 text-danger" aria-hidden="true">
         <RiErrorWarningLine size={22} />
       </div>
 
-      <div className="state-content">
-        <h2 className="state-title">
+      <div className="mt-4 max-w-md">
+        <h2 className="text-lg font-bold text-text">
           We ran into a problem
         </h2>
 
-        <p className="state-message">
+        <p className="mt-1.5 text-sm leading-6 text-muted">
           {message}
         </p>
 
         {typeof onRetry === 'function' && (
-          <div className="state-action">
+          <div className="mt-5">
             <button
               type="button"
-              className="btn btn-quiet btn-sm"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               onClick={onRetry}
             >
-              <RiRefreshLine
-                size={15}
-                aria-hidden="true"
-              />
+              <RiRefreshLine size={16} aria-hidden="true" />
               <span>Try again</span>
             </button>
           </div>
@@ -139,10 +142,10 @@ export function ProductSkeletons({
   count = 8,
 }) {
   const safeCount = clampCount(count);
-  
+
   return (
     <div
-      className="products-grid products-grid--loading"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
       aria-busy="true"
       aria-label="Loading products"
     >
@@ -151,14 +154,14 @@ export function ProductSkeletons({
         (_, index) => (
           <div
             key={`product-skeleton-${index}`}
-            className="product-card product-card--skeleton"
+            className="overflow-hidden rounded-2xl border border-line bg-surface"
             aria-hidden="true"
           >
-            <div className="skeleton skeleton-media" />
-
-            <div className="skeleton-content">
-              <div className="skeleton skeleton-line" />
-              <div className="skeleton skeleton-line skeleton-line-short" />
+            <div className="aspect-square animate-pulse bg-surface-2 motion-reduce:animate-none" />
+            <div className="space-y-2 p-3.5 sm:p-4">
+              <div className="h-3.5 w-4/5 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+              <div className="h-3 w-2/5 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+              <div className="mt-3 h-5 w-1/2 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
             </div>
           </div>
         ),
