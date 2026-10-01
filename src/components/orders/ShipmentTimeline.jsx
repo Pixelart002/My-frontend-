@@ -5,7 +5,6 @@ import {
   RiTimeLine,
   RiFileTextLine,
   RiAlertLine,
-  RiCloseCircleLine,
 } from '@remixicon/react';
 
 const label = (value) =>
@@ -141,21 +140,21 @@ export default function ShipmentTimeline({ shipment }) {
   if (!shipment || shipment.status === 'not_booked') {
     return (
       <section
-        className="order-shipment-card shipment-card shipment-card--empty"
+        className="rounded-2xl border border-line bg-surface p-4 sm:p-5"
         aria-labelledby="shipment-heading"
       >
-        <div className="order-section-label" id="shipment-heading">
+        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted" id="shipment-heading">
           Delivery
         </div>
 
-        <div className="shipment-empty-state">
-          <span className="shipment-empty-icon" aria-hidden="true">
+        <div className="mt-4 flex items-start gap-3 rounded-xl border border-dashed border-line bg-surface-2 p-4">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold-dim text-gold" aria-hidden="true">
             <RiTruckLine size={20} />
           </span>
 
           <div>
             <strong>Shipment pending</strong>
-            <p className="td-dim">
+            <p className="mt-1 text-sm leading-6 text-muted">
               Your shipment will appear here once Luviio has arranged dispatch.
             </p>
           </div>
@@ -197,137 +196,82 @@ export default function ShipmentTimeline({ shipment }) {
   const knownStepIndex = Math.max(0, currentIndex);
 
   return (
-    <section
-      className="order-shipment-card shipment-card"
-      aria-labelledby="shipment-heading"
-    >
-      <header className="shipment-header">
-        <div>
-          <div className="order-section-label" id="shipment-heading">
-            Delivery tracking
-          </div>
-
-          <p className="shipment-header-copy">
-            Follow your manual shipment status and tracking updates.
-          </p>
+    <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5" aria-labelledby="shipment-heading">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted" id="shipment-heading">Delivery tracking</div>
+          <p className="mt-1 text-sm leading-6 text-muted">Follow your manual shipment status and tracking updates.</p>
         </div>
-
         {trackingUrl && (
-          <a
-            className="btn btn-quiet btn-sm shipment-track-button"
-            href={trackingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <RiTruckLine size={15} aria-hidden="true" />
-            <span>Track shipment</span>
+          <a className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-3.5 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" href={trackingUrl} target="_blank" rel="noopener noreferrer">
+            <RiTruckLine size={16} aria-hidden="true" /> Track shipment
           </a>
         )}
       </header>
 
-      <div className="shipment-summary" aria-label="Shipment details">
-        <div className="shipment-summary-item">
-          <span>Shipping</span>
-          <strong>Manual shipping</strong>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Shipment details">
+        <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3">
+          <span className="block text-xs text-muted">Shipping</span>
+          <strong className="mt-1 block text-sm text-text">Manual shipping</strong>
         </div>
-
-        <div className="shipment-summary-item">
-          <span>Tracking</span>
-          <strong>
-            {shipment.tracking_number ||
-              trackRow?.awb_code ||
-              'Pending'}
-          </strong>
+        <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3">
+          <span className="block text-xs text-muted">Tracking</span>
+          <strong className="mt-1 block break-all text-sm text-text">{shipment.tracking_number || trackRow?.awb_code || 'Pending'}</strong>
         </div>
-
         {trackRow?.destination && (
-          <div className="shipment-summary-item">
-            <span>Destination</span>
-            <strong>{trackRow.destination}</strong>
+          <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3">
+            <span className="block text-xs text-muted">Destination</span>
+            <strong className="mt-1 block text-sm text-text">{trackRow.destination}</strong>
           </div>
         )}
-
         {(trackingData.etd || trackRow?.edd) && (
-          <div className="shipment-summary-item">
-            <span>Expected delivery</span>
-            <strong>
-              {trackingData.etd || trackRow.edd}
-            </strong>
+          <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3">
+            <span className="block text-xs text-muted">Expected delivery</span>
+            <strong className="mt-1 block text-sm text-text">{trackingData.etd || trackRow.edd}</strong>
           </div>
         )}
-
         {shipment.pickup_scheduled_at && (
-          <div className="shipment-summary-item">
-            <span>Pickup</span>
-            <strong>
-              {formatDateTime(shipment.pickup_scheduled_at)}
-            </strong>
+          <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3">
+            <span className="block text-xs text-muted">Pickup</span>
+            <strong className="mt-1 block text-sm text-text">{formatDateTime(shipment.pickup_scheduled_at)}</strong>
           </div>
         )}
       </div>
 
       <div
-        className={`shipment-current-status shipment-current-status--${statusMeta.tone}`}
+        className={`mt-4 flex items-start gap-3 rounded-2xl border p-4 ${statusMeta.tone === 'success' ? 'border-success/30 bg-success-dim' : statusMeta.tone === 'warning' ? 'border-danger/30 bg-danger-dim' : 'border-gold/30 bg-gold-dim'}`}
         role="status"
         aria-live="polite"
       >
-        <div className="shipment-current-status-icon" aria-hidden="true">
+        <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${statusMeta.tone === 'success' ? 'bg-success/15 text-success' : statusMeta.tone === 'warning' ? 'bg-danger/15 text-danger' : 'bg-gold/15 text-gold'}`} aria-hidden="true">
           <StatusIcon size={18} />
-        </div>
-
-        <div className="shipment-current-status-content">
-          <span>Shipment status</span>
-          <strong>{statusMeta.title}</strong>
-
+        </span>
+        <div className="min-w-0">
+          <span className="block text-xs font-semibold uppercase tracking-wide text-muted">Shipment status</span>
+          <strong className="mt-1 block text-base font-bold text-text">{statusMeta.title}</strong>
           {trackRow?.location && (
-            <small>
-              <RiMapPinLine size={13} aria-hidden="true" />
-              {trackRow.location}
+            <small className="mt-1 flex items-center gap-1 text-xs text-muted">
+              <RiMapPinLine size={13} aria-hidden="true" /> {trackRow.location}
             </small>
           )}
         </div>
       </div>
 
-      <ol
-        className="shipment-timeline"
-        aria-label="Shipment progress"
-      >
+      <ol className="mt-5 grid gap-2 sm:grid-cols-2" aria-label="Shipment progress">
         {STEPS.map(([key, title, Icon], index) => {
-          const state = getStepState(
-            key,
-            current,
-            knownStepIndex,
-            index,
-          );
-
+          const state = getStepState(key, current, knownStepIndex, index);
           const isCurrent = state === 'is-current';
           const isDone = state === 'is-done';
 
           return (
-            <li
-              key={key}
-              className={`shipment-step ${state}`}
-              aria-current={isCurrent ? 'step' : undefined}
-            >
-              <span
-                className="shipment-step-marker"
-                aria-hidden="true"
-              >
+            <li key={key} className={`flex min-w-0 items-center gap-3 rounded-xl border px-3 py-3 ${isCurrent ? 'border-gold/50 bg-gold-dim' : isDone ? 'border-success/30 bg-success-dim' : 'border-line bg-surface-2'}`} aria-current={isCurrent ? 'step' : undefined}>
+              <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${isCurrent ? 'bg-gold text-gold-ink' : isDone ? 'bg-success/15 text-success' : 'bg-surface text-muted'}`} aria-hidden="true">
                 <Icon size={16} />
               </span>
-
-              <div className="shipment-step-content">
-                <strong>{title}</strong>
-
-                {isCurrent && (
-                  <small>
-                    Current status · {label(current)}
-                  </small>
-                )}
-
-                {isDone && !isCurrent && (
-                  <small>Completed</small>
-                )}
+              <div className="min-w-0">
+                <strong className="block truncate text-sm font-semibold text-text">{title}</strong>
+                {isCurrent && <small className="mt-0.5 block truncate text-xs text-gold">Current status · {label(current)}</small>}
+                {isDone && !isCurrent && <small className="mt-0.5 block text-xs text-success">Completed</small>}
               </div>
             </li>
           );
@@ -335,68 +279,25 @@ export default function ShipmentTimeline({ shipment }) {
       </ol>
 
       {activities.length > 0 && (
-        <div className="shipment-activity-list">
-          <div className="shipment-activity-header">
-            <div className="order-section-label">
-              Shipping updates
-            </div>
-
-            <span className="shipment-activity-count">
-              {activities.length} update
-              {activities.length === 1 ? '' : 's'}
-            </span>
+        <div className="mt-5 border-t border-line pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Shipping updates</div>
+            <span className="text-xs font-medium text-muted">{activities.length} update{activities.length === 1 ? '' : 's'}</span>
           </div>
-
-          <div className="shipment-activities">
+          <div className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line">
             {activities.slice(0, 8).map((item, index) => {
-              const activityStatus = normalizeStatus(
-                item?.status || item?.['sr-status-label'],
-              );
-
-              const activityTitle =
-                item?.['sr-status-label'] ||
-                item?.activity ||
-                item?.status ||
-                'Tracking update';
-
+              const activityStatus = normalizeStatus(item?.status || item?.['sr-status-label']);
+              const activityTitle = item?.['sr-status-label'] || item?.activity || item?.status || 'Tracking update';
+              const exception = EXCEPTION_STATUSES.has(activityStatus);
               return (
-                <article
-                  className="shipment-activity"
-                  key={`${item?.date || 'event'}-${index}`}
-                >
-                  <span
-                    className={`shipment-activity-icon ${
-                      EXCEPTION_STATUSES.has(activityStatus)
-                        ? 'is-warning'
-                        : ''
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {EXCEPTION_STATUSES.has(activityStatus) ? (
-                      <RiAlertLine size={15} />
-                    ) : (
-                      <RiTimeLine size={15} />
-                    )}
+                <article className="flex items-start gap-3 bg-surface-2 px-3 py-3" key={`${item?.date || 'event'}-${index}`}>
+                  <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${exception ? 'bg-danger-dim text-danger' : 'bg-gold-dim text-gold'}`} aria-hidden="true">
+                    {exception ? <RiAlertLine size={15} /> : <RiTimeLine size={15} />}
                   </span>
-
-                  <div className="shipment-activity-content">
-                    <strong>{activityTitle}</strong>
-
-                    {item?.location && (
-                      <span>
-                        <RiMapPinLine
-                          size={12}
-                          aria-hidden="true"
-                        />
-                        {item.location}
-                      </span>
-                    )}
-
-                    {item?.date && (
-                      <time dateTime={item.date}>
-                        {formatDateTime(item.date)}
-                      </time>
-                    )}
+                  <div className="min-w-0">
+                    <strong className="block text-sm font-semibold text-text">{activityTitle}</strong>
+                    {item?.location && <span className="mt-1 flex items-center gap-1 text-xs text-muted"><RiMapPinLine size={12} aria-hidden="true" />{item.location}</span>}
+                    {item?.date && <time className="mt-1 block text-xs text-muted" dateTime={item.date}>{formatDateTime(item.date)}</time>}
                   </div>
                 </article>
               );
@@ -406,15 +307,9 @@ export default function ShipmentTimeline({ shipment }) {
       )}
 
       {trackingUrl && (
-        <footer className="shipment-footer">
-          <a
-            className="btn btn-quiet btn-sm"
-            href={trackingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <RiTruckLine size={15} aria-hidden="true" />
-            Track shipment
+        <footer className="mt-4 flex justify-end border-t border-line pt-4">
+          <a className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-line bg-surface-2 px-3.5 text-sm font-semibold text-text transition hover:border-gold hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold" href={trackingUrl} target="_blank" rel="noopener noreferrer">
+            <RiTruckLine size={16} aria-hidden="true" /> Track shipment
           </a>
         </footer>
       )}
