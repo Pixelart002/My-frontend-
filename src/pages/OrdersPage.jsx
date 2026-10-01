@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { RiArrowRightLine } from '@remixicon/react';
 import { orderService } from '../services/orders';
 import {
   orderStatusLabel,
