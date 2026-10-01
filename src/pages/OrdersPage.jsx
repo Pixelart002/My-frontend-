@@ -224,7 +224,7 @@ export default function OrdersPage() {
               return (
                 <Link
                   to={`/orders/${encodeURIComponent(orderNumber)}`}
-                  className="group grid gap-3 border-b border-line px-4 py-4 transition last:border-b-0 hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_120px_120px_36px] sm:items-center sm:gap-4 sm:px-5"
+                  className="group grid gap-3 border-b border-line px-4 py-4 transition last:border-b-0 hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none sm:grid-cols-[minmax(0,1fr)_120px_120px_120px_36px] sm:items-center sm:gap-4 sm:px-5"
                   key={orderNumber}
                   role="listitem"
                   aria-label={`Order ${orderNumber}, ${orderStatusLabel(statusValue)}`}
