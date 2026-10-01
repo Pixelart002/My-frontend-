@@ -460,7 +460,7 @@ export default function AdminMfaGate({
         </p>
 
         <span
-          className="spin admin-mfa-spinner"
+          className="mt-1 inline-flex size-8 items-center justify-center rounded-full border-2 border-line border-t-gold animate-spin motion-reduce:animate-none"
           aria-hidden="true"
         />
       </section>
