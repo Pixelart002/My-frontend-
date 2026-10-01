@@ -119,98 +119,12 @@ export default function HomePage() {
 
     loadStore();
 
-    return (
-    CATEGORY_ICONS[String(name || '').trim().toLowerCase()] ||
-    RiGridLine
-  );
-}
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [loadStore]);
 
-function normalizeProducts(value) {
-  const items = Array.isArray(value) ? value : value?.items;
-
-  if (!Array.isArray(items)) return [];
-
-  return items.filter(
-    (product) =>
-      product &&
-      typeof product === 'object' &&
-      (product.id || product.slug),
-  );
-}
-
-function normalizeCategories(value) {
-  const items = Array.isArray(value)
-    ? value
-    : Array.isArray(value?.items)
-      ? value.items
-      : [];
-
-  const seen = new Set();
-
-  return items.filter((category) => {
-    if (
-      !category ||
-      typeof category !== 'object' ||
-      !category.slug ||
-      !category.name
-    ) {
-      return false;
-    }
-
-    const key = String(category.id || category.slug).trim().toLowerCase();
-
-    if (!key || seen.has(key)) return false;
-
-    seen.add(key);
-    return true;
-  });
-}
-
-export default function HomePage() {
-  const [products, setProducts] = useState(null);
-  const [categories, setCategories] = useState(null);
-  const [error, setError] = useState('');
-
-  const mountedRef = useRef(false);
-  const requestIdRef = useRef(0);
-
-  const loadStore = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    setError('');
-
-    try {
-      const [productData, categoryData] = await Promise.all([
-        productService.list({
-          page: 1,
-          page_size: 8,
-        }),
-        productService.categories(),
-      ]);
-
-      if (!mountedRef.current || requestId !== requestIdRef.current) {
-        return;
-      }
-
-      setProducts(normalizeProducts(productData));
-      setCategories(normalizeCategories(categoryData));
-    } catch (err) {
-      if (!mountedRef.current || requestId !== requestIdRef.current) {
-        return;
-      }
-
-      setError(
-        err?.message || 'Unable to load the store. Please try again.',
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    loadStore();
-
-    return (
+  return (
     <main className="min-w-0 bg-bg text-text">
       <section
         className="relative isolate min-h-[620px] overflow-hidden border-b border-line bg-bg sm:min-h-[680px] lg:min-h-[calc(100svh-5rem)]"
