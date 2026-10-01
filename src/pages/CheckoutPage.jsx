@@ -594,33 +594,47 @@ export default function CheckoutPage() {
 
   const validateCheckout = useCallback(() => {
     if (!canCheckout) {
-      setPageError(
-        cart?.has_unavailable_items
-          ? 'One or more cart items are unavailable. Update your cart and try again.'
-          : 'Your cart is empty.',
-      );
+      const message = cart?.has_unavailable_items
+        ? 'One or more cart items are unavailable. Update your cart and try again.'
+        : 'Your cart is empty.';
+      setPageError(message);
+      toast.error(message);
       return false;
     }
 
     if (!selectedAddress) {
-      setPageError('Select a delivery address before continuing.');
+      const message = 'Select a delivery address before continuing.';
+      setPageError(message);
+      toast.error(message);
       return false;
     }
 
     if (!isValidIndianPhone(selectedAddress.phone)) {
-      setPageError(
-        'This address needs a valid 10-digit Indian mobile number.',
-      );
+      const message = 'This address needs a valid 10-digit Indian mobile number.';
+      setPageError(message);
+      toast.error(message);
       return false;
     }
 
     if (!isValidEmail(selectedAddress.email)) {
-      setPageError('This address needs a valid email address.');
+      const message = 'This address needs a valid email address.';
+      setPageError(message);
+      toast.error(message);
       return false;
     }
 
     return true;
-  }, [canCheckout, cart?.has_unavailable_items, selectedAddress]);
+  }, [canCheckout, cart?.has_unavailable_items, selectedAddress, toast]);
+
+  const openPaymentSelection = useCallback(() => {
+    setPageError('');
+
+    if (!validateCheckout()) {
+      return;
+    }
+
+    setPaymentModalOpen(true);
+  }, [validateCheckout]);
 
   const loadOrderPreview = useCallback(async (orderNumber) => {
     if (!orderNumber) {
