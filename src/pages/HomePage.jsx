@@ -113,8 +113,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative isolate overflow-hidden border-b border-line" aria-labelledby="home-title">
         <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{ backgroundImage: "url('/luviio-hero-background.webp')" }}
+          className="absolute inset-0 -z-20 bg-[url('/luviio-hero-background.webp')] bg-cover bg-center"
           aria-hidden="true"
         />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#080808_4%,rgba(8,8,8,.96)_35%,rgba(8,8,8,.72)_65%,rgba(8,8,8,.35)_100%)]" aria-hidden="true" />
