@@ -14,7 +14,6 @@ import './styles/admin.css';
 import './styles/admin-layout.css';
 import './styles/cart.css';
 import './styles/payment.css';
-import './styles/checkout.css';
 import './styles/loading.css';
 import './styles/settings.css';
 import './styles/location-autocomplete.css';
