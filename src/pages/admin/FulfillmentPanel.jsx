@@ -250,16 +250,29 @@ export default function FulfillmentPanel() {
       setBusy(actionKey);
 
       try {
+        const payload = {
+          tracking_number: normalizedTracking,
+        };
+
+        const processingOrder =
+          normalize(trackingOrder.status) === 'processing';
+
+        if (processingOrder) {
+          payload.status = 'shipped';
+        }
+
         await adminService.updateOrder(
           trackingOrder.order_number,
-          {
-            tracking_number: normalizedTracking,
-          },
+          payload,
         );
 
         if (!mountedRef.current) return;
 
-        toast.success('Tracking number updated.');
+        toast.success(
+          processingOrder
+            ? 'Tracking saved and order marked shipped.'
+            : 'Tracking number updated.',
+        );
         setTrackingOrder(null);
         setTrackingNumber('');
         await load();
@@ -498,7 +511,7 @@ export default function FulfillmentPanel() {
                             <button
                               type="button"
                               className="btn btn-sm"
-                              disabled={rowBusy}
+                              disabled={rowBusy || !shipment}
                               onClick={() =>
                                 runOrderUpdate(
                                   order,
