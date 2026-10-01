@@ -11,7 +11,6 @@ import {
   RiMapPinLine,
   RiMoneyRupeeCircleLine,
   RiShieldCheckLine,
-  RiTruckLine,
   RiUser3Line,
 } from '@remixicon/react';
 
