@@ -1724,6 +1724,8 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
               </div>
 
+              </section>
+
               <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
