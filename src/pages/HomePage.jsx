@@ -14,7 +14,6 @@ import {
 import { productService } from '../services/products';
 import ProductCard from '../components/ProductCard';
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
-import '../styles/marketing.css';
 
 const CATEGORY_ICONS = {
   'bathroom fittings': RiHomeGearLine,
@@ -169,7 +168,7 @@ export default function HomePage() {
       <section className="border-b border-line bg-surface" aria-label="Luviio shopping benefits" data-reveal>
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 divide-y divide-line px-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-6 lg:px-8">
           {[
-            [RiTruckLine, 'Free shipping', 'Orders above ₹1,499'],
+            [RiTruckLine, 'Shipping from ₹45.90', 'Free above ₹1,499'],
             [RiShieldCheckLine, 'Secure checkout', 'Protected online payments'],
             [RiToolsLine, 'Useful products', 'Made for daily use'],
           ].map(([Icon, title, detail]) => (
