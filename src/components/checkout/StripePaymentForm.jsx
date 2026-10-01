@@ -251,6 +251,12 @@ function PaymentStatusPopup({
     return null;
   }
 
+  const portalRoot = document.getElementById('root');
+
+  if (!portalRoot) {
+    return null;
+  }
+
   return createPortal(
     <div
       className={`payment-modal-backdrop payment-status-popup-backdrop ${className}`}
@@ -258,7 +264,7 @@ function PaymentStatusPopup({
     >
       {children}
     </div>,
-    document.body,
+    portalRoot,
   );
 }
 
