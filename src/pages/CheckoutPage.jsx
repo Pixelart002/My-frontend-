@@ -733,12 +733,12 @@ export default function CheckoutPage() {
 
       void loadOrderPreview(result.order_number);
     } catch (error) {
-      setPageError(
-        getErrorMessage(
-          error,
-          'Unable to start checkout. Please try again.',
-        ),
+      const message = getErrorMessage(
+        error,
+        'Unable to start checkout. Please try again.',
       );
+      setPageError(message);
+      toast.error(message);
     } finally {
       creatingRef.current = false;
       setPlacing(false);
@@ -750,6 +750,7 @@ export default function CheckoutPage() {
     navigate,
     paymentMethod,
     selectedAddress,
+    toast,
     validateCheckout,
   ]);
 
