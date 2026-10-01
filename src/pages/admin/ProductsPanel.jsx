@@ -13,6 +13,7 @@ import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { formatMoney } from '../../utils/format';
 import { ErrorState, Spinner } from '../../components/ui/States';
+import '../../styles/product-admin.css';
 import AdminModal from './Modal';
 
 const PAGE_SIZE = 100;
@@ -910,15 +911,15 @@ export default function ProductsPanel({ capabilities = {} }) {
                 <thead className="border-b border-line bg-surface-2/60">
                   <tr>
                     <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Product</th>
-                    <th scope="col">SKU</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Stock</th>
-                    <th scope="col">GST</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">SKU</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Price</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Stock</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">GST</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Category</th>
+                    <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Status</th>
 
                     {(canUpdate || canDelete) && (
-                      <th scope="col">Actions</th>
+                      <th scope="col" className="whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Actions</th>
                     )}
                   </tr>
                 </thead>
@@ -946,7 +947,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                               />
                             ) : (
                               <div
-                                className="product-thumb"
+                                className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2 text-muted"
                                 aria-hidden="true"
                               >
                                 <RiImageAddLine
@@ -988,11 +989,11 @@ export default function ProductsPanel({ capabilities = {} }) {
                           %
                         </td>
 
-                        <td className="td-dim">
+                        <td className="px-4 py-3.5 align-middle text-muted">
                           {category?.name || '—'}
                         </td>
 
-                        <td>
+                        <td className="px-4 py-3.5 align-middle">
                           {product.is_active ===
                           false ? (
                             <span className="inline-flex w-fit items-center rounded-full bg-danger-dim px-2.5 py-1 text-xs font-bold text-danger">
@@ -1209,7 +1210,7 @@ export default function ProductsPanel({ capabilities = {} }) {
               </section>
 
               <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="editor-section-head">
+                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
                     <h3>
                       Pricing, tax &
@@ -1492,7 +1493,7 @@ export default function ProductsPanel({ capabilities = {} }) {
               </section>
 
               <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="editor-section-head">
+                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
                     <h3>
                       Product media
@@ -1671,7 +1672,7 @@ export default function ProductsPanel({ capabilities = {} }) {
               </section>
 
               <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="editor-section-head">
+                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
                     <h3>
                       Descriptions
@@ -1723,8 +1724,8 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
               </div>
 
-              <div className="editor-section">
-                <div className="editor-section-head">
+              <section className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
                     <h3>
                       Hardware details
@@ -2004,7 +2005,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                     }
                   />
                 </div>
-              </div>
+              </section>
 
               <div className="editor-footer">
                 <label className="check-line">
