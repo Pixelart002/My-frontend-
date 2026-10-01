@@ -1274,11 +1274,9 @@ export default function CheckoutPage() {
                   )}
                 </div>
               )}
-            </Section>
+            </div>
           </main>
 
-
-            </div>
           <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
