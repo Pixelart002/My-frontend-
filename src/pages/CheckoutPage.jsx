@@ -1285,6 +1285,36 @@ export default function CheckoutPage() {
             </div>
           </aside>
         </div>
+
+        <PaymentMethodModal
+          open={paymentModalOpen}
+          value={paymentMethod}
+          onChange={(method) => {
+            setPaymentMethod(method);
+            toast.info(
+              method === 'cod'
+                ? 'Cash on Delivery selected.'
+                : 'Online payment selected.',
+            );
+          }}
+          onClose={() => {
+            if (!placing && !locked) {
+              setPaymentModalOpen(false);
+            }
+          }}
+          onContinue={() => void createCheckout()}
+          loading={placing}
+          address={selectedAddress}
+          total={
+            displayedTotal !== null && Number.isFinite(displayedTotal)
+              ? formatMoney(displayedTotal)
+              : 'Calculated'
+          }
+          activeOrder={activeOrder}
+          onCancelOrder={cancelPayment}
+          cancellingOrder={cancelling}
+          review={false}
+        />
       </div>
     </div>
   );
