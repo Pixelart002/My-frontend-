@@ -1065,7 +1065,7 @@ export default function ProductsPanel({ capabilities = {} }) {
               </table>
             </div>
           )}
-        </div>
+        </section>
 
         {editing && (
           <AdminModal
