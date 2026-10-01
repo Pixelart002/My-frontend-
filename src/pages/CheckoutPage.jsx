@@ -23,6 +23,8 @@ import { couponService } from '../services/coupons';
 import { paymentService } from '../services/payments';
 import { orderService } from '../services/orders';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
+import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
+import { useToast } from '../context/ToastContext';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
 
@@ -384,6 +386,7 @@ function AddressCard({ address, selected, disabled, onSelect }) {
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const {
     cart,
     loading: cartLoading,
@@ -398,6 +401,7 @@ export default function CheckoutPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [couponLoading, setCouponLoading] = useState(false);
