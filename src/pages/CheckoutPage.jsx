@@ -551,15 +551,16 @@ export default function CheckoutPage() {
         subtotal: Number(cart?.subtotal) || 0,
       });
       setCouponInput('');
+      toast.success(`Coupon ${code} applied.`);
     } catch (error) {
-      setCouponError(
-        getErrorMessage(error, 'Unable to apply this coupon.'),
-      );
+      const message = getErrorMessage(error, 'Unable to apply this coupon.');
+      setCouponError(message);
+      toast.error(message);
     } finally {
       couponRef.current = false;
       setCouponLoading(false);
     }
-  }, [cart?.subtotal, coupon, couponInput, locked]);
+  }, [cart?.subtotal, coupon, couponInput, locked, toast]);
 
   useEffect(() => {
     if (
@@ -577,12 +578,13 @@ export default function CheckoutPage() {
     async (saved) => {
       setShowAddressForm(false);
       await loadAddresses();
+      toast.success('Delivery address saved.');
 
       if (saved?.id) {
         setSelectedAddressId(String(saved.id));
       }
     },
-    [loadAddresses],
+    [loadAddresses, toast],
   );
 
   const addressReady =
