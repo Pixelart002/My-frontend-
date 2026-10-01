@@ -1,153 +1,82 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  RiCheckLine,
   RiLinksLine,
   RiRefreshLine,
   RiTruckLine,
 } from '@remixicon/react';
+
+import AdminModal from './Modal';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { Spinner } from '../../components/ui/States';
 
-const SHIPMENT_PAGE_SIZE = 100;
+const PAGE_SIZE = 100;
+
+const STATUS_OPTIONS = [
+  ['', 'All fulfillment orders'],
+  ['paid', 'Ready for dispatch'],
+  ['processing', 'Processing'],
+  ['shipped', 'Shipped'],
+  ['delivered', 'Delivered'],
+];
+
+const normalize = (value) =>
+  typeof value === 'string'
+    ? value.trim().toLowerCase()
+    : '';
 
 const text = (value) =>
   value === null || value === undefined || value === ''
     ? '—'
     : String(value);
 
-const normalizeStatus = (status) =>
-  typeof status === 'string'
-    ? status.trim().toLowerCase()
-    : '';
-
-const statusTone = (status) => {
-  const value = normalizeStatus(status);
-
-  if (
-    [
-      'delivered',
-      'picked_up',
-      'in_transit',
-      'out_for_delivery',
-      'shipped',
-    ].includes(value)
-  ) {
-    return 'pill-success';
-  }
-
-  if (
-    [
-      'failed',
-      'cancelled',
-      'rto',
-      'rto_delivered',
-    ].includes(value)
-  ) {
-    return 'pill-danger';
-  }
-
-  if (
-    [
-      'ready_to_create',
-      'created',
-      'awb_assigned',
-      'pickup_scheduled',
-      'manifest_generated',
-      'label_generated',
-      'invoice_generated',
-      'documents_ready',
-    ].includes(value)
-  ) {
-    return 'pill-gold';
-  }
-
-  return 'pill-muted';
-};
-
-const workflowLabel = (row) => {
-  const step = normalizeStatus(
-    row?.workflow_status ||
-      row?.metadata?.workflow?.step ||
-      row?.status,
-  );
-
+const statusLabel = (status) => {
   const labels = {
-    ready_to_create: 'Ready to create',
-    created: 'Created',
-    awb_assigned: 'AWB assigned',
-    pickup_scheduled: 'Pickup scheduled',
-    label_generated: 'Label generated',
-    manifest_generated: 'Manifest generated',
-    invoice_generated: 'Invoice generated',
-    documents_ready: 'Documents ready',
-    out_for_delivery: 'Out for delivery',
-    in_transit: 'In transit',
-    picked_up: 'Picked up',
+    paid: 'Ready for dispatch',
+    processing: 'Processing',
     shipped: 'Shipped',
     delivered: 'Delivered',
-    cancelled: 'Cancelled',
-    failed: 'Failed',
-    rto: 'RTO',
-    rto_delivered: 'RTO delivered',
   };
 
-  return (
-    labels[step] ||
-    text(row?.status || 'created').replaceAll('_', ' ')
+  return labels[normalize(status)] || text(status).replaceAll('_', ' ');
+};
+
+const statusTone = (status) => {
+  switch (normalize(status)) {
+    case 'delivered':
+      return 'pill-success';
+    case 'shipped':
+      return 'pill-gold';
+    case 'processing':
+      return 'pill-gold';
+    case 'paid':
+      return 'pill-muted';
+    default:
+      return 'pill-muted';
+  }
+};
+
+const nextAction = (order) => {
+  switch (normalize(order?.status)) {
+    case 'paid':
+      return 'Start processing';
+    case 'processing':
+      return 'Mark shipped';
+    case 'shipped':
+      return 'Mark delivered';
+    default:
+      return '';
+  }
+};
+
+const isFulfillmentOrder = (order) =>
+  ['paid', 'processing', 'shipped', 'delivered'].includes(
+    normalize(order?.status),
   );
-};
 
-const documentLinks = (row) =>
-  [
-    ['Label', row?.label_url],
-    ['Manifest', row?.manifest_url],
-    ['Invoice', row?.provider_invoice_url],
-  ].filter(([, url]) => Boolean(url));
-
-const nextWorkflowStep = (row) => {
-  const status = normalizeStatus(row?.status);
-
-  if (status === 'ready_to_create') {
-    return 'Create shipment';
-  }
-
-  if (!row?.tracking_number) {
-    return 'Assign AWB';
-  }
-
-  if (!row?.pickup_id) {
-    return 'Schedule pickup';
-  }
-
-  if (!row?.manifest_url) {
-    return 'Generate manifest';
-  }
-
-  if (!row?.label_url) {
-    return 'Generate label';
-  }
-
-  if (!row?.provider_invoice_url) {
-    return 'Generate invoice';
-  }
-
-  if (row?.metadata?.workflow?.completed === true) {
-    return 'Complete';
-  }
-
-  return 'Resume workflow';
-};
-
-const isTerminalStatus = (status) =>
-  [
-    'delivered',
-    'cancelled',
-    'refunded',
-  ].includes(normalizeStatus(status));
-
-const isWorkflowComplete = (row) =>
-  row?.metadata?.workflow?.completed === true ||
-  normalizeStatus(row?.workflow_status) === 'delivered';
+const getTrackingNumber = (order, shipment) =>
+  text(order?.tracking_number || shipment?.tracking_number);
 
 export default function FulfillmentPanel() {
   const { toast } = useToast();
@@ -156,6 +85,8 @@ export default function FulfillmentPanel() {
   const [filter, setFilter] = useState('');
   const [busy, setBusy] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [trackingOrder, setTrackingOrder] = useState(null);
+  const [trackingNumber, setTrackingNumber] = useState('');
 
   const mountedRef = useRef(true);
   const requestIdRef = useRef(0);
@@ -168,18 +99,16 @@ export default function FulfillmentPanel() {
 
   const load = useCallback(async () => {
     const requestId = ++requestIdRef.current;
-
     setRefreshing(true);
 
     try {
-      const [shipmentResponse, orderResponse] =
-        await Promise.all([
-          adminService.fulfillmentShipments(filter || null),
-          adminService.listOrders({
-            page: 1,
-            page_size: SHIPMENT_PAGE_SIZE,
-          }),
-        ]);
+      const [shipmentResponse, orderResponse] = await Promise.all([
+        adminService.fulfillmentShipments(),
+        adminService.listOrders({
+          page: 1,
+          page_size: PAGE_SIZE,
+        }),
+      ]);
 
       if (
         !mountedRef.current ||
@@ -189,76 +118,29 @@ export default function FulfillmentPanel() {
       }
 
       const shipments = itemsOfList(shipmentResponse);
-      const orders = itemsOfList(orderResponse);
+      const orders = itemsOfList(orderResponse).filter(isFulfillmentOrder);
 
-      const shippedOrderIds = new Set(
+      const shipmentsByOrder = new Map(
         shipments
-          .map((shipment) =>
-            String(
-              shipment?.order_id ||
-                shipment?.orders?.id ||
-                '',
-            ),
-          )
-          .filter(Boolean),
+          .filter((shipment) => shipment?.order_id)
+          .map((shipment) => [
+            String(shipment.order_id),
+            shipment,
+          ]),
       );
 
-      /*
-       * Paid/processing/COD orders may not have a shipment row
-       * until the provider booking is created.
-       *
-       * Backend remains the source of truth for shipment creation
-       * and package details.
-       */
-      const eligibleOrders = orders.filter((order) => {
-        const status = normalizeStatus(order?.status);
-        const method = normalizeStatus(
-          order?.payment_method,
+      const merged = orders
+        .map((order) => ({
+          order,
+          shipment: shipmentsByOrder.get(String(order.id)) || null,
+        }))
+        .filter(({ order }) =>
+          filter
+            ? normalize(order.status) === normalize(filter)
+            : true,
         );
 
-        if (!order?.id) return false;
-
-        if (shippedOrderIds.has(String(order.id))) {
-          return false;
-        }
-
-        if (
-          [
-            'cancelled',
-            'refunded',
-            'delivered',
-            'shipped',
-          ].includes(status)
-        ) {
-          return false;
-        }
-
-        return (
-          ['paid', 'processing'].includes(status) ||
-          ['cod', 'cash_on_delivery'].includes(method)
-        );
-      });
-
-      const pendingRows =
-        !filter || filter === 'ready_to_create'
-          ? eligibleOrders.map((order) => ({
-              id: `order:${String(order.id)}`,
-              order_id: order.id,
-              status: 'ready_to_create',
-              provider_key: 'manual',
-              courier_name: null,
-              service_type: null,
-              tracking_number: null,
-              tracking_url: null,
-              pickup_id: null,
-              label_url: null,
-              manifest_url: null,
-              provider_invoice_url: null,
-              orders: order,
-            }))
-          : [];
-
-      setRows([...pendingRows, ...shipments]);
+      setRows(merged);
     } catch (error) {
       if (
         !mountedRef.current ||
@@ -269,8 +151,7 @@ export default function FulfillmentPanel() {
 
       setRows([]);
       toast.error(
-        error?.message ||
-          'Unable to load fulfillment shipments.',
+        error?.message || 'Unable to load fulfillment orders.',
       );
     } finally {
       if (
@@ -286,23 +167,22 @@ export default function FulfillmentPanel() {
     load();
   }, [load]);
 
-  const runAction = useCallback(
-    async (id, method, successMessage) => {
-      if (!id || !method || busy) return;
+  const runOrderUpdate = useCallback(
+    async (order, data, successMessage) => {
+      const orderNumber = order?.order_number;
 
-      const actionKey = `${id}:${method}`;
+      if (!orderNumber || busy) return;
 
+      const actionKey = `${orderNumber}:${data?.status || 'tracking'}`;
       setBusy(actionKey);
 
       try {
-        await adminService[method](id);
-
+        await adminService.updateOrder(orderNumber, data);
         toast.success(successMessage);
         await load();
       } catch (error) {
         toast.error(
-          error?.message ||
-            'Fulfillment action failed.',
+          error?.message || 'Unable to update the order.',
         );
       } finally {
         if (mountedRef.current) {
@@ -313,68 +193,21 @@ export default function FulfillmentPanel() {
     [busy, load, toast],
   );
 
-  const processShipment = useCallback(
-    async (row) => {
-      if (!row?.id || busy) return;
-
-      const actionKey = `${row.id}:process`;
-
-      setBusy(actionKey);
-
-      try {
-        await adminService.processProviderShipment(
-          row.id,
-        );
-
-        toast.success(
-          'Shipment workflow processed/resumed successfully.',
-        );
-
-        await load();
-      } catch (error) {
-        toast.error(
-          error?.message ||
-            'Shipment workflow could not be completed.',
-        );
-      } finally {
-        if (mountedRef.current) {
-          setBusy('');
-        }
-      }
-    },
-    [busy, load, toast],
-  );
-
-  const createShipment = useCallback(
+  const createInternalShipment = useCallback(
     async (order) => {
-      const orderId = order?.id;
+      if (!order?.id || busy) return;
 
-      if (!orderId || busy) return;
-
-      const actionKey = `${orderId}:create`;
-
+      const actionKey = `${order.id}:shipment`;
       setBusy(actionKey);
 
       try {
-        /*
-         * Do not calculate weight, dimensions, pickup location,
-         * shipping price, GST or other provider data here.
-         * Backend derives the shipment payload.
-         */
-        await adminService.createProviderShipment(
-          orderId,
-          {},
-        );
-
-        toast.success(
-          'Courier shipment created with server-derived package details.',
-        );
-
+        await adminService.createProviderShipment(order.id, {});
+        toast.success('Internal manual shipment record created.');
         await load();
       } catch (error) {
         toast.error(
           error?.message ||
-            'Unable to create courier shipment.',
+            'Unable to create the internal shipment record.',
         );
       } finally {
         if (mountedRef.current) {
@@ -384,412 +217,371 @@ export default function FulfillmentPanel() {
     },
     [busy, load, toast],
   );
+
+  const openTrackingEditor = useCallback((order) => {
+    setTrackingOrder(order);
+    setTrackingNumber(
+      typeof order?.tracking_number === 'string'
+        ? order.tracking_number
+        : '',
+    );
+  }, []);
+
+  const closeTrackingEditor = useCallback(() => {
+    if (busy) return;
+    setTrackingOrder(null);
+    setTrackingNumber('');
+  }, [busy]);
+
+  const saveTracking = useCallback(
+    async (event) => {
+      event.preventDefault();
+
+      if (!trackingOrder?.order_number || busy) return;
+
+      const normalizedTracking = trackingNumber.trim();
+
+      if (!normalizedTracking) {
+        toast.error('Enter a tracking number.');
+        return;
+      }
+
+      const actionKey = `${trackingOrder.order_number}:tracking`;
+      setBusy(actionKey);
+
+      try {
+        await adminService.updateOrder(
+          trackingOrder.order_number,
+          {
+            tracking_number: normalizedTracking,
+          },
+        );
+
+        if (!mountedRef.current) return;
+
+        toast.success('Tracking number updated.');
+        setTrackingOrder(null);
+        setTrackingNumber('');
+        await load();
+      } catch (error) {
+        if (mountedRef.current) {
+          toast.error(
+            error?.message || 'Unable to update tracking number.',
+          );
+        }
+      } finally {
+        if (mountedRef.current) {
+          setBusy('');
+        }
+      }
+    },
+    [busy, load, toast, trackingNumber, trackingOrder],
+  );
+
+  const counts = useMemo(() => {
+    const source = rows || [];
+
+    return {
+      ready: source.filter(
+        ({ order }) => normalize(order?.status) === 'paid',
+      ).length,
+      processing: source.filter(
+        ({ order }) => normalize(order?.status) === 'processing',
+      ).length,
+      shipped: source.filter(
+        ({ order }) => normalize(order?.status) === 'shipped',
+      ).length,
+      delivered: source.filter(
+        ({ order }) => normalize(order?.status) === 'delivered',
+      ).length,
+    };
+  }, [rows]);
 
   if (rows === null) {
     return (
-      <div className="admin-panel fulfillment-loading">
+      <div className="admin-panel">
         <Spinner label="Loading fulfillment…" />
       </div>
     );
   }
 
-  const readyCount = rows.filter(
-    (row) =>
-      normalizeStatus(row?.status) ===
-      'ready_to_create',
-  ).length;
-
-  const activeCount = rows.filter((row) => {
-    const status = normalizeStatus(row?.status);
-
-    return (
-      status !== 'ready_to_create' &&
-      !isTerminalStatus(status)
-    );
-  }).length;
-
-  const deliveredCount = rows.filter(
-    (row) =>
-      normalizeStatus(row?.status) === 'delivered',
-  ).length;
-
   return (
-    <section className="admin-panel fulfillment-panel">
-      <div
-        className="admin-stats fulfillment-stats"
-        aria-label="Fulfillment statistics"
-      >
-        <article className="admin-stat">
-          <div className="stat-label">
-            Ready to create
-          </div>
-          <div className="stat-value">
-            {readyCount}
-          </div>
+    <section className="admin-panel min-w-0" aria-labelledby="fulfillment-title">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <article className="admin-stat min-w-0">
+          <div className="stat-label">Ready for dispatch</div>
+          <div className="stat-value tabular-nums">{counts.ready}</div>
         </article>
 
-        <article className="admin-stat">
-          <div className="stat-label">
-            Active shipments
-          </div>
-          <div className="stat-value">
-            {activeCount}
-          </div>
+        <article className="admin-stat min-w-0">
+          <div className="stat-label">Processing</div>
+          <div className="stat-value tabular-nums">{counts.processing}</div>
         </article>
 
-        <article className="admin-stat">
+        <article className="admin-stat min-w-0">
+          <div className="stat-label">Shipped</div>
+          <div className="stat-value tabular-nums">{counts.shipped}</div>
+        </article>
+
+        <article className="admin-stat min-w-0">
           <div className="stat-label">Delivered</div>
-          <div className="stat-value">
-            {deliveredCount}
-          </div>
+          <div className="stat-value tabular-nums">{counts.delivered}</div>
         </article>
       </div>
 
-      <div className="admin-card fulfillment-header-card">
-        <div className="admin-toolbar fulfillment-toolbar">
-          <div className="fulfillment-heading">
-            <div className="fulfillment-title-row">
-              <h2>Manual fulfillment</h2>
-
-              <span className="admin-pill pill-gold">
-                Manual shipping
-              </span>
+      <div className="admin-card mt-5">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <h2 id="fulfillment-title" className="min-w-0">
+                Manual fulfillment
+              </h2>
+              <span className="admin-pill pill-gold">Manual shipping</span>
             </div>
 
-            <p>
-              Manage shipment creation, AWB, pickup,
-              documents and tracking from one place.
-              Provider events remain the source of truth
-              for shipped and delivered status.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+              Manage the real Luviio dispatch lifecycle here. Courier
+              selection, AWB assignment, pickup scheduling, labels and
+              provider webhooks are not used in manual shipping mode.
             </p>
           </div>
 
-          <div className="fulfillment-actions">
-            <label
-              className="fulfillment-filter"
-              htmlFor="fulfillment-status-filter"
-            >
-              <span className="sr-only">
-                Filter shipments by status
-              </span>
-
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="min-w-0 sm:min-w-[210px]">
+              <span className="sr-only">Filter fulfillment orders</span>
               <select
-                id="fulfillment-status-filter"
-                className="admin-select"
+                className="admin-select w-full"
                 value={filter}
-                onChange={(event) =>
-                  setFilter(event.target.value)
-                }
+                onChange={(event) => setFilter(event.target.value)}
               >
-                <option value="">
-                  All shipments
-                </option>
-                <option value="ready_to_create">
-                  Ready to create
-                </option>
-                <option value="created">
-                  Created
-                </option>
-                <option value="awb_assigned">
-                  AWB assigned
-                </option>
-                <option value="pickup_scheduled">
-                  Pickup scheduled
-                </option>
-                <option value="out_for_delivery">
-                  Out for delivery
-                </option>
-                <option value="in_transit">
-                  In transit
-                </option>
-                <option value="shipped">
-                  Shipped
-                </option>
-                <option value="delivered">
-                  Delivered
-                </option>
+                {STATUS_OPTIONS.map(([value, label]) => (
+                  <option key={value || 'all'} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
 
             <button
               type="button"
-              className="btn btn-quiet btn-sm"
+              className="btn btn-quiet btn-sm shrink-0"
               onClick={load}
               disabled={refreshing}
-              aria-label={
-                refreshing
-                  ? 'Refreshing fulfillment'
-                  : 'Refresh fulfillment'
-              }
             >
               <RiRefreshLine
                 size={16}
-                className={
-                  refreshing
-                    ? 'fulfillment-refresh-icon spin'
-                    : ''
-                }
+                className={refreshing ? 'spin' : undefined}
                 aria-hidden="true"
               />
-
-              <span>
-                {refreshing
-                  ? 'Refreshing…'
-                  : 'Refresh'}
-              </span>
+              {refreshing ? 'Refreshing…' : 'Refresh'}
             </button>
           </div>
         </div>
+
+        <div className="mt-5 rounded-xl border border-line-soft bg-surface-2 px-4 py-3 text-sm leading-6 text-muted">
+          <strong className="font-semibold text-text">
+            Workflow:
+          </strong>{' '}
+          Ready for dispatch → Processing → Shipped → Delivered.
+          Tracking is recorded on the order and remains the source of truth
+          for dispatch status.
+        </div>
       </div>
 
-      <div className="admin-table-wrap fulfillment-table-wrap">
-        <div className="fulfillment-table-scroll">
-          <table className="admin-table fulfillment-table">
+      <div className="admin-table-wrap mt-5">
+        <div className="overflow-x-auto">
+          <table className="admin-table min-w-[980px]">
             <caption className="sr-only">
-              Manual fulfillment shipments
+              Manual fulfillment orders
             </caption>
 
             <thead>
               <tr>
                 <th scope="col">Order</th>
                 <th scope="col">Customer</th>
-                <th scope="col">
-                  Courier / service
-                </th>
-                <th scope="col">AWB</th>
+                <th scope="col">Destination</th>
+                <th scope="col">Tracking</th>
                 <th scope="col">Status</th>
+                <th scope="col">Shipment record</th>
                 <th scope="col">Actions</th>
               </tr>
             </thead>
 
             <tbody>
-              {rows.length > 0 ? (
-                rows.map((row) => {
-                  const order = row?.orders || {};
-                  const status = normalizeStatus(
-                    row?.status,
-                  );
-
+              {rows.length ? (
+                rows.map(({ order, shipment }) => {
+                  const orderNumber = order?.order_number;
+                  const status = normalize(order?.status);
+                  const tracking = getTrackingNumber(order, shipment);
+                  const rowKey = String(order?.id || orderNumber);
                   const rowBusy =
                     typeof busy === 'string' &&
-                    busy.startsWith(
-                      `${row.id}:`,
-                    );
+                    (busy.startsWith(`${orderNumber}:`) ||
+                      busy.startsWith(`${order?.id}:`));
 
-                  const completed =
-                    isWorkflowComplete(row);
-
-                  const documents =
-                    documentLinks(row);
-
-                  const canProcess =
-                    status !== 'ready_to_create' &&
-                    !completed;
+                  const action = nextAction(order);
 
                   return (
-                    <tr key={row.id}>
-                      <td className="td-gold fulfillment-order-cell">
-                        #{text(order.order_number)}
+                    <tr key={rowKey}>
+                      <td className="td-gold whitespace-nowrap">
+                        #{text(orderNumber)}
                       </td>
 
                       <td>
-                        <div className="fulfillment-customer">
-                          {text(order.shipping_name)}
+                        <div className="font-medium text-text">
+                          {text(order?.shipping_name)}
                         </div>
-
-                        <span className="td-dim">
-                          {text(order.shipping_city)}
-                          {' · '}
-                          {text(
-                            order.shipping_postal_code,
-                          )}
-                        </span>
+                        <div className="td-dim mt-1">
+                          {text(order?.email || order?.users?.email)}
+                        </div>
                       </td>
 
                       <td>
-                        <div>
-                          {text(row.courier_name)}
+                        <div>{text(order?.shipping_city)}</div>
+                        <div className="td-dim mt-1">
+                          {text(order?.shipping_postal_code)}
                         </div>
-
-                        <span className="td-dim">
-                          {text(row.service_type)}
-                        </span>
                       </td>
 
-                      <td className="fulfillment-awb">
-                        {text(
-                          row.tracking_number,
+                      <td className="max-w-[220px]">
+                        <div className="break-all font-mono text-xs">
+                          {tracking}
+                        </div>
+
+                        {tracking !== '—' && (
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm mt-2"
+                            onClick={() => openTrackingEditor(order)}
+                            disabled={rowBusy}
+                          >
+                            Edit tracking
+                          </button>
                         )}
                       </td>
 
                       <td>
-                        <span
-                          className={`admin-pill ${statusTone(
-                            row.status,
-                          )}`}
-                        >
-                          {workflowLabel(row)}
+                        <span className={`admin-pill ${statusTone(status)}`}>
+                          {statusLabel(status)}
                         </span>
-
-                        {status !==
-                          'ready_to_create' &&
-                          !completed &&
-                          row?.workflow_status !==
-                            'documents_ready' &&
-                          row?.workflow_status !==
-                            'delivered' && (
-                            <div className="td-dim fulfillment-next-step">
-                              Next:{' '}
-                              {nextWorkflowStep(
-                                row,
-                              )}
-                            </div>
-                          )}
                       </td>
 
                       <td>
-                        <div className="fulfillment-action-row">
-                          {canProcess && (
-                            <button
-                              type="button"
-                              className="btn btn-sm"
-                              disabled={Boolean(
-                                rowBusy,
-                              )}
-                              onClick={() =>
-                                processShipment(row)
-                              }
-                            >
-                              <RiTruckLine
-                                size={14}
-                                aria-hidden="true"
-                              />
-
-                              <span>
-                                {busy ===
-                                `${row.id}:process`
-                                  ? 'Processing…'
-                                  : `Continue: ${nextWorkflowStep(
-                                      row,
-                                    )}`}
-                              </span>
-                            </button>
-                          )}
-
-                          {row.tracking_number && (
-                            <button
-                              type="button"
-                              className="btn btn-quiet btn-sm"
-                              disabled={Boolean(
-                                rowBusy,
-                              )}
-                              onClick={() =>
-                                runAction(
-                                  row.id,
-                                  'syncTracking',
-                                  'Tracking synchronized.',
-                                )
-                              }
-                            >
-                              Sync
-                            </button>
-                          )}
-
-                          {row.tracking_url && (
-                            <a
-                              className="btn btn-quiet btn-sm"
-                              href={
-                                row.tracking_url
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <RiLinksLine
-                                size={14}
-                                aria-hidden="true"
-                              />
-                              <span>Track</span>
-                            </a>
-                          )}
-                        </div>
-
-                        {documents.length > 0 && (
-                          <div className="fulfillment-document-row">
-                            {documents.map(
-                              ([label, url]) => (
-                                <a
-                                  key={label}
-                                  className="btn btn-quiet btn-sm"
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <RiLinksLine
-                                    size={14}
-                                    aria-hidden="true"
-                                  />
-                                  <span>
-                                    {label}
-                                  </span>
-                                </a>
-                              ),
-                            )}
-                          </div>
+                        {shipment ? (
+                          <span className="admin-pill pill-success">
+                            Created
+                          </span>
+                        ) : (
+                          <span className="admin-pill pill-muted">
+                            Not created
+                          </span>
                         )}
+                      </td>
 
-                        {status ===
-                          'ready_to_create' && (
-                          <div className="admin-page-note fulfillment-auto-note">
-                            <div className="fulfillment-auto-note-copy">
-                              <RiTruckLine
-                                size={15}
-                                aria-hidden="true"
-                              />
-
-                              <span>
-                                Pickup location, order
-                                weight and fallback
-                                parcel dimensions are
-                                filled server-side from
-                                the order/product data
-                                and Manual shipping
-                                configuration.
-                              </span>
-                            </div>
-
+                      <td>
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          {status === 'paid' && !shipment && (
                             <button
                               type="button"
-                              className="btn btn-sm"
-                              disabled={Boolean(
-                                busy,
-                              )}
-                              onClick={() =>
-                                createShipment(
-                                  order,
-                                )
-                              }
+                              className="btn btn-quiet btn-sm"
+                              disabled={Boolean(busy)}
+                              onClick={() => createInternalShipment(order)}
                             >
-                              {busy ===
-                              `${order.id}:create`
+                              <RiTruckLine size={14} aria-hidden="true" />
+                              {busy === `${order?.id}:shipment`
                                 ? 'Creating…'
-                                : 'Create Manual shipping shipment'}
+                                : 'Create shipment'}
                             </button>
-                          </div>
-                        )}
+                          )}
+
+                          {status === 'paid' && (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              disabled={rowBusy}
+                              onClick={() =>
+                                runOrderUpdate(
+                                  order,
+                                  { status: 'processing' },
+                                  'Order moved to processing.',
+                                )
+                              }
+                            >
+                              {busy === `${orderNumber}:processing`
+                                ? 'Updating…'
+                                : 'Start processing'}
+                            </button>
+                          )}
+
+                          {status === 'processing' && (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              disabled={rowBusy}
+                              onClick={() => openTrackingEditor(order)}
+                            >
+                              <RiTruckLine size={14} aria-hidden="true" />
+                              {tracking !== '—'
+                                ? 'Mark shipped'
+                                : 'Add tracking & ship'}
+                            </button>
+                          )}
+
+                          {status === 'shipped' && (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              disabled={rowBusy}
+                              onClick={() =>
+                                runOrderUpdate(
+                                  order,
+                                  { status: 'delivered' },
+                                  'Order marked delivered.',
+                                )
+                              }
+                            >
+                              <RiCheckLine size={14} aria-hidden="true" />
+                              {busy === `${orderNumber}:delivered`
+                                ? 'Updating…'
+                                : 'Mark delivered'}
+                            </button>
+                          )}
+
+                          {status === 'shipped' && (
+                            <button
+                              type="button"
+                              className="btn btn-quiet btn-sm"
+                              disabled={rowBusy}
+                              onClick={() => openTrackingEditor(order)}
+                            >
+                              Update tracking
+                            </button>
+                          )}
+
+                          {action && (
+                            <span className="sr-only">
+                              Next action: {action}
+                            </span>
+                          )}
+
+                          {tracking !== '—' && (
+                            <span className="inline-flex items-center gap-1 text-xs text-muted">
+                              <RiLinksLine size={13} aria-hidden="true" />
+                              Tracking recorded
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="6">
-                    <div className="admin-empty">
+                  <td colSpan="7">
+                    <div className="admin-empty px-4 py-10 text-center">
                       {filter
-                        ? `No shipments match “${filter.replaceAll(
-                            '_',
-                            ' ',
-                          )}”.`
-                        : 'No provider shipments yet.'}
+                        ? `No ${statusLabel(filter).toLowerCase()} orders found.`
+                        : 'No orders are currently in the fulfillment queue.'}
                     </div>
                   </td>
                 </tr>
@@ -798,6 +590,66 @@ export default function FulfillmentPanel() {
           </table>
         </div>
       </div>
+
+      {trackingOrder && (
+        <AdminModal
+          title={
+            normalize(trackingOrder.status) === 'processing'
+              ? 'Ship order'
+              : 'Update tracking'
+          }
+          sub={
+            normalize(trackingOrder.status) === 'processing'
+              ? 'Enter the tracking reference supplied by your actual courier/local delivery service.'
+              : 'Tracking is stored on the order and is not queried from an external courier provider.'
+          }
+          onClose={closeTrackingEditor}
+        >
+          <form onSubmit={saveTracking} noValidate>
+            <div className="field">
+              <label htmlFor="fulfillment-tracking-number">
+                Tracking number
+              </label>
+              <input
+                id="fulfillment-tracking-number"
+                value={trackingNumber}
+                onChange={(event) =>
+                  setTrackingNumber(event.target.value)
+                }
+                maxLength={100}
+                autoComplete="off"
+                autoFocus
+                placeholder="Enter tracking / delivery reference"
+              />
+              <small>
+                {normalize(trackingOrder.status) === 'processing'
+                  ? 'Saving this form will record the tracking number and move the order to Shipped.'
+                  : 'Use the same reference customers receive for delivery tracking.'}
+              </small>
+            </div>
+
+            <div className="btn-row">
+              <button
+                type="button"
+                className="btn btn-quiet"
+                onClick={closeTrackingEditor}
+                disabled={Boolean(busy)}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="btn"
+                disabled={Boolean(busy)}
+              >
+                <RiTruckLine size={16} aria-hidden="true" />
+                {busy ? 'Saving…' : 'Save & ship'}
+              </button>
+            </div>
+          </form>
+        </AdminModal>
+      )}
     </section>
   );
 }
