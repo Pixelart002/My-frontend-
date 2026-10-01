@@ -19,11 +19,11 @@ export default function ProtectedRoute({ children }) {
   if (initializing) {
     return (
       <main
-        className="auth-route-loading page"
+        className="mx-auto flex min-h-[60vh] w-full max-w-6xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8"
         aria-busy="true"
         aria-live="polite"
       >
-        <div className="container auth-route-loading-inner">
+        <div className="w-full max-w-md">
           <Spinner label="Loading your session…" />
         </div>
       </main>
