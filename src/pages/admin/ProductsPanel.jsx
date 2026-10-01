@@ -2028,7 +2028,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </span>
                 </label>
 
-                <div className="editor-footer btn-row">
+                <div className="btn-row">
                   <button
                     type="button"
                     className="btn btn-quiet"
