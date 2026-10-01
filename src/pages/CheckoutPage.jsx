@@ -381,28 +381,6 @@ function AddressCard({ address, selected, disabled, onSelect }) {
   );
 }
 
-function Section({ number, icon: Icon, title, description, children }) {
-  return (
-    <section className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
-          <Icon size={17} aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-line bg-bg px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-dim">
-              {number}
-            </span>
-            <h2 className="text-base font-semibold text-text">{title}</h2>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -959,12 +937,16 @@ export default function CheckoutPage() {
 
         <div className="mt-7 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <main className="min-w-0 space-y-5">
-            <Section
-              number="01"
-              icon={RiMapPinLine}
-              title="Delivery address"
-              description="Select a saved Indian address or add a new one."
-            >
+            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
+                  <RiMapPinLine size={17} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-text">Delivery address</h2>
+                  <p className="mt-0.5 text-sm text-muted">Select a saved Indian address or add a new one.</p>
+                </div>
+              </div>
               {addressesLoading ? (
                 <div className="mt-5 rounded-2xl border border-line bg-bg px-4 py-8 text-center">
                   <Spinner inline label="Loading saved addresses" />
@@ -1046,15 +1028,18 @@ export default function CheckoutPage() {
                   )}
                 </>
               )}
-            </Section>
+            </div>
 
-
-            <Section
-              number="02"
-              icon={RiCoupon3Line}
-              title="Coupon"
-              description="Apply one valid coupon before order creation."
-            >
+            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
+                  <RiCoupon3Line size={17} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-text">Coupon</h2>
+                  <p className="mt-0.5 text-sm text-muted">Apply one valid coupon before order creation.</p>
+                </div>
+              </div>
               <div className="mt-5">
                 {coupon ? (
                   <div className="flex flex-col gap-3 rounded-2xl border border-success/20 bg-success-dim p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1123,14 +1108,18 @@ export default function CheckoutPage() {
                   </p>
                 )}
               </div>
-            </Section>
+            </div>
 
-            <Section
-              number="03"
-              icon={RiMoneyRupeeCircleLine}
-              title="Payment"
-              description="Choose how you want to pay. Final pricing and inventory stay backend-authoritative."
-            >
+            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
+                  <RiMoneyRupeeCircleLine size={17} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-text">Payment</h2>
+                  <p className="mt-0.5 text-sm text-muted">Choose how you want to pay.</p>
+                </div>
+              </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {[
                   {
@@ -1288,6 +1277,8 @@ export default function CheckoutPage() {
             </Section>
           </main>
 
+
+            </div>
           <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
