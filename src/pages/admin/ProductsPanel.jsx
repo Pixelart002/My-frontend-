@@ -1778,6 +1778,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </div>
                   )}
 
+                  {additionalFields.includes("manufacturer") && (
                   <div className="field">
                     <label htmlFor="product-manufacturer">
                       Manufacturer
@@ -1797,9 +1798,11 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
                 </div>
 
                 <div className="field-grid">
+                  {additionalFields.includes("model_number") && (
                   <div className="field">
                     <label htmlFor="product-model">
                       Model number
@@ -1819,7 +1822,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
 
+                  {additionalFields.includes("part_number") && (
                   <div className="field">
                     <label htmlFor="product-part">
                       Part number
@@ -1839,6 +1844,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
                 </div>
 
                 <div className="field-grid">
