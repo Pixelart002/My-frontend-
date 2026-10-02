@@ -1013,6 +1013,16 @@ export default function ProductDetailPage() {
             the store threshold.
           </p>
 
+
+          {product.description && (
+            <div className="description-block">
+              <h3>Details</h3>
+              <p>{product.description}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
           {attributes.length > 0 && (
             <section
               className="product-parameters"
@@ -1050,15 +1060,6 @@ export default function ProductDetailPage() {
               </dl>
             </section>
           )}
-
-          {product.description && (
-            <div className="description-block">
-              <h3>Details</h3>
-              <p>{product.description}</p>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
  );
 }
