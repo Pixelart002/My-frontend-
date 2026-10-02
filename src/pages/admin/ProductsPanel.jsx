@@ -210,6 +210,37 @@ export default function ProductsPanel({ capabilities = {} }) {
 
   const isCreate = !editingId;
 
+  const OPTIONAL_FIELD_OPTIONS = [
+    ['compare_price', 'Compare price'],
+    ['measurement', 'Measurement'],
+    ['short_description', 'Short description'],
+    ['description', 'Description'],
+    ['images', 'Product media'],
+    ['brand', 'Brand'],
+    ['manufacturer', 'Manufacturer'],
+    ['model_number', 'Model number'],
+    ['part_number', 'Part number'],
+    ['material', 'Material'],
+    ['finish', 'Finish'],
+    ['color', 'Color'],
+    ['size', 'Size'],
+    ['dimensions', 'Dimensions'],
+    ['warranty', 'Warranty'],
+    ['country_of_origin', 'Country of origin'],
+    ['key_features', 'Key features'],
+  ];
+
+  const getAdditionalFields = (product) =>
+    OPTIONAL_FIELD_OPTIONS
+      .map(([key]) => key)
+      .filter((key) => {
+        if (key === 'compare_price') return product?.compare_price !== null && product?.compare_price !== undefined && product?.compare_price !== '';
+        if (key === 'measurement') return Boolean(product?.measurement_type || product?.measurement_value || product?.measurement_unit);
+        if (key === 'images') return Array.isArray(product?.images) && product.images.length > 0;
+        if (key === 'key_features') return Array.isArray(product?.key_features) && product.key_features.length > 0;
+        return Boolean(product?.[key]);
+      });
+
   const measurementTypes = measurementCatalog.types || [];
 
   const measurementUnits = useMemo(() => {
