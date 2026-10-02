@@ -1758,6 +1758,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
 
                 <div className="field-grid">
+                  {additionalFields.includes("brand") && (
                   <div className="field">
                     <label htmlFor="product-brand">
                       Brand
@@ -1775,6 +1776,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
 
                   <div className="field">
                     <label htmlFor="product-manufacturer">
