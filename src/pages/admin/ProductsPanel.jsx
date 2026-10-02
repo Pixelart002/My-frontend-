@@ -1880,44 +1880,6 @@ export default function ProductsPanel({ capabilities = {} }) {
 
                 <div className="field-grid">
                   <div className="field">
-                    <label htmlFor="product-gtin">
-                      GTIN
-                    </label>
-
-                    <input
-                      id="product-gtin"
-                      maxLength={32}
-                      value={form.gtin}
-                      onChange={(event) =>
-                        setField(
-                          'gtin',
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="field">
-                    <label htmlFor="product-ean">
-                      EAN
-                    </label>
-
-                    <input
-                      id="product-ean"
-                      maxLength={32}
-                      value={form.ean}
-                      onChange={(event) =>
-                        setField(
-                          'ean',
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="field-grid">
-                  <div className="field">
                     <label htmlFor="product-material">
                       Material
                     </label>
