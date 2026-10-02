@@ -1133,7 +1133,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </div>
                 </div>
 
-                <div className="field-grid"
+                <div className="field-grid">
                   <div className="field">
                     <label htmlFor="product-name">
                       {fieldLabel(
