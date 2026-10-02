@@ -1736,47 +1736,22 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </div>
                 </div>
 
-                {additionalFields.includes("short_description") && (
-                <div className="field">
-                  <label htmlFor="product-short">
-                    Short description
-                  </label>
-
-                  <input
-                    id="product-short"
-                    maxLength={500}
-                    value={
-                      form.short_description
-                    }
-                    onChange={(event) =>
-                      setField(
-                        'short_description',
-                        event.target.value,
-                      )
-                    }
-                  />
+              {(additionalFields.includes("short_description") || additionalFields.includes("description")) && (
+              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
+                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
+                  <div>
+                    <h3 className="text-base font-bold text-text">Descriptions</h3>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Customer-facing product copy.</p>
+                  </div>
                 </div>
-                )}
-
-                {additionalFields.includes("description") && (
                 <div className="field">
-                  <label htmlFor="product-description">
-                    Description
-                  </label>
-
-                  <textarea
-                    id="product-description"
-                    rows="6"
-                    maxLength={2000}
-                    aria-describedby="product-description-help"
-                    value={form.description}
-                    onChange={(event) =>
-                      setField(
-                        'description',
-                        event.target.value,
-                      )
-                    }
-                  />
+                  <label htmlFor="product-short">Short description</label>
+                  <input id="product-short" maxLength={500} value={form.short_description} onChange={(event) => setField('short_description', event.target.value)} />
+                </div>
+                <div className="field">
+                  <label htmlFor="product-description">Description</label>
+                  <textarea id="product-description" rows="6" maxLength={2000} aria-describedby="product-description-help" value={form.description} onChange={(event) => setField('description', event.target.value)} />
+                  <small id="product-description-help">Up to 2,000 characters. Text wraps automatically.</small>
                 </div>
               </section>
               )}
