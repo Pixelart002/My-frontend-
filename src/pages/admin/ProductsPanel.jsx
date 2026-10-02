@@ -322,6 +322,7 @@ export default function ProductsPanel({ capabilities = {} }) {
       ...BLANK_FORM,
       images: [],
     });
+    setAdditionalFields([]);
     setSelectedFiles([]);
     setEditing(true);
   };
@@ -337,6 +338,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
     setEditingId(productId);
     setForm(toForm(product));
+    setAdditionalFields(getAdditionalFields(product));
     setSelectedFiles([]);
     setEditing(true);
     setLoadingEditor(true);
@@ -355,6 +357,7 @@ export default function ProductsPanel({ capabilities = {} }) {
       }
 
       setForm(toForm(detail));
+      setAdditionalFields(getAdditionalFields(detail));
     } catch (err) {
       if (mountedRef.current) {
         toast.error(err?.message || 'Unable to load complete product details.');
@@ -373,6 +376,7 @@ export default function ProductsPanel({ capabilities = {} }) {
     setEditing(false);
     setEditingId(null);
     setSelectedFiles([]);
+    setAdditionalFields([]);
     setLoadingEditor(false);
   };
 
@@ -778,6 +782,7 @@ export default function ProductsPanel({ capabilities = {} }) {
       setEditing(false);
       setEditingId(null);
       setSelectedFiles([]);
+      setAdditionalFields([]);
 
       await load();
     } catch (err) {
