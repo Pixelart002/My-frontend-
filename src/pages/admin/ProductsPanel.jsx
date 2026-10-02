@@ -1132,8 +1132,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </p>
                   </div>
                 </div>
+                )}
 
-                <div className="field-grid">
+                <div className="field-grid"
                   <div className="field">
                     <label htmlFor="product-name">
                       {fieldLabel(
@@ -1294,6 +1295,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                     />
                   </div>
 
+                  {additionalFields.includes("compare_price") && (
                   <div className="field">
                     <label htmlFor="product-compare">
                       Compare-at price
@@ -1315,6 +1317,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
                 </div>
 
                 <div className="field-grid">
@@ -1415,6 +1418,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   />
                 </div>
 
+                {additionalFields.includes("measurement") && (
                 <div className="field">
                   <label htmlFor="product-measurement-type">
                     Product measurement
