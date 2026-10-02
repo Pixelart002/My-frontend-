@@ -47,8 +47,6 @@ const BLANK_FORM = {
   brand: '',
   manufacturer: '',
   model_number: '',
-  gtin: '',
-  ean: '',
   part_number: '',
 
   key_features: '',
@@ -143,8 +141,6 @@ function toForm(product) {
     manufacturer: product?.manufacturer || '',
     model_number: product?.model_number || '',
 
-    gtin: product?.gtin || '',
-    ean: product?.ean || '',
     part_number: product?.part_number || '',
 
     key_features: Array.isArray(product?.key_features)
@@ -682,9 +678,6 @@ export default function ProductsPanel({ capabilities = {} }) {
 
         model_number:
           form.model_number.trim() || undefined,
-
-        gtin: form.gtin.trim() || undefined,
-        ean: form.ean.trim() || undefined,
 
         part_number:
           form.part_number.trim() || undefined,
