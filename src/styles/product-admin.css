@@ -1657,3 +1657,141 @@
     padding: 10px;
   }
 }
+
+
+/* ============================================================
+   ADD PRODUCT — FLAT, SINGLE-SURFACE FINAL COMPOSITION
+   Keep one modal surface; sections are hierarchy, not cards.
+   ============================================================ */
+
+.products-admin .product-editor {
+  gap: 0;
+  padding: 18px 28px 28px;
+}
+
+.products-admin .product-editor > .editor-section {
+  margin: 0;
+  padding: 22px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.products-admin .product-editor > .editor-section + .editor-section {
+  border-top: 1px solid var(--line-soft);
+}
+
+.products-admin .product-editor > .editor-section:first-child {
+  padding-top: 4px;
+}
+
+.products-admin .product-editor .editor-section-head {
+  margin-bottom: 18px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.products-admin .product-editor .editor-section-head h3 {
+  font-size: 15px;
+  letter-spacing: -.01em;
+}
+
+.products-admin .product-editor .editor-section-head p {
+  max-width: 68ch;
+  font-size: 11px;
+}
+
+.products-admin .product-editor .field-grid {
+  column-gap: 18px;
+  row-gap: 0;
+}
+
+.products-admin .product-editor .field {
+  margin-bottom: 15px;
+}
+
+.products-admin .product-editor .field input,
+.products-admin .product-editor .field select,
+.products-admin .product-editor .field textarea {
+  border-radius: 9px;
+}
+
+.products-admin .product-editor .measurement-panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.products-admin .product-editor .check-line {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.products-admin .product-editor > .editor-footer {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  margin: 4px 0 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 760px) {
+  .products-admin .product-editor {
+    gap: 0;
+    padding: 14px 18px 22px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    padding: 19px 0;
+  }
+
+  .products-admin .product-editor > .editor-section:first-child {
+    padding-top: 2px;
+  }
+
+  .products-admin .product-editor .editor-section-head {
+    margin-bottom: 15px;
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    position: relative;
+    inset: auto;
+    margin-top: 2px;
+    padding-top: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-admin .product-editor {
+    padding: 12px 16px 18px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    padding: 17px 0;
+  }
+
+  .products-admin .product-editor .editor-section-head {
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+
+  .products-admin .product-editor .editor-section-head p {
+    font-size: 10.5px;
+    line-height: 1.45;
+  }
+
+  .products-admin .product-editor .field {
+    margin-bottom: 13px;
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    padding-top: 13px;
+  }
+}
