@@ -193,6 +193,7 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [editing, setEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ ...BLANK_FORM });
+  const [additionalFields, setAdditionalFields] = useState([]);
 
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState(null);
