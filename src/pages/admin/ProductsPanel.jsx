@@ -1726,20 +1726,6 @@ export default function ProductsPanel({ capabilities = {} }) {
               <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
-                    <h3 className="text-base font-bold text-text">Descriptions
-                    </h3>
-
-                    <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">
-                      Customer-facing product
-                      copy.
-                    </p>
-                  </div>
-                </div>
-
-              {(additionalFields.includes("short_description") || additionalFields.includes("description")) && (
-              <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
-                <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
-                  <div>
                     <h3 className="text-base font-bold text-text">Descriptions</h3>
                     <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Customer-facing product copy.</p>
                   </div>
