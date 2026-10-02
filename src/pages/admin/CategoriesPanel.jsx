@@ -26,7 +26,6 @@ import {
 } from '../../components/ui/States';
 
 import AdminModal from './Modal';
-import '../../styles/category-admin.css';
 
 const BLANK_CATEGORY = {
   name: '',
