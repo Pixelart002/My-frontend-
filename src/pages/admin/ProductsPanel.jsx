@@ -1848,6 +1848,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                 </div>
 
                 <div className="field-grid">
+                  {additionalFields.includes("material") && (
                   <div className="field">
                     <label htmlFor="product-material">
                       Material
@@ -1866,7 +1867,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                       placeholder="e.g. Stainless Steel"
                     />
                   </div>
+                  )}
 
+                  {additionalFields.includes("finish") && (
                   <div className="field">
                     <label htmlFor="product-finish">
                       Finish
@@ -1885,9 +1888,11 @@ export default function ProductsPanel({ capabilities = {} }) {
                       placeholder="e.g. Polished"
                     />
                   </div>
+                  )}
                 </div>
 
                 <div className="field-grid">
+                  {additionalFields.includes("color") && (
                   <div className="field">
                     <label htmlFor="product-color">
                       Color
@@ -1905,7 +1910,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
 
+                  {additionalFields.includes("size") && (
                   <div className="field">
                     <label htmlFor="product-size">
                       Size
@@ -1923,6 +1930,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                       }
                     />
                   </div>
+                  )}
                 </div>
 
                 <div className="field">
