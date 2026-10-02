@@ -1711,6 +1711,8 @@ export default function ProductsPanel({ capabilities = {} }) {
                   <textarea
                     id="product-description"
                     rows="6"
+                    maxLength={2000}
+                    aria-describedby="product-description-help"
                     value={form.description}
                     onChange={(event) =>
                       setField(
