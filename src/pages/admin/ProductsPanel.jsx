@@ -232,7 +232,7 @@ export default function ProductsPanel({ capabilities = {} }) {
       .filter((key) => {
         if (key === 'compare_price') return product?.compare_price !== null && product?.compare_price !== undefined && product?.compare_price !== '';
         if (key === 'measurement') return Boolean(product?.measurement_type || product?.measurement_value || product?.measurement_unit);
-        if (key === 'images') return Array.isArray(product?.images) && product.images.length > 0;
+        if (key === 'images') return (Array.isArray(product?.images) && product.images.length > 0) || Boolean(product?.image_url);
         if (key === 'key_features') return Array.isArray(product?.key_features) && product.key_features.length > 0;
         return Boolean(product?.[key]);
       });
