@@ -1513,6 +1513,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                     compatible unit are stored.
                   </small>
                 </div>
+                )}
 
                 {additionalFields.includes("country_of_origin") && (
                 <div className="field-grid">
