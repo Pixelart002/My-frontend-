@@ -1576,3 +1576,84 @@
     padding-inline: 8px;
   }
 }
+
+
+/* ============================================================
+   ADD PRODUCT — FINAL MOBILE OVERLAY FIX
+   Keep the action footer in normal flow; never cover form fields.
+   ============================================================ */
+
+.products-admin .product-editor > .editor-footer {
+  position: relative;
+  bottom: auto;
+  z-index: 1;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  margin-bottom: 0;
+  align-items: center;
+  overflow: visible;
+}
+
+.products-admin .product-editor > .editor-footer > .check-line {
+  flex: 1 1 320px;
+  width: auto;
+}
+
+.products-admin .product-editor > .editor-footer .btn-row {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .products-admin .product-editor > .editor-footer {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin-top: 2px;
+    padding: 12px;
+  }
+
+  .products-admin .product-editor > .editor-footer > .check-line {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .products-admin .product-editor > .editor-footer .btn-row {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-admin .product-editor > .editor-footer {
+    gap: 10px;
+    margin-top: 0;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .products-admin .product-editor > .editor-footer > .check-line {
+    min-height: 54px;
+    padding: 11px 12px;
+  }
+
+  .products-admin .product-editor > .editor-footer .btn-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .products-admin .product-editor > .editor-footer .btn-row .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .products-admin .product-editor > .editor-footer {
+    padding: 10px;
+  }
+
+  .products-admin .product-editor > .editor-footer > .check-line {
+    padding: 10px;
+  }
+}
