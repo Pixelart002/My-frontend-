@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { RiCoupon3Line, RiRefreshLine } from '@remixicon/react';
+import {
+  RiBarChart2Line,
+  RiCoupon3Line,
+  RiRefreshLine,
+  RiShoppingBag3Line,
+  RiStackLine,
+  RiTeamLine,
+} from '@remixicon/react';
 import { adminService, itemsOfList } from '../../services/admin';
 import { formatMoney } from '../../utils/format';
 import { ErrorState } from '../../components/ui/States';
@@ -123,27 +130,32 @@ export default function DashboardPanel({ onNavigate }) {
           label: 'Products',
           value: normalizeNumber(stats.products),
           hint: 'Active listings',
+          icon: RiStackLine,
         },
         {
           label: 'Orders',
           value: normalizeNumber(stats.orders),
           hint: 'All time',
+          icon: RiShoppingBag3Line,
         },
         {
           label: 'Pending',
           value: normalizeNumber(stats.pending_orders),
           hint: 'Needs action',
           danger: true,
+          icon: RiBarChart2Line,
         },
         {
           label: 'Users',
           value: normalizeNumber(stats.users),
           hint: 'Registered',
+          icon: RiTeamLine,
         },
         {
           label: 'Revenue',
           value: formatMoney(normalizeNumber(stats.revenue)),
           hint: 'Paid / shipped / delivered',
+          icon: RiBarChart2Line,
         },
       ]
     : [];
@@ -167,7 +179,14 @@ export default function DashboardPanel({ onNavigate }) {
               card.danger ? ' tone-danger' : ''
             }`}
           >
-            <div className="stat-label">{card.label}</div>
+            <div className="stat-topline">
+              <div className="stat-label">{card.label}</div>
+              {card.icon && (
+                <span className="stat-icon" aria-hidden="true">
+                  <card.icon size={17} />
+                </span>
+              )}
+            </div>
             <div className="stat-value">{card.value}</div>
             <div className="stat-hint">{card.hint}</div>
           </article>
@@ -175,7 +194,7 @@ export default function DashboardPanel({ onNavigate }) {
       </section>
 
       <section
-        className="dashboard-section"
+        className="dashboard-section dashboard-quick-actions-section"
         aria-labelledby="dashboard-quick-actions"
       >
         <div
@@ -185,10 +204,10 @@ export default function DashboardPanel({ onNavigate }) {
           Quick actions
         </div>
 
-        <div className="btn-row dashboard-actions">
+        <div className="dashboard-actions">
           <button
             type="button"
-            className="btn btn-quiet btn-sm"
+            className="btn btn-quiet btn-sm dashboard-action-btn"
             onClick={() => onNavigate?.('products')}
           >
             Add product
@@ -229,7 +248,7 @@ export default function DashboardPanel({ onNavigate }) {
 
           <button
             type="button"
-            className="btn btn-quiet btn-sm dashboard-refresh"
+            className="btn btn-quiet btn-sm dashboard-refresh dashboard-action-btn"
             onClick={load}
             disabled={refreshing}
             aria-label={
@@ -249,7 +268,7 @@ export default function DashboardPanel({ onNavigate }) {
       </section>
 
       <section
-        className="dashboard-section"
+        className="dashboard-section dashboard-recent-section"
         aria-labelledby="dashboard-recent-orders"
       >
         <div
