@@ -271,7 +271,7 @@ export default function ProductCard({ product }) {
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <div className="min-w-0">
-          <h3 className="m-0 line-clamp-2 min-h-[2.7rem] text-[13px] font-semibold leading-[1.42] tracking-[-0.005em] text-text sm:text-[14px]">
+          <h3 className="m-0 h-[2.8rem] max-h-[2.8rem] overflow-hidden text-[13px] font-semibold leading-[1.4] tracking-[-0.005em] text-text break-words sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -281,7 +281,7 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-3 flex min-h-[3.5rem] min-w-0 items-end justify-between gap-3">
+        <div className="mt-3 flex h-[3.5rem] min-h-[3.5rem] min-w-0 shrink-0 items-end justify-between gap-3 overflow-hidden">
           <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
               <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
@@ -312,7 +312,7 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className={`mt-auto flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`mt-auto flex h-12 min-h-12 w-full min-w-0 shrink-0 items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
             added
               ? 'border-[rgba(111,191,138,.45)] bg-success-dim text-success'
               : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
