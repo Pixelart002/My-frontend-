@@ -1132,7 +1132,6 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </p>
                   </div>
                 </div>
-                )}
 
                 <div className="field-grid"
                   <div className="field">
@@ -1252,7 +1251,6 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </div>
                   </div>
                 </div>
-                )}
               </section>
 
               <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
