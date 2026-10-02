@@ -1185,22 +1185,6 @@ export default function ProductsPanel({ capabilities = {} }) {
 
                 <div className="field-grid">
                   <div className="field">
-                    <label htmlFor="product-slug">
-                      Slug
-                    </label>
-
-                    <input
-                      id="product-slug"
-                      value={
-                        form.slug ||
-                        'Generated after save'
-                      }
-                      readOnly
-                      disabled
-                    />
-                  </div>
-
-                  <div className="field">
                     <label htmlFor="product-category">
                       Category
                     </label>
@@ -1236,6 +1220,35 @@ export default function ProductsPanel({ capabilities = {} }) {
                         ),
                       )}
                     </select>
+                  </div>
+                </div>
+              </section>
+
+              <section className="editor-section add-fields-section" aria-labelledby="add-more-fields-title">
+                <div className="add-fields-bar">
+                  <div>
+                    <h3 id="add-more-fields-title">Additional fields</h3>
+                    <p>Add only the attributes that actually apply to this product.</p>
+                  </div>
+                  <div className="add-fields-picker">
+                    <button type="button" className="add-fields-trigger" onClick={(event) => {
+                      const list = event.currentTarget.nextElementSibling;
+                      if (list) list.hidden = !list.hidden;
+                    }}>
+                      <RiAddLine size={17} aria-hidden="true" />
+                      Add more fields
+                    </button>
+                    <div className="add-fields-list" hidden>
+                      {OPTIONAL_FIELD_OPTIONS.map(([key, label]) => {
+                        const selected = additionalFields.includes(key);
+                        return (
+                          <button type="button" key={key} className={`add-field-option ${selected ? 'is-selected' : ''}`} onClick={() => setAdditionalFields((current) => selected ? current.filter((field) => field !== key) : [...current, key])}>
+                            <span aria-hidden="true">{selected ? '✓' : '+'}</span>
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </section>
