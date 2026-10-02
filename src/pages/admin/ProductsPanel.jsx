@@ -1933,6 +1933,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   )}
                 </div>
 
+                {additionalFields.includes("dimensions") && (
                 <div className="field">
                   <label htmlFor="product-dimensions">
                     Dimensions
@@ -1957,7 +1958,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                     product dimension in one value.
                   </small>
                 </div>
+                )}
 
+                {additionalFields.includes("warranty") && (
                 <div className="field">
                   <label htmlFor="product-warranty">
                     Warranty
@@ -1975,7 +1978,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                     }
                   />
                 </div>
+                )}
 
+                {additionalFields.includes("key_features") && (
                 <div className="field">
                   <label htmlFor="product-features">
                     Key features{' '}
@@ -2001,6 +2006,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                     }
                   />
                 </div>
+                )}
               </section>
               )}
 
