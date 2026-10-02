@@ -26,6 +26,7 @@ import {
 } from '../../components/ui/States';
 
 import AdminModal from './Modal';
+import '../../styles/category-admin.css';
 
 const BLANK_CATEGORY = {
   name: '',
@@ -400,7 +401,7 @@ export default function CategoriesPanel({
   return (
     <>
       <section
-        className="admin-panel"
+        className="admin-panel categories-admin"
         aria-labelledby="categories-title"
       >
         <div className="admin-head">
@@ -504,8 +505,9 @@ export default function CategoriesPanel({
                           data-label="Description"
                           className="td-dim category-description"
                         >
-                          {category?.description ||
-                            '—'}
+                          <span className="category-description-text">
+                            {category?.description || '—'}
+                          </span>
                         </td>
 
                         {canDelete && (
@@ -637,6 +639,7 @@ export default function CategoriesPanel({
                 placeholder="Optional category description"
                 rows={4}
                 maxLength={500}
+                aria-describedby="cat-description-help"
               />
             </div>
 
