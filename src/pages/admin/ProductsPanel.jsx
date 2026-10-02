@@ -1252,6 +1252,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                     </div>
                   </div>
                 </div>
+                )}
               </section>
 
               <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
@@ -1735,6 +1736,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   </div>
                 </div>
 
+                {additionalFields.includes("short_description") && (
                 <div className="field">
                   <label htmlFor="product-short">
                     Short description
@@ -1754,7 +1756,9 @@ export default function ProductsPanel({ capabilities = {} }) {
                     }
                   />
                 </div>
+                )}
 
+                {additionalFields.includes("description") && (
                 <div className="field">
                   <label htmlFor="product-description">
                     Description
@@ -1777,6 +1781,7 @@ export default function ProductsPanel({ capabilities = {} }) {
               </section>
               )}
 
+              {(additionalFields.includes("brand") || additionalFields.includes("manufacturer") || additionalFields.includes("model_number") || additionalFields.includes("part_number") || additionalFields.includes("material") || additionalFields.includes("finish") || additionalFields.includes("color") || additionalFields.includes("size") || additionalFields.includes("dimensions") || additionalFields.includes("warranty") || additionalFields.includes("key_features")) && (
               <section className="editor-section rounded-2xl border border-line bg-surface p-4 sm:p-5">
                 <div className="editor-section-head mb-4 flex items-start justify-between gap-4 border-b border-line pb-4">
                   <div>
@@ -2058,6 +2063,7 @@ export default function ProductsPanel({ capabilities = {} }) {
                   />
                 </div>
               </section>
+              )}
 
               <div className="editor-footer">
                 <label className="check-line">
