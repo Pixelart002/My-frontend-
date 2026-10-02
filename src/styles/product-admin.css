@@ -1318,3 +1318,261 @@
     gap: 8px;
   }
 }
+
+
+/* ============================================================
+   ADD PRODUCT / EDIT PRODUCT — RESPONSIVE FINAL HARDENING
+   Scope: editor modal only. No data or business logic changes.
+   ============================================================ */
+
+.products-admin .product-editor-modal,
+.products-admin .product-editor-modal * {
+  box-sizing: border-box;
+}
+
+.products-admin .product-editor-modal {
+  min-width: 0;
+  width: min(960px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.products-admin .product-editor-modal > h2,
+.products-admin .product-editor-modal > .modal-sub {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor-modal > h2 {
+  max-width: 100%;
+}
+
+.products-admin .product-editor-modal > .modal-sub {
+  max-width: 100%;
+}
+
+.products-admin .product-editor {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.products-admin .product-editor > .editor-section,
+.products-admin .product-editor > .editor-footer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .field-grid,
+.products-admin .product-editor .field-inline,
+.products-admin .product-editor .measurement-panel,
+.products-admin .product-editor .dimension-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .field,
+.products-admin .product-editor .field > *,
+.products-admin .product-editor .field > label,
+.products-admin .product-editor .field > small {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .field > label {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor .field input,
+.products-admin .product-editor .field select,
+.products-admin .product-editor .field textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .field textarea {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor .field > small {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor .editor-section-head {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.products-admin .product-editor .editor-section-head > div {
+  min-width: min(100%, 240px);
+  max-width: 100%;
+}
+
+.products-admin .product-editor .editor-section-head h3,
+.products-admin .product-editor .editor-section-head p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor .upload-drop {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .upload-drop span {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .upload-drop strong,
+.products-admin .product-editor .upload-drop small {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.products-admin .product-editor .admin-image-grid {
+  width: 100%;
+  max-width: 100%;
+}
+
+.products-admin .product-editor .admin-image-item {
+  min-width: 0;
+}
+
+.products-admin .product-editor .selected-image-row {
+  min-width: 0;
+}
+
+.products-admin .product-editor .selected-image-row > span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.products-admin .product-editor .editor-footer {
+  flex-wrap: wrap;
+}
+
+.products-admin .product-editor .editor-footer > .check-line {
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.products-admin .product-editor .editor-footer .btn-row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .products-admin .product-editor-modal {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .products-admin .product-editor {
+    padding-inline: 16px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    padding: 16px;
+  }
+
+  .products-admin .product-editor .editor-section-head {
+    gap: 10px;
+  }
+
+  .products-admin .product-editor .editor-section-head > div {
+    flex: 1 1 100%;
+  }
+
+  .products-admin .product-editor .editor-footer {
+    align-items: stretch;
+  }
+
+  .products-admin .product-editor .editor-footer > .check-line,
+  .products-admin .product-editor .editor-footer .btn-row {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-admin .product-editor-modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .products-admin .product-editor-modal > h2 {
+    padding-left: 16px;
+    padding-right: 58px;
+    font-size: 21px;
+  }
+
+  .products-admin .product-editor-modal > .modal-sub {
+    padding-left: 16px;
+    padding-right: 58px;
+  }
+
+  .products-admin .product-editor {
+    padding-inline: 12px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    padding: 14px;
+  }
+
+  .products-admin .product-editor .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .products-admin .product-editor .field-inline {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .products-admin .product-editor .admin-image-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    margin-inline: 0;
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .products-admin .product-editor-modal > h2 {
+    padding-left: 12px;
+    padding-right: 52px;
+    font-size: 20px;
+  }
+
+  .products-admin .product-editor-modal > .modal-sub {
+    padding-left: 12px;
+    padding-right: 52px;
+  }
+
+  .products-admin .product-editor {
+    padding-inline: 8px;
+  }
+
+  .products-admin .product-editor > .editor-section {
+    padding: 12px;
+  }
+
+  .products-admin .product-editor > .editor-footer {
+    padding-inline: 8px;
+  }
+}
