@@ -251,6 +251,8 @@ function CartItem({ item, actionBusy, updating, removing, onQuantity, onRemove }
 }
 
 function OrderSummary({ cart, disabled, onCheckout }) {
+  const shippingEnabled = Boolean(cart?.shipping_enabled);
+  const taxEnabled = Boolean(cart?.tax_enabled);
   const shippingCost = Number(cart?.shipping_cost) || 0;
   const freeShippingThreshold = Number(cart?.free_shipping_threshold) || 1499;
   const isFreeShipping = Boolean(cart?.free_shipping_eligible) || shippingCost === 0;
@@ -277,6 +279,7 @@ function OrderSummary({ cart, disabled, onCheckout }) {
           </dd>
         </div>
 
+        {taxEnabled && (
         <div className="flex items-center justify-between gap-4 text-muted">
           <dt>Taxes</dt>
           <dd className="font-medium tabular-nums text-text">
@@ -284,12 +287,17 @@ function OrderSummary({ cart, disabled, onCheckout }) {
           </dd>
         </div>
 
+        )}
+
+        {shippingEnabled && (
         <div className="flex items-center justify-between gap-4 text-muted">
           <dt>Shipping</dt>
           <dd className="font-medium tabular-nums text-text">
             {isFreeShipping ? 'Free' : formatMoney(shippingCost)}
           </dd>
         </div>
+
+        )}
 
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-line pt-5">
           <dt className="text-sm font-semibold text-text">Total</dt>
@@ -299,12 +307,15 @@ function OrderSummary({ cart, disabled, onCheckout }) {
         </div>
       </dl>
 
+      {shippingEnabled && (
       <div className="mt-5 flex gap-3 rounded-xl border border-gold bg-gold-dim px-3.5 py-3 text-xs leading-5 text-gold-soft">
         <RiTruckLine className="mt-0.5 shrink-0" size={16} aria-hidden="true" />
         <p>
           Manual shipping: {isFreeShipping ? `Free at or above ${formatMoney(freeShippingThreshold)}` : `${formatMoney(shippingCost)} below ${formatMoney(freeShippingThreshold)}`}.
         </p>
-      </div>
+      </div>      )}
+
+
 
       <button
         type="button"
