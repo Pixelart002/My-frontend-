@@ -218,6 +218,7 @@ export default function OrdersPanel({
         await adminService.listOrders({
           page: 1,
           page_size: PAGE_SIZE,
+          _ts: Date.now(),
         });
 
       if (
