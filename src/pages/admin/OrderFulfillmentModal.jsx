@@ -243,8 +243,13 @@ export default function OrderFulfillmentModal({
         );
         setCurrentOrder((previous) => ({
           ...previous,
-          ...payload,
+          tracking_number: value,
+          ...(payload.status
+            ? { status: payload.status }
+            : {}),
         }));
+
+        setTracking(value);
 
         toast.success(
           status === 'processing'
