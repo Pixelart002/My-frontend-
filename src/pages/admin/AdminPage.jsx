@@ -92,9 +92,6 @@ const BusinessProfilePanel = lazy(
   () => import('./BusinessProfilePanel'),
 );
 
-const FulfillmentPanel = lazy(
-  () => import('./FulfillmentPanel'),
-);
 
 const StripeConfigPanel = lazy(
   () => import('./StripeConfigPanel'),
@@ -134,11 +131,6 @@ const NAV = [
   {
     key: 'shipping',
     label: 'Shipping',
-    icon: RiTruckLine,
-  },
-  {
-    key: 'fulfillment',
-    label: 'Fulfillment',
     icon: RiTruckLine,
   },
   {
@@ -220,7 +212,6 @@ const ROLE_PANELS = {
     'coupons',
     'inventory',
     'shipping',
-    'fulfillment',
     'subscriptions',
     'users',
     'reviews',
@@ -235,7 +226,6 @@ const ROLE_PANELS = {
     'products',
     'coupons',
     'shipping',
-    'fulfillment',
     'subscriptions',
   ],
 
@@ -334,7 +324,6 @@ const NAV_GROUPS = [
       'coupons',
       'inventory',
       'shipping',
-      'fulfillment',
       'subscriptions',
       'payments',
       'stripe',
@@ -413,17 +402,9 @@ function AdminGate({
 function getInitialPanel({
   role,
   requestedPanel,
-  isFulfillmentRoute,
 }) {
   const allowed =
     ROLE_PANELS[role] || [];
-
-  if (
-    isFulfillmentRoute &&
-    allowed.includes('fulfillment')
-  ) {
-    return 'fulfillment';
-  }
 
   if (
     requestedPanel &&
@@ -466,10 +447,6 @@ export default function AdminPage() {
   const createCoupon =
     searchParams.get('create') === '1';
 
-  const isFulfillmentRoute =
-    location.pathname ===
-    '/admin/fulfillment';
-
   const role =
     user?.role || '';
 
@@ -490,7 +467,6 @@ export default function AdminPage() {
     getInitialPanel({
       role,
       requestedPanel,
-      isFulfillmentRoute,
     }),
   );
 
@@ -763,16 +739,6 @@ export default function AdminPage() {
         }
 
         closeDrawer();
-
-        if (
-          next === 'fulfillment'
-        ) {
-          navigate(
-            '/admin/fulfillment',
-          );
-          setPanel(next);
-          return;
-        }
 
         navigate('/admin');
 
@@ -1123,11 +1089,6 @@ export default function AdminPage() {
             {effectivePanel ===
               'business-profile' && (
               <BusinessProfilePanel />
-            )}
-
-            {effectivePanel ===
-              'fulfillment' && (
-              <FulfillmentPanel />
             )}
 
             {[
