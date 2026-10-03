@@ -6,9 +6,18 @@ import {
   RiAlertLine,
 } from '@remixicon/react';
 
-const STEPS = [
-  ['paid', 'Ready for dispatch', RiFileTextLine],
+const ONLINE_STEPS = [
+  ['pending', 'Payment pending', RiFileTextLine],
+  ['paid', 'Payment received', RiFileTextLine],
   ['processing', 'Processing', RiTimeLine],
+  ['shipped', 'Shipped', RiTruckLine],
+  ['delivered', 'Delivered', RiCheckboxCircleLine],
+];
+
+const COD_STEPS = [
+  ['pending', 'Order placed', RiFileTextLine],
+  ['processing', 'Processing', RiTimeLine],
+  ['paid', 'COD paid', RiFileTextLine],
   ['shipped', 'Shipped', RiTruckLine],
   ['delivered', 'Delivered', RiCheckboxCircleLine],
 ];
@@ -33,7 +42,7 @@ const formatDateTime = (value) => {
   }).format(date);
 };
 
-const statusMeta = (status) => {
+const statusMeta = (status, isCod) => {
   if (status === 'delivered') {
     return { tone: 'success', title: 'Delivered', icon: RiCheckboxCircleLine };
   }
@@ -54,6 +63,14 @@ const statusMeta = (status) => {
     return { tone: 'info', title: 'Processing', icon: RiTimeLine };
   }
 
+  if (status === 'pending') {
+    return {
+      tone: 'info',
+      title: isCod ? 'Order placed' : 'Payment pending',
+      icon: RiFileTextLine,
+    };
+  }
+
   return {
     tone: 'info',
     title: 'Ready for dispatch',
@@ -61,11 +78,15 @@ const statusMeta = (status) => {
   };
 };
 
-export default function ShipmentTimeline({ shipment, orderStatus }) {
+export default function ShipmentTimeline({ shipment, orderStatus, paymentMethod }) {
   const status = normalizeStatus(orderStatus);
+  const isCod = ['cod', 'cash_on_delivery'].includes(
+    normalizeStatus(paymentMethod),
+  );
+  const steps = isCod ? COD_STEPS : ONLINE_STEPS;
 
   if (status === 'cancelled' || status === 'refunded') {
-    const meta = statusMeta(status);
+    const meta = statusMeta(status, isCod);
     const StatusIcon = meta.icon;
 
     return (
@@ -91,14 +112,17 @@ export default function ShipmentTimeline({ shipment, orderStatus }) {
     );
   }
 
-  const currentIndex = STATUS_INDEX[status] ?? 0;
+  const statusIndex = Object.fromEntries(
+    steps.map(([key], index) => [key, index]),
+  );
+  const currentIndex = statusIndex[status] ?? 0;
   const trackingNumber = shipment?.tracking_number || 'Pending';
   const trackingUrl =
     typeof shipment?.tracking_url === 'string'
       ? shipment.tracking_url.trim()
       : '';
 
-  const meta = statusMeta(status);
+  const meta = statusMeta(status, isCod);
   const StatusIcon = meta.icon;
 
   return (
@@ -153,7 +177,7 @@ export default function ShipmentTimeline({ shipment, orderStatus }) {
       </div>
 
       <ol className="mt-5 grid gap-2 sm:grid-cols-2" aria-label="Order fulfillment progress">
-        {STEPS.map(([key, title, Icon], index) => {
+        {steps.map(([key, title, Icon], index) => {
           const isCurrent = key === status;
           const isDone = index < currentIndex;
 
