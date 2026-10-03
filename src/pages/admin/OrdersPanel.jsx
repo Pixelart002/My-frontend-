@@ -227,7 +227,9 @@ export default function OrdersPanel({
         return;
       }
 
-      setItems(itemsOfList(result));
+      const nextItems = itemsOfList(result);
+      setItems(nextItems);
+      return nextItems;
     } catch (err) {
       if (
         !mountedRef.current ||
@@ -465,7 +467,17 @@ export default function OrdersPanel({
           order={fulfilling}
           capabilities={capabilities}
           onClose={() => setFulfilling(null)}
-          onUpdated={load}
+          onUpdated={async () => {
+            const nextItems = await load();
+            const refreshed = nextItems?.find(
+              (item) =>
+                String(item?.order_number ?? '') ===
+                String(fulfilling?.order_number ?? ''),
+            );
+            if (refreshed) {
+              setFulfilling(refreshed);
+            }
+          }}
         />
       )}
 
