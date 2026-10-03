@@ -399,7 +399,12 @@ export default function OrderFulfillmentModal({
               : undefined;
 
 
-  const canCancel = canOrderUpdate && status === 'pending';
+  const canCancel =
+    canOrderUpdate &&
+    (
+      status === 'pending' ||
+      (status === 'processing' && isCodOrder && !currentOrder?.provider_payment_id)
+    );
   const canRefund = canOrderUpdate && hasOnlinePayment &&
     ['paid', 'processing', 'shipped', 'delivered'].includes(status);
 
@@ -708,7 +713,7 @@ export default function OrderFulfillmentModal({
       <ConfirmDialog
         open={pendingAction === 'cancel'}
         title="Cancel order?"
-        message="This will cancel the order and release any reserved stock. COD orders do not receive an online payment refund."
+        message="This will cancel the order and release any reserved stock. For COD, cancellation is available only before payment is collected."
         confirmLabel="Cancel order"
         cancelLabel="Keep order"
         danger
