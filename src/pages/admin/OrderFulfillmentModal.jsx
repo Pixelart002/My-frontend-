@@ -169,13 +169,19 @@ export default function OrderFulfillmentModal({
       setBusy(true);
 
       try {
-        await adminService.updateOrder(
+        const result = await adminService.updateOrder(
           currentOrder.order_number,
           data,
         );
+        const serverOrder =
+          result?.data && typeof result.data === 'object'
+            ? result.data
+            : result;
         setCurrentOrder((previous) => ({
           ...previous,
+          ...(serverOrder && typeof serverOrder === 'object' ? serverOrder : {}),
           ...data,
+          status: serverOrder?.status || data.status || previous.status,
         }));
         if (data.tracking_number !== undefined) {
           setTracking(data.tracking_number || '');
@@ -201,13 +207,18 @@ export default function OrderFulfillmentModal({
 
     try {
       await createShipmentIfNeeded();
-      await adminService.updateOrder(
+      const result = await adminService.updateOrder(
         currentOrder.order_number,
         { status: 'processing' },
       );
+      const serverOrder =
+        result?.data && typeof result.data === 'object'
+          ? result.data
+          : result;
       setCurrentOrder((previous) => ({
         ...previous,
-        status: 'processing',
+        ...(serverOrder && typeof serverOrder === 'object' ? serverOrder : {}),
+        status: serverOrder?.status || 'processing',
       }));
       toast.success('Order moved to processing.');
       await onUpdated?.();
@@ -257,15 +268,21 @@ export default function OrderFulfillmentModal({
           status: shouldShip ? 'shipped' : undefined,
         };
 
-        await adminService.updateOrder(
+        const result = await adminService.updateOrder(
           currentOrder.order_number,
           payload,
         );
+        const serverOrder =
+          result?.data && typeof result.data === 'object'
+            ? result.data
+            : result;
         setCurrentOrder((previous) => ({
           ...previous,
-          tracking_number: value,
+          ...(serverOrder && typeof serverOrder === 'object' ? serverOrder : {}),
+          tracking_number:
+            serverOrder?.tracking_number || value,
           ...(payload.status
-            ? { status: payload.status }
+            ? { status: serverOrder?.status || payload.status }
             : {}),
         }));
 
@@ -317,6 +334,10 @@ export default function OrderFulfillmentModal({
         currentOrder.order_number,
         { status: nextStatus },
       );
+      const serverOrder =
+        result?.data && typeof result.data === 'object'
+          ? result.data
+          : result;
       setPendingAction(null);
 
       if (nextStatus === 'refunded' && result?.detail) {
@@ -324,7 +345,8 @@ export default function OrderFulfillmentModal({
       } else {
         setCurrentOrder((previous) => ({
           ...previous,
-          status: nextStatus,
+          ...(serverOrder && typeof serverOrder === 'object' ? serverOrder : {}),
+          status: serverOrder?.status || nextStatus,
         }));
         toast.success(successMessage);
       }
@@ -373,8 +395,19 @@ export default function OrderFulfillmentModal({
     if (!canOrderUpdate || busy || !currentOrder?.order_number || !isCodOrder) return;
     setBusy(true);
     try {
-      await adminService.updateOrder(currentOrder.order_number, { status: 'paid' });
-      setCurrentOrder((previous) => ({ ...previous, status: 'paid' }));
+      const result = await adminService.updateOrder(
+        currentOrder.order_number,
+        { status: 'paid' },
+      );
+      const serverOrder =
+        result?.data && typeof result.data === 'object'
+          ? result.data
+          : result;
+      setCurrentOrder((previous) => ({
+        ...previous,
+        ...(serverOrder && typeof serverOrder === 'object' ? serverOrder : {}),
+        status: serverOrder?.status || 'paid',
+      }));
       toast.success('COD payment marked as paid.');
       await onUpdated?.();
       await loadShipment();
