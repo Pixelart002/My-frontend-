@@ -22,10 +22,6 @@ const COD_STEPS = [
   ['delivered', 'Delivered', RiCheckboxCircleLine],
 ];
 
-const STATUS_INDEX = Object.fromEntries(
-  STEPS.map(([key], index) => [key, index]),
-);
-
 const normalizeStatus = (value) =>
   String(value || '').trim().toLowerCase();
 
