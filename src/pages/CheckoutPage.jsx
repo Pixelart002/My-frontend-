@@ -449,6 +449,8 @@ export default function CheckoutPage() {
     cart?.shipping_cost === null || cart?.shipping_cost === undefined
       ? null
       : Number(cart.shipping_cost);
+  const shippingEnabled = Boolean(cart?.shipping_enabled);
+  const taxEnabled = Boolean(cart?.tax_enabled);
 
   const cartTotal =
     cart?.total_amount === null || cart?.total_amount === undefined
@@ -1229,6 +1231,7 @@ export default function CheckoutPage() {
                     {formatMoney(cart.subtotal)}
                   </dd>
                 </div>
+                {shippingEnabled && (
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-muted">Shipping</dt>
                   <dd className="font-semibold text-text">
@@ -1238,13 +1241,16 @@ export default function CheckoutPage() {
                         ? 'Free'
                         : formatMoney(shippingAmount)}
                   </dd>
-                </div>
+                </                )}
+div>
+                {taxEnabled && (
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-muted">GST</dt>
                   <dd className="font-semibold text-text">
                     {formatMoney(cart.tax_amount)}
                   </dd>
-                </div>
+                </                )}
+div>
                 {coupon && (
                   <div className="flex items-center justify-between gap-4 text-success">
                     <dt>Coupon</dt>
