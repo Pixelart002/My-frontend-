@@ -536,8 +536,14 @@ export default function OrdersPanel({
                         {canUpdate && (
                           <td>
                             <div className="flex flex-wrap items-center gap-2">
-                              {['paid', 'processing', 'shipped', 'delivered'].includes(
-                                String(order?.status ?? '').trim().toLowerCase(),
+                              {(
+                                ['paid', 'processing', 'shipped', 'delivered'].includes(
+                                  String(order?.status ?? '').trim().toLowerCase(),
+                                ) ||
+                                (
+                                  String(order?.status ?? '').trim().toLowerCase() === 'pending' &&
+                                  String(order?.payment_method ?? '').trim().toLowerCase() === 'cod'
+                                )
                               ) && (
                                 <button
                                   type="button"
