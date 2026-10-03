@@ -43,13 +43,13 @@ const STATUS_META = {
 
 const address = (order) =>
   [
-    order?.shipping_line1,
-    order?.shipping_line2,
-    order?.shipping_landmark,
-    order?.shipping_city,
-    order?.shipping_state,
-    order?.shipping_postal_code,
-    order?.shipping_country,
+    currentOrder?.shipping_line1,
+    currentOrder?.shipping_line2,
+    currentOrder?.shipping_landmark,
+    currentOrder?.shipping_city,
+    currentOrder?.shipping_state,
+    currentOrder?.shipping_postal_code,
+    currentOrder?.shipping_country,
   ]
     .filter(Boolean)
     .join(', ') || '—';
@@ -61,18 +61,19 @@ export default function OrderFulfillmentModal({
   onUpdated,
 }) {
   const { toast } = useToast();
+  const [currentOrder, setCurrentOrder] = useState(order);
   const [shipment, setShipment] = useState(null);
   const [tracking, setTracking] = useState(
-    typeof order?.tracking_number === 'string'
+    typeof currentOrder?.tracking_number === 'string'
       ? order.tracking_number
       : '',
   );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  const status = normalize(order?.status);
+  const status = normalize(currentOrder?.status);
   const meta = STATUS_META[status] || {
-    label: text(order?.status),
+    label: text(currentOrder?.status),
     tone: 'pill-muted',
     next: '',
   };
@@ -84,7 +85,7 @@ export default function OrderFulfillmentModal({
   const canManage = canOrderUpdate && canShippingUpdate;
 
   const loadShipment = useCallback(async () => {
-    if (!order?.id) {
+    if (!currentOrder?.id) {
       setShipment(null);
       setLoading(false);
       return;
@@ -107,7 +108,11 @@ export default function OrderFulfillmentModal({
     } finally {
       setLoading(false);
     }
-  }, [order?.id, toast]);
+  }, [currentOrder?.id, toast]);
+
+  useEffect(() => {
+    setCurrentOrder(order);
+  }, [order]);
 
   useEffect(() => {
     loadShipment();
@@ -122,7 +127,7 @@ export default function OrderFulfillmentModal({
       return shipment;
     }
 
-    if (!order?.id) {
+    if (!currentOrder?.id) {
       throw new Error('This order has no internal identifier.');
     }
 
@@ -136,11 +141,11 @@ export default function OrderFulfillmentModal({
 
     setShipment(next);
     return next;
-  }, [order?.id, shipment]);
+  }, [currentOrder?.id, shipment]);
 
   const updateOrder = useCallback(
     async (data, message) => {
-      if (!order?.order_number || busy) return;
+      if (!currentOrder?.order_number || busy) return;
 
       setBusy(true);
 
@@ -160,7 +165,7 @@ export default function OrderFulfillmentModal({
         setBusy(false);
       }
     },
-    [busy, onUpdated, order?.order_number, toast],
+    [busy, onUpdated, currentOrder?.order_number, toast],
   );
 
   const startProcessing = useCallback(async () => {
@@ -191,7 +196,7 @@ export default function OrderFulfillmentModal({
     createShipmentIfNeeded,
     loadShipment,
     onUpdated,
-    order?.order_number,
+    currentOrder?.order_number,
     toast,
   ]);
 
@@ -206,7 +211,7 @@ export default function OrderFulfillmentModal({
         return;
       }
 
-      if (!canManage || busy || !order?.order_number) {
+      if (!canManage || busy || !currentOrder?.order_number) {
         return;
       }
 
@@ -246,7 +251,7 @@ export default function OrderFulfillmentModal({
       busy,
       canManage,
       onUpdated,
-      order?.order_number,
+      currentOrder?.order_number,
       status,
       toast,
       tracking,
@@ -264,9 +269,9 @@ export default function OrderFulfillmentModal({
 
   const summary = useMemo(
     () => [
-      ['Customer', text(order?.shipping_name)],
-      ['Destination', address(order)],
-      ['Tracking', text(order?.tracking_number)],
+      ['Customer', text(currentOrder?.shipping_name)],
+      ['Destination', address(currentOrder)],
+      ['Tracking', text(currentOrder?.tracking_number)],
     ],
     [order],
   );
@@ -280,7 +285,7 @@ export default function OrderFulfillmentModal({
 
   return (
     <AdminModal
-      title={'Fulfillment · ' + text(order?.order_number)}
+      title={'Fulfillment · ' + text(currentOrder?.order_number)}
       sub="Dispatch controls stay attached to the order. Luviio uses manual shipping; the order remains the source of truth."
       onClose={busy ? undefined : onClose}
       className="max-w-[720px]"
@@ -348,7 +353,7 @@ export default function OrderFulfillmentModal({
               className="mt-0.5 shrink-0 text-gold"
               aria-hidden="true"
             />
-            <span>{address(order)}</span>
+            <span>{address(currentOrder)}</span>
           </div>
         </section>
 
