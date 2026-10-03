@@ -59,6 +59,14 @@ const statusMeta = (status, isCod) => {
     return { tone: 'info', title: 'Processing', icon: RiTimeLine };
   }
 
+  if (status === 'paid') {
+    return {
+      tone: 'info',
+      title: isCod ? 'COD paid · Ready to ship' : 'Payment received · Ready to process',
+      icon: RiFileTextLine,
+    };
+  }
+
   if (status === 'pending') {
     return {
       tone: 'info',
