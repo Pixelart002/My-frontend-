@@ -423,6 +423,9 @@ export default function OrderDetailPage() {
 
   const status = text(order.status).toLowerCase();
 
+  const shippingEnabled = Boolean(order.shipping_enabled);
+  const taxEnabled = Boolean(order.tax_enabled);
+
   const paymentMethod = text(
     order.payment_method,
   ).toLowerCase();
@@ -666,8 +669,22 @@ export default function OrderDetailPage() {
             </div>
             <dl className="mt-5 space-y-3 text-sm">
               <div className="flex items-center justify-between gap-4"><dt className="text-muted">Subtotal</dt><dd className="font-semibold text-text">{formatMoney(order.subtotal ?? order.items_subtotal ?? 0)}</dd></div>
-              <div className="flex items-center justify-between gap-4"><dt className="text-muted">Shipping</dt><dd className="font-semibold text-text">{safeNumber(order.shipping_cost) > 0 ? formatMoney(order.shipping_cost) : 'Free'}</dd></div>
-              <div className="flex items-center justify-between gap-4"><dt className="text-muted">Taxes</dt><dd className="font-semibold text-text">{formatMoney(order.tax_amount ?? 0)}</dd></div>
+              {shippingEnabled && (
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted">Shipping</dt>
+                  <dd className="font-semibold text-text">
+                    {safeNumber(order.shipping_cost) > 0 ? formatMoney(order.shipping_cost) : 'Free'}
+                  </dd>
+                </div>
+              )}
+              {taxEnabled && (
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-muted">Taxes</dt>
+                  <dd className="font-semibold text-text">
+                    {formatMoney(order.tax_amount ?? 0)}
+                  </dd>
+                </div>
+              )}
               {safeNumber(order.discount_amount) > 0 && <div className="flex items-center justify-between gap-4"><dt className="text-muted">Discount</dt><dd className="font-semibold text-success">−{formatMoney(order.discount_amount)}</dd></div>}
               <div className="my-4 border-t border-line" />
               <div className="flex items-end justify-between gap-4"><dt className="font-bold text-text">Total</dt><dd className="font-display text-2xl font-semibold text-text">{formatMoney(order.total_amount ?? order.grand_total ?? 0)}</dd></div>
