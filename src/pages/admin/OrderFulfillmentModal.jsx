@@ -19,6 +19,11 @@ const text = (value) =>
     : String(value);
 
 const STATUS_META = {
+  pending: {
+    label: 'COD · Ready for processing',
+    tone: 'pill-muted',
+    next: 'Start processing',
+  },
   paid: {
     label: 'Ready for dispatch',
     tone: 'pill-muted',
@@ -297,11 +302,14 @@ export default function OrderFulfillmentModal({
   );
 
   const action =
-    status === 'paid'
+    (status === 'paid' || status === 'pending') &&
+    String(currentOrder?.payment_method ?? '').trim().toLowerCase() === 'cod'
       ? startProcessing
-      : status === 'shipped'
-        ? markDelivered
-        : undefined;
+      : status === 'paid'
+        ? startProcessing
+        : status === 'shipped'
+          ? markDelivered
+          : undefined;
 
   return (
     <AdminModal
