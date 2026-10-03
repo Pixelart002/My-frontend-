@@ -656,13 +656,15 @@ export default function OrderFulfillmentModal({
           </section>
         )}
 
-        {!canManage && (
+        {(!canManage || !canOrderUpdate) && (
           <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-xs leading-5 text-muted">
-            You can view this fulfillment state, but your current admin role does not have the permissions required to change it.
+            {!canOrderUpdate
+              ? 'You can view this order, but your current admin role cannot change its lifecycle or fulfillment.'
+              : 'Order lifecycle actions are available, but shipping permission is required for dispatch and tracking changes.'}
           </div>
         )}
 
-        {status === 'delivered' && (
+        {status === 'delivered' && !canRefund && (
           <div className="rounded-2xl border border-success/20 bg-success-dim px-4 py-3 text-sm font-semibold text-success">
             <RiCheckLine
               className="mr-2 inline-block"
