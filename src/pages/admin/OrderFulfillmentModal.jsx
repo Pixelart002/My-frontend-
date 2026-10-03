@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   RiCheckLine,
+  RiCloseCircleLine,
   RiMapPin2Line,
+  RiRefund2Line,
   RiRefreshLine,
   RiTruckLine,
 } from '@remixicon/react';
 
 import AdminModal from './Modal';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { adminService } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 
@@ -75,19 +78,28 @@ export default function OrderFulfillmentModal({
   );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const status = normalize(currentOrder?.status);
-  const meta = STATUS_META[status] || {
+  const isCodOrder = ['cod', 'cash_on_delivery'].includes(
+    normalize(currentOrder?.payment_method),
+  );
+  const metaBase = STATUS_META[status] || {
     label: text(currentOrder?.status),
     tone: 'pill-muted',
     next: '',
   };
+  const meta =
+    status === 'pending' && !isCodOrder
+      ? { ...metaBase, label: 'Payment pending', next: '' }
+      : metaBase;
 
   const canOrderUpdate = capabilities.orderUpdate === true;
   const canShippingUpdate =
     capabilities.shippingWrite === true ||
     capabilities.fulfillmentWrite === true;
   const canManage = canOrderUpdate && canShippingUpdate;
+  const hasOnlinePayment = Boolean(currentOrder?.stripe_payment_intent) && !isCodOrder;
 
   const loadShipment = useCallback(async () => {
     if (!currentOrder?.id) {
@@ -283,6 +295,50 @@ export default function OrderFulfillmentModal({
     ],
   );
 
+  const runLifecycleAction = useCallback(async () => {
+    if (!pendingAction || !canOrderUpdate || busy || !currentOrder?.order_number) {
+      return;
+    }
+
+    const nextStatus = pendingAction === 'cancel' ? 'cancelled' : 'refunded';
+    const successMessage = pendingAction === 'cancel'
+      ? 'Order cancelled.'
+      : 'Refund initiated successfully.';
+
+    setBusy(true);
+    try {
+      await adminService.updateOrder(
+        currentOrder.order_number,
+        { status: nextStatus },
+      );
+      setCurrentOrder((previous) => ({
+        ...previous,
+        status: nextStatus,
+      }));
+      setPendingAction(null);
+      toast.success(successMessage);
+      await onUpdated?.();
+      await loadShipment();
+    } catch (error) {
+      toast.error(
+        error?.message ||
+          (pendingAction === 'cancel'
+            ? 'Unable to cancel the order.'
+            : 'Unable to refund the order.'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }, [
+    busy,
+    canOrderUpdate,
+    currentOrder?.order_number,
+    loadShipment,
+    onUpdated,
+    pendingAction,
+    toast,
+  ]);
+
   const markDelivered = useCallback(async () => {
     if (!canManage || busy) return;
 
@@ -302,14 +358,17 @@ export default function OrderFulfillmentModal({
   );
 
   const action =
-    (status === 'paid' || status === 'pending') &&
-    String(currentOrder?.payment_method ?? '').trim().toLowerCase() === 'cod'
+    (status === 'paid' || status === 'pending') && isCodOrder
       ? startProcessing
       : status === 'paid'
         ? startProcessing
         : status === 'shipped'
           ? markDelivered
           : undefined;
+
+  const canCancel = canOrderUpdate && status === 'pending';
+  const canRefund = canOrderUpdate && hasOnlinePayment &&
+    ['paid', 'processing', 'shipped', 'delivered'].includes(status);
 
   return (
     <AdminModal
@@ -545,6 +604,52 @@ export default function OrderFulfillmentModal({
           </div>
         )}
 
+        {(canCancel || canRefund) && (
+          <section
+            className="rounded-2xl border border-danger/20 bg-danger-dim/30 p-4 sm:p-5"
+            aria-labelledby="fulfillment-order-actions-title"
+          >
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-danger/80">
+                Order lifecycle
+              </p>
+              <h3
+                id="fulfillment-order-actions-title"
+                className="mt-1 text-base font-bold text-text"
+              >
+                Order actions
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-muted">
+                Destructive actions stay inside fulfillment so the order lifecycle and dispatch record remain together.
+              </p>
+            </div>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {canCancel && (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => setPendingAction('cancel')}
+                  disabled={busy}
+                >
+                  <RiCloseCircleLine size={15} aria-hidden="true" />
+                  Cancel order
+                </button>
+              )}
+              {canRefund && (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => setPendingAction('refund')}
+                  disabled={busy}
+                >
+                  <RiRefund2Line size={15} aria-hidden="true" />
+                  Refund order
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+
         {!canManage && (
           <div className="rounded-xl border border-line bg-surface-2 px-3.5 py-3 text-xs leading-5 text-muted">
             You can view this fulfillment state, but your current admin role does not have the permissions required to change it.
@@ -562,6 +667,30 @@ export default function OrderFulfillmentModal({
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingAction === 'cancel'}
+        title="Cancel order?"
+        message="This will cancel the order and release any reserved stock. COD orders do not receive an online payment refund."
+        confirmLabel="Cancel order"
+        cancelLabel="Keep order"
+        danger
+        busy={busy}
+        onCancel={() => { if (!busy) setPendingAction(null); }}
+        onConfirm={runLifecycleAction}
+      />
+
+      <ConfirmDialog
+        open={pendingAction === 'refund'}
+        title="Refund order?"
+        message="A full refund will be initiated for the recorded online payment. The order will be marked refunded after the refund request succeeds."
+        confirmLabel="Refund order"
+        cancelLabel="Keep order"
+        danger
+        busy={busy}
+        onCancel={() => { if (!busy) setPendingAction(null); }}
+        onConfirm={runLifecycleAction}
+      />
     </AdminModal>
   );
 }
