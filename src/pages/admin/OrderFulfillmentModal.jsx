@@ -363,14 +363,45 @@ export default function OrderFulfillmentModal({
     [currentOrder],
   );
 
+  const markPaid = useCallback(async () => {
+    if (!canOrderUpdate || busy || !currentOrder?.order_number || !isCodOrder) return;
+    setBusy(true);
+    try {
+      await adminService.updateOrder(currentOrder.order_number, { status: 'paid' });
+      setCurrentOrder((previous) => ({ ...previous, status: 'paid' }));
+      toast.success('COD payment marked as paid.');
+      await onUpdated?.();
+      await loadShipment();
+    } catch (error) {
+      toast.error(error?.message || 'Unable to mark COD payment as paid.');
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, canOrderUpdate, currentOrder?.order_number, isCodOrder, loadShipment, onUpdated, toast]);
+
+  const markShipped = useCallback(async () => {
+    if (!canManage || busy || !currentOrder?.order_number) return;
+    setBusy(true);
+    try {
+      await saveTracking();
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, canManage, currentOrder?.order_number, saveTracking]);
+
   const action =
-    (status === 'paid' || status === 'pending') && isCodOrder
+    status === 'pending' && isCodOrder
       ? startProcessing
-      : status === 'paid'
-        ? startProcessing
-        : status === 'shipped'
-          ? markDelivered
-          : undefined;
+      : status === 'processing' && isCodOrder
+        ? markPaid
+        : status === 'paid' && isCodOrder
+          ? markShipped
+          : status === 'paid'
+            ? startProcessing
+            : status === 'shipped'
+              ? markDelivered
+              : undefined;
+
 
   const canCancel = canOrderUpdate && status === 'pending';
   const canRefund = canOrderUpdate && hasOnlinePayment &&
