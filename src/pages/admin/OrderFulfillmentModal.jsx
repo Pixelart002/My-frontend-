@@ -307,16 +307,22 @@ export default function OrderFulfillmentModal({
 
     setBusy(true);
     try {
-      await adminService.updateOrder(
+      const result = await adminService.updateOrder(
         currentOrder.order_number,
         { status: nextStatus },
       );
-      setCurrentOrder((previous) => ({
-        ...previous,
-        status: nextStatus,
-      }));
       setPendingAction(null);
-      toast.success(successMessage);
+
+      if (nextStatus === 'refunded' && result?.detail) {
+        toast.success(String(result.detail));
+      } else {
+        setCurrentOrder((previous) => ({
+          ...previous,
+          status: nextStatus,
+        }));
+        toast.success(successMessage);
+      }
+
       await onUpdated?.();
       await loadShipment();
     } catch (error) {
