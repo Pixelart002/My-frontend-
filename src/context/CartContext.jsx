@@ -29,6 +29,8 @@ const EMPTY_CART = {
   subtotal: 0,
   shipping_cost: 0,
   tax_amount: 0,
+  shipping_enabled: false,
+  tax_enabled: false,
   total_amount: 0,
   free_shipping_eligible: false,
   amount_to_free_shipping: 0,
