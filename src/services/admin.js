@@ -588,6 +588,14 @@ export const adminService = {
       ),
     ),
 
+  fulfillmentShipment: (orderId) =>
+    request(
+      'GET',
+      `/shipping/provider/orders/${encodeId(
+        orderId,
+      )}`,
+    ),
+
   createProviderShipment: (
     orderId,
     data = {},
