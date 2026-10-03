@@ -588,6 +588,7 @@ export default function OrderDetailPage() {
               <ShipmentTimeline
                 shipment={shipment}
                 orderStatus={order?.status}
+                paymentMethod={order?.payment_method}
               />
             </div>
 
