@@ -1232,25 +1232,25 @@ export default function CheckoutPage() {
                   </dd>
                 </div>
                 {shippingEnabled && (
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-muted">Shipping</dt>
-                  <dd className="font-semibold text-text">
-                    {shippingAmount === null
-                      ? 'Calculated'
-                      : shippingAmount === 0
-                        ? 'Free'
-                        : formatMoney(shippingAmount)}
-                  </dd>
-                </                )}
-div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-muted">Shipping</dt>
+                    <dd className="font-semibold text-text">
+                      {shippingAmount === null
+                        ? 'Calculated'
+                        : shippingAmount === 0
+                          ? 'Free'
+                          : formatMoney(shippingAmount)}
+                    </dd>
+                  </div>
+                )}
                 {taxEnabled && (
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-muted">GST</dt>
-                  <dd className="font-semibold text-text">
-                    {formatMoney(cart.tax_amount)}
-                  </dd>
-                </                )}
-div>
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-muted">GST</dt>
+                    <dd className="font-semibold text-text">
+                      {formatMoney(cart.tax_amount)}
+                    </dd>
+                  </div>
+                )}
                 {coupon && (
                   <div className="flex items-center justify-between gap-4 text-success">
                     <dt>Coupon</dt>
