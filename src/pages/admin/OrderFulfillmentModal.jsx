@@ -43,13 +43,13 @@ const STATUS_META = {
 
 const address = (order) =>
   [
-    currentOrder?.shipping_line1,
-    currentOrder?.shipping_line2,
-    currentOrder?.shipping_landmark,
-    currentOrder?.shipping_city,
-    currentOrder?.shipping_state,
-    currentOrder?.shipping_postal_code,
-    currentOrder?.shipping_country,
+    order?.shipping_line1,
+    order?.shipping_line2,
+    order?.shipping_landmark,
+    order?.shipping_city,
+    order?.shipping_state,
+    order?.shipping_postal_code,
+    order?.shipping_country,
   ]
     .filter(Boolean)
     .join(', ') || '—';
@@ -94,7 +94,7 @@ export default function OrderFulfillmentModal({
     setLoading(true);
 
     try {
-      const result = await adminService.fulfillmentShipment(order.id);
+      const result = await adminService.fulfillmentShipment(currentOrder.id);
 
       setShipment(
         result?.status === 'not_booked' ? null : result,
@@ -132,7 +132,7 @@ export default function OrderFulfillmentModal({
     }
 
     const created = await adminService.createProviderShipment(
-      order.id,
+      currentOrder.id,
       {},
     );
 
@@ -151,9 +151,16 @@ export default function OrderFulfillmentModal({
 
       try {
         await adminService.updateOrder(
-          order.order_number,
+          currentOrder.order_number,
           data,
         );
+        setCurrentOrder((previous) => ({
+          ...previous,
+          ...data,
+        }));
+        if (data.tracking_number !== undefined) {
+          setTracking(data.tracking_number || '');
+        }
         toast.success(message);
         await onUpdated?.();
       } catch (error) {
@@ -176,9 +183,13 @@ export default function OrderFulfillmentModal({
     try {
       await createShipmentIfNeeded();
       await adminService.updateOrder(
-        order.order_number,
+        currentOrder.order_number,
         { status: 'processing' },
       );
+      setCurrentOrder((previous) => ({
+        ...previous,
+        status: 'processing',
+      }));
       toast.success('Order moved to processing.');
       await onUpdated?.();
       await loadShipment();
@@ -273,7 +284,7 @@ export default function OrderFulfillmentModal({
       ['Destination', address(currentOrder)],
       ['Tracking', text(currentOrder?.tracking_number)],
     ],
-    [order],
+    [currentOrder],
   );
 
   const action =
