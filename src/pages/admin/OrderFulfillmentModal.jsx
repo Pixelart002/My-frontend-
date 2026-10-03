@@ -238,9 +238,13 @@ export default function OrderFulfillmentModal({
         };
 
         await adminService.updateOrder(
-          order.order_number,
+          currentOrder.order_number,
           payload,
         );
+        setCurrentOrder((previous) => ({
+          ...previous,
+          ...payload,
+        }));
 
         toast.success(
           status === 'processing'
