@@ -92,7 +92,9 @@ export default function OrderFulfillmentModal({
   const meta =
     status === 'pending' && !isCodOrder
       ? { ...metaBase, label: 'Payment pending', next: '' }
-      : metaBase;
+      : status === 'paid' && isCodOrder
+        ? { ...metaBase, label: 'COD · Paid · Ready to ship', next: 'Add tracking & ship' }
+        : metaBase;
 
   const canOrderUpdate = capabilities.orderUpdate === true;
   const canShippingUpdate =
@@ -230,7 +232,7 @@ export default function OrderFulfillmentModal({
 
   const saveTracking = useCallback(
     async (event) => {
-      event.preventDefault();
+      event?.preventDefault();
 
       const value = tracking.trim();
 
@@ -243,15 +245,16 @@ export default function OrderFulfillmentModal({
         return;
       }
 
+      const shouldShip =
+        status === 'processing' ||
+        (status === 'paid' && isCodOrder);
+
       setBusy(true);
 
       try {
         const payload = {
           tracking_number: value,
-          status:
-            status === 'processing'
-              ? 'shipped'
-              : undefined,
+          status: shouldShip ? 'shipped' : undefined,
         };
 
         await adminService.updateOrder(
@@ -269,12 +272,13 @@ export default function OrderFulfillmentModal({
         setTracking(value);
 
         toast.success(
-          status === 'processing'
+          shouldShip
             ? 'Tracking saved and order marked shipped.'
             : 'Tracking number updated.',
         );
 
         await onUpdated?.();
+        await loadShipment();
       } catch (error) {
         toast.error(
           error?.message ||
@@ -287,8 +291,10 @@ export default function OrderFulfillmentModal({
     [
       busy,
       canManage,
-      onUpdated,
       currentOrder?.order_number,
+      isCodOrder,
+      loadShipment,
+      onUpdated,
       status,
       toast,
       tracking,
@@ -381,12 +387,7 @@ export default function OrderFulfillmentModal({
 
   const markShipped = useCallback(async () => {
     if (!canManage || busy || !currentOrder?.order_number) return;
-    setBusy(true);
-    try {
-      await saveTracking();
-    } finally {
-      setBusy(false);
-    }
+    await saveTracking();
   }, [busy, canManage, currentOrder?.order_number, saveTracking]);
 
   const action =
@@ -534,7 +535,7 @@ export default function OrderFulfillmentModal({
           </p>
         </section>
 
-        {status === 'processing' && (
+        {(status === 'processing' || (status === 'paid' && isCodOrder)) && (
           <form
             onSubmit={saveTracking}
             className="rounded-2xl border border-line bg-surface-2 p-4 sm:p-5"
@@ -546,7 +547,9 @@ export default function OrderFulfillmentModal({
               Tracking number
             </label>
             <p className="mt-1 text-xs leading-5 text-muted">
-              Enter the reference supplied by your actual courier or local delivery service.
+              {status === 'paid' && isCodOrder
+                ? 'COD payment is settled. Add your delivery reference before shipping.'
+                : 'Enter the reference supplied by your actual courier or local delivery service.'}
             </p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <input
@@ -566,7 +569,7 @@ export default function OrderFulfillmentModal({
                 disabled={busy || !canManage}
               >
                 <RiTruckLine size={15} aria-hidden="true" />
-                {busy ? 'Saving…' : 'Mark shipped'}
+                {busy ? 'Saving…' : status === 'paid' && isCodOrder ? 'Ship order' : 'Mark shipped'}
               </button>
             </div>
           </form>
