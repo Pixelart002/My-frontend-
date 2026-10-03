@@ -385,18 +385,13 @@ export default function OrderFulfillmentModal({
     }
   }, [busy, canOrderUpdate, currentOrder?.order_number, isCodOrder, loadShipment, onUpdated, toast]);
 
-  const markShipped = useCallback(async () => {
-    if (!canManage || busy || !currentOrder?.order_number) return;
-    await saveTracking();
-  }, [busy, canManage, currentOrder?.order_number, saveTracking]);
-
   const action =
     status === 'pending' && isCodOrder
       ? startProcessing
       : status === 'processing' && isCodOrder
         ? markPaid
         : status === 'paid' && isCodOrder
-          ? markShipped
+          ? undefined
           : status === 'paid'
             ? startProcessing
             : status === 'shipped'
