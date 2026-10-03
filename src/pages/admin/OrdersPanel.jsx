@@ -9,6 +9,7 @@ import {
   RiEditLine,
   RiMapPin2Line,
   RiRefreshLine,
+  RiTruckLine,
 } from '@remixicon/react';
 
 import { adminService, itemsOfList } from '../../services/admin';
@@ -17,6 +18,7 @@ import { useToast } from '../../context/ToastContext';
 import { ErrorState, Spinner } from '../../components/ui/States';
 import AdminModal from './Modal';
 import { StatusPill } from './DashboardPanel';
+import OrderFulfillmentModal from './OrderFulfillmentModal';
 
 const PAGE_SIZE = 100;
 
@@ -202,6 +204,7 @@ export default function OrdersPanel({
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [editing, setEditing] = useState(null);
+  const [fulfilling, setFulfilling] = useState(null);
 
   const [status, setStatus] = useState('');
   const [tracking, setTracking] = useState('');
@@ -532,28 +535,48 @@ export default function OrdersPanel({
 
                         {canUpdate && (
                           <td>
-                            <button
-                              type="button"
-                              className="btn btn-quiet btn-sm"
-                              onClick={() =>
-                                openEdit(
+                            <div className="flex flex-wrap items-center gap-2">
+                              {['paid', 'processing', 'shipped', 'delivered'].includes(
+                                String(order?.status ?? '').trim().toLowerCase(),
+                              ) && (
+                                <button
+                                  type="button"
+                                  className="btn btn-sm"
+                                  onClick={() => setFulfilling(order)}
+                                  disabled={!order?.order_number}
+                                  title={`Open fulfillment for ${displayOrderNumber(order)}`}
+                                >
+                                  <RiTruckLine
+                                    size={14}
+                                    aria-hidden="true"
+                                  />
+                                  Fulfillment
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                className="btn btn-quiet btn-sm"
+                                onClick={() =>
+                                  openEdit(
+                                    order
+                                  )
+                                }
+                                disabled={
+                                  !order?.order_number
+                                }
+                                title="Edit order"
+                                aria-label={`Edit ${displayOrderNumber(
                                   order
-                                )
-                              }
-                              disabled={
-                                !order?.order_number
-                              }
-                              title="Edit order"
-                              aria-label={`Edit ${displayOrderNumber(
-                                order
-                              )}`}
-                            >
-                              <RiEditLine
-                                size={14}
-                                aria-hidden="true"
-                              />
-                              Edit
-                            </button>
+                                )}`}
+                              >
+                                <RiEditLine
+                                  size={14}
+                                  aria-hidden="true"
+                                />
+                                Edit
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>
@@ -565,6 +588,15 @@ export default function OrdersPanel({
           )}
         </div>
       </div>
+
+      {fulfilling && (
+        <OrderFulfillmentModal
+          order={fulfilling}
+          capabilities={capabilities}
+          onClose={() => setFulfilling(null)}
+          onUpdated={load}
+        />
+      )}
 
       {editing && (
         <AdminModal
