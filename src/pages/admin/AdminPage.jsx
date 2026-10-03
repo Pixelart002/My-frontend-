@@ -444,6 +444,9 @@ export default function AdminPage() {
   const requestedPanel =
     searchParams.get('panel');
 
+  const isLegacyFulfillmentRoute =
+    location.pathname === '/admin/fulfillment';
+
   const createCoupon =
     searchParams.get('create') === '1';
 
@@ -636,6 +639,21 @@ export default function AdminPage() {
     initializing,
     isAuthenticated,
     token,
+  ]);
+
+  useEffect(() => {
+    if (
+      status === 'verified' &&
+      isLegacyFulfillmentRoute
+    ) {
+      navigate('/admin?panel=orders', {
+        replace: true,
+      });
+    }
+  }, [
+    isLegacyFulfillmentRoute,
+    navigate,
+    status,
   ]);
 
   useEffect(() => {
