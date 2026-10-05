@@ -2052,3 +2052,297 @@
     transition: none;
   }
 }
+
+
+/* ============================================================
+   Admin shell v5 — true responsive sidebar
+   Collapsed desktop = icon rail.
+   Collapsed mobile = no rail width at all.
+   Expanded mobile = real sidebar, not a drawer.
+   ============================================================ */
+
+.admin-shell {
+  grid-template-columns: 56px minmax(0, 1fr) !important;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.admin-shell.is-sidebar-expanded {
+  grid-template-columns: 232px minmax(0, 1fr) !important;
+}
+
+.admin-main {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  overflow-x: clip;
+}
+
+.admin-head {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-head-brand,
+.admin-breadcrumb {
+  min-width: 0;
+}
+
+.admin-breadcrumb-current {
+  min-width: 0;
+  max-width: min(52vw, 620px);
+}
+
+/* Never let labels leak into the collapsed icon rail. */
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-sb-btn span,
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-nav-group-label,
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-account,
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-sidebar-brand-copy {
+  display: none !important;
+}
+
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-sb-btn {
+  display: grid !important;
+  grid-template-columns: 1fr;
+  place-items: center;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  margin-inline: auto;
+}
+
+.admin-shell:not(.is-sidebar-expanded) .admin-sidebar .admin-navigation {
+  width: 100%;
+}
+
+/* Desktop expanded sidebar remains a normal column, never a drawer. */
+@media (min-width: 901px) {
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    transform: none !important;
+  }
+}
+
+/* Tablet + mobile: collapsed means zero-width sidebar.
+   The header menu is the only way to expand it. */
+@media (max-width: 900px) {
+  .admin-shell,
+  .admin-shell.is-sidebar-expanded {
+    display: grid !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  .admin-shell {
+    grid-template-columns: 0 minmax(0, 1fr) !important;
+  }
+
+  .admin-shell.is-sidebar-expanded {
+    grid-template-columns: minmax(248px, 280px) minmax(0, 1fr) !important;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    padding: 12px 10px;
+    overflow: hidden;
+    transform: none !important;
+    border-right: 1px solid var(--line);
+    box-shadow: none;
+  }
+
+  .admin-shell:not(.is-sidebar-expanded) .admin-sidebar {
+    visibility: hidden;
+    pointer-events: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .admin-sidebar-inner {
+    min-width: 0;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar-brand {
+    justify-content: flex-start;
+    padding-inline: 2px;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar-brand-copy {
+    display: flex;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar .admin-nav-group-label {
+    display: block;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar .admin-sb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 44px;
+    gap: 10px;
+    margin: 1px 0;
+    padding: 0 10px;
+    text-align: left;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar .admin-sb-btn span {
+    display: block !important;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar .admin-account {
+    display: block;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar .admin-navigation > div:first-child {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .admin-main {
+    width: 100%;
+    min-width: 0;
+    padding: 0 clamp(12px, 3vw, 22px) 48px;
+  }
+
+  .admin-head {
+    min-height: 56px;
+    margin-bottom: 18px;
+    padding-block: 7px;
+  }
+
+  .admin-menu-trigger {
+    display: inline-flex !important;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    margin-right: 7px;
+  }
+
+  .admin-breadcrumb {
+    min-width: 0;
+    max-width: none;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  .admin-breadcrumb-root,
+  .admin-breadcrumb-separator {
+    flex: 0 0 auto;
+  }
+
+  .admin-breadcrumb-current {
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-head-meta {
+    flex: 0 0 auto;
+  }
+
+  .admin-page-head {
+    min-width: 0;
+  }
+
+  .orders-ledger-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-shell.is-sidebar-expanded {
+    grid-template-columns: minmax(232px, 78vw) minmax(0, 1fr) !important;
+  }
+
+  .admin-main {
+    padding-inline: 12px;
+  }
+
+  .admin-head {
+    min-height: 54px;
+    margin-bottom: 14px;
+  }
+
+  .admin-breadcrumb-root,
+  .admin-breadcrumb-separator {
+    display: none;
+  }
+
+  .admin-breadcrumb-current {
+    font-size: 13px;
+  }
+
+  .admin-role-chip {
+    max-width: 78px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .admin-page-head h1 {
+    font-size: clamp(23px, 6vw, 28px);
+  }
+
+  .admin-page-head .admin-toolbar {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-page-head .admin-toolbar .admin-select {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-shell.is-sidebar-expanded {
+    grid-template-columns: minmax(220px, 84vw) minmax(0, 1fr) !important;
+  }
+
+  .admin-main {
+    padding-inline: 10px;
+  }
+
+  .admin-role-chip {
+    display: none;
+  }
+
+  .admin-menu-trigger {
+    margin-right: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell {
+    transition: none !important;
+  }
+}
