@@ -1152,3 +1152,60 @@
     min-height: 0;
   }
 }
+
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .admin-shell {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 16px;
+    padding-inline: 12px;
+  }
+
+  .admin-sidebar {
+    display: flex !important;
+    position: sticky;
+    top: 80px;
+    width: 64px;
+    min-width: 64px;
+    min-height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    padding: 8px 5px;
+  }
+
+  .admin-sidebar .admin-navigation {
+    align-items: center;
+  }
+
+  .admin-sidebar .admin-nav-group-label {
+    display: none;
+  }
+
+  .admin-sidebar .admin-sb-btn.is-compact {
+    justify-content: center;
+    width: 46px;
+    min-width: 46px;
+    min-height: 44px;
+    height: 44px;
+    margin: 2px auto;
+    padding: 0;
+    gap: 0;
+  }
+
+  .admin-sidebar .admin-sb-btn.is-compact span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .admin-sidebar .admin-account {
+    display: none;
+  }
+
+  .admin-menu-trigger {
+    display: inline-flex !important;
+  }
+}
