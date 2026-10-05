@@ -196,11 +196,14 @@ export const adminService = {
       },
     ),
 
-  mfaVerify: (code) =>
+  mfaVerify: (code, factorId = null) =>
     request(
       'POST',
       '/auth/mfa/verify',
-      { code },
+      {
+        code,
+        ...(factorId ? { factor_id: factorId } : {}),
+      },
     ),
 
   mfaUnenroll: (factorId) =>
