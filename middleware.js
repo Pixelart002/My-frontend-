@@ -1,17 +1,18 @@
 /**
- * Vercel Routing Middleware — social preview proxy for product pages.
+ * Vercel Routing Middleware — product SEO + social preview handling.
  *
  * Normal browser → next() → Vercel serves the React SPA.
- * Social crawler → fetch Koyeb /share/products/{slug} → return OG HTML.
+ * Social/search crawlers → fetch Koyeb /share/products/{slug} → return
+ * server-rendered product metadata.
  *
- * Search-engine crawlers are served the same server-rendered product metadata
- * so Google/Bing can discover product images and structured data without SPA JS.
+ * Permanently removed legacy product URLs return HTTP 410 instead of falling
+ * through to the SPA's 200 response, preventing a soft-404.
  */
 
 import { next } from '@vercel/functions';
 
 export const config = {
-  matcher: '/product/:slug',
+  matcher: ['/product/:slug', '/product.html'],
   runtime: 'nodejs',
 };
 
@@ -40,6 +41,7 @@ const BACKEND_ORIGIN =
   'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app';
 const SAFE_SLUG_RE = /^[A-Za-z0-9_-]+$/;
 const BACKEND_TIMEOUT_MS = 4000;
+const REMOVED_LEGACY_SLUGS = new Set(['floor-drainer-square-ring']);
 
 function isPreviewCrawler(userAgent) {
   if (!userAgent) return false;
@@ -47,7 +49,33 @@ function isPreviewCrawler(userAgent) {
   return PREVIEW_CRAWLERS.some((signature) => ua.includes(signature));
 }
 
+function removedLegacyProductResponse(request) {
+  const url = new URL(request.url);
+
+  if (
+    url.pathname !== '/product.html' ||
+    url.searchParams.get('slug') !== 'floor-drainer-square-ring'
+  ) {
+    return null;
+  }
+
+  return new Response('Gone', {
+    status: 410,
+    headers: {
+      'Cache-Control': 'public, max-age=300',
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  });
+}
+
 export default async function middleware(request) {
+  const removedResponse = removedLegacyProductResponse(request);
+
+  if (removedResponse) {
+    return removedResponse;
+  }
+
   const ua = request.headers.get('user-agent') || '';
 
   if (!isPreviewCrawler(ua)) {
@@ -64,6 +92,12 @@ export default async function middleware(request) {
   const slug = match[1];
 
   if (!SAFE_SLUG_RE.test(slug)) {
+    return next();
+  }
+
+  // Keep this guard aligned with the explicit legacy-removal list so an
+  // accidental reuse cannot silently turn into a valid legacy product route.
+  if (REMOVED_LEGACY_SLUGS.has(slug)) {
     return next();
   }
 
