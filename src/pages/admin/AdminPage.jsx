@@ -902,16 +902,28 @@ export default function AdminPage() {
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar" aria-label="Collapsed admin navigation">
+      <aside className="admin-sidebar" aria-label="Admin navigation rail">
+        <div className="admin-rail-head">
+          <div className="admin-rail-mark" aria-hidden="true">L</div>
+          <button
+            type="button"
+            className="admin-rail-menu"
+            aria-label="Open admin menu"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen(true)}
+          >
+            <RiMenuLine size={18} aria-hidden="true" />
+          </button>
+        </div>
+
         <AdminNavigation
           panel={effectivePanel}
           allowed={allowed}
           profile={profile}
           user={user}
           onSelect={selectPanel}
-          onLogout={
-            handleLogout
-          }
+          onLogout={handleLogout}
+          compact
         />
       </aside>
 
@@ -987,30 +999,23 @@ export default function AdminPage() {
           <div className="admin-head-brand">
             <button
               type="button"
-              className="admin-menu-trigger"
+              className="admin-menu-trigger admin-mobile-menu"
               aria-label="Open admin menu"
               aria-expanded={drawerOpen}
               onClick={() => setDrawerOpen(true)}
             >
-              <RiMenuLine size={20} aria-hidden="true" />
+              <RiMenuLine size={19} aria-hidden="true" />
             </button>
 
-            <div className="admin-brand-copy">
-              <p className="admin-eyebrow">Luviio Admin</p>
-              <span className="admin-brand-status">
-                <span className="admin-status-dot" aria-hidden="true" />
-                Console
-              </span>
-            </div>
+            <nav className="admin-breadcrumb" aria-label="Breadcrumb">
+              <span className="admin-breadcrumb-root">Luviio Admin</span>
+              <span className="admin-breadcrumb-separator" aria-hidden="true">/</span>
+              <span className="admin-breadcrumb-current">{active.label}</span>
+            </nav>
           </div>
 
           <div className="admin-head-meta">
-            <span className="admin-role-chip">
-              {currentRole || 'Staff'}
-            </span>
-            <span className="admin-page-context" aria-label="Current section">
-              {active.label}
-            </span>
+            <span className="admin-role-chip">{currentRole || 'Staff'}</span>
           </div>
         </header>
 
