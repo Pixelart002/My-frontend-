@@ -1742,3 +1742,17 @@
     min-width: 1080px;
   }
 }
+
+
+/* Header menu trigger is mobile-only; desktop opens navigation from the rail. */
+@media (min-width: 901px) {
+  .admin-head .admin-mobile-menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-head .admin-mobile-menu {
+    display: inline-flex !important;
+  }
+}
