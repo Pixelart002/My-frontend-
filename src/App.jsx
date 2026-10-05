@@ -333,8 +333,6 @@ function AppRoutes() {
       <RouteSeo />
 
       <Routes>
-        {StoreRoutes()}
-
         <Route
           path="/admin"
           element={
@@ -352,6 +350,9 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+        {StoreRoutes()}
+
       </Routes>
     </Suspense>
   );
