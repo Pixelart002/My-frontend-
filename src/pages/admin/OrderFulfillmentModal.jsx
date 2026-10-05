@@ -323,10 +323,18 @@ export default function OrderFulfillmentModal({
       return;
     }
 
-    const nextStatus = pendingAction === 'cancel' ? 'cancelled' : 'refunded';
-    const successMessage = pendingAction === 'cancel'
-      ? 'Order cancelled.'
-      : 'Refund initiated successfully.';
+    const cancelAndRefund =
+      pendingAction === 'cancel' &&
+      hasOnlinePayment &&
+      ['paid', 'processing'].includes(status);
+    const nextStatus = pendingAction === 'refund' || cancelAndRefund
+      ? 'refunded'
+      : 'cancelled';
+    const successMessage = cancelAndRefund
+      ? 'Order cancelled and refund initiated successfully.'
+      : pendingAction === 'cancel'
+        ? 'Order cancelled.'
+        : 'Refund initiated successfully.';
 
     setBusy(true);
     try {
@@ -369,7 +377,9 @@ export default function OrderFulfillmentModal({
     currentOrder?.order_number,
     loadShipment,
     onUpdated,
+    hasOnlinePayment,
     pendingAction,
+    status,
     toast,
   ]);
 
@@ -438,8 +448,12 @@ export default function OrderFulfillmentModal({
       status === 'pending' ||
       (status === 'processing' && isCodOrder && !currentOrder?.provider_payment_id)
     );
+  const canCancelAndRefund =
+    canOrderUpdate &&
+    hasOnlinePayment &&
+    ['paid', 'processing'].includes(status);
   const canRefund = canOrderUpdate && hasOnlinePayment &&
-    ['paid', 'processing', 'shipped', 'delivered'].includes(status);
+    ['shipped', 'delivered'].includes(status);
 
   return (
     <AdminModal
@@ -677,7 +691,7 @@ export default function OrderFulfillmentModal({
           </div>
         )}
 
-        {(canCancel || canRefund) && (
+        {(canCancel || canCancelAndRefund || canRefund) && (
           <section
             className="rounded-2xl border border-danger/20 bg-danger-dim/30 p-4 sm:p-5"
             aria-labelledby="fulfillment-order-actions-title"
@@ -706,6 +720,17 @@ export default function OrderFulfillmentModal({
                 >
                   <RiCloseCircleLine size={15} aria-hidden="true" />
                   Cancel order
+                </button>
+              )}
+              {canCancelAndRefund && (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => setPendingAction('cancel')}
+                  disabled={busy}
+                >
+                  <RiCloseCircleLine size={15} aria-hidden="true" />
+                  Cancel & refund
                 </button>
               )}
               {canRefund && (
@@ -745,9 +770,13 @@ export default function OrderFulfillmentModal({
 
       <ConfirmDialog
         open={pendingAction === 'cancel'}
-        title="Cancel order?"
-        message="This will cancel the order and release any reserved stock. For COD, cancellation is available only before payment is collected."
-        confirmLabel="Cancel order"
+        title={canCancelAndRefund ? 'Cancel & refund order?' : 'Cancel order?'}
+        message={
+          canCancelAndRefund
+            ? 'The online payment will be fully refunded through the payment provider. The order will then be marked refunded and released from fulfillment.'
+            : 'This will cancel the order and release any reserved stock. For COD, cancellation is available only before payment is collected.'
+        }
+        confirmLabel={canCancelAndRefund ? 'Cancel & refund' : 'Cancel order'}
         cancelLabel="Keep order"
         danger
         busy={busy}
