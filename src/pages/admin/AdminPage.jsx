@@ -902,7 +902,7 @@ export default function AdminPage() {
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <aside className="admin-sidebar" aria-label="Collapsed admin navigation">
         <AdminNavigation
           panel={effectivePanel}
           allowed={allowed}
@@ -918,7 +918,7 @@ export default function AdminPage() {
       {drawerOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-[200] hidden bg-black/60 max-[900px]:!block backdrop-blur-[2px]"
+          className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px]"
           aria-label="Close admin menu"
           onClick={closeDrawer}
         />
@@ -1267,6 +1267,7 @@ function SideBtn({
           ? 'page'
           : undefined
       }
+      title={nav.label}
     >
       <Icon
         size={18}
