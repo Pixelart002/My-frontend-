@@ -384,6 +384,7 @@ export default function AdminMfaGate({
           const data =
             await adminService.mfaVerify(
               normalizedCode,
+              factorId,
             );
 
           const access =
