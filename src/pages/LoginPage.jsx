@@ -54,11 +54,23 @@ export default function LoginPage() {
     setSubmitting(true);
     
     try {
-      await login(normalizedEmail, password);
+      const session = await login(normalizedEmail, password);
       
       toast.success('Welcome back.');
       
-      navigate(from, {
+      const role = session?.profile?.role || '';
+      const workspaceRoles = new Set([
+        'super_admin',
+        'admin',
+        'manager',
+        'support',
+        'owner',
+      ]);
+      const destination = workspaceRoles.has(role)
+        ? '/admin'
+        : from;
+
+      navigate(destination, {
         replace: true,
       });
     } catch (err) {
