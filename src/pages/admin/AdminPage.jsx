@@ -699,7 +699,9 @@ export default function AdminPage() {
           return;
         }
 
-        closeSidebar();
+        if (window.matchMedia('(max-width: 900px)').matches) {
+          closeSidebar();
+        }
 
         navigate('/admin');
 
