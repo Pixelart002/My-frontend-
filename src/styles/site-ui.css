@@ -1135,7 +1135,7 @@ textarea[aria-invalid="true"] {
 }
 
 .admin-toolbar {
-  align-items: flex-start;
+  align-items: center;
 }
 
 .admin-toolbar > div {
