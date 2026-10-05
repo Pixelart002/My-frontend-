@@ -1547,3 +1547,198 @@
 @media (max-width:900px){.admin-shell{display:block;min-height:100dvh}.admin-sidebar{display:none}.admin-main{min-height:100dvh;padding:0 16px 48px}.admin-mobile-menu{display:inline-flex}.admin-head{min-height:56px;margin-bottom:20px}}
 @media (max-width:520px){.admin-main{padding-inline:12px}.admin-head{gap:10px}.admin-breadcrumb-root,.admin-breadcrumb-separator{display:none}.admin-breadcrumb-current{font-size:14px}.admin-role-chip{max-width:92px;overflow:hidden;text-overflow:ellipsis}}
 @media (prefers-reduced-motion:reduce){.admin-rail-menu,.admin-menu-trigger,.admin-sidebar .admin-sb-btn,.admin-drawer{transition:none}}
+
+
+/* ============================================================
+   Orders — page-level layout isolation
+   Prevents the shell header styles from leaking into panel UI.
+   ============================================================ */
+
+.admin-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  margin: 0 0 18px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-page-head > div:first-child {
+  min-width: 0;
+}
+
+.admin-page-head h1 {
+  margin: 0 0 5px;
+  color: var(--text);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 750;
+  letter-spacing: -.025em;
+  line-height: 1.12;
+}
+
+.admin-page-head .admin-sub {
+  margin: 0;
+  color: var(--dim);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.admin-page-head .admin-toolbar {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  justify-content: flex-end;
+}
+
+.orders-admin-full {
+  min-width: 0;
+  width: 100%;
+}
+
+.orders-ledger-card {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.orders-ledger-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.orders-ledger-table {
+  width: 100%;
+  min-width: 1080px;
+  table-layout: fixed;
+}
+
+.orders-ledger-table th,
+.orders-ledger-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.orders-ledger-table th {
+  height: 42px;
+  padding: 0 14px;
+  background: var(--surface-2);
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+
+.orders-ledger-table td {
+  height: 48px;
+  padding: 0 14px;
+}
+
+.orders-ledger-table tbody tr {
+  transition: background-color .12s ease;
+}
+
+.orders-ledger-table tbody tr:hover {
+  background: rgba(255,255,255,.018);
+}
+
+.orders-ledger-table th:nth-child(1),
+.orders-ledger-table td:nth-child(1) { width: 108px; }
+
+.orders-ledger-table th:nth-child(2),
+.orders-ledger-table td:nth-child(2) { width: 150px; }
+
+.orders-ledger-table th:nth-child(3),
+.orders-ledger-table td:nth-child(3) { width: 250px; }
+
+.orders-ledger-table th:nth-child(4),
+.orders-ledger-table td:nth-child(4) { width: 108px; }
+
+.orders-ledger-table th:nth-child(5),
+.orders-ledger-table td:nth-child(5) { width: 100px; }
+
+.orders-ledger-table th:nth-child(6),
+.orders-ledger-table td:nth-child(6) { width: 112px; }
+
+.orders-ledger-table th:nth-child(7),
+.orders-ledger-table td:nth-child(7) { width: 120px; }
+
+.orders-ledger-table th:nth-child(8),
+.orders-ledger-table td:nth-child(8) { width: 140px; }
+
+.orders-ledger-table th:nth-child(9),
+.orders-ledger-table td:nth-child(9) { width: 150px; }
+
+.orders-ledger-table th:last-child,
+.orders-ledger-table td:last-child {
+  width: 126px;
+  text-align: right;
+}
+
+.orders-ledger-table .btn {
+  min-height: 32px;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .admin-page-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+  }
+
+  .admin-page-head .admin-toolbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .admin-page-head .admin-toolbar .admin-select {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .admin-page-head .admin-toolbar .btn {
+    flex: 0 0 auto;
+  }
+
+  .orders-ledger-card {
+    border-radius: 10px;
+  }
+
+  .orders-ledger-wrap {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-page-head {
+    gap: 10px;
+  }
+
+  .admin-page-head h1 {
+    font-size: 25px;
+  }
+
+  .admin-page-head .admin-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+  }
+
+  .admin-page-head .admin-toolbar .admin-select {
+    width: 100%;
+  }
+
+  .orders-ledger-table {
+    min-width: 1080px;
+  }
+}
