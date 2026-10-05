@@ -1147,6 +1147,7 @@ function AdminNavigation({
   user,
   onSelect,
   onLogout,
+  compact = false,
 }) {
   return (
     <nav
@@ -1170,7 +1171,10 @@ function AdminNavigation({
                 key={label}
                 className="min-w-0"
               >
-                <div className="mb-1.5 mt-4 px-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-dim first:mt-1">
+                <div
+                  className="mb-1.5 mt-4 px-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-dim first:mt-1 admin-nav-group-label"
+                  aria-hidden={compact}
+                >
                   {label}
                 </div>
 
@@ -1191,11 +1195,8 @@ function AdminNavigation({
                           key={key}
                           nav={nav}
                           active={panel}
-                          onClick={() =>
-                            onSelect(
-                              key,
-                            )
-                          }
+                          onClick={() => onSelect(key)}
+                          compact={compact}
                         />
                       );
                     },
@@ -1248,6 +1249,7 @@ function SideBtn({
   nav,
   active,
   onClick,
+  compact = false,
 }) {
   const Icon = nav.icon;
   const isActive =
@@ -1256,8 +1258,10 @@ function SideBtn({
   return (
     <button
       type="button"
-      className={`admin-sb-btn${isActive ? ' is-active' : ''}`}
+      className={`admin-sb-btn${isActive ? ' is-active' : ''}${compact ? ' is-compact' : ''}`}
       onClick={onClick}
+      title={compact ? nav.label : undefined}
+      aria-label={compact ? nav.label : undefined}
       aria-current={
         isActive
           ? 'page'
