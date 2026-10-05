@@ -226,6 +226,48 @@ export default function CouponsPanel({
   ] = useState(
     cloneEmptyForm,
   );
+
+  const [
+    advancedOpen,
+    setAdvancedOpen,
+  ] = useState(false);
+
+  const [
+    optionalFields,
+    setOptionalFields,
+  ] = useState({
+    maxDiscount: false,
+    usageLimit: false,
+    schedule: false,
+  });
+
+  const setOptionalField = useCallback(
+    (key, enabled) => {
+      setOptionalFields((current) => ({
+        ...current,
+        [key]: enabled,
+      }));
+
+      if (!enabled) {
+        setForm((current) => ({
+          ...current,
+          ...(key === 'maxDiscount'
+            ? { max_discount: '' }
+            : {}),
+          ...(key === 'usageLimit'
+            ? { usage_limit: '' }
+            : {}),
+          ...(key === 'schedule'
+            ? {
+                valid_from: '',
+                valid_until: '',
+              }
+            : {}),
+        }));
+      }
+    },
+    [],
+  );
   
   const mountedRef =
     useRef(true);
@@ -337,6 +379,12 @@ export default function CouponsPanel({
       setForm(
         cloneEmptyForm(),
       );
+      setAdvancedOpen(false);
+      setOptionalFields({
+        maxDiscount: false,
+        usageLimit: false,
+        schedule: false,
+      });
       setFormOpen(true);
     }, [canCreate, saving]);
   
@@ -352,6 +400,27 @@ export default function CouponsPanel({
         }
         
         setEditing(coupon);
+
+        setAdvancedOpen(
+          Boolean(
+            coupon.max_discount != null ||
+            coupon.usage_limit != null ||
+            coupon.valid_from ||
+            coupon.valid_until,
+          ),
+        );
+
+        setOptionalFields({
+          maxDiscount:
+            coupon.max_discount != null,
+          usageLimit:
+            coupon.usage_limit != null,
+          schedule:
+            Boolean(
+              coupon.valid_from ||
+              coupon.valid_until,
+            ),
+        });
         
         setForm({
           ...cloneEmptyForm(),
@@ -794,15 +863,9 @@ export default function CouponsPanel({
               Coupons
             </h2>
 
-            <p>
-              Customer promo codes with
-              server-side validation,
-              per-user limits and atomic
-              checkout reservation.
-            </p>
           </div>
 
-          <div className="btn-row">
+          <div className="btn-row coupon-toolbar-actions">
             <button
               className="btn btn-quiet btn-sm"
               type="button"
@@ -907,7 +970,7 @@ export default function CouponsPanel({
                 </div>
               </div>
 
-              <div className="field-grid">
+              <div className="field-grid coupon-core-fields">
                 <div className="field">
                   <label htmlFor="coupon-value">
                     Value *
@@ -919,15 +982,12 @@ export default function CouponsPanel({
                     min="0.01"
                     step="0.01"
                     max={
-                      form.type ===
-                      'percent'
+                      form.type === 'percent'
                         ? '100'
                         : undefined
                     }
                     value={form.value}
-                    onChange={updateField(
-                      'value',
-                    )}
+                    onChange={updateField('value')}
                     disabled={saving}
                     inputMode="decimal"
                     required
@@ -944,9 +1004,7 @@ export default function CouponsPanel({
                     type="number"
                     min="0"
                     step="0.01"
-                    value={
-                      form.min_order_amount
-                    }
+                    value={form.min_order_amount}
                     onChange={updateField(
                       'min_order_amount',
                     )}
@@ -954,160 +1012,334 @@ export default function CouponsPanel({
                     inputMode="decimal"
                   />
                 </div>
-
-                <div className="field">
-                  <label htmlFor="coupon-max-discount">
-                    Max discount
-                  </label>
-
-                  <input
-                    id="coupon-max-discount"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={
-                      form.max_discount
-                    }
-                    onChange={updateField(
-                      'max_discount',
-                    )}
-                    disabled={saving}
-                    inputMode="decimal"
-                    placeholder="No cap"
-                  />
-                </div>
               </div>
 
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="coupon-usage-limit">
-                    Total usage limit
-                  </label>
-
-                  <input
-                    id="coupon-usage-limit"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={
-                      form.usage_limit
-                    }
-                    onChange={updateField(
-                      'usage_limit',
-                    )}
-                    disabled={saving}
-                    inputMode="numeric"
-                    placeholder="Unlimited"
-                  />
-                </div>
-
-                <div className="field">
-                  <label htmlFor="coupon-per-user">
-                    Per-user limit
-                  </label>
-
-                  <input
-                    id="coupon-per-user"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={
-                      form.per_user_limit
-                    }
-                    onChange={updateField(
-                      'per_user_limit',
-                    )}
-                    disabled={saving}
-                    inputMode="numeric"
-                  />
-
-                  <small>
-                    How many times one
-                    customer can redeem
-                    this coupon.
-                  </small>
-                </div>
-
-                <div className="field">
-                  <span className="field-label">
-                    Active
-                  </span>
-
-                  <label className="checkbox-field">
-                    <input
-                      type="checkbox"
-                      checked={
-                        form.is_active
-                      }
-                      onChange={updateField(
-                        'is_active',
-                      )}
-                      disabled={saving}
-                    />
-                    Enabled
-                  </label>
-                </div>
-              </div>
-
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="coupon-valid-from">
-                    Valid from
-                  </label>
-
-                  <input
-                    id="coupon-valid-from"
-                    type="datetime-local"
-                    value={
-                      form.valid_from
-                    }
-                    onChange={updateField(
-                      'valid_from',
-                    )}
-                    disabled={saving}
-                  />
-                </div>
-
-                <div className="field">
-                  <label htmlFor="coupon-valid-until">
-                    Valid until
-                  </label>
-
-                  <input
-                    id="coupon-valid-until"
-                    type="datetime-local"
-                    value={
-                      form.valid_until
-                    }
-                    onChange={updateField(
-                      'valid_until',
-                    )}
-                    disabled={saving}
-                  />
-                </div>
-              </div>
-
-              <div className="field">
-                <label htmlFor="coupon-description">
-                  Description
-                </label>
-
-                <textarea
-                  id="coupon-description"
-                  value={
-                    form.description
+              <div className="coupon-advanced">
+                <button
+                  className="coupon-advanced-toggle"
+                  type="button"
+                  onClick={() =>
+                    setAdvancedOpen((current) => !current)
                   }
-                  onChange={updateField(
-                    'description',
-                  )}
-                  rows={3}
-                  maxLength={500}
+                  aria-expanded={advancedOpen}
+                  aria-controls="coupon-advanced-fields"
                   disabled={saving}
-                  placeholder="Optional internal/customer-facing description"
-                />
+                >
+                  <span>
+                    Advanced settings
+                  </span>
+                  <span
+                    className="coupon-advanced-toggle-icon"
+                    aria-hidden="true"
+                  >
+                    {advancedOpen ? '−' : '+'}
+                  </span>
+                </button>
+
+                {advancedOpen && (
+                  <div
+                    id="coupon-advanced-fields"
+                    className="coupon-advanced-fields"
+                  >
+                    <div className="coupon-option">
+                      <div className="coupon-option-copy">
+                        <strong>Maximum discount</strong>
+                        <span>
+                          Set a cap for percentage discounts.
+                        </span>
+                      </div>
+
+                      <div
+                        className="coupon-radio-group"
+                        role="radiogroup"
+                        aria-label="Maximum discount"
+                      >
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-max-discount-enabled"
+                            checked={
+                              !optionalFields.maxDiscount
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'maxDiscount',
+                                false,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          Off
+                        </label>
+
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-max-discount-enabled"
+                            checked={
+                              optionalFields.maxDiscount
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'maxDiscount',
+                                true,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          On
+                        </label>
+                      </div>
+                    </div>
+
+                    {optionalFields.maxDiscount && (
+                      <div className="field coupon-optional-field">
+                        <label htmlFor="coupon-max-discount">
+                          Maximum discount amount
+                        </label>
+                        <input
+                          id="coupon-max-discount"
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={form.max_discount}
+                          onChange={updateField(
+                            'max_discount',
+                          )}
+                          disabled={saving}
+                          inputMode="decimal"
+                          placeholder="No cap"
+                        />
+                      </div>
+                    )}
+
+                    <div className="coupon-option">
+                      <div className="coupon-option-copy">
+                        <strong>Total usage limit</strong>
+                        <span>
+                          Limit how many times this coupon can be used.
+                        </span>
+                      </div>
+
+                      <div
+                        className="coupon-radio-group"
+                        role="radiogroup"
+                        aria-label="Total usage limit"
+                      >
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-usage-limit-enabled"
+                            checked={
+                              !optionalFields.usageLimit
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'usageLimit',
+                                false,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          Off
+                        </label>
+
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-usage-limit-enabled"
+                            checked={
+                              optionalFields.usageLimit
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'usageLimit',
+                                true,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          On
+                        </label>
+                      </div>
+                    </div>
+
+                    {optionalFields.usageLimit && (
+                      <div className="field coupon-optional-field">
+                        <label htmlFor="coupon-usage-limit">
+                          Maximum uses
+                        </label>
+                        <input
+                          id="coupon-usage-limit"
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={form.usage_limit}
+                          onChange={updateField(
+                            'usage_limit',
+                          )}
+                          disabled={saving}
+                          inputMode="numeric"
+                          placeholder="Unlimited"
+                        />
+                      </div>
+                    )}
+
+                    <div className="field">
+                      <label htmlFor="coupon-per-user">
+                        Per-user limit
+                      </label>
+
+                      <input
+                        id="coupon-per-user"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={form.per_user_limit}
+                        onChange={updateField(
+                          'per_user_limit',
+                        )}
+                        disabled={saving}
+                        inputMode="numeric"
+                      />
+                    </div>
+
+                    <div className="coupon-option">
+                      <div className="coupon-option-copy">
+                        <strong>Validity window</strong>
+                        <span>
+                          Restrict when the coupon can be redeemed.
+                        </span>
+                      </div>
+
+                      <div
+                        className="coupon-radio-group"
+                        role="radiogroup"
+                        aria-label="Validity window"
+                      >
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-schedule-enabled"
+                            checked={
+                              !optionalFields.schedule
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'schedule',
+                                false,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          Off
+                        </label>
+
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-schedule-enabled"
+                            checked={
+                              optionalFields.schedule
+                            }
+                            onChange={() =>
+                              setOptionalField(
+                                'schedule',
+                                true,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                          On
+                        </label>
+                      </div>
+                    </div>
+
+                    {optionalFields.schedule && (
+                      <div className="field-grid coupon-schedule-fields">
+                        <div className="field">
+                          <label htmlFor="coupon-valid-from">
+                            Valid from
+                          </label>
+                          <input
+                            id="coupon-valid-from"
+                            type="datetime-local"
+                            value={form.valid_from}
+                            onChange={updateField(
+                              'valid_from',
+                            )}
+                            disabled={saving}
+                          />
+                        </div>
+
+                        <div className="field">
+                          <label htmlFor="coupon-valid-until">
+                            Valid until
+                          </label>
+                          <input
+                            id="coupon-valid-until"
+                            type="datetime-local"
+                            value={form.valid_until}
+                            onChange={updateField(
+                              'valid_until',
+                            )}
+                            disabled={saving}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="coupon-option coupon-active-option">
+                      <div className="coupon-option-copy">
+                        <strong>Coupon status</strong>
+                        <span>
+                          Decide whether this coupon can be redeemed.
+                        </span>
+                      </div>
+
+                      <div
+                        className="coupon-radio-group"
+                        role="radiogroup"
+                        aria-label="Coupon status"
+                      >
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-active"
+                            checked={!form.is_active}
+                            onChange={() =>
+                              setForm((current) => ({
+                                ...current,
+                                is_active: false,
+                              }))
+                            }
+                            disabled={saving}
+                          />
+                          Off
+                        </label>
+
+                        <label className="coupon-radio">
+                          <input
+                            type="radio"
+                            name="coupon-active"
+                            checked={form.is_active}
+                            onChange={() =>
+                              setForm((current) => ({
+                                ...current,
+                                is_active: true,
+                              }))
+                            }
+                            disabled={saving}
+                          />
+                          On
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="btn-row">
+              <div className="btn-row coupon-form-actions">
                 <button
                   className="btn"
                   type="submit"
