@@ -41,8 +41,6 @@ const BACKEND_ORIGIN =
   'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app';
 const SAFE_SLUG_RE = /^[A-Za-z0-9_-]+$/;
 const BACKEND_TIMEOUT_MS = 4000;
-const REMOVED_LEGACY_SLUGS = new Set(['floor-drainer-square-ring']);
-
 function isPreviewCrawler(userAgent) {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
@@ -92,12 +90,6 @@ export default async function middleware(request) {
   const slug = match[1];
 
   if (!SAFE_SLUG_RE.test(slug)) {
-    return next();
-  }
-
-  // Keep this guard aligned with the explicit legacy-removal list so an
-  // accidental reuse cannot silently turn into a valid legacy product route.
-  if (REMOVED_LEGACY_SLUGS.has(slug)) {
     return next();
   }
 
