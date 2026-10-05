@@ -984,40 +984,33 @@ export default function AdminPage() {
 
       <main className="admin-main">
         <header className="admin-head">
-          <div className="admin-head-title">
+          <div className="admin-head-brand">
             <button
               type="button"
               className="admin-menu-trigger"
               aria-label="Open admin menu"
-              aria-expanded={
-                drawerOpen
-              }
-              onClick={() =>
-                setDrawerOpen(true)
-              }
+              aria-expanded={drawerOpen}
+              onClick={() => setDrawerOpen(true)}
             >
-              <RiMenuLine
-                size={20}
-                aria-hidden="true"
-              />
+              <RiMenuLine size={20} aria-hidden="true" />
             </button>
 
-            <div>
-              <p className="admin-eyebrow">
-                Luviio Admin
-              </p>
-
-              <h1>
-                {active.label}
-              </h1>
-
-              <p className="admin-sub">
-                Store administration
-                {' · '}
-                {currentRole ||
-                  'Staff'}
-              </p>
+            <div className="admin-brand-copy">
+              <p className="admin-eyebrow">Luviio Admin</p>
+              <span className="admin-brand-status">
+                <span className="admin-status-dot" aria-hidden="true" />
+                Console
+              </span>
             </div>
+          </div>
+
+          <div className="admin-head-meta">
+            <span className="admin-role-chip">
+              {currentRole || 'Staff'}
+            </span>
+            <span className="admin-page-context" aria-label="Current section">
+              {active.label}
+            </span>
           </div>
         </header>
 
@@ -1267,7 +1260,6 @@ function SideBtn({
           ? 'page'
           : undefined
       }
-      title={nav.label}
     >
       <Icon
         size={18}
