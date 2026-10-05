@@ -117,22 +117,103 @@
 }
 
 .admin-head {
+  position: sticky;
+  top: 0;
+  z-index: 80;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-width: 0;
-  margin: 0 0 24px;
-  padding: 0 0 18px;
+  gap: 18px;
+  min-height: 72px;
+  margin: -2px 0 24px;
+  padding: 10px 0 12px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.admin-head-title {
+.admin-head-brand {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   min-width: 0;
 }
+
+.admin-brand-copy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-brand-copy .admin-eyebrow {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+.admin-brand-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.admin-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.admin-head-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-role-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  max-width: 180px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.admin-page-context {
+  max-width: 180px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
 
 .admin-head h1 {
   min-width: 0;
@@ -149,7 +230,7 @@
 }
 
 .admin-menu-trigger {
-  display: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 42px;
@@ -801,6 +882,33 @@
 }
 
 @media (max-width: 900px) {
+  .admin-head {
+    min-height: 64px;
+    margin-bottom: 18px;
+    padding: 8px 0 10px;
+  }
+
+  .admin-brand-copy {
+    gap: 7px;
+  }
+
+  .admin-brand-copy .admin-eyebrow {
+    font-size: 14px;
+  }
+
+  .admin-brand-status {
+    display: none;
+  }
+
+  .admin-head-meta {
+    gap: 7px;
+  }
+
+  .admin-page-context {
+    display: none;
+  }
+
+
   .admin-shell {
     display: block;
     min-height: 0;
