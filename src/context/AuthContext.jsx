@@ -274,7 +274,10 @@ export function AuthProvider({ children }) {
         setUser(null);
       }
 
-      return data;
+      return {
+        ...data,
+        profile,
+      };
     },
     [
       loadProfile,
