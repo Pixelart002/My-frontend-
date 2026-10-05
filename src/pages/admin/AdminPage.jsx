@@ -43,8 +43,6 @@ import { setAccessToken } from '../../api/client';
 import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-
 import AdminMfaGate from './AdminMfaGate';
 import { classifyAdminAccessError } from './adminAccess';
 
@@ -472,18 +470,12 @@ export default function AdminPage() {
   );
 
   const [
-    drawerOpen,
-    setDrawerOpen,
+    sidebarExpanded,
+    setSidebarExpanded,
   ] = useState(false);
 
   const verifyRequestRef =
     useRef(0);
-
-  const drawerRef =
-    useRef(null);
-
-  const drawerCloseRef =
-    useRef(null);
 
   const currentRole =
     profile?.role || role;
@@ -504,9 +496,14 @@ export default function AdminPage() {
       effectivePanel,
     ) || NAV[0];
 
-  const closeDrawer =
+  const toggleSidebar =
     useCallback(() => {
-      setDrawerOpen(false);
+      setSidebarExpanded((value) => !value);
+    }, []);
+
+  const closeSidebar =
+    useCallback(() => {
+      setSidebarExpanded(false);
     }, []);
 
   const verifyAdmin =
@@ -693,58 +690,6 @@ export default function AdminPage() {
     status,
   ]);
 
-  useEffect(() => {
-    if (!drawerOpen) {
-      return undefined;
-    }
-
-    const previousOverflow =
-      document.body.style.overflow;
-
-    document.body.style.overflow =
-      'hidden';
-
-    return () => {
-      document.body.style.overflow =
-        previousOverflow;
-    };
-  }, [drawerOpen]);
-
-  useEffect(() => {
-    if (!drawerOpen) {
-      return undefined;
-    }
-
-    const handleRouteKey =
-      (event) => {
-        if (
-          event.key === 'Escape'
-        ) {
-          closeDrawer();
-        }
-      };
-
-    window.addEventListener(
-      'keydown',
-      handleRouteKey,
-    );
-
-    return () => {
-      window.removeEventListener(
-        'keydown',
-        handleRouteKey,
-      );
-    };
-  }, [closeDrawer, drawerOpen]);
-
-  useFocusTrap({
-    enabled: drawerOpen,
-    containerRef: drawerRef,
-    initialFocusRef:
-      drawerCloseRef,
-    onEscape: closeDrawer,
-  });
-
   const selectPanel =
     useCallback(
       (next) => {
@@ -754,7 +699,7 @@ export default function AdminPage() {
           return;
         }
 
-        closeDrawer();
+        closeSidebar();
 
         navigate('/admin');
 
@@ -775,7 +720,7 @@ export default function AdminPage() {
       },
       [
         allowed,
-        closeDrawer,
+        closeSidebar,
         navigate,
         setSearchParams,
       ],
@@ -901,95 +846,29 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar" aria-label="Admin navigation rail">
-        <div className="admin-rail-head">
-          <div className="admin-rail-mark" aria-hidden="true">L</div>
-          <button
-            type="button"
-            className="admin-rail-menu"
-            aria-label="Open admin menu"
-            aria-expanded={drawerOpen}
-            onClick={() => setDrawerOpen(true)}
-          >
-            <RiMenuLine size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <AdminNavigation
-          panel={effectivePanel}
-          allowed={allowed}
-          profile={profile}
-          user={user}
-          onSelect={selectPanel}
-          onLogout={handleLogout}
-          compact
-        />
-      </aside>
-
-      {drawerOpen && (
-        <button
-          type="button"
-          className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-[2px]"
-          aria-label="Close admin menu"
-          onClick={closeDrawer}
-        />
-      )}
-
+    <div className={`admin-shell${sidebarExpanded ? ' is-sidebar-expanded' : ''}`}>
       <aside
-        ref={drawerRef}
-        className={`admin-drawer${drawerOpen ? ' is-open' : ''}`}
-        aria-label="Admin menu"
-        aria-hidden={
-          !drawerOpen
-        }
-        inert={
-          !drawerOpen
-            ? true
-            : undefined
-        }
-        tabIndex={-1}
+        className="admin-sidebar"
+        aria-label="Admin navigation"
+        aria-expanded={sidebarExpanded}
       >
-        <div className="admin-drawer-head">
-          <div className="flex min-w-0 flex-col gap-0.5 [&_strong]:truncate [&_strong]:text-[19px] [&_strong]:font-semibold [&_strong]:leading-tight [&_span]:truncate [&_span]:text-[11px] [&_span]:text-dim">
-            <strong>
-              Luviio
-            </strong>
-            <span>
-              Admin console
-            </span>
+        <div className="admin-sidebar-inner">
+          <div className="admin-sidebar-brand">
+            <div className="admin-rail-mark" aria-hidden="true">L</div>
+            <div className="admin-sidebar-brand-copy">
+              <strong>Luviio</strong>
+              <span>Admin console</span>
+            </div>
           </div>
 
-          <button
-            ref={
-              drawerCloseRef
-            }
-            type="button"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-transparent text-muted transition-colors hover:border-gold hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
-            aria-label="Close menu"
-            onClick={
-              closeDrawer
-            }
-          >
-            <RiCloseLine
-              size={20}
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-
-        <div className="admin-drawer-scroll">
           <AdminNavigation
             panel={effectivePanel}
             allowed={allowed}
             profile={profile}
             user={user}
-            onSelect={
-              selectPanel
-            }
-            onLogout={
-              handleLogout
-            }
+            onSelect={selectPanel}
+            onLogout={handleLogout}
+            compact={!sidebarExpanded}
           />
         </div>
       </aside>
@@ -999,10 +878,10 @@ export default function AdminPage() {
           <div className="admin-head-brand">
             <button
               type="button"
-              className="admin-menu-trigger admin-mobile-menu"
-              aria-label="Open admin menu"
-              aria-expanded={drawerOpen}
-              onClick={() => setDrawerOpen(true)}
+              className="admin-menu-trigger"
+              aria-label={sidebarExpanded ? 'Collapse admin sidebar' : 'Expand admin sidebar'}
+              aria-expanded={sidebarExpanded}
+              onClick={toggleSidebar}
             >
               <RiMenuLine size={19} aria-hidden="true" />
             </button>
