@@ -290,7 +290,7 @@ export default function OrdersPanel({
 
   return (
     <div className="orders-admin-full">
-      <div className="admin-head">
+      <div className="admin-page-head">
         <div>
           <h1>Orders</h1>
 
