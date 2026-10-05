@@ -224,9 +224,7 @@ const ROLE_PANELS = {
     'orders',
     'users',
     'products',
-    'coupons',
     'shipping',
-    'subscriptions',
   ],
 
   customer: [],
