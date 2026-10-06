@@ -352,17 +352,18 @@ export default function OrdersPanel({
 
       <div className="admin-card orders-ledger-card w-full min-w-0 max-w-none">
         <div
-          className="admin-table-wrap orders-ledger-wrap w-full min-w-0 max-w-full overflow-x-auto"
+          className="orders-ledger-scroll"
           role="region"
           aria-label="Orders table"
           tabIndex={0}
         >
-          {filtered.length === 0 ? (
-            <div className="admin-empty">
-              No orders match.
-            </div>
-          ) : (
-            <table className="admin-table orders-ledger-table">
+          <div className="orders-ledger-track">
+            {filtered.length === 0 ? (
+              <div className="admin-empty">
+                No orders match.
+              </div>
+            ) : (
+              <table className="admin-table orders-ledger-table">
               <caption className="sr-only">
                 Customer order ledger
               </caption>
@@ -462,9 +463,10 @@ export default function OrdersPanel({
                     );
                   }
                 )}
-              </tbody>
-            </table>
-          )}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
 
