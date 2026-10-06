@@ -2394,4 +2394,111 @@
     transition: none;
   }
 }
+
+/* ============================================================
+   Orders ledger — isolated horizontal data surface
+   The table owns its intrinsic width; the wrapper owns scrolling.
+   ============================================================ */
+
+.orders-admin-full {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.orders-ledger-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.orders-ledger-wrap {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable both-edges;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 8%);
+}
+
+.orders-ledger-wrap:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 72%, white 28%);
+  outline-offset: 2px;
+}
+
+.orders-ledger-table {
+  display: table;
+  width: max-content !important;
+  min-width: 1180px !important;
+  max-width: none !important;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.orders-ledger-table th,
+.orders-ledger-table td {
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.orders-ledger-table th {
+  height: 44px;
+  background: color-mix(in srgb, var(--surface-2) 88%, var(--gold) 12%);
+}
+
+.orders-ledger-table td {
+  height: 54px;
+}
+
+.orders-ledger-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.orders-ledger-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+
+@media (max-width: 767px) {
+  .orders-ledger-wrap {
+    max-width: calc(100vw - 24px);
+    overflow-x: scroll !important;
+    scrollbar-width: auto;
+  }
+
+  .orders-ledger-table {
+    min-width: 1180px !important;
+  }
+
+  .orders-ledger-table th,
+  .orders-ledger-table td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-ledger-wrap {
+    max-width: calc(100vw - 20px);
+    border-radius: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orders-ledger-wrap {
+    scroll-behavior: auto;
+  }
+}
+
 }
