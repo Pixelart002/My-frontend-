@@ -213,6 +213,54 @@ function Detail({ label, value, mono = false }) {
   );
 }
 
+function paymentStateClass(state) {
+  return state.key === 'succeeded'
+    ? 'pill-success'
+    : state.key === 'failed'
+      ? 'pill-danger'
+      : state.key === 'expired'
+        ? 'pill-warning'
+        : 'pill-muted';
+}
+
+function GatewayMetadata({ row, state }) {
+  const metadata = parseGatewayMetadata(row?.gateway_metadata);
+  const gatewayStatus = text(metadata?.status);
+
+  return (
+    <div className="payment-gateway-details">
+      <div className="payment-gateway-summary">
+        <div>
+          <span>Payment status</span>
+          <strong>Authoritative attempt result</strong>
+        </div>
+
+        <span className={`admin-pill ${paymentStateClass(state)}`}>
+          {state.label}
+        </span>
+      </div>
+
+      <div className="payment-gateway-note">
+        Gateway metadata below is a raw provider snapshot. It is
+        diagnostic telemetry and does not override the recorded
+        payment-attempt status.
+      </div>
+
+      {gatewayStatus !== '—' && (
+        <div className="payment-gateway-status">
+          <span>Gateway-reported status</span>
+          <code>{gatewayStatus}</code>
+        </div>
+      )}
+
+      <details>
+        <summary>Raw gateway metadata</summary>
+        <pre>{json(metadata)}</pre>
+      </details>
+    </div>
+  );
+}
+
 function Attempt({ row, index }) {
   const [open, setOpen] = useState(false);
 
@@ -357,10 +405,7 @@ function Attempt({ row, index }) {
             />
           </div>
 
-          <details className="payment-gateway-details">
-            <summary>Gateway metadata</summary>
-            <pre>{json(row?.gateway_metadata)}</pre>
-          </details>
+          <GatewayMetadata row={row} state={state} />
         </div>
       )}
     </article>
