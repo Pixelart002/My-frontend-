@@ -3141,4 +3141,158 @@
   }
 }
 
+/* ============================================================
+   Admin navigation visual polish
+   One active signal, restrained hover, no animated borders.
+   ============================================================ */
+
+.admin-console-root .admin-sb-btn {
+  position: relative;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid transparent !important;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--admin-text-secondary);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+  transform: none !important;
+}
+
+.admin-console-root .admin-sb-btn:hover {
+  border-color: transparent !important;
+  background: var(--admin-surface-hover);
+  color: var(--admin-text-primary);
+}
+
+.admin-console-root .admin-sb-btn:active {
+  background: color-mix(in srgb, var(--admin-surface-hover) 80%, black 20%);
+  transform: none !important;
+}
+
+.admin-console-root .admin-sb-btn.is-active {
+  border-color: transparent !important;
+  background: color-mix(in srgb, var(--admin-gold) 9%, var(--surface) 91%);
+  color: var(--admin-gold-strong);
+  box-shadow: none !important;
+  font-weight: 650;
+}
+
+.admin-console-root .admin-sb-btn.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--admin-gold);
+}
+
+.admin-console-root .admin-sb-btn.is-active::after {
+  display: none !important;
+}
+
+.admin-console-root .admin-sb-btn svg {
+  opacity: .72;
+  transition: opacity 160ms ease;
+}
+
+.admin-console-root .admin-sb-btn:hover svg,
+.admin-console-root .admin-sb-btn.is-active svg {
+  opacity: 1;
+}
+
+.admin-console-root .admin-sb-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--admin-gold) 65%, white 35%);
+  outline-offset: 2px;
+  border-color: transparent !important;
+}
+
+.admin-console-root .admin-menu-trigger {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--admin-border-soft) !important;
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--admin-text-secondary);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.admin-console-root .admin-menu-trigger:hover {
+  border-color: var(--admin-border-soft) !important;
+  background: var(--admin-surface-hover);
+  color: var(--admin-text-primary);
+  box-shadow: none;
+}
+
+.admin-console-root .admin-menu-trigger:active {
+  transform: none;
+}
+
+.admin-console-root .admin-menu-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--admin-gold) 65%, white 35%);
+  outline-offset: 3px;
+}
+
+.admin-console-root .admin-console-sidebar {
+  transition:
+    width 180ms ease,
+    transform 220ms cubic-bezier(.22, .8, .25, 1),
+    visibility 180ms ease;
+}
+
+.admin-console-root:not(.is-sidebar-expanded) .admin-sb-btn {
+  width: 42px;
+  min-height: 42px;
+  margin-inline: auto;
+  padding: 0;
+  justify-content: center;
+  border-radius: 11px;
+}
+
+.admin-console-root:not(.is-sidebar-expanded) .admin-sb-btn.is-active::before {
+  left: -1px;
+  top: 9px;
+  bottom: 9px;
+}
+
+.admin-console-root:not(.is-sidebar-expanded) .admin-sb-btn:hover {
+  background: var(--admin-surface-hover);
+}
+
+.admin-console-root.is-sidebar-expanded .admin-sb-btn {
+  justify-content: flex-start;
+}
+
+.admin-console-root.is-sidebar-expanded .admin-nav-group + .admin-nav-group {
+  border-top: 0;
+}
+
+@media (max-width: 1100px) {
+  .admin-console-root .admin-console-sidebar {
+    transition:
+      transform 220ms cubic-bezier(.22, .8, .25, 1),
+      visibility 180ms ease;
+  }
+
+  .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
+    box-shadow: 18px 0 48px rgb(0 0 0 / 28%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-console-root .admin-sb-btn,
+  .admin-console-root .admin-sb-btn svg,
+  .admin-console-root .admin-menu-trigger,
+  .admin-console-root .admin-console-sidebar {
+    transition: none !important;
+  }
+}
+
 }
