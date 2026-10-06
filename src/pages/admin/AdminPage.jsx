@@ -848,9 +848,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className={`admin-shell${sidebarExpanded ? ' is-sidebar-expanded' : ''}`}>
+    <div className={`admin-shell admin-console-root${sidebarExpanded ? ' is-sidebar-expanded' : ''}`}>
       <aside
-        className="admin-sidebar"
+        className="admin-sidebar admin-console-sidebar"
         aria-label="Admin navigation"
         aria-expanded={sidebarExpanded}
       >
@@ -875,7 +875,7 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="admin-main w-full min-w-0 max-w-none overflow-x-clip">
+      <main className="admin-main admin-console-main w-full min-w-0 max-w-none overflow-x-clip">
         <header className="admin-head flex w-full min-w-0">
           <div className="admin-head-brand flex min-w-0 flex-1">
             <button
