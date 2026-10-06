@@ -1074,7 +1074,7 @@ function AdminNavigation({
       className="admin-navigation"
       aria-label="Admin navigation"
     >
-      <div className="min-w-0">
+      <div className="admin-navigation-scroll">
         {NAV_GROUPS.map(
           ([label, keys]) => {
             const visible =
@@ -1087,7 +1087,7 @@ function AdminNavigation({
             }
 
             return (
-              <div
+              <section
                 key={label}
                 className="admin-nav-group min-w-0"
               >
@@ -1098,7 +1098,7 @@ function AdminNavigation({
                   {label}
                 </div>
 
-                <div className="grid gap-1">
+                <div className="admin-nav-group-items">
                   {visible.map(
                     (key) => {
                       const nav =
@@ -1122,23 +1122,43 @@ function AdminNavigation({
                     },
                   )}
                 </div>
-              </div>
+              </section>
             );
           },
         )}
       </div>
 
       <div className="admin-account">
-        <div className="admin-account-name">
-          {profile?.full_name ||
-            user?.full_name ||
-            'Staff'}
-        </div>
+        <div className="admin-account-identity">
+          <div className="admin-account-avatar" aria-hidden="true">
+            {(
+              profile?.full_name ||
+              user?.full_name ||
+              profile?.email ||
+              user?.email ||
+              'S'
+            ).trim().charAt(0).toUpperCase()}
+          </div>
 
-        <div className="admin-account-email">
-          {profile?.email ||
-            user?.email ||
-            ''}
+          <div className="admin-account-copy">
+            <div className="admin-account-name">
+              {profile?.full_name ||
+                user?.full_name ||
+                'Staff'}
+            </div>
+
+            <div className="admin-account-email">
+              {profile?.email ||
+                user?.email ||
+                ''}
+            </div>
+          </div>
+
+          <span
+            className="admin-account-status"
+            title="Admin session active"
+            aria-label="Admin session active"
+          />
         </div>
 
         <div className="admin-account-role">
@@ -1156,9 +1176,7 @@ function AdminNavigation({
             size={15}
             aria-hidden="true"
           />
-          <span>
-            Sign out
-          </span>
+          <span>Sign out</span>
         </button>
       </div>
     </nav>
