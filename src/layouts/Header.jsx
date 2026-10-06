@@ -160,12 +160,12 @@ function MenuLink({
       to={to}
       className={
         className ||
-        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none'
+        'group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-[14px] font-medium text-text transition-colors duration-150 hover:border-line hover:bg-surface-2 active:bg-surface-2 focus-visible:border-gold focus-visible:outline-none'
       }
       onClick={onClick}
     >
       {Icon && (
-        <span className={`grid size-10 shrink-0 place-items-center rounded-xl transition-colors duration-150 ${accentStyles[accent] || accentStyles.gold}`}>
+        <span className={`grid size-9 shrink-0 place-items-center rounded-[10px] transition-colors duration-150 ${accentStyles[accent] || accentStyles.gold}`}>
           <Icon size={19} aria-hidden="true" />
         </span>
       )}
@@ -611,9 +611,9 @@ export default function Header() {
           <a
             href="mailto:support@luviio.in"
             onClick={closeAll}
-            className="group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none"
+            className="group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-[14px] font-medium text-text transition-colors duration-150 hover:border-line hover:bg-surface-2 active:bg-surface-2 focus-visible:border-gold focus-visible:outline-none"
           >
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky-400/10 text-sky-300 transition-colors duration-150 group-hover:bg-sky-400/15">
+            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-sky-400/10 text-sky-300 transition-colors duration-150 group-hover:bg-sky-400/15">
               <RiMailLine size={19} aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1 truncate">Contact</span>
@@ -638,7 +638,7 @@ export default function Header() {
               onClick={onLogout}
               className="group flex min-h-12 w-full min-w-0 items-center gap-3 rounded-2xl border border-transparent px-2.5 py-2 text-left text-[15px] font-medium text-text transition-[background-color,border-color,color,transform] duration-150 hover:border-line hover:bg-surface-2 active:scale-[0.99] focus-visible:border-gold focus-visible:outline-none"
             >
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-400/10 text-rose-300 transition-colors duration-150 group-hover:bg-rose-400/15">
+              <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-rose-400/10 text-rose-300 transition-colors duration-150 group-hover:bg-rose-400/15">
                 <RiLogoutBoxRLine size={19} aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1 truncate">Sign out</span>
@@ -651,7 +651,7 @@ export default function Header() {
 
   return (
     <header className="header sticky top-0 z-[120] isolate h-[72px] min-h-[72px] border-b border-[rgb(255_255_255_/_0.07)] bg-[rgb(8_8_8_/_0.94)] text-text backdrop-blur-xl transition-[box-shadow,background-color] duration-200 max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:backdrop-blur-none">
-      <div className="header-reference-inner mx-auto grid h-[72px] w-full min-w-0 grid-cols-[180px_minmax(0,1fr)_auto] items-center gap-x-8 px-[8.333vw] max-[1100px]:grid-cols-[150px_minmax(0,1fr)_auto] max-[1100px]:gap-x-[18px] max-[1100px]:px-[5vw] max-[1024px]:gap-x-5 max-[1024px]:px-[clamp(24px,5vw,52px)] max-[900px]:flex max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:gap-x-0 max-[900px]:px-5 max-[768px]:px-4 max-[640px]:px-[14px] max-[375px]:px-3">
+      <div className="header-reference-inner mx-auto grid h-[72px] w-full min-w-0 grid-cols-[160px_minmax(0,1fr)_auto] items-center gap-x-7 px-[8.333vw] max-[1100px]:grid-cols-[145px_minmax(0,1fr)_auto] max-[1100px]:gap-x-[18px] max-[1100px]:px-[5vw] max-[1024px]:gap-x-5 max-[1024px]:px-[clamp(24px,5vw,52px)] max-[900px]:flex max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:gap-x-0 max-[900px]:px-5 max-[768px]:px-4 max-[640px]:px-[14px] max-[375px]:px-3">
         <Link
           className="brand min-w-0 whitespace-nowrap font-display text-[35px] font-medium leading-none tracking-[-.035em] text-gold no-underline max-[900px]:text-[30px] max-[768px]:text-[29px] max-[640px]:text-[28px] max-[375px]:text-[26px]"
           to="/"
@@ -662,7 +662,7 @@ export default function Header() {
         </Link>
 
         <nav
-          className="nav-links flex h-full min-w-0 items-center justify-center gap-[39px] text-xs font-medium text-[rgb(245_242_236_/_0.72)] max-[1100px]:gap-[22px] max-[1024px]:gap-[clamp(16px,2.2vw,24px)] max-[900px]:hidden [&_a]:relative [&_a]:flex [&_a]:h-full [&_a]:items-center [&_a]:whitespace-nowrap [&_a]:transition-colors [&_a:hover]:text-text [&_a[aria-current=page]]:text-gold"
+          className="nav-links flex h-full min-w-0 items-center justify-center gap-8 text-[12px] font-medium text-[rgb(245_242_236_/_0.64)] max-[1100px]:gap-[22px] max-[1024px]:gap-[clamp(16px,2.2vw,24px)] max-[900px]:hidden [&_a]:relative [&_a]:flex [&_a]:h-full [&_a]:items-center [&_a]:whitespace-nowrap [&_a]:transition-colors [&_a:hover]:text-text [&_a[aria-current=page]]:text-gold [&_a[aria-current=page]]:after:w-4"
           aria-label="Primary navigation"
         >
           <NavLink
@@ -693,7 +693,7 @@ export default function Header() {
 
         <div className="header-actions ml-auto flex min-w-0 items-center justify-end gap-2">
           <form
-            className="search-form flex h-[38px] w-[302px] min-w-[302px] items-center gap-2 rounded-full border border-[rgb(255_255_255_/_0.17)] bg-[rgb(12_12_12_/_0.72)] px-3 max-[1100px]:w-[230px] max-[1100px]:min-w-[230px] max-[1024px]:w-[clamp(190px,22vw,230px)] max-[1024px]:min-w-[190px] max-[900px]:w-[180px] max-[900px]:max-w-[180px] max-[900px]:min-w-0 max-[640px]:hidden [&_input]:h-full [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:font-body [&_input]:text-[11px] [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-[rgb(245_242_236_/_0.58)] [&_.search-icon]:shrink-0 [&_.search-icon]:text-[rgb(245_242_236_/_0.78)]"
+            className="search-form flex h-[38px] w-[286px] min-w-[286px] items-center gap-2 rounded-full border border-[rgb(255_255_255_/_0.17)] bg-[rgb(12_12_12_/_0.72)] px-3 max-[1100px]:w-[220px] max-[1100px]:min-w-[220px] max-[1024px]:w-[clamp(190px,22vw,230px)] max-[1024px]:min-w-[190px] max-[900px]:w-[180px] max-[900px]:max-w-[180px] max-[900px]:min-w-0 max-[640px]:hidden [&_input]:h-full [&_input]:min-w-0 [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:font-body [&_input]:text-[11px] [&_input]:text-text [&_input]:outline-none [&_input]:placeholder:text-[rgb(245_242_236_/_0.58)] [&_.search-icon]:shrink-0 [&_.search-icon]:text-[rgb(245_242_236_/_0.78)]"
             onSubmit={onSearch}
             role="search"
           >
@@ -715,7 +715,7 @@ export default function Header() {
 
           {!isAuthenticated && (
             <Link
-              className="icon-btn header-account-icon relative inline-flex h-[38px] w-[38px] min-w-[38px] shrink-0 items-center justify-center rounded-[10px] border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11"
+              className="icon-btn header-account-icon relative inline-flex h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-xl border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11"
               to="/account"
               aria-label="Account"
             >
@@ -727,7 +727,7 @@ export default function Header() {
           )}
 
           <Link
-            className="icon-btn header-cart-icon relative inline-flex h-[38px] w-[38px] min-w-[38px] shrink-0 items-center justify-center rounded-[10px] border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11 max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
+            className="icon-btn header-cart-icon relative inline-flex h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-xl border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11 max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
             to="/cart"
             aria-label={cartLabel}
           >
@@ -753,7 +753,7 @@ export default function Header() {
               <button
                 ref={accountTriggerRef}
                 type="button"
-                className="icon-btn account-trigger relative inline-flex h-[38px] w-[38px] min-w-[38px] shrink-0 items-center justify-center rounded-[10px] border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11 max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
+                className="icon-btn account-trigger relative inline-flex h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-xl border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11 max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px]"
                 onClick={() =>
                   setMenuOpen(
                     (current) =>
@@ -775,7 +775,7 @@ export default function Header() {
               {menuOpen && (
                 <div
                   id="account-menu"
-                  className="account-menu absolute right-0 top-[calc(100%+10px)] z-[300] max-h-[min(70vh,520px)] w-[min(290px,calc(100vw-24px))] min-w-[230px] max-w-[min(320px,calc(100vw-24px))] overflow-x-hidden overflow-y-auto rounded-[14px] border border-line bg-surface p-2.5 text-text shadow-[0_18px_50px_rgba(0,0,0,.35)] max-[760px]:fixed max-[760px]:top-[calc(68px+8px)] max-[760px]:right-3"
+                  className="account-menu absolute right-0 top-[calc(100%+10px)] z-[300] max-h-[min(70vh,520px)] w-[min(300px,calc(100vw-24px))] min-w-[240px] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto rounded-2xl border border-line bg-surface p-2 text-text shadow-[0_20px_60px_rgba(0,0,0,.38)] max-[760px]:fixed max-[760px]:top-[calc(68px+8px)] max-[760px]:right-3"
                   role="menu"
                   aria-label="Account menu"
                 >
@@ -800,6 +800,7 @@ export default function Header() {
                     to="/account"
                     onClick={closeAll}
                     role="menuitem"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                   >
                     <RiUser3Line
                       size={16}
@@ -814,6 +815,7 @@ export default function Header() {
                     to="/orders"
                     onClick={closeAll}
                     role="menuitem"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                   >
                     <RiArchive2Line
                       size={16}
@@ -828,6 +830,7 @@ export default function Header() {
                     to="/account/addresses"
                     onClick={closeAll}
                     role="menuitem"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                   >
                     <RiMapPin2Line
                       size={16}
@@ -842,6 +845,7 @@ export default function Header() {
                     to="/account/settings"
                     onClick={closeAll}
                     role="menuitem"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                   >
                     <RiSettings3Line
                       size={16}
@@ -857,6 +861,7 @@ export default function Header() {
                       to="/admin"
                       onClick={closeAll}
                       role="menuitem"
+                      className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                     >
                       <RiShieldStarLine
                         size={16}
@@ -872,6 +877,7 @@ export default function Header() {
                     type="button"
                     onClick={onLogout}
                     role="menuitem"
+                    className="group flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text focus-visible:bg-surface-2 focus-visible:text-text focus-visible:outline-none"
                   >
                     <RiLogoutBoxRLine
                       size={16}
@@ -930,7 +936,7 @@ export default function Header() {
       <aside
         ref={mobileNavRef}
         id="mobile-navigation"
-        className={`mobile-nav fixed inset-y-0 left-0 z-[1000] flex h-dvh w-[min(360px,88vw)] max-w-[360px] flex-col overflow-hidden rounded-r-[20px] border-r border-line bg-surface shadow-[20px_0_70px_rgba(0,0,0,.48)] transition-transform duration-200 ease-[cubic-bezier(.22,.61,.36,1)] motion-reduce:transition-none max-[640px]:w-[min(340px,90vw)] min-[901px]:bottom-0 min-[901px]:left-auto min-[901px]:right-0 min-[901px]:top-[72px] min-[901px]:h-[calc(100dvh-72px)] min-[901px]:w-[min(380px,92vw)] min-[901px]:rounded-l-[18px] min-[901px]:rounded-r-none min-[901px]:border-l min-[901px]:border-r-0 min-[901px]:shadow-[-20px_0_70px_rgba(0,0,0,.48)] min-[1100px]:w-[min(360px,42vw)] ${mobileOpen ? 'pointer-events-auto visible max-[900px]:translate-x-0 min-[901px]:translate-x-0' : 'pointer-events-none invisible max-[900px]:-translate-x-full min-[901px]:translate-x-full'}`}
+        className={`mobile-nav fixed inset-y-0 left-0 z-[1000] flex h-dvh w-[min(344px,88vw)] max-w-[344px] flex-col overflow-hidden rounded-r-2xl border-r border-line bg-surface shadow-[18px_0_56px_rgba(0,0,0,.42)] transition-transform duration-200 ease-[cubic-bezier(.22,.61,.36,1)] motion-reduce:transition-none max-[640px]:w-[min(332px,90vw)] min-[901px]:bottom-0 min-[901px]:left-auto min-[901px]:right-0 min-[901px]:top-[72px] min-[901px]:h-[calc(100dvh-72px)] min-[901px]:w-[min(380px,92vw)] min-[901px]:rounded-l-[18px] min-[901px]:rounded-r-none min-[901px]:border-l min-[901px]:border-r-0 min-[901px]:shadow-[-20px_0_70px_rgba(0,0,0,.48)] min-[1100px]:w-[min(360px,42vw)] ${mobileOpen ? 'pointer-events-auto visible max-[900px]:translate-x-0 min-[901px]:translate-x-0' : 'pointer-events-none invisible max-[900px]:-translate-x-full min-[901px]:translate-x-full'}`}
         aria-label="Navigation menu"
         aria-hidden={!mobileOpen}
       >
