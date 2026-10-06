@@ -3812,3 +3812,151 @@
     }
   }
 }
+
+
+/* -------------------------------------------------------------------------
+   Admin console shell — final layout contract.
+   This is intentionally isolated from older .admin-shell/.admin-sidebar
+   declarations so panel content can never inherit a collapsed grid track.
+   ------------------------------------------------------------------------- */
+.admin-console-root {
+  display: grid !important;
+  grid-template-columns: 248px minmax(0, 1fr) !important;
+  align-items: start !important;
+  width: 100% !important;
+  max-width: 1480px !important;
+  min-width: 0 !important;
+  min-height: 100dvh !important;
+  margin-inline: auto !important;
+  gap: 24px !important;
+  padding: 24px var(--pad) 56px !important;
+  overflow-x: clip !important;
+  box-sizing: border-box !important;
+}
+
+.admin-console-sidebar {
+  position: sticky !important;
+  top: 88px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 248px !important;
+  min-height: calc(100vh - 112px) !important;
+  max-height: calc(100vh - 112px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.admin-console-main {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: clip !important;
+  box-sizing: border-box !important;
+}
+
+.admin-console-main > section {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.orders-admin-full,
+.orders-admin-full > .admin-page-head,
+.orders-admin-full > .admin-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.orders-ledger-wrap {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.orders-ledger-table {
+  width: 100% !important;
+  min-width: 1080px !important;
+  table-layout: fixed !important;
+}
+
+@media (max-width: 1100px) {
+  .admin-console-root {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 16px 14px 48px !important;
+  }
+
+  .admin-console-sidebar {
+    display: none !important;
+  }
+
+  .admin-console-main {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .admin-console-main .admin-menu-trigger {
+    display: inline-flex !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-console-root {
+    padding: 12px 14px 48px !important;
+  }
+
+  .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 220 !important;
+    width: min(280px, 84vw) !important;
+    max-width: 280px !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: 12px 10px !important;
+    transform: translate3d(0, 0, 0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    border-radius: 0 !important;
+  }
+
+  .admin-console-sidebar {
+    transform: translate3d(-105%, 0, 0) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .admin-console-main {
+    overflow-x: clip !important;
+  }
+
+  .orders-admin-full {
+    overflow-x: clip !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-console-root {
+    padding-inline: 12px !important;
+  }
+
+  .orders-ledger-wrap {
+    margin-inline: 0 !important;
+  }
+}
