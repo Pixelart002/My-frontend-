@@ -3834,6 +3834,24 @@
   box-sizing: border-box !important;
 }
 
+.admin-console-root:not(.is-sidebar-expanded) {
+  grid-template-columns: 72px minmax(0, 1fr) !important;
+}
+
+.admin-console-root.is-sidebar-expanded {
+  grid-template-columns: 248px minmax(0, 1fr) !important;
+}
+
+.admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar {
+  width: 72px !important;
+  max-width: 72px !important;
+}
+
+.admin-console-root.is-sidebar-expanded .admin-console-sidebar {
+  width: 100% !important;
+  max-width: 248px !important;
+}
+
 .admin-console-sidebar {
   position: sticky !important;
   top: 88px !important;
