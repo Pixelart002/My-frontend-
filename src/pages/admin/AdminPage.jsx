@@ -1069,115 +1069,147 @@ function AdminNavigation({
   onLogout,
   compact = false,
 }) {
+  const displayName =
+    profile?.full_name ||
+    user?.full_name ||
+    'Staff';
+  const displayEmail =
+    profile?.email ||
+    user?.email ||
+    '';
+  const role =
+    profile?.role ||
+    user?.role ||
+    'Staff';
+  const initials =
+    displayName.trim().charAt(0).toUpperCase() || 'S';
+
   return (
     <nav
-      className="admin-navigation"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden"
       aria-label="Admin navigation"
     >
-      <div className="admin-navigation-scroll">
-        {NAV_GROUPS.map(
-          ([label, keys]) => {
-            const visible =
-              keys.filter((key) =>
-                allowed.includes(key),
-              );
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-2 pb-3 pt-2 [scrollbar-width:thin]"
+      >
+        <div className="space-y-5">
+          {NAV_GROUPS.map(
+            ([label, keys]) => {
+              const visible =
+                keys.filter((key) =>
+                  allowed.includes(key),
+                );
 
-            if (!visible.length) {
-              return null;
-            }
+              if (!visible.length) {
+                return null;
+              }
 
-            return (
-              <section
-                key={label}
-                className="admin-nav-group min-w-0"
-              >
-                <div
-                  className="admin-nav-group-label"
-                  aria-hidden={compact}
+              return (
+                <section
+                  key={label}
+                  className="min-w-0"
+                  aria-label={label}
                 >
-                  {label}
-                </div>
+                  <div
+                    className={
+                      compact
+                        ? 'sr-only'
+                        : 'mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/35'
+                    }
+                  >
+                    {label}
+                  </div>
 
-                <div className="admin-nav-group-items">
-                  {visible.map(
-                    (key) => {
-                      const nav =
-                        NAV_BY_KEY.get(
-                          key,
+                  <div className="grid gap-1">
+                    {visible.map(
+                      (key) => {
+                        const nav =
+                          NAV_BY_KEY.get(
+                            key,
+                          );
+
+                        if (!nav) {
+                          return null;
+                        }
+
+                        return (
+                          <SideBtn
+                            key={key}
+                            nav={nav}
+                            active={panel}
+                            onClick={() => onSelect(key)}
+                            compact={compact}
+                          />
                         );
-
-                      if (!nav) {
-                        return null;
-                      }
-
-                      return (
-                        <SideBtn
-                          key={key}
-                          nav={nav}
-                          active={panel}
-                          onClick={() => onSelect(key)}
-                          compact={compact}
-                        />
-                      );
-                    },
-                  )}
-                </div>
-              </section>
-            );
-          },
-        )}
+                      },
+                    )}
+                  </div>
+                </section>
+              );
+            },
+          )}
+        </div>
       </div>
 
-      <div className="admin-account">
-        <div className="admin-account-identity">
-          <div className="admin-account-avatar" aria-hidden="true">
-            {(
-              profile?.full_name ||
-              user?.full_name ||
-              profile?.email ||
-              user?.email ||
-              'S'
-            ).trim().charAt(0).toUpperCase()}
-          </div>
-
-          <div className="admin-account-copy">
-            <div className="admin-account-name">
-              {profile?.full_name ||
-                user?.full_name ||
-                'Staff'}
-            </div>
-
-            <div className="admin-account-email">
-              {profile?.email ||
-                user?.email ||
-                ''}
-            </div>
-          </div>
-
-          <span
-            className="admin-account-status"
-            title="Admin session active"
-            aria-label="Admin session active"
-          />
-        </div>
-
-        <div className="admin-account-role">
-          {profile?.role ||
-            user?.role ||
-            'Staff'}
-        </div>
-
-        <button
-          type="button"
-          onClick={onLogout}
-          className="admin-signout"
+      <div className="shrink-0 border-t border-white/[0.07] bg-black/10 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-3">
+        <div
+          className={
+            compact
+              ? 'flex justify-center'
+              : 'rounded-xl bg-white/[0.035] p-2.5'
+          }
         >
-          <RiLogoutBoxRLine
-            size={15}
-            aria-hidden="true"
-          />
-          <span>Sign out</span>
-        </button>
+          <div
+            className={
+              compact
+                ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06] text-sm font-bold text-white'
+                : 'flex min-w-0 items-center gap-2.5'
+            }
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.08] text-xs font-bold text-white ring-1 ring-white/[0.08]">
+              {initials}
+            </div>
+
+            {!compact && (
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[12px] font-semibold text-white/90">
+                  {displayName}
+                </div>
+                <div className="truncate text-[10px] font-medium text-white/40">
+                  {displayEmail}
+                </div>
+              </div>
+            )}
+
+            {!compact && (
+              <span
+                className="h-2 w-2 shrink-0 rounded-full bg-emerald-400/90 ring-2 ring-emerald-400/10"
+                title="Admin session active"
+                aria-label="Admin session active"
+              />
+            )}
+          </div>
+        </div>
+
+        {!compact && (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="min-w-0 flex-1 truncate px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/35">
+              {role}
+            </span>
+
+            <button
+              type="button"
+              onClick={onLogout}
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg px-2.5 text-[11px] font-semibold text-white/55 transition-colors duration-150 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8ad6a]/70"
+            >
+              <RiLogoutBoxRLine
+                size={15}
+                aria-hidden="true"
+              />
+              <span>Sign out</span>
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
