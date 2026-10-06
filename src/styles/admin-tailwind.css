@@ -3960,3 +3960,39 @@
     margin-inline: 0 !important;
   }
 }
+
+
+/* Black-screen guard: the admin route must own its stacking context.
+   Legacy drawer/backdrop selectors must never cover the console by default. */
+.admin-console-root {
+  position: relative !important;
+  z-index: 300 !important;
+  isolation: isolate !important;
+  background: var(--bg) !important;
+}
+
+.admin-console-root .admin-drawer-backdrop {
+  display: none !important;
+}
+
+.admin-console-root .admin-drawer {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.admin-console-root.is-sidebar-expanded .admin-drawer {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.admin-console-root .admin-modal-overlay[aria-hidden="true"],
+.admin-console-root .admin-modal-overlay.is-hidden {
+  display: none !important;
+}
+
+.admin-console-main,
+.admin-console-main > section {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
