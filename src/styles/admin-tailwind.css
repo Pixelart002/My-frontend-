@@ -3915,6 +3915,23 @@
 }
 
 @media (max-width: 900px) {
+  /* Mobile drawer must escape the shell's horizontal clipping context. */
+  .admin-console-root,
+  .admin-console-root.is-sidebar-expanded {
+    overflow: visible !important;
+  }
+
+  .admin-console-root .admin-menu-trigger {
+    position: relative !important;
+    z-index: 230 !important;
+    display: inline-flex !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
   .admin-console-root {
     padding: 12px 14px 48px !important;
   }
