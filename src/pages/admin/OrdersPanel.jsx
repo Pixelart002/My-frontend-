@@ -351,7 +351,12 @@ export default function OrdersPanel({
       </div>
 
       <div className="admin-card orders-ledger-card w-full min-w-0 max-w-none">
-        <div className="admin-table-wrap orders-ledger-wrap w-full min-w-0 max-w-full overflow-x-auto">
+        <div
+          className="admin-table-wrap orders-ledger-wrap w-full min-w-0 max-w-full overflow-x-auto"
+          role="region"
+          aria-label="Orders table"
+          tabIndex={0}
+        >
           {filtered.length === 0 ? (
             <div className="admin-empty">
               No orders match.
