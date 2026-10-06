@@ -1228,25 +1228,37 @@ function SideBtn({
   return (
     <button
       type="button"
-      className={`admin-sb-btn${isActive ? ' is-active' : ''}${compact ? ' is-compact' : ''}`}
-      onClick={onClick}
-      title={undefined}
-      aria-label={nav.label}
-      data-label={nav.label}
-      aria-current={
-        isActive
-          ? 'page'
-          : undefined
+      className={
+        `group relative inline-flex min-h-11 w-full items-center rounded-xl text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8ad6a]/70 ${compact ? 'justify-center px-0' : 'gap-3 px-3 text-[13px] font-medium'} ${isActive ? 'bg-[#d8ad6a]/[0.10] text-[#f0cf97]' : 'text-white/55 hover:bg-white/[0.055] hover:text-white/90'}`
       }
+      onClick={onClick}
+      aria-label={nav.label}
+      title={compact ? nav.label : undefined}
+      aria-current={isActive ? 'page' : undefined}
     >
+      {isActive && (
+        <span
+          className="absolute left-0 top-2.5 h-6 w-[3px] rounded-r-full bg-[#d8ad6a]"
+          aria-hidden="true"
+        />
+      )}
+
       <Icon
         size={18}
+        strokeWidth={isActive ? 2.2 : 1.8}
+        className={
+          isActive
+            ? 'shrink-0 text-[#f0cf97]'
+            : 'shrink-0 text-current opacity-75'
+        }
         aria-hidden="true"
       />
 
-      <span>
-        {nav.label}
-      </span>
+      {!compact && (
+        <span className="min-w-0 flex-1 truncate">
+          {nav.label}
+        </span>
+      )}
     </button>
   );
 }
