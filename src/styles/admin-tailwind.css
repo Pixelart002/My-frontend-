@@ -3295,4 +3295,24 @@
   }
 }
 
+/* Navigation presentation is owned by Tailwind utilities in AdminPage.jsx.
+   Keep this compatibility layer non-visual so legacy selectors cannot
+   override the mobile/desktop navigation component. */
+.admin-console-root .admin-sb-btn {
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.admin-console-root .admin-sb-btn::before,
+.admin-console-root .admin-sb-btn::after {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-console-root .admin-sb-btn {
+    transition: none !important;
+  }
+}
+
 }
