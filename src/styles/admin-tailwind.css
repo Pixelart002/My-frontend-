@@ -2879,4 +2879,266 @@
   }
 }
 
+/* ============================================================
+   Admin typography + color system
+   Admin is an operational console: neutral sans hierarchy,
+   gold reserved for emphasis and active state.
+   ============================================================ */
+
+.admin-console-root {
+  --admin-text-primary: #f4f1eb;
+  --admin-text-secondary: #b7b0a7;
+  --admin-text-tertiary: #817970;
+  --admin-text-disabled: #625b54;
+  --admin-border-strong: #3b3631;
+  --admin-border-soft: #2d2925;
+  --admin-surface-hover: #211f1c;
+  --admin-gold: #d8ad6a;
+  --admin-gold-strong: #f0cf97;
+
+  color: var(--admin-text-primary);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.admin-console-root,
+.admin-console-root button,
+.admin-console-root input,
+.admin-console-root select,
+.admin-console-root textarea {
+  font-family: var(--font-body);
+}
+
+.admin-console-root h1,
+.admin-console-root h2,
+.admin-console-root h3,
+.admin-console-root h4,
+.admin-console-root strong {
+  font-family: var(--font-body);
+}
+
+.admin-console-root h1,
+.admin-console-root h2,
+.admin-console-root h3,
+.admin-console-root h4 {
+  color: var(--admin-text-primary);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.admin-console-root p {
+  color: var(--admin-text-secondary);
+}
+
+.admin-console-root .admin-sidebar-brand-copy strong {
+  color: var(--admin-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.admin-console-root .admin-sidebar-brand-copy span {
+  color: var(--admin-text-tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+
+.admin-console-root .admin-nav-group-label {
+  color: var(--admin-text-tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .15em;
+}
+
+.admin-console-root .admin-sb-btn {
+  color: var(--admin-text-secondary);
+  font-size: 13px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+}
+
+.admin-console-root .admin-sb-btn svg {
+  color: currentColor;
+}
+
+.admin-console-root .admin-sb-btn:hover {
+  color: var(--admin-text-primary);
+}
+
+.admin-console-root .admin-sb-btn.is-active {
+  color: var(--admin-gold-strong);
+  font-weight: 650;
+}
+
+.admin-console-root .admin-account-name {
+  color: var(--admin-text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.admin-console-root .admin-account-email {
+  color: var(--admin-text-tertiary);
+  font-size: 10px;
+  font-weight: 450;
+}
+
+.admin-console-root .admin-account-role {
+  color: var(--admin-text-tertiary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.admin-console-root .admin-signout {
+  color: var(--admin-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-console-root .admin-head-brand,
+.admin-console-root .admin-page-context {
+  color: var(--admin-text-secondary);
+}
+
+.admin-console-root .admin-brand-copy .admin-eyebrow {
+  color: var(--admin-text-primary);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.admin-console-root .admin-brand-status,
+.admin-console-root .admin-page-context {
+  color: var(--admin-text-tertiary);
+}
+
+.admin-console-root .admin-head h1 {
+  color: var(--admin-text-primary);
+  font-weight: 650;
+}
+
+.admin-console-root .admin-head .admin-sub {
+  color: var(--admin-text-secondary);
+  font-weight: 400;
+}
+
+.admin-console-root .admin-toolbar h2 {
+  color: var(--admin-text-primary);
+  font-weight: 650;
+}
+
+.admin-console-root .admin-toolbar p,
+.admin-console-root .admin-page-note,
+.admin-console-root .field-hint {
+  color: var(--admin-text-secondary);
+}
+
+.admin-console-root .admin-table th,
+.admin-console-root .admin-stat .stat-label,
+.admin-console-root .admin-section-label {
+  color: var(--admin-text-tertiary);
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.admin-console-root .admin-table td {
+  color: var(--admin-text-secondary);
+}
+
+.admin-console-root .admin-table .td-strong {
+  color: var(--admin-text-primary);
+  font-weight: 600;
+}
+
+.admin-console-root .admin-table .td-dim {
+  color: var(--admin-text-tertiary);
+}
+
+.admin-console-root .admin-table .td-gold {
+  color: var(--admin-gold-strong);
+  font-weight: 650;
+}
+
+.admin-console-root .admin-stat .stat-value {
+  color: var(--admin-gold-strong);
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.admin-console-root .admin-stat .stat-hint {
+  color: var(--admin-text-tertiary);
+}
+
+.admin-console-root .admin-pill {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .01em;
+}
+
+.admin-console-root .admin-search,
+.admin-console-root .admin-select {
+  color: var(--admin-text-secondary);
+}
+
+.admin-console-root .admin-search input,
+.admin-console-root .admin-select {
+  color: var(--admin-text-primary);
+}
+
+.admin-console-root .admin-search input::placeholder {
+  color: var(--admin-text-disabled);
+  opacity: 1;
+}
+
+.admin-console-root .admin-role-chip {
+  color: var(--admin-text-primary);
+  font-weight: 650;
+}
+
+.admin-console-root .admin-rail-mark {
+  font-family: var(--font-body);
+  font-weight: 800;
+}
+
+.admin-console-root .admin-menu-trigger {
+  color: var(--admin-text-primary);
+}
+
+.admin-console-root .admin-menu-trigger:hover {
+  color: var(--admin-gold-strong);
+}
+
+.admin-console-root .admin-card,
+.admin-console-root .admin-panel,
+.admin-console-root .admin-stat,
+.admin-console-root .admin-table-wrap {
+  border-color: var(--admin-border-soft);
+}
+
+.admin-console-root .admin-card:hover {
+  border-color: var(--admin-border-strong);
+}
+
+@media (max-width: 767px) {
+  .admin-console-root .admin-sb-btn {
+    font-size: 13px;
+    font-weight: 550;
+  }
+
+  .admin-console-root .admin-sidebar-brand-copy strong {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .admin-console-root {
+    --admin-text-secondary: #c8c1b8;
+    --admin-text-tertiary: #9a9187;
+    --admin-border-soft: #484139;
+  }
+}
+
 }
