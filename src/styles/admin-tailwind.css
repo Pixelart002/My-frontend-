@@ -4100,3 +4100,294 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+
+/* UI/UX Pro Max responsive contract
+   Target widths: 375 / 768 / 1024 / 1440.
+   Content must reflow; only true data tables may scroll horizontally. */
+.admin-console-root,
+.admin-console-root * {
+  box-sizing: border-box;
+}
+
+.admin-console-root {
+  width: min(100%, 1480px) !important;
+  max-width: 1480px !important;
+  margin-inline: auto !important;
+  min-width: 0 !important;
+}
+
+.admin-console-root .admin-console-sidebar,
+.admin-console-root .admin-console-main,
+.admin-console-root .admin-console-main > section,
+.admin-console-root .admin-panel {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.admin-console-root img,
+.admin-console-root svg,
+.admin-console-root video,
+.admin-console-root canvas {
+  max-width: 100%;
+}
+
+.admin-console-root button,
+.admin-console-root input,
+.admin-console-root select,
+.admin-console-root textarea {
+  max-width: 100%;
+}
+
+.admin-console-root h1,
+.admin-console-root h2,
+.admin-console-root h3,
+.admin-console-root h4,
+.admin-console-root p,
+.admin-console-root td,
+.admin-console-root th,
+.admin-console-root label,
+.admin-console-root .td-strong,
+.admin-console-root .td-dim {
+  overflow-wrap: anywhere;
+}
+
+.admin-console-root .admin-page-head,
+.admin-console-root .admin-toolbar,
+.admin-console-root .admin-head,
+.admin-console-root .admin-head-brand,
+.admin-console-root .admin-head-meta,
+.admin-console-root .btn-row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-console-root .admin-page-head,
+.admin-console-root .admin-toolbar {
+  width: 100%;
+}
+
+.admin-console-root .admin-toolbar > *,
+.admin-console-root .admin-page-head > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-console-root .admin-table-wrap,
+.admin-console-root .admin-table-scroll,
+.admin-console-root .orders-ledger-wrap {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.admin-console-root .admin-table,
+.admin-console-root .orders-ledger-table {
+  max-width: none;
+}
+
+.admin-console-root .field-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-console-root .field,
+.admin-console-root .form-field,
+.admin-console-root .editor-section,
+.admin-console-root .admin-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-console-root .admin-card {
+  overflow: hidden;
+}
+
+.admin-console-root .admin-table-wrap {
+  scrollbar-gutter: stable;
+}
+
+/* Tablet: navigation becomes a drawer before content gets cramped. */
+@media (max-width: 1100px) {
+  .admin-console-root {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 18px 48px !important;
+  }
+
+  .admin-console-root .admin-console-sidebar {
+    display: flex !important;
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 220 !important;
+    width: min(292px, 84vw) !important;
+    max-width: 292px !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: 14px 10px !important;
+    border-radius: 0 !important;
+    transform: translate3d(-105%, 0, 0) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .admin-console-root .admin-menu-trigger {
+    display: inline-flex !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    position: relative !important;
+    z-index: 230 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .admin-console-root .admin-console-main {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .admin-console-root .admin-head {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    padding-block: 8px 12px;
+  }
+}
+
+/* Mobile: preserve breathing room without shrinking content into unreadable columns. */
+@media (max-width: 767px) {
+  .admin-console-root {
+    padding: 10px 12px 40px !important;
+  }
+
+  .admin-console-root .admin-head {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .admin-console-root .admin-head-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .admin-console-root .admin-breadcrumb {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-console-root .admin-breadcrumb-root,
+  .admin-console-root .admin-breadcrumb-separator {
+    display: none;
+  }
+
+  .admin-console-root .admin-breadcrumb-current {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-console-root .admin-head-meta {
+    flex: 0 0 auto;
+    max-width: 34%;
+  }
+
+  .admin-console-root .admin-role-chip {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-console-root .admin-card,
+  .admin-console-root .admin-panel {
+    width: 100%;
+  }
+
+  .admin-console-root .admin-toolbar {
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-console-root .admin-toolbar > *,
+  .admin-console-root .admin-toolbar .btn-row {
+    width: 100%;
+  }
+
+  .admin-console-root .admin-toolbar .btn-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-console-root .admin-toolbar .btn-row > * {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .admin-console-root .field-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-console-root .admin-table-wrap,
+  .admin-console-root .admin-table-scroll,
+  .admin-console-root .orders-ledger-wrap {
+    margin-inline: 0;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-console-root {
+    padding-inline: 10px !important;
+  }
+
+  .admin-console-root .admin-menu-trigger {
+    flex-basis: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .admin-console-root .admin-head-meta {
+    max-width: 30%;
+  }
+
+  .admin-console-root .admin-toolbar .btn-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-console-root .admin-card {
+    padding: 14px !important;
+  }
+
+  .admin-console-root .admin-table th,
+  .admin-console-root .admin-table td {
+    padding-inline: 10px;
+  }
+}
+
+/* Large desktop: use the available width instead of stretching controls. */
+@media (min-width: 1440px) {
+  .admin-console-root {
+    padding-inline: 28px !important;
+  }
+}
