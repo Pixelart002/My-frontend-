@@ -289,10 +289,10 @@ export default function OrdersPanel({
   }
 
   return (
-    <div className="orders-admin-full">
-      <div className="admin-page-head">
-        <div>
-          <h1>Orders</h1>
+    <div className="orders-admin-full w-full min-w-0 max-w-none overflow-x-clip">
+      <div className="admin-page-head flex w-full min-w-0 flex-col items-stretch gap-3 min-[901px]:flex-row min-[901px]:items-end min-[901px]:justify-between">
+        <div className="min-w-0 flex-1">
+          <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
             {filtered.length} of {items.length}{' '}
@@ -300,7 +300,7 @@ export default function OrdersPanel({
           </p>
         </div>
 
-        <div className="admin-toolbar">
+        <div className="admin-toolbar flex w-full min-w-0 flex-col items-stretch gap-2 min-[901px]:w-auto min-[901px]:flex-row min-[901px]:items-center">
           <label
             className="sr-only"
             htmlFor="orders-status-filter"
@@ -310,7 +310,7 @@ export default function OrdersPanel({
 
           <select
             id="orders-status-filter"
-            className="admin-select"
+            className="admin-select min-w-0 w-full min-[901px]:w-auto"
             value={filter}
             onChange={(event) =>
               setFilter(event.target.value)
@@ -350,8 +350,8 @@ export default function OrdersPanel({
         </div>
       </div>
 
-      <div className="admin-card orders-ledger-card">
-        <div className="admin-table-wrap orders-ledger-wrap">
+      <div className="admin-card orders-ledger-card w-full min-w-0 max-w-none">
+        <div className="admin-table-wrap orders-ledger-wrap w-full min-w-0 max-w-full overflow-x-auto">
           {filtered.length === 0 ? (
             <div className="admin-empty">
               No orders match.
