@@ -506,6 +506,23 @@ export default function AdminPage() {
       setSidebarExpanded(false);
     }, []);
 
+  useEffect(() => {
+    if (!sidebarExpanded || typeof window === 'undefined') {
+      return undefined;
+    }
+
+    if (!window.matchMedia('(max-width: 1100px)').matches) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sidebarExpanded]);
+
   const verifyAdmin =
     useCallback(async (verifiedToken = token) => {
       if (initializing) {
@@ -699,7 +716,7 @@ export default function AdminPage() {
           return;
         }
 
-        if (window.matchMedia('(max-width: 900px)').matches) {
+        if (window.matchMedia('(max-width: 1100px)').matches) {
           closeSidebar();
         }
 
@@ -851,6 +868,7 @@ export default function AdminPage() {
     <div className={`admin-shell admin-console-root${sidebarExpanded ? ' is-sidebar-expanded' : ''}`}>
       <aside
         className="admin-sidebar admin-console-sidebar"
+        data-sidebar-state={sidebarExpanded ? 'expanded' : 'collapsed'}
         aria-label="Admin navigation"
         aria-expanded={sidebarExpanded}
       >
@@ -874,6 +892,15 @@ export default function AdminPage() {
           />
         </div>
       </aside>
+
+      <button
+        type="button"
+        className="admin-sidebar-backdrop"
+        aria-label="Close admin navigation"
+        aria-hidden={!sidebarExpanded}
+        tabIndex={sidebarExpanded ? 0 : -1}
+        onClick={closeSidebar}
+      />
 
       <main className="admin-main admin-console-main w-full min-w-0 max-w-none overflow-x-clip">
         <header className="admin-head flex w-full min-w-0">
