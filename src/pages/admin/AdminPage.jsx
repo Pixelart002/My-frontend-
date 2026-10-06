@@ -875,9 +875,9 @@ export default function AdminPage() {
         </div>
       </aside>
 
-      <main className="admin-main">
-        <header className="admin-head">
-          <div className="admin-head-brand">
+      <main className="admin-main w-full min-w-0 max-w-none overflow-x-clip">
+        <header className="admin-head flex w-full min-w-0">
+          <div className="admin-head-brand flex min-w-0 flex-1">
             <button
               type="button"
               className="admin-menu-trigger"
@@ -888,7 +888,7 @@ export default function AdminPage() {
               <RiMenuLine size={19} aria-hidden="true" />
             </button>
 
-            <nav className="admin-breadcrumb" aria-label="Breadcrumb">
+            <nav className="admin-breadcrumb min-w-0 max-w-full" aria-label="Breadcrumb">
               <span className="admin-breadcrumb-root">Luviio Admin</span>
               <span className="admin-breadcrumb-separator" aria-hidden="true">/</span>
               <span className="admin-breadcrumb-current">{active.label}</span>
@@ -901,7 +901,7 @@ export default function AdminPage() {
         </header>
 
         <section
-          className="min-w-0"
+          className="w-full min-w-0 max-w-none overflow-x-clip"
           aria-label={`${active.label} panel`}
         >
           <Suspense
