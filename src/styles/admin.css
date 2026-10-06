@@ -2346,3 +2346,117 @@
     transition: none !important;
   }
 }
+
+
+/* ============================================================
+   LUVIIO ADMIN — responsive containment hardening
+   Canonical mobile behavior: full-width content + fixed sidebar.
+   Prevents legacy grid rules from collapsing the main rail.
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .admin-shell,
+  .admin-shell.is-sidebar-expanded {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100dvh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: clip !important;
+    background: var(--bg);
+  }
+
+  .admin-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 14px 48px !important;
+    overflow-x: clip !important;
+  }
+
+  .admin-sidebar {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 220 !important;
+    display: flex !important;
+    width: min(280px, 82vw) !important;
+    max-width: 280px !important;
+    min-width: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 12px 10px !important;
+    transform: translate3d(-105%, 0, 0) !important;
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+    box-shadow: 18px 0 52px rgba(0, 0, 0, .28);
+    transition: transform .18s cubic-bezier(.2,.8,.2,1), visibility .18s ease;
+  }
+
+  .admin-shell.is-sidebar-expanded .admin-sidebar {
+    transform: translate3d(0, 0, 0) !important;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .admin-head {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .admin-head-brand,
+  .admin-breadcrumb {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .admin-breadcrumb {
+    flex: 1 1 auto !important;
+    overflow: hidden;
+  }
+
+  .admin-page-head,
+  .admin-page-head > div,
+  .admin-toolbar,
+  .admin-card,
+  .admin-panel,
+  .admin-stats,
+  .admin-filter-row,
+  .admin-table-wrap {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-page-head {
+    overflow-x: clip;
+  }
+
+  .admin-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-main {
+    padding-inline: 12px !important;
+  }
+
+  .admin-page-head {
+    gap: 12px;
+  }
+
+  .admin-page-head h1,
+  .admin-page-head h2,
+  .admin-page-head p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
