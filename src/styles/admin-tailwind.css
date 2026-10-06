@@ -4031,3 +4031,72 @@
   z-index: 1;
   background: transparent;
 }
+
+
+/* Final responsive scroll contract.
+   Keep one document-level vertical scroll; only independently scrollable
+   surfaces (sidebar/drawer) own their internal Y overflow. */
+.admin-console-root {
+  min-height: auto !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.admin-console-main {
+  min-height: 0 !important;
+  height: auto !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+.admin-console-main > section {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.admin-console-sidebar {
+  height: calc(100dvh - 112px) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 112px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1100px) {
+  .admin-console-root {
+    min-height: auto !important;
+  }
+
+  .admin-console-sidebar {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-console-root {
+    min-height: 100dvh !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  .admin-console-main {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+  }
+
+  .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
