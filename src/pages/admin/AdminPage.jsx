@@ -874,11 +874,25 @@ export default function AdminPage() {
       >
         <div className="admin-sidebar-inner">
           <div className="admin-sidebar-brand">
-            <div className="admin-rail-mark" aria-hidden="true">L</div>
-            <div className="admin-sidebar-brand-copy">
-              <strong>Luviio</strong>
-              <span>Admin console</span>
+            <div className="admin-sidebar-brand-main">
+              <div className="admin-rail-mark" aria-hidden="true">L</div>
+              <div className="admin-sidebar-brand-copy">
+                <strong>Luviio</strong>
+                <span>Admin console</span>
+              </div>
             </div>
+
+            <button
+              type="button"
+              className="admin-sidebar-close"
+              onClick={closeSidebar}
+              aria-label="Close admin navigation"
+            >
+              <RiCloseLine
+                size={18}
+                aria-hidden="true"
+              />
+            </button>
           </div>
 
           <AdminNavigation
@@ -1075,10 +1089,10 @@ function AdminNavigation({
             return (
               <div
                 key={label}
-                className="min-w-0"
+                className="admin-nav-group min-w-0"
               >
                 <div
-                  className="mb-1.5 mt-4 px-1.5 text-[10px] font-bold uppercase tracking-[.16em] text-dim first:mt-1 admin-nav-group-label"
+                  className="admin-nav-group-label"
                   aria-hidden={compact}
                 >
                   {label}
@@ -1166,8 +1180,9 @@ function SideBtn({
       type="button"
       className={`admin-sb-btn${isActive ? ' is-active' : ''}${compact ? ' is-compact' : ''}`}
       onClick={onClick}
-      title={compact ? nav.label : undefined}
-      aria-label={compact ? nav.label : undefined}
+      title={undefined}
+      aria-label={nav.label}
+      data-label={nav.label}
       aria-current={
         isActive
           ? 'page'
