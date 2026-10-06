@@ -1902,7 +1902,7 @@
 
 
 /* ============================================================
-   Admin shell — production navigation system
+   Admin shell — production navigation + data viewport
    ============================================================ */
 
 .admin-console-root {
@@ -1918,18 +1918,8 @@
   box-sizing: border-box;
   min-width: 0;
   border: 1px solid var(--line);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--surface) 98%, var(--gold) 2%) 0%,
-      var(--surface) 42%,
-      color-mix(in srgb, var(--surface) 96%, var(--bg) 4%) 100%
-    );
-  box-shadow: 8px 0 28px rgb(0 0 0 / 10%);
-}
-
-.admin-console-sidebar {
-  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 6px 0 24px rgb(0 0 0 / 9%);
 }
 
 .admin-sidebar-inner {
@@ -1942,7 +1932,7 @@
   flex: 0 0 auto;
   min-height: 58px;
   padding: 6px 4px 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .admin-sidebar-brand-main {
@@ -1958,19 +1948,18 @@
 }
 
 .admin-sidebar-brand-copy span {
-  @apply text-[10px] font-medium uppercase tracking-[0.12em];
+  @apply text-[10px] font-medium uppercase tracking-[0.12em] text-dim;
 }
 
 .admin-rail-mark {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 16%);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 14%);
 }
 
 .admin-sidebar-close {
   @apply hidden h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-muted transition-colors duration-150;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .admin-sidebar-close:hover,
@@ -1987,16 +1976,6 @@
   @apply min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto;
   padding: 0 2px 10px;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--line) 75%, transparent) transparent;
-}
-
-.admin-navigation > div:first-child::-webkit-scrollbar {
-  width: 4px;
-}
-
-.admin-navigation > div:first-child::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--line) 75%, transparent);
-  border-radius: 999px;
 }
 
 .admin-nav-group {
@@ -2004,26 +1983,13 @@
 }
 
 .admin-nav-group + .admin-nav-group {
-  margin-top: 12px;
+  margin-top: 10px;
   padding-top: 10px;
-}
-
-.admin-nav-group + .admin-nav-group::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 10px;
-  right: 10px;
-  height: 1px;
-  background: color-mix(in srgb, var(--line) 62%, transparent);
+  border-top: 1px solid var(--line-soft);
 }
 
 .admin-nav-group-label {
-  @apply mb-1.5 mt-0 px-2 text-[9px] font-extrabold uppercase tracking-[0.18em] text-dim;
-}
-
-.admin-nav-group:first-child .admin-nav-group-label {
-  margin-top: 0;
+  @apply mb-1.5 px-2 text-[9px] font-extrabold uppercase tracking-[0.18em] text-dim;
 }
 
 .admin-nav-group > .grid {
@@ -2033,66 +1999,55 @@
 .admin-sb-btn {
   position: relative;
   min-height: 42px;
-  border-radius: 10px;
+  border-radius: 9px;
   padding: 9px 10px;
   gap: 10px;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: -0.005em;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
-    color 150ms ease,
-    transform 120ms ease;
+    color 150ms ease;
 }
 
 .admin-sb-btn:hover {
-  background: color-mix(in srgb, var(--surface-2) 88%, var(--gold) 12%);
-  border-color: color-mix(in srgb, var(--line) 82%, var(--gold) 18%);
+  background: var(--surface-2);
+  border-color: var(--line);
 }
 
 .admin-sb-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gold) 75%, white 25%);
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, white 30%);
   outline-offset: 2px;
 }
 
 .admin-sb-btn.is-active {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--gold-dim) 88%, var(--surface) 12%),
-    color-mix(in srgb, var(--gold-dim) 48%, transparent)
-  );
+  background: var(--gold-dim);
   color: var(--gold-soft);
-  border-color: color-mix(in srgb, var(--gold) 22%, var(--line) 78%);
-  box-shadow: inset 3px 0 0 var(--gold);
+  border-color: color-mix(in srgb, var(--gold) 24%, var(--line) 76%);
+  box-shadow: inset 2px 0 0 var(--gold);
 }
 
 .admin-sb-btn.is-active::after {
   content: "";
   position: absolute;
-  right: 10px;
+  right: 9px;
   width: 5px;
   height: 5px;
   border-radius: 999px;
   background: var(--gold);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .admin-sb-btn svg {
   width: 18px;
   height: 18px;
+  flex: 0 0 18px;
   color: currentColor;
-  opacity: .82;
-  transition: opacity 150ms ease, transform 150ms ease;
+  opacity: .8;
 }
 
 .admin-sb-btn:hover svg,
 .admin-sb-btn.is-active svg {
   opacity: 1;
-}
-
-.admin-sb-btn.is-active svg {
-  transform: scale(1.03);
 }
 
 .admin-account {
@@ -2121,7 +2076,6 @@
 
 .admin-account-status {
   @apply h-2 w-2 shrink-0 rounded-full bg-success;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 12%, transparent);
 }
 
 .admin-account-role {
@@ -2137,10 +2091,11 @@
 }
 
 .admin-signout:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gold) 75%, white 25%);
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, white 30%);
   outline-offset: 2px;
 }
 
+/* Collapsed desktop rail */
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar {
   width: 72px;
   max-width: 72px;
@@ -2151,7 +2106,6 @@
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sidebar-brand {
   justify-content: center;
   padding-inline: 0;
-  padding-bottom: 12px;
 }
 
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sidebar-brand-main {
@@ -2169,11 +2123,6 @@
   padding-top: 8px;
 }
 
-.admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-nav-group + .admin-nav-group::before {
-  left: 13px;
-  right: 13px;
-}
-
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sb-btn {
   width: 44px;
   min-width: 44px;
@@ -2189,11 +2138,6 @@
   display: none;
 }
 
-.admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sb-btn svg {
-  flex: 0 0 18px;
-  margin: 0;
-}
-
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sb-btn.is-active::after {
   right: 3px;
 }
@@ -2205,12 +2149,93 @@
   padding: 12px 10px 10px;
 }
 
-.admin-console-root.is-sidebar-expanded .admin-console-sidebar .admin-sidebar-brand {
-  justify-content: flex-start;
+.admin-console-root.is-sidebar-expanded .admin-sidebar-close {
+  display: none;
 }
 
-.admin-console-root.is-sidebar-expanded .admin-console-sidebar .admin-sidebar-close {
-  display: none;
+/* Orders: the card must not clip its own scroll viewport. */
+.orders-ledger-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.orders-ledger-wrap {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  border-radius: inherit;
+  outline: none;
+  touch-action: pan-x pinch-zoom;
+}
+
+.orders-ledger-wrap:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 65%, white 35%);
+  outline-offset: -2px;
+}
+
+.orders-ledger-table {
+  width: max-content !important;
+  min-width: 1180px !important;
+  max-width: none !important;
+  table-layout: auto !important;
+}
+
+.orders-ledger-table th,
+.orders-ledger-table td {
+  white-space: nowrap;
+}
+
+.orders-ledger-table th:nth-child(1),
+.orders-ledger-table td:nth-child(1) {
+  min-width: 150px;
+}
+
+.orders-ledger-table th:nth-child(2),
+.orders-ledger-table td:nth-child(2) {
+  min-width: 150px;
+}
+
+.orders-ledger-table th:nth-child(3),
+.orders-ledger-table td:nth-child(3) {
+  min-width: 240px;
+}
+
+.orders-ledger-table th:nth-child(4),
+.orders-ledger-table td:nth-child(4) {
+  min-width: 120px;
+}
+
+.orders-ledger-table th:nth-child(5),
+.orders-ledger-table td:nth-child(5) {
+  min-width: 120px;
+}
+
+.orders-ledger-table th:nth-child(6),
+.orders-ledger-table td:nth-child(6) {
+  min-width: 120px;
+}
+
+.orders-ledger-table th:nth-child(7),
+.orders-ledger-table td:nth-child(7) {
+  min-width: 130px;
+}
+
+.orders-ledger-table th:nth-child(8),
+.orders-ledger-table td:nth-child(8) {
+  min-width: 160px;
+}
+
+.orders-ledger-table th:nth-child(9),
+.orders-ledger-table td:nth-child(9) {
+  min-width: 170px;
 }
 
 .admin-sidebar-backdrop {
@@ -2231,29 +2256,24 @@
     inset: 0 auto 0 0;
     z-index: 220;
     display: flex;
-    width: min(310px, calc(100vw - 28px));
-    max-width: 310px;
+    width: min(304px, calc(100vw - 24px));
+    max-width: 304px;
     min-width: 0;
     height: 100dvh;
     min-height: 100dvh;
-    max-height: none;
     padding: 14px 12px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    border-radius: 0 20px 20px 0;
+    overflow: hidden;
+    border-radius: 0 18px 18px 0;
     transform: translate3d(-105%, 0, 0);
     visibility: hidden;
     pointer-events: none;
-    box-shadow: 14px 0 36px rgb(0 0 0 / 26%);
-    transition:
-      transform 180ms cubic-bezier(.2,.8,.2,1),
-      visibility 180ms ease;
+    box-shadow: 12px 0 30px rgb(0 0 0 / 22%);
+    transition: transform 180ms cubic-bezier(.2,.8,.2,1), visibility 180ms ease;
   }
 
   .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
-    width: min(310px, calc(100vw - 28px));
-    max-width: 310px;
+    width: min(304px, calc(100vw - 24px));
+    max-width: 304px;
     min-width: 0;
     transform: translate3d(0,0,0);
     visibility: visible;
@@ -2287,7 +2307,7 @@
 
   .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sidebar-brand {
     justify-content: flex-start;
-    gap: 12px;
+    padding-inline: 4px;
   }
 
   .admin-sidebar-backdrop {
@@ -2297,15 +2317,13 @@
     display: block;
     border: 0;
     padding: 0;
-    background: rgb(0 0 0 / 64%);
+    background: rgb(0 0 0 / 58%);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    transition:
-      opacity 180ms ease,
-      visibility 180ms ease;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity 180ms ease, visibility 180ms ease;
   }
 
   .admin-console-root.is-sidebar-expanded .admin-sidebar-backdrop {
@@ -2314,13 +2332,7 @@
     pointer-events: auto;
   }
 
-  .admin-console-main {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-    overflow-x: clip;
-  }
-
+  .admin-console-main,
   .admin-console-main > section {
     width: 100%;
     min-width: 0;
@@ -2333,27 +2345,6 @@
     margin-bottom: 18px;
     gap: 10px;
   }
-
-  .admin-head-brand {
-    min-width: 0;
-    gap: 10px;
-  }
-
-  .admin-breadcrumb {
-    min-width: 0;
-    max-width: min(62vw, 420px);
-  }
-
-  .admin-head-meta {
-    min-width: 0;
-    max-width: 34%;
-  }
-
-  .admin-role-chip {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 @media (max-width: 767px) {
@@ -2362,111 +2353,9 @@
     padding-bottom: 36px;
   }
 
-  .admin-head {
-    min-height: 54px;
-    padding-block: 6px 8px;
-  }
-
-  .admin-breadcrumb-root,
-  .admin-breadcrumb-separator {
-    display: none;
-  }
-
-  .admin-breadcrumb {
-    max-width: min(56vw, 250px);
-  }
-
-  .admin-breadcrumb-current {
-    font-size: 14px;
-  }
-
-  .admin-head-meta {
-    max-width: 28%;
-  }
-
-  .admin-role-chip {
-    min-height: 30px;
-    padding-inline: 9px;
-    font-size: 10px;
-  }
-
-  .admin-page-head {
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .admin-page-head h1 {
-    font-size: clamp(24px, 7vw, 30px);
-  }
-
-  .admin-page-head .admin-toolbar {
-    width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .admin-page-head .admin-toolbar .admin-select {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .admin-page-head .admin-toolbar .btn {
-    min-width: 44px;
-  }
-
-  .orders-ledger-card {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-    border-radius: 12px;
-  }
-
   .orders-ledger-wrap {
-    width: 100%;
+    margin-inline: 0;
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    touch-action: pan-x;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-  }
-
-  .orders-ledger-table {
-    width: max-content;
-    min-width: 1080px;
-    table-layout: fixed;
-  }
-
-  .orders-ledger-table th,
-  .orders-ledger-table td {
-    white-space: nowrap;
-  }
-
-  .admin-card,
-  .admin-panel,
-  .admin-toolbar,
-  .admin-page-head,
-  .admin-stats {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .field-grid {
-    grid-template-columns: minmax(0,1fr);
-  }
-
-  .admin-stats {
-    grid-template-columns: minmax(0,1fr);
-  }
-
-  .btn-row {
-    width: 100%;
-  }
-
-  .btn-row > * {
-    min-width: 0;
   }
 }
 
@@ -2475,45 +2364,20 @@
     padding-inline: 10px;
   }
 
-  .admin-console-root .admin-console-sidebar {
-    width: min(320px, calc(100vw - 18px));
-    max-width: 320px;
-    border-radius: 0 18px 18px 0;
-  }
-
+  .admin-console-root .admin-console-sidebar,
   .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
-    width: min(320px, calc(100vw - 18px));
-    max-width: 320px;
+    width: min(300px, calc(100vw - 18px));
+    max-width: 300px;
   }
 
-  .admin-head {
-    gap: 8px;
+  .orders-ledger-table {
+    min-width: 1180px !important;
   }
 
   .admin-menu-trigger {
     width: 40px;
     height: 40px;
     flex-basis: 40px;
-  }
-
-  .admin-breadcrumb {
-    max-width: 48vw;
-  }
-
-  .admin-role-chip {
-    max-width: 92px;
-  }
-
-  .admin-page-head .admin-toolbar {
-    grid-template-columns: minmax(0,1fr);
-  }
-
-  .admin-page-head .admin-toolbar .btn {
-    width: 100%;
-  }
-
-  .orders-ledger-table {
-    min-width: 1080px;
   }
 }
 
@@ -2526,10 +2390,8 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-console-root .admin-console-sidebar,
   .admin-console-root .admin-sidebar-backdrop,
-  .admin-console-root .admin-sb-btn,
-  .admin-console-root .admin-sb-btn svg {
+  .admin-console-root .admin-sb-btn {
     transition: none;
   }
 }
-
 }
