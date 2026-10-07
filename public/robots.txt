@@ -1,6 +1,16 @@
 User-agent: *
 Allow: /
 
+# Anthropic / Claude crawlers
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
 # Transactional/private areas should not be indexed.
 Disallow: /cart
 Disallow: /checkout
