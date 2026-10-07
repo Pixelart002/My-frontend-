@@ -16,7 +16,7 @@
                 <span className="admin-breadcrumb-separator" aria-hidden="true">/</span>
                 <span className="admin-breadcrumb-current">{active.label}</span>
               </nav>
-              <span className="admin-head-caption">Operations console</span>
+              <span className="admin-head-caption" aria-hidden="true">Admin console</span>
             </div>
           </div>
 
