@@ -1308,7 +1308,7 @@
    ============================================================ */
 
 .admin-console-root {
-  @apply relative mx-auto grid w-full min-w-0 max-w-[1480px] items-start gap-6 px-6 pb-14 pt-6;
+
   min-height: 100dvh;
   isolation: isolate;
   background: var(--bg);
@@ -1324,7 +1324,7 @@
 }
 
 .admin-console-sidebar {
-  @apply sticky top-6 flex min-w-0 max-w-full flex-col;
+
   width: 100%;
   height: calc(100dvh - 48px);
   min-height: 0;
@@ -1345,11 +1345,11 @@
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-nav-group-label,
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-account,
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sb-btn span {
-  @apply sr-only;
+
 }
 
 .admin-console-root:not(.is-sidebar-expanded) .admin-console-sidebar .admin-sb-btn {
-  @apply mx-auto grid min-h-11 w-11 place-items-center justify-center p-0;
+
 }
 
 .admin-console-root.is-sidebar-expanded .admin-console-sidebar {
@@ -1357,25 +1357,25 @@
 }
 
 .admin-console-main {
-  @apply block w-full min-w-0 max-w-full;
+
   min-height: 0;
   overflow-x: clip;
   overflow-y: visible;
 }
 
 .admin-console-main > section {
-  @apply w-full min-w-0 max-w-full;
+
   min-height: 0;
   overflow: visible;
 }
 
 .admin-sidebar-inner,
 .admin-navigation {
-  @apply flex min-h-0 min-w-0 flex-1 flex-col;
+
 }
 
 .admin-navigation > div:first-child {
-  @apply min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto;
+
   scrollbar-width: none;
 }
 
@@ -1384,33 +1384,33 @@
 }
 
 .admin-sidebar-brand {
-  @apply flex min-w-0 items-center gap-3 border-b border-line px-1 pb-3;
+
   min-height: 40px;
 }
 
 .admin-sidebar-brand-copy {
-  @apply flex min-w-0 flex-1 flex-col gap-0.5;
+
 }
 
 .admin-sidebar-brand-copy strong {
-  @apply truncate text-sm font-bold leading-tight text-text;
+
 }
 
 .admin-sidebar-brand-copy span {
-  @apply truncate text-[10px] leading-tight text-dim;
+
 }
 
 .admin-rail-mark {
-  @apply grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-text font-display text-sm font-extrabold leading-none text-bg;
+
 }
 
 .admin-sb-btn {
-  @apply flex min-h-10 w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-lg border border-transparent bg-transparent px-2.5 py-2 text-left text-sm leading-tight text-muted transition-colors duration-150;
+
   -webkit-tap-highlight-color: transparent;
 }
 
 .admin-sb-btn:hover {
-  @apply border-line bg-surface-2 text-text;
+
 }
 
 .admin-sb-btn:active {
@@ -1418,164 +1418,164 @@
 }
 
 .admin-sb-btn.is-active {
-  @apply bg-gold-dim text-gold-soft;
+
   box-shadow: inset 2px 0 0 var(--gold);
 }
 
 .admin-sb-btn svg {
-  @apply block h-[18px] w-[18px] shrink-0;
+
 }
 
 .admin-sb-btn span {
-  @apply min-w-0 truncate;
+
 }
 
 .admin-menu-trigger {
-  @apply inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-line bg-surface p-0 text-text transition-colors duration-150;
+
   -webkit-tap-highlight-color: transparent;
 }
 
 .admin-menu-trigger:hover {
-  @apply border-gold text-gold-soft;
+
 }
 
 .admin-head {
-  @apply sticky top-0 z-[80] mb-6 flex min-h-[60px] w-full min-w-0 items-center justify-between gap-4 border-b border-line py-2;
+
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
 .admin-head-brand {
-  @apply flex min-w-0 flex-1 items-center gap-3;
+
 }
 
 .admin-breadcrumb {
-  @apply flex min-w-0 max-w-full items-center gap-2 text-[13px];
+
 }
 
 .admin-breadcrumb-root,
 .admin-breadcrumb-separator {
-  @apply shrink-0 text-dim;
+
 }
 
 .admin-breadcrumb-current {
-  @apply min-w-0 truncate font-bold text-text;
+
 }
 
 .admin-head-meta {
-  @apply flex min-w-0 shrink-0 items-center gap-2;
+
 }
 
 .admin-role-chip {
-  @apply inline-flex min-h-8 max-w-[180px] items-center truncate rounded-full border border-line bg-surface px-2.5 py-1 text-[11px] font-bold capitalize tracking-wide text-text;
+
 }
 
 .admin-page-head {
-  @apply flex w-full min-w-0 flex-col gap-3;
+
 }
 
 .admin-card,
 .admin-panel {
-  @apply min-w-0 max-w-full;
+
 }
 
 .admin-card {
-  @apply mb-[18px] overflow-hidden rounded-xl border border-line bg-surface p-5;
+
 }
 
 .admin-toolbar {
-  @apply mb-[18px] flex min-w-0 flex-wrap items-center justify-between gap-4 border-b border-line pb-4;
+
 }
 
 .admin-toolbar > * {
-  @apply min-w-0 max-w-full;
+
 }
 
 .btn-row {
-  @apply flex min-w-0 flex-wrap items-center gap-2;
+
 }
 
 .btn-row > * {
-  @apply min-w-0 max-w-full;
+
 }
 
 .btn-sm {
-  @apply min-h-9 px-3 py-2 text-[13px];
+
 }
 
 .btn-quiet {
-  @apply border border-line bg-transparent text-muted;
+
 }
 
 .btn-quiet:hover {
-  @apply border-gold text-text;
+
 }
 
 .icon-btn {
-  @apply inline-flex h-[34px] w-[34px] min-w-[34px] cursor-pointer items-center justify-center rounded-lg border border-line bg-transparent p-0 text-muted transition-colors duration-150;
+
 }
 
 .icon-btn:hover {
-  @apply border-gold text-gold-soft;
+
 }
 
 .field-grid {
-  @apply grid min-w-0 gap-4;
+
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field,
 .form-field,
 .editor-section {
-  @apply min-w-0 max-w-full;
+
 }
 
 .admin-stats {
-  @apply mb-7 grid min-w-0 gap-3.5;
+
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .admin-stat {
-  @apply min-w-0 rounded-xl border border-line bg-surface p-[18px];
+
 }
 
 .admin-stat .stat-label {
-  @apply break-words text-[11px] font-bold uppercase tracking-[.12em] text-dim;
+
 }
 
 .admin-stat .stat-value {
-  @apply mt-2 break-words font-display text-[clamp(26px,3vw,34px)] leading-none text-gold-soft;
+
 }
 
 .admin-stat .stat-hint {
-  @apply mt-2 break-words text-xs text-dim;
+
 }
 
 .admin-section-label {
-  @apply mb-3 mt-7 text-[11px] font-bold uppercase tracking-[.18em] text-dim;
+
 }
 
 .admin-table-wrap,
 .admin-table-scroll,
 .orders-ledger-wrap,
 .dashboard-table-scroll {
-  @apply w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden rounded-xl border border-line bg-surface;
+
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-gutter: stable;
 }
 
 .admin-table {
-  @apply w-full border-collapse text-[13px];
+
 }
 
 .admin-table th {
-  @apply whitespace-nowrap border-b border-line px-3.5 py-3 text-left text-[10px] font-bold uppercase tracking-[.12em] text-dim;
+
 }
 
 .admin-table td {
-  @apply border-b border-line-soft px-3.5 py-3 align-middle text-muted;
+
 }
 
 .admin-table tr:last-child td {
@@ -1583,39 +1583,39 @@
 }
 
 .admin-table .td-strong {
-  @apply font-semibold text-text;
+
 }
 
 .admin-table .td-gold {
-  @apply font-semibold text-gold-soft;
+
 }
 
 .admin-table .td-dim {
-  @apply text-dim;
+
 }
 
 .admin-table-wrap .admin-empty {
-  @apply p-10 text-center text-dim;
+
 }
 
 .admin-search {
-  @apply flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-line bg-bg px-3 text-dim;
+
 }
 
 .admin-search input {
-  @apply min-w-0 flex-1 border-0 bg-transparent py-2.5 text-text outline-none;
+
 }
 
 .admin-select {
-  @apply min-w-0 max-w-full rounded-lg border border-line bg-bg px-3 py-2.5 text-muted;
+
 }
 
 .admin-page-note {
-  @apply mt-3 break-words px-1 text-xs text-dim;
+
 }
 
 .admin-pill {
-  @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize;
+
 }
 
 .pill-muted { @apply bg-surface-2 text-muted; }
@@ -1624,27 +1624,27 @@
 .pill-danger { @apply bg-danger-dim text-danger; }
 
 .segmented-control {
-  @apply mb-2 flex min-w-0 gap-1 rounded-lg border border-line bg-surface-2 p-1;
+
 }
 
 .segmented-control button {
-  @apply min-h-9 min-w-0 flex-1 cursor-pointer rounded-md border-0 bg-transparent text-muted;
+
 }
 
 .segmented-control button.is-active {
-  @apply bg-surface text-text;
+
 }
 
 .checkbox-field {
-  @apply flex cursor-pointer flex-row items-center gap-2;
+
 }
 
 .checkbox-field input {
-  @apply w-auto;
+
 }
 
 .admin-inline {
-  @apply max-w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-text;
+
   width: 80px;
 }
 
@@ -1653,24 +1653,24 @@
 }
 
 .admin-modal-overlay {
-  @apply fixed inset-0 z-[120] flex min-w-0 items-center justify-center bg-black/60 p-5;
+
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
 .admin-modal {
-  @apply w-[min(560px,94vw)] max-w-full min-w-0 overflow-x-hidden overflow-y-auto rounded-2xl border border-line bg-surface p-6;
+
   max-height: calc(100dvh - 40px);
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
 .admin-order-items {
-  @apply mb-4 mt-1 overflow-hidden rounded-lg border border-line;
+
 }
 
 .admin-order-items .oi-row {
-  @apply flex min-w-0 justify-between gap-3 border-b border-line-soft px-3 py-2 text-[13px];
+
 }
 
 .admin-order-items .oi-row:last-child {
@@ -1678,91 +1678,91 @@
 }
 
 .admin-gate {
-  @apply mx-auto max-w-[520px] text-center;
+
 }
 
 .admin-mfa-gate {
-  @apply mx-auto w-full max-w-[560px] rounded-2xl border border-line bg-surface p-[clamp(24px,5vw,40px)] text-center shadow-luviio-card;
+
   margin-top: clamp(28px, 8vh, 80px);
   margin-bottom: clamp(28px, 8vh, 80px);
 }
 
 .admin-mfa-gate h1 {
-  @apply mt-2 break-words text-[clamp(28px,6vw,40px)];
+
 }
 
 .admin-mfa-setup {
-  @apply my-[22px] grid justify-items-center gap-3.5;
+
 }
 
 .admin-mfa-qr {
-  @apply w-[min(240px,72vw)] rounded-xl bg-white p-2.5;
+
   aspect-ratio: 1;
 }
 
 .admin-mfa-secret {
-  @apply block max-w-full overflow-x-auto rounded-lg border border-line px-3 py-2.5 text-text;
+
 }
 
 .admin-mfa-form {
-  @apply mt-[22px] grid gap-2.5 text-left;
+
 }
 
 .admin-mfa-form input {
-  @apply w-full py-3 text-center text-[22px] tracking-[.28em];
+
 }
 
 .admin-mfa-note {
-  @apply mt-5 break-words text-xs text-dim;
+
 }
 
 .admin-panel-fallback {
-  @apply flex min-h-48 items-center justify-center gap-3 rounded-2xl border border-line bg-surface p-6 text-sm text-muted;
+
 }
 
 .coupon-form {
-  @apply mb-[18px] grid gap-4 rounded-xl border border-line bg-surface p-[18px];
+
 }
 
 .coupon-advanced {
-  @apply overflow-hidden rounded-xl border border-line bg-surface-2;
+
 }
 
 .coupon-advanced-toggle {
-  @apply flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-3.5 py-3 text-left text-[13px] font-extrabold text-text;
+
 }
 
 .coupon-advanced-fields {
-  @apply grid gap-3 border-t border-line px-3.5 pb-3.5;
+
 }
 
 .coupon-option {
-  @apply flex min-w-0 items-center justify-between gap-4 border-b border-line py-3;
+
 }
 
 .coupon-option-copy {
-  @apply grid min-w-0 gap-0.5;
+
 }
 
 .coupon-radio-group {
-  @apply inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-bg p-0.5;
+
 }
 
 .coupon-radio {
-  @apply inline-flex min-h-8 cursor-pointer flex-row items-center gap-1.5 rounded-full px-2.5 text-[11px] font-bold text-muted;
+
 }
 
 .coupon-radio:has(input:checked) {
-  @apply bg-surface text-text;
+
 }
 
 @media (max-width: 1100px) {
   .admin-console-root {
-    @apply block w-full max-w-none px-4 pb-12 pt-4;
+
   }
 
   .admin-console-sidebar {
-    @apply fixed left-0 top-0 z-[220] flex w-[min(292px,84vw)] max-w-[292px] border-0;
+
     height: 100dvh;
     min-height: 100dvh;
     max-height: 100dvh;
@@ -1781,29 +1781,29 @@
   }
 
   .admin-console-root .admin-menu-trigger {
-    @apply inline-flex;
+
   }
 
   .admin-console-main {
-    @apply w-full min-w-0 max-w-full;
+
   }
 
   .admin-console-main .admin-head {
-    @apply sticky top-0 z-[80];
+
   }
 }
 
 @media (max-width: 767px) {
   .admin-console-root {
-    @apply px-3 pb-10 pt-2.5;
+
   }
 
   .admin-head {
-    @apply mb-[18px] gap-2.5;
+
   }
 
   .admin-head-brand {
-    @apply flex-1;
+
   }
 
   .admin-head-meta {
@@ -1811,19 +1811,19 @@
   }
 
   .admin-role-chip {
-    @apply max-w-full truncate;
+
   }
 
   .admin-toolbar {
-    @apply items-stretch gap-3;
+
   }
 
   .admin-toolbar .btn-row {
-    @apply grid w-full grid-cols-2;
+
   }
 
   .admin-toolbar .btn-row > * {
-    @apply w-full min-w-0;
+
   }
 
   .field-grid {
@@ -1831,7 +1831,7 @@
   }
 
   .admin-card {
-    @apply p-4;
+
   }
 
   .admin-table {
@@ -1841,11 +1841,11 @@
 
 @media (max-width: 480px) {
   .admin-console-root {
-    @apply px-2.5;
+
   }
 
   .admin-menu-trigger {
-    @apply h-10 w-10;
+
   }
 
   .admin-head-meta {
@@ -1853,16 +1853,16 @@
   }
 
   .admin-toolbar .btn-row {
-    @apply grid-cols-1;
+
   }
 
   .admin-card {
-    @apply p-3.5;
+
   }
 
   .admin-table th,
   .admin-table td {
-    @apply px-2.5;
+
   }
 
   .admin-stats {
@@ -1870,11 +1870,11 @@
   }
 
   .segmented-control {
-    @apply flex-col;
+
   }
 
   .segmented-control button {
-    @apply w-full;
+
   }
 
   .admin-inline-sm {
@@ -1884,7 +1884,7 @@
 
 @media (min-width: 1440px) {
   .admin-console-root {
-    @apply px-7;
+
   }
 }
 
@@ -1936,7 +1936,7 @@
 }
 
 .admin-sidebar-brand-main {
-  @apply flex min-w-0 flex-1 items-center gap-3;
+
 }
 
 .admin-sidebar-brand-copy {
@@ -1944,11 +1944,11 @@
 }
 
 .admin-sidebar-brand-copy strong {
-  @apply text-[15px] font-extrabold tracking-[-0.01em];
+
 }
 
 .admin-sidebar-brand-copy span {
-  @apply text-[10px] font-medium uppercase tracking-[0.12em] text-dim;
+
 }
 
 .admin-rail-mark {
@@ -1959,21 +1959,21 @@
 }
 
 .admin-sidebar-close {
-  @apply hidden h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-muted transition-colors duration-150;
+
 }
 
 .admin-sidebar-close:hover,
 .admin-sidebar-close:focus-visible {
-  @apply border-line bg-surface-2 text-text;
+
 }
 
 .admin-navigation {
-  @apply flex min-h-0 min-w-0 flex-1 flex-col;
+
   padding-top: 10px;
 }
 
 .admin-navigation > div:first-child {
-  @apply min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto;
+
   padding: 0 2px 10px;
   scrollbar-width: thin;
 }
@@ -1989,7 +1989,7 @@
 }
 
 .admin-nav-group-label {
-  @apply mb-1.5 px-2 text-[9px] font-extrabold uppercase tracking-[0.18em] text-dim;
+
 }
 
 .admin-nav-group > .grid {
@@ -2051,43 +2051,43 @@
 }
 
 .admin-account {
-  @apply relative mt-2 min-w-0 border-t border-line px-1 pt-3;
+
 }
 
 .admin-account-identity {
-  @apply flex min-w-0 items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-2.5 py-2;
+
 }
 
 .admin-account-avatar {
-  @apply grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gold-dim text-xs font-extrabold text-gold-soft;
+
 }
 
 .admin-account-copy {
-  @apply min-w-0 flex-1;
+
 }
 
 .admin-account-name {
-  @apply truncate text-xs font-bold text-text;
+
 }
 
 .admin-account-email {
-  @apply mt-0.5 truncate text-[10px] text-dim;
+
 }
 
 .admin-account-status {
-  @apply h-2 w-2 shrink-0 rounded-full bg-success;
+
 }
 
 .admin-account-role {
-  @apply mt-2 px-1 text-[9px] font-extrabold uppercase tracking-[0.14em] text-dim;
+
 }
 
 .admin-signout {
-  @apply mt-2 flex min-h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-transparent bg-transparent px-2 text-xs font-semibold text-muted transition-colors duration-150;
+
 }
 
 .admin-signout:hover {
-  @apply border-danger/20 bg-danger-dim text-danger;
+
 }
 
 .admin-signout:focus-visible {
