@@ -1618,10 +1618,10 @@
 
 }
 
-.pill-muted { @apply bg-surface-2 text-muted; }
-.pill-gold { @apply bg-gold-dim text-gold-soft; }
-.pill-success { @apply bg-success-dim text-success; }
-.pill-danger { @apply bg-danger-dim text-danger; }
+.pill-muted { background: var(--surface-2); color: var(--muted); }
+.pill-gold { background: var(--gold-dim); color: var(--gold-soft); }
+.pill-success { background: var(--success-dim); color: var(--success); }
+.pill-danger { background: var(--danger-dim); color: var(--danger); }
 
 .segmented-control {
 
