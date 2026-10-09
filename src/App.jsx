@@ -16,8 +16,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 import StoreLayout from './layouts/StoreLayout';
 
 import HomePage from './pages/HomePage';
-import ShopPage from './pages/ShopPage';
-import ProductDetailPage from './pages/ProductDetailPage';
+
+// Keep the first storefront render small; load catalogue-heavy routes on demand.
+const ShopPage = lazy(() => import('./pages/ShopPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 
