@@ -181,19 +181,19 @@ export default function ProductCard({ product }) {
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
+        className="relative aspect-[4/3] overflow-hidden bg-surface-2 p-3 sm:p-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <Link
           to={`/product/${slug}`}
-          className="absolute inset-0 z-[1] block overflow-hidden"
+          className="absolute inset-3 z-[1] block overflow-hidden rounded-xl border border-line/70 bg-[#111111] sm:inset-4"
           aria-label={`View ${name}`}
           onKeyDown={handleMediaKeyDown}
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:p-5"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -208,7 +208,7 @@ export default function ProductCard({ product }) {
           )}
 
           <span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+            className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/[0.035]"
             aria-hidden="true"
           />
         </Link>
