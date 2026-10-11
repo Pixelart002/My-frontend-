@@ -40,6 +40,8 @@ export default function StoreLayout() {
       {shouldShowFooter(pathname) && (
         <Footer />
       )}
+
+      <CookieConsent />
     </div>
   );
 }
