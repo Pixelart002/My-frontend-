@@ -41,6 +41,8 @@ export default function RegisterPage() {
     useState('');
   const [confirm, setConfirm] =
     useState('');
+  const [acceptedTerms, setAcceptedTerms] =
+    useState(false);
   const [showPw, setShowPw] =
     useState(false);
   const [showConfirm, setShowConfirm] =
@@ -148,6 +150,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!acceptedTerms) {
+      setError('Please agree to the Terms & Conditions and Privacy Policy to create an account.');
+      return;
+    }
+
     if (!passwordsMatch) {
       setError(
         'Passwords do not match.',
@@ -162,6 +169,7 @@ export default function RegisterPage() {
         normalizedEmail,
         password,
         normalizedName,
+        acceptedTerms,
       );
 
       toast.success(
@@ -462,6 +470,28 @@ export default function RegisterPage() {
             )}
           </div>
 
+          <div className="mb-5 rounded-xl border border-line bg-bg/60 p-3.5">
+            <label htmlFor="register-terms" className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-muted">
+              <input
+                id="register-terms"
+                name="terms_accepted"
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(event) => {
+                  setAcceptedTerms(event.target.checked);
+                  clearError();
+                }}
+                disabled={submitting}
+                required
+                className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                aria-describedby="register-terms-description"
+              />
+              <span id="register-terms-description">
+                I agree to Luviio’s <Link className="font-semibold text-gold-soft underline underline-offset-2 hover:text-gold" to="/terms" target="_blank" rel="noreferrer">Terms &amp; Conditions</Link> and acknowledge the <Link className="font-semibold text-gold-soft underline underline-offset-2 hover:text-gold" to="/privacy" target="_blank" rel="noreferrer">Privacy Policy</Link>.
+              </span>
+            </label>
+          </div>
+
           <button
             className="btn btn-block mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-gold px-4 text-xs font-bold uppercase tracking-[.06em] text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
             type="submit"
@@ -470,7 +500,8 @@ export default function RegisterPage() {
               !fullName.trim() ||
               !email.trim() ||
               !passwordValid ||
-              !passwordsMatch
+              !passwordsMatch ||
+              !acceptedTerms
             }
             aria-busy={submitting}
           >
