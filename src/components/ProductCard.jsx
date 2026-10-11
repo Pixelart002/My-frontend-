@@ -181,19 +181,19 @@ export default function ProductCard({ product }) {
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
+        className="relative aspect-[4/3] shrink-0 overflow-hidden bg-[#101114] p-3 sm:p-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <Link
           to={`/product/${slug}`}
-          className="absolute inset-0 z-[1] block overflow-hidden"
+          className="absolute inset-3 z-[1] block overflow-hidden rounded-xl border border-line/80 bg-[#0b0c0e] sm:inset-4"
           aria-label={`View ${name}`}
           onKeyDown={handleMediaKeyDown}
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:p-5"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -208,7 +208,7 @@ export default function ProductCard({ product }) {
           )}
 
           <span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+            className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/[0.035]"
             aria-hidden="true"
           />
         </Link>
@@ -269,9 +269,9 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <div className="min-w-0">
-          <h3 className="m-0 h-[2.6rem] max-h-[2.6rem] overflow-hidden text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text break-words sm:text-[14px]">
+          <h3 className="m-0 min-h-[2.6rem] text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-words sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -281,7 +281,7 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-2 flex h-[3.25rem] min-h-[3.25rem] min-w-0 shrink-0 items-end justify-between gap-3 overflow-hidden">
+        <div className="mt-3 flex min-h-[3.5rem] min-w-0 shrink-0 items-end justify-between gap-2">
           <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
               <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
@@ -296,7 +296,7 @@ export default function ProductCard({ product }) {
             </div>
 
             <p
-              className={`m-0 mt-0.5 min-h-4 text-[9px] leading-4 text-muted${savings > 0 ? '' : ' opacity-0'}`}
+              className={`m-0 mt-1 text-[10px] leading-4 text-muted${savings > 0 ? '' : ' invisible'}`}
               aria-hidden={savings <= 0}
             >
               You save {formatMoney(savings)}
@@ -304,7 +304,7 @@ export default function ProductCard({ product }) {
           </div>
 
           {discount > 0 && (
-            <span className="shrink-0 rounded-full border border-success/20 bg-success-dim px-2 py-1 text-[8px] font-bold uppercase tracking-[0.06em] text-success">
+            <span className="max-w-[42%] shrink-0 rounded-full border border-success/20 bg-success-dim px-2 py-1 text-center text-[8px] font-bold uppercase tracking-[0.04em] leading-tight text-success sm:text-[9px]">
               {discount}% off
             </span>
           )}
@@ -312,7 +312,7 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className={`mt-auto flex h-11 min-h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`mt-4 flex h-12 min-h-12 w-full min-w-0 shrink-0 items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-xs font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm ${
             added
               ? 'border-[rgba(111,191,138,.45)] bg-success-dim text-success'
               : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
@@ -339,7 +339,7 @@ export default function ProductCard({ product }) {
           </span>
 
           <span
-            className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border ${
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
               added
                 ? 'border-[rgba(111,191,138,.35)] bg-[rgba(111,191,138,.10)] text-success'
                 : 'border-line bg-black/15 text-gold'
