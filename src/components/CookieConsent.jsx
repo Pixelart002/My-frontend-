@@ -5,7 +5,7 @@ import {
   RiCookieLine,
   RiSettings3Line,
   RiShieldCheckLine,
-} from 'react-icons/ri';
+} from '@remixicon/react';
 
 const STORAGE_KEY = 'luviio-cookie-consent-v1';
 
