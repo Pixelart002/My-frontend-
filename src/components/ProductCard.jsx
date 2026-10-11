@@ -181,19 +181,19 @@ export default function ProductCard({ product }) {
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
+        className="relative aspect-[4/3] shrink-0 overflow-hidden bg-surface-2 p-3 sm:aspect-[5/4] sm:p-4"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <Link
           to={`/product/${slug}`}
-          className="absolute inset-0 z-[1] block overflow-hidden"
+          className="absolute inset-3 z-[1] block overflow-hidden rounded-xl border border-line/70 bg-[#0b0c0e] sm:inset-4"
           aria-label={`View ${name}`}
           onKeyDown={handleMediaKeyDown}
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:p-5"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -208,16 +208,12 @@ export default function ProductCard({ product }) {
           )}
 
           <span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+            className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/[0.035]"
             aria-hidden="true"
           />
         </Link>
 
-        {discount > 0 && (
-          <span className="absolute left-3 top-3 z-10 inline-flex min-h-7 items-center rounded-full border border-gold/30 bg-black/75 px-2.5 text-[9px] font-bold uppercase tracking-[0.08em] text-gold-soft shadow-lg backdrop-blur-md">
-            Save {discount}%
-          </span>
-        )}
+
 
         {imageCount > 1 && (
           <>
@@ -269,7 +265,7 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <div className="min-w-0">
           <h3 className="m-0 min-h-[2.6rem] text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-words sm:text-[14px]">
             <Link
