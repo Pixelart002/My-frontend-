@@ -81,6 +81,12 @@ export const userService = {
     );
   },
   
+  deleteMe: ({ password, confirmation }) =>
+    request('DELETE', '/users/me', {
+      password,
+      confirmation,
+    }),
+
   getAddresses: () =>
     request(
       'GET',
