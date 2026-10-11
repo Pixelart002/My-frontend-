@@ -17,6 +17,7 @@ import './styles/loading.css';
 import './styles/settings.css';
 import './styles/location-autocomplete.css';
 import './styles/site-ui.css';
+import './styles/layout-stability.css';
 
 const rootElement = document.getElementById('root');
 
