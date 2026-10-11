@@ -62,6 +62,13 @@ describe('RegisterPage', () => {
     ).toBeInTheDocument();
   });
   
+  it('requires explicit agreement to the Terms & Conditions and Privacy Policy', () => {
+    renderRegisterPage();
+    expect(screen.getByRole('checkbox', { name: /terms & conditions/i })).not.toBeChecked();
+    expect(screen.getByRole('link', { name: /terms & conditions/i })).toHaveAttribute('href', '/terms');
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute('href', '/privacy');
+  });
+
   it('renders password guidance', () => {
     renderRegisterPage();
     
@@ -126,6 +133,8 @@ describe('RegisterPage', () => {
       target: { value: 'StrongPass1' },
     });
     
+    fireEvent.click(screen.getByRole('checkbox', { name: /terms & conditions/i }));
+
     const submitButton =
       screen.getByRole('button', {
         name: /create account/i,
@@ -139,6 +148,7 @@ describe('RegisterPage', () => {
       'test@example.com',
       'StrongPass1',
       'Test User',
+      true,
     );
   });
 });
