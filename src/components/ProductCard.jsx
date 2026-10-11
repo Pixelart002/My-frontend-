@@ -7,7 +7,7 @@ import {
 } from '@remixicon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { formatMoney } from '../utils/format';
+import ProductPrice from './ProductPrice';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -281,34 +281,7 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-3 grid min-w-0 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2">
-          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="shrink-0 text-[15px] font-bold tabular-nums tracking-[-0.02em] text-gold-soft sm:text-base">
-              {formatMoney(price)}
-            </span>
-
-            {comparePrice > price && price > 0 && (
-              <span className="shrink-0 text-[11px] font-medium tabular-nums text-dim line-through sm:text-xs">
-                {formatMoney(comparePrice)}
-              </span>
-            )}
-          </div>
-
-          {discount > 0 ? (
-            <span className="inline-flex min-h-7 max-w-full items-center justify-center whitespace-nowrap rounded-full border border-success/25 bg-success-dim px-2.5 py-1 text-[9px] font-bold uppercase leading-none tracking-[0.035em] text-success sm:text-[10px]">
-              {discount}% off
-            </span>
-          ) : (
-            <span aria-hidden="true" />
-          )}
-
-          <p
-            className={`col-span-2 m-0 min-h-4 text-[11px] leading-4 text-muted${savings > 0 ? '' : ' invisible'}`}
-            aria-hidden={savings <= 0}
-          >
-            You save {formatMoney(savings)}
-          </p>
-        </div>
+        <ProductPrice price={price} comparePrice={comparePrice} />
 
         <button
           type="button"
