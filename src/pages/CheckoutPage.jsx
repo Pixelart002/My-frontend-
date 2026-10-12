@@ -918,11 +918,36 @@ export default function CheckoutPage() {
       : 'Continue to secure payment';
 
   const cartItems = items.map((item, index) => {
-    const product = item?.product || item?.products || {};
-    const quantity = Number(item?.quantity) || 0;
-    const unitPrice = item?.unit_price ?? item?.price ?? product?.price;
+    const product =
+      item?.product ||
+      item?.products ||
+      item?.product_data ||
+      item?.product_details ||
+      {};
+    const quantity = Number(item?.quantity ?? item?.qty) || 0;
+    const rawImage =
+      item?.image_url ||
+      item?.product_image_url ||
+      item?.image ||
+      product?.image_url ||
+      product?.image ||
+      (Array.isArray(product?.images) ? product.images[0] : '');
+    const imageUrl =
+      typeof rawImage === 'string'
+        ? rawImage
+        : rawImage?.url || rawImage?.image_url || rawImage?.src || '';
+    const unitPrice =
+      item?.unit_price ??
+      item?.unitPrice ??
+      item?.price ??
+      item?.sale_price ??
+      product?.unit_price ??
+      product?.price ??
+      product?.sale_price ??
+      product?.selling_price;
     const lineTotal =
       item?.line_total ??
+      item?.lineTotal ??
       item?.subtotal ??
       item?.total_price ??
       (Number.isFinite(Number(unitPrice)) ? Number(unitPrice) * quantity : null);
@@ -931,14 +956,12 @@ export default function CheckoutPage() {
       id: String(item?.id || item?.product_id || product?.id || index),
       name:
         item?.product_name ||
-        product?.name ||
         item?.name ||
+        product?.name ||
+        product?.title ||
+        product?.display_name ||
         'Product',
-      image_url:
-        item?.image_url ||
-        item?.product_image_url ||
-        product?.image_url ||
-        (Array.isArray(product?.images) ? product.images[0] : ''),
+      image_url: imageUrl,
       unit_price: unitPrice,
       line_total: lineTotal,
       quantity,
