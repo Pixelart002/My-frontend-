@@ -924,7 +924,7 @@ export default function CheckoutPage() {
   }));
 
   return (
-    <div className="page container py-7 sm:py-10">
+    <div className="page container py-5 sm:py-8 lg:py-10">
       <div className="mx-auto max-w-6xl">
         <button
           type="button"
@@ -944,10 +944,31 @@ export default function CheckoutPage() {
           <h1 className="mt-3 text-3xl font-semibold tracking-[-.03em] text-text sm:text-4xl">
             Complete your order.
           </h1>
-          <p className="mt-3 text-sm leading-6 text-muted">
+          <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
             Delivery first, server-verified order next, then secure payment.
           </p>
         </header>
+
+        <nav aria-label="Checkout progress" className="mt-6 rounded-2xl border border-line bg-surface p-3 sm:p-4">
+          <ol className="grid grid-cols-3 gap-2 sm:gap-3">
+            {[
+              { number: '01', title: 'Delivery', detail: 'Address' },
+              { number: '02', title: 'Review', detail: 'Cart & coupon' },
+              { number: '03', title: 'Payment', detail: 'Secure checkout' },
+            ].map((step, index) => (
+              <li key={step.number} className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold/35 bg-gold-dim text-[10px] font-bold text-gold-soft sm:h-9 sm:w-9">
+                  {step.number}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-xs font-semibold text-text sm:text-sm">{step.title}</span>
+                  <span className="mt-0.5 hidden truncate text-[11px] text-muted sm:block">{step.detail}</span>
+                </span>
+                {index < 2 && <span aria-hidden="true" className="ml-auto hidden h-px min-w-2 flex-1 bg-line sm:block" />}
+              </li>
+            ))}
+          </ol>
+        </nav>
 
         {pageError && (
           <div
@@ -958,9 +979,9 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <div className="mt-7 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <main className="min-w-0 space-y-5">
-            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+        <div className="mt-5 grid min-w-0 items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
+          <main className="min-w-0 space-y-4 sm:space-y-5">
+            <div className="rounded-2xl border border-line bg-surface p-4 shadow-luviio-card sm:rounded-3xl sm:p-6">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
                   <RiMapPinLine size={17} aria-hidden="true" />
@@ -984,7 +1005,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   {addresses.length > 0 && (
-                    <div className="mt-5 grid gap-3">
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       {addresses.map((address) => (
                         <AddressCard
                           key={String(address.id)}
@@ -1190,7 +1211,7 @@ export default function CheckoutPage() {
             </div>
           </main>
 
-          <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+          <aside className="order-first min-w-0 lg:order-last lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -1206,7 +1227,7 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <div className="mt-5 space-y-3">
+              <div className="mt-4 space-y-3">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
@@ -1224,7 +1245,7 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <dl className="mt-5 space-y-3 border-t border-line pt-5 text-sm">
+              <dl className="mt-4 space-y-3 border-t border-line pt-4 text-sm">
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-muted">Subtotal</dt>
                   <dd className="font-semibold text-text">
