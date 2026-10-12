@@ -917,11 +917,33 @@ export default function CheckoutPage() {
       ? 'Place COD order'
       : 'Continue to secure payment';
 
-  const cartItems = items.map((item, index) => ({
-    id: String(item?.id || item?.product_id || index),
-    name: item?.product_name || item?.name || 'Product',
-    quantity: Number(item?.quantity) || 0,
-  }));
+  const cartItems = items.map((item, index) => {
+    const product = item?.product || item?.products || {};
+    const quantity = Number(item?.quantity) || 0;
+    const unitPrice = item?.unit_price ?? item?.price ?? product?.price;
+    const lineTotal =
+      item?.line_total ??
+      item?.subtotal ??
+      item?.total_price ??
+      (Number.isFinite(Number(unitPrice)) ? Number(unitPrice) * quantity : null);
+
+    return {
+      id: String(item?.id || item?.product_id || product?.id || index),
+      name:
+        item?.product_name ||
+        product?.name ||
+        item?.name ||
+        'Product',
+      image_url:
+        item?.image_url ||
+        item?.product_image_url ||
+        product?.image_url ||
+        (Array.isArray(product?.images) ? product.images[0] : ''),
+      unit_price: unitPrice,
+      line_total: lineTotal,
+      quantity,
+    };
+  });
 
   return (
     <div className="page container py-5 sm:py-8 lg:py-10">
