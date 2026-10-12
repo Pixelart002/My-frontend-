@@ -181,7 +181,7 @@ export default function ProductCard({ product }) {
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
+        className="relative aspect-[4/3] shrink-0 overflow-hidden rounded-t-[18px] bg-surface-2"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -193,7 +193,7 @@ export default function ProductCard({ product }) {
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-contain p-2 transition-transform duration-300 ease-out group-hover:scale-[1.02] group-focus-within:scale-[1.01] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -269,9 +269,9 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="flex min-h-0 flex-1 flex-col p-3 sm:p-4">
         <div className="min-w-0">
-          <h3 className="m-0 h-[2.6rem] max-h-[2.6rem] overflow-hidden text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text break-words sm:text-[14px]">
+          <h3 className="m-0 line-clamp-2 min-h-[2.6rem] text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text [overflow-wrap:anywhere] sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -281,7 +281,7 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-2 flex h-[3.25rem] min-h-[3.25rem] min-w-0 shrink-0 items-end justify-between gap-3 overflow-hidden">
+        <div className="mt-3 grid min-h-[3.75rem] shrink-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
           <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
               <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
