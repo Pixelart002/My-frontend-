@@ -1227,20 +1227,37 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 flex flex-col gap-3" aria-label="Items in your bag">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-start justify-between gap-4 text-sm"
+                    className="flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-bg/70 p-2.5"
                   >
-                    <div className="min-w-0">
-                      <p className="break-words font-medium text-text">
-                        {item.name}
+                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-2">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt=""
+                          className="size-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-sm font-semibold text-dim" aria-hidden="true">
+                          {(item.name || 'P').slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-sm font-medium leading-5 text-text">
+                        {item.name || 'Product'}
                       </p>
                       <p className="mt-0.5 text-xs text-dim">
-                        Qty {item.quantity}
+                        {formatMoney(item.unit_price)} each · Qty {item.quantity}
                       </p>
                     </div>
+                    <strong className="shrink-0 text-sm font-semibold tabular-nums text-text">
+                      {formatMoney(item.line_total)}
+                    </strong>
                   </div>
                 ))}
               </div>
