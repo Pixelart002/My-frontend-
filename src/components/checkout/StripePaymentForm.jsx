@@ -630,6 +630,27 @@ export default function StripePaymentForm({
             paymentIntent.id,
           );
 
+        // Never show a successful checkout from a transport-level 2xx alone.
+        // The backend must explicitly confirm the payment/order state; this
+        // prevents a stale `requires_payment_method` intent being presented as paid.
+        const confirmationStatus = String(
+          confirmation?.status ||
+            confirmation?.payment_status ||
+            confirmation?.order_status ||
+            '',
+        ).toLowerCase();
+
+        if (
+          !['paid', 'succeeded', 'success'].includes(
+            confirmationStatus,
+          )
+        ) {
+          throw new Error(
+            confirmation?.message ||
+              'Payment is not confirmed yet.',
+          );
+        }
+
         try {
           await refreshProfile();
         } catch {
