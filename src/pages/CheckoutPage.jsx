@@ -917,11 +917,56 @@ export default function CheckoutPage() {
       ? 'Place COD order'
       : 'Continue to secure payment';
 
-  const cartItems = items.map((item, index) => ({
-    id: String(item?.id || item?.product_id || index),
-    name: item?.product_name || item?.name || 'Product',
-    quantity: Number(item?.quantity) || 0,
-  }));
+  const cartItems = items.map((item, index) => {
+    const product =
+      item?.product ||
+      item?.products ||
+      item?.product_data ||
+      item?.product_details ||
+      {};
+    const quantity = Number(item?.quantity ?? item?.qty) || 0;
+    const rawImage =
+      item?.image_url ||
+      item?.product_image_url ||
+      item?.image ||
+      product?.image_url ||
+      product?.image ||
+      (Array.isArray(product?.images) ? product.images[0] : '');
+    const imageUrl =
+      typeof rawImage === 'string'
+        ? rawImage
+        : rawImage?.url || rawImage?.image_url || rawImage?.src || '';
+    const unitPrice =
+      item?.unit_price ??
+      item?.unitPrice ??
+      item?.price ??
+      item?.sale_price ??
+      product?.unit_price ??
+      product?.price ??
+      product?.sale_price ??
+      product?.selling_price;
+    const lineTotal =
+      item?.line_total ??
+      item?.lineTotal ??
+      item?.subtotal ??
+      item?.total_price ??
+      (Number.isFinite(Number(unitPrice)) ? Number(unitPrice) * quantity : null);
+
+    return {
+      id: String(item?.id || item?.product_id || product?.id || index),
+      name:
+        item?.product_name ||
+        item?.name ||
+        product?.name ||
+        product?.title ||
+        product?.display_name ||
+        'Product',
+      image_url: imageUrl,
+      unit_price: unitPrice,
+      line_total: lineTotal,
+      quantity,
+    };
+  });
 
   return (
     <div className="page container py-5 sm:py-8 lg:py-10">
@@ -1227,20 +1272,37 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 flex flex-col gap-3" aria-label="Items in your bag">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-start justify-between gap-4 text-sm"
+                    className="flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-bg/70 p-2.5"
                   >
-                    <div className="min-w-0">
-                      <p className="break-words font-medium text-text">
-                        {item.name}
+                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-2">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt=""
+                          className="size-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="text-sm font-semibold text-dim" aria-hidden="true">
+                          {(item.name || 'P').slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-sm font-medium leading-5 text-text">
+                        {item.name || 'Product'}
                       </p>
                       <p className="mt-0.5 text-xs text-dim">
-                        Qty {item.quantity}
+                        {formatMoney(item.unit_price)} each · Qty {item.quantity}
                       </p>
                     </div>
+                    <strong className="shrink-0 text-sm font-semibold tabular-nums text-text">
+                      {formatMoney(item.line_total)}
+                    </strong>
                   </div>
                 ))}
               </div>
