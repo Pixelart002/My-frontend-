@@ -1,0 +1,44 @@
+/* Checkout refinement: scoped to CheckoutPage only. */
+.checkout-page-polish{--checkout-radius:18px}
+.checkout-page-polish>div{width:100%;min-width:0}
+.checkout-page-polish header h1{max-width:15ch;line-height:1.08;text-wrap:balance}
+.checkout-page-polish nav[aria-label="Checkout progress"]{position:relative;overflow:hidden}
+.checkout-page-polish nav[aria-label="Checkout progress"] ol{align-items:center}
+.checkout-page-polish nav[aria-label="Checkout progress"] li{min-width:0}
+.checkout-page-polish main>div,
+.checkout-page-polish aside>div{border-radius:var(--checkout-radius);box-shadow:0 8px 28px rgb(0 0 0 / .12)}
+.checkout-page-polish main>div{scroll-margin-top:1rem}
+.checkout-page-polish input:not([type="radio"]):not([type="checkbox"]){min-width:0}
+.checkout-page-polish button{touch-action:manipulation}
+.checkout-page-polish button:focus-visible,
+.checkout-page-polish a:focus-visible,
+.checkout-page-polish input:focus-visible{outline:2px solid var(--color-gold,#d8ad6a);outline-offset:3px}
+.checkout-page-polish [role="alert"]{overflow-wrap:anywhere}
+@media(max-width:639px){
+ .checkout-page-polish{padding-top:1rem;padding-bottom:6.5rem}
+ .checkout-page-polish>div>button:first-child{margin-bottom:1rem}
+ .checkout-page-polish header h1{font-size:clamp(1.8rem,7vw,2.25rem);max-width:13ch}
+ .checkout-page-polish header>p:last-child{max-width:34ch;font-size:.8125rem;line-height:1.55}
+ .checkout-page-polish nav[aria-label="Checkout progress"]{margin-top:1rem;padding:.7rem;border-radius:14px}
+ .checkout-page-polish nav[aria-label="Checkout progress"] ol{gap:.35rem}
+ .checkout-page-polish nav[aria-label="Checkout progress"] li{gap:.4rem}
+ .checkout-page-polish nav[aria-label="Checkout progress"] li>span:first-child{width:1.8rem;height:1.8rem;font-size:.65rem}
+ .checkout-page-polish nav[aria-label="Checkout progress"] li>span:nth-child(2){font-size:.7rem}
+ .checkout-page-polish .mt-5.grid{margin-top:1rem;gap:.85rem}
+ .checkout-page-polish main{gap:.85rem}
+ .checkout-page-polish main>div,
+ .checkout-page-polish aside>div{padding:1rem;border-radius:16px}
+ .checkout-page-polish main>div h2{font-size:.95rem}
+ .checkout-page-polish main>div p{line-height:1.5}
+ .checkout-page-polish label.block{min-width:0}
+ .checkout-page-polish aside{min-width:0}
+ .checkout-page-polish aside .space-y-3>div{gap:.65rem}
+ .checkout-page-polish aside .text-xl{font-size:1.2rem}
+ .checkout-page-polish button.min-h-11{min-height:2.75rem}
+}
+@media(min-width:640px) and (max-width:1023px){
+ .checkout-page-polish aside{order:2}
+}
+@media(prefers-reduced-motion:reduce){
+ .checkout-page-polish *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
