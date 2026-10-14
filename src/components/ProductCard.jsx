@@ -177,11 +177,11 @@ export default function ProductCard({ product }) {
 
   return (
     <article
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[18px] border border-line bg-surface shadow-luviio-card transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-gold/60 hover:shadow-[0_22px_52px_rgba(0,0,0,.26)] motion-reduce:transform-none"
+      className="group flex h-full min-w-0 flex-col rounded-2xl border border-white/[0.09] bg-[#10100f] shadow-[0_8px_28px_rgba(0,0,0,.14)] transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[#c9a96e]/50 hover:shadow-[0_18px_40px_rgba(0,0,0,.24)] motion-reduce:transform-none"
       aria-label={name}
     >
       <div
-        className="relative aspect-square overflow-hidden rounded-t-[18px] bg-surface-2"
+        className="relative mx-3 mt-3 aspect-square overflow-hidden rounded-xl border border-white/[0.06] bg-[#171715]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -193,7 +193,7 @@ export default function ProductCard({ product }) {
         >
           {currentImage && !imageFailed ? (
             <img
-              className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="product-image block h-full w-full object-contain p-5 sm:p-6 transition-transform duration-500 ease-out group-hover:scale-[1.025] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               src={currentImage}
               alt={name}
               loading="lazy"
@@ -208,7 +208,7 @@ export default function ProductCard({ product }) {
           )}
 
           <span
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/10 to-transparent"
             aria-hidden="true"
           />
         </Link>
@@ -269,9 +269,9 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <div className="flex flex-1 flex-col px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
         <div className="min-w-0">
-          <h3 className="m-0 h-[2.6rem] max-h-[2.6rem] overflow-hidden text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text break-words sm:text-[14px]">
+          <h3 className="m-0 line-clamp-2 min-h-[2.6rem] text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-[#f0ece4] break-words sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -284,7 +284,7 @@ export default function ProductCard({ product }) {
         <div className="mt-2 flex h-[3.25rem] min-h-[3.25rem] min-w-0 shrink-0 items-end justify-between gap-3 overflow-hidden">
           <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
+              <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-[#e0c58f] sm:text-base">
                 {formatMoney(price)}
               </span>
 
@@ -312,10 +312,10 @@ export default function ProductCard({ product }) {
 
         <button
           type="button"
-          className={`mt-auto flex h-11 min-h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`mt-auto flex h-11 min-h-11 w-full min-w-0 shrink-0 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-[10px] font-bold transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50 ${
             added
               ? 'border-[rgba(111,191,138,.45)] bg-success-dim text-success'
-              : 'border-line bg-surface-2 text-text hover:border-gold/55 hover:bg-gold-dim hover:text-gold-soft'
+              : 'border-white/[0.11] bg-[#191916] text-[#f0ece4] hover:border-[#c9a96e]/60 hover:bg-[#201d16] hover:text-[#e0c58f]'
           }`}
           onClick={handleAdd}
           disabled={outOfStock || adding}
@@ -342,7 +342,7 @@ export default function ProductCard({ product }) {
             className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border ${
               added
                 ? 'border-[rgba(111,191,138,.35)] bg-[rgba(111,191,138,.10)] text-success'
-                : 'border-line bg-black/15 text-gold'
+                : 'border-white/[0.09] bg-black/15 text-[#c9a96e]'
             }`}
             aria-hidden="true"
           >
