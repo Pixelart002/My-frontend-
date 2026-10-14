@@ -855,6 +855,128 @@ textarea[aria-invalid="true"] {
   line-height: 1.35;
 }
 
+/* ============================================================
+   PRODUCT DETAIL — CLEAN CUSTOMER PRESENTATION
+   ============================================================ */
+
+.product-detail {
+  padding-block: clamp(8px, 2vw, 22px) clamp(28px, 5vw, 56px);
+}
+
+.product-detail .gallery-main {
+  border: 1px solid var(--lm-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+}
+
+.product-detail .gallery-thumbs {
+  padding-inline: 1px;
+}
+
+.product-detail .product-info {
+  padding-block: 4px;
+}
+
+.product-detail .product-category {
+  margin: 0 0 12px;
+  color: var(--lm-brand-300);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.product-detail .product-info h1 {
+  max-width: 20ch;
+  font-size: clamp(30px, 4vw, 48px);
+  letter-spacing: -0.04em;
+}
+
+.product-detail .product-actions .btn:first-child {
+  grid-column: 1 / -1;
+}
+
+.product-detail .description-block {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--lm-border);
+}
+
+.product-detail .description-block h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .product-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    padding-block: 4px 32px;
+  }
+
+  .product-detail .gallery {
+    position: static;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .product-detail .gallery-main {
+    aspect-ratio: 0.94;
+    border-radius: 14px !important;
+  }
+
+  .product-detail .product-info {
+    padding-block: 0;
+  }
+
+  .product-detail .product-info h1 {
+    max-width: 16ch;
+    font-size: clamp(30px, 9vw, 40px);
+  }
+
+  .product-detail .product-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .product-detail .product-actions .btn {
+    min-height: 46px;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+
+  .product-detail .product-actions .btn:first-child {
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 420px) {
+  .product-detail {
+    gap: 22px;
+  }
+
+  .product-detail .gallery-main {
+    aspect-ratio: 0.9;
+  }
+
+  .product-detail .gallery-thumbs .thumb {
+    flex-basis: 64px;
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .product-detail .product-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .product-detail .product-actions .btn:first-child {
+    grid-column: auto;
+  }
+}
+
 .cart-row .qty-stepper,
 .cart-row button,
 .address-card input,
