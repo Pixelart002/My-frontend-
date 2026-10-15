@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import '../styles/cart.css';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   RiAddLine,
