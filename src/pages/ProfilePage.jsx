@@ -241,7 +241,7 @@ export default function ProfilePage() {
       </header>
 
       <nav
-        className="mb-6 grid grid-cols-3 gap-2 rounded-2xl border border-line bg-surface/80 p-1.5 sm:mb-8 sm:inline-flex sm:w-auto"
+        className="mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-line bg-surface/80 p-1.5 sm:mb-8 sm:inline-flex sm:w-auto"
         aria-label="Account navigation"
       >
         <Link
@@ -255,6 +255,12 @@ export default function ProfilePage() {
           className="rounded-xl px-3 py-2.5 text-center text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:px-4 sm:text-sm"
         >
           Addresses
+        </Link>
+        <Link
+          to="/account/subscription"
+          className="rounded-xl px-3 py-2.5 text-center text-xs font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:px-4 sm:text-sm"
+        >
+          Membership
         </Link>
         <Link
           to="/account/settings"
