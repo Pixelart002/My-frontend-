@@ -6,15 +6,12 @@ import { installLocationAutocomplete } from './services/locationAutocomplete';
 
 import './styles/tokens.css';
 import './styles/viewport.css';
-import './styles/admin-tailwind.css';
 import './styles/pages.css';
 import './styles/products.css';
 import './styles/product-media.css';
 import './styles/app.css';
-import './styles/cart.css';
 import './styles/payment.css';
 import './styles/loading.css';
-import './styles/settings.css';
 import './styles/location-autocomplete.css';
 import './styles/site-ui.css';
 import './styles/layout-stability.css';
