@@ -1,3 +1,4 @@
+import '../styles/product-media.css';
 import {
  useCallback,
  useEffect,
