@@ -16,7 +16,7 @@ function deferEntryStylesheet() {
       // Preload it without blocking first paint; the inline critical CSS in
       // index.html keeps the storefront header and hero stable while it loads.
       html = html.replace(
-        /<link\\b(?=[^>]*\\brel=["']stylesheet["'])[^>]*\\bhref=["']([^"']+\\.css)["'][^>]*>/gi,
+        /<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+\.css)["'][^>]*>/gi,
         (tag, href) => {
           if (!href.startsWith('/assets/')) return tag
           converted += 1
