@@ -92,13 +92,18 @@ export default function SubscriptionPage() {
   useEffect(() => { load(); }, [load]);
 
   const currentTier = String(membership?.tier || 'free').toLowerCase();
-  const active = Boolean(membership?.active || (membership?.plan_id && membership?.ends_at && new Date(membership.ends_at) > new Date()));
+  const isSuperAdmin = membership?.is_super_admin === true;
+  const active = !isSuperAdmin && Boolean(membership?.active || (membership?.plan_id && membership?.ends_at && new Date(membership.ends_at) > new Date()));
   const sortedPlans = useMemo(() => [...plans].sort((a, b) => {
     const rank = (tierRank[String(a.tier || 'free').toLowerCase()] ?? 0) - (tierRank[String(b.tier || 'free').toLowerCase()] ?? 0);
     return rank || Number(a.price_inr || 0) - Number(b.price_inr || 0);
   }), [plans]);
 
   const choosePlan = async (plan) => {
+    if (isSuperAdmin) {
+      toast.info('Super admin access does not require a customer membership.');
+      return;
+    }
     if (!plan?.id || actionId) return;
     if (active) {
       toast.info('You already have an active membership. Cancel it before choosing another plan.');
@@ -176,7 +181,18 @@ export default function SubscriptionPage() {
           </section>
         )}
 
-        {active && (
+        {isSuperAdmin && (
+          <section className="sub-current" aria-label="Administrator access">
+            <div className="sub-current-icon"><RiShieldCheckLine size={21} /></div>
+            <div className="sub-current-copy">
+              <span className="sub-status">LUVIIO ADMINISTRATOR</span>
+              <h2>Super admin access <span>Enabled</span></h2>
+              <p>Your administrator role does not require a customer membership. No plan selection is needed.</p>
+            </div>
+          </section>
+        )}
+
+        {active && !isSuperAdmin && (
           <section className="sub-current" aria-label="Current membership">
             <div className="sub-current-icon"><RiCheckLine size={21} /></div>
             <div className="sub-current-copy">
@@ -217,10 +233,10 @@ export default function SubscriptionPage() {
                     <button
                       type="button"
                       className={`sub-plan-cta ${tier === 'premium' ? 'sub-plan-cta-gold' : ''}`}
-                      disabled={Boolean(actionId) || isCurrent || (active && !isCurrent) || (paid && !active)}
+                      disabled={isSuperAdmin || Boolean(actionId) || isCurrent || (active && !isCurrent) || (paid && !active)}
                       onClick={() => choosePlan(plan)}
                     >
-                      {actionId === String(plan.id) ? 'Activating…' : isCurrent ? 'Current plan' : active ? 'Already subscribed' : paid ? 'Paid checkout coming soon' : 'Choose plan'}
+                      {isSuperAdmin ? 'Admin access' : actionId === String(plan.id) ? 'Activating…' : isCurrent ? 'Current plan' : active ? 'Already subscribed' : paid ? 'Paid checkout coming soon' : 'Choose plan'}
                       {!isCurrent && !active && !paid && <RiArrowRightLine size={17} aria-hidden="true" />}
                     </button>
                     {paid && !active && <p className="sub-checkout-note">Payment is not enabled for this plan yet.</p>}
