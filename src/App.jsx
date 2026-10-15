@@ -49,6 +49,10 @@ const OrdersPage = lazy(() =>
   import('./pages/OrdersPage'),
 );
 
+const SubscriptionPage = lazy(() =>
+  import('./pages/SubscriptionPage'),
+);
+
 const OrderDetailPage = lazy(() =>
   import('./pages/OrderDetailPage'),
 );
@@ -203,6 +207,15 @@ function StoreRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/account/subscription"
+        element={
+          <ProtectedRoute>
+            <SubscriptionPage />
           </ProtectedRoute>
         }
       />
