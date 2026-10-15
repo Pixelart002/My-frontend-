@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import '../styles/settings.css';
 import {
   RiArrowRightSLine,
   RiLockPasswordLine,
