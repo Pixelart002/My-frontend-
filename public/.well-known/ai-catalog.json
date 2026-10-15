@@ -1,0 +1,45 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Luviio",
+    "identifier": "https://www.luviio.in",
+    "documentationUrl": "https://www.luviio.in/llms.txt",
+    "logoUrl": "https://www.luviio.in/icon-512.png"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:luviio.in:store:product-catalog",
+      "displayName": "Luviio Product Catalogue",
+      "type": "text/html",
+      "url": "https://www.luviio.in/shop",
+      "description": "Browse Luviio hardware, sanitary fittings, floor drainers, sink waste couplings and drainage products.",
+      "tags": [
+        "ecommerce",
+        "hardware",
+        "sanitary",
+        "drainage",
+        "India"
+      ],
+      "representativeQueries": [
+        "Find floor drainers and drainage products at Luviio",
+        "Browse sanitary fittings and hardware products with prices"
+      ]
+    },
+    {
+      "identifier": "urn:air:luviio.in:docs:ai-crawler-guidance",
+      "displayName": "Luviio AI Crawler Guidance",
+      "type": "text/markdown",
+      "url": "https://www.luviio.in/llms.txt",
+      "description": "Guidance for AI systems accessing public Luviio website information.",
+      "tags": [
+        "documentation",
+        "AI-crawlers",
+        "store-policies"
+      ],
+      "representativeQueries": [
+        "What information can AI crawlers use from Luviio?",
+        "Find Luviio's public website and store policy guidance"
+      ]
+    }
+  ]
+}
