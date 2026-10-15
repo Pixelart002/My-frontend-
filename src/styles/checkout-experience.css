@@ -1,0 +1,147 @@
+/* Luviio customer checkout — scoped styles only. Keeps checkout isolated from store/admin UI. */
+.checkout-experience {
+  --checkout-radius: 20px;
+  --checkout-border: color-mix(in srgb, var(--line, #343434) 78%, transparent);
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+.checkout-experience > .mx-auto {
+  width: 100%;
+}
+.checkout-experience header {
+  max-width: 46rem;
+}
+.checkout-experience header h1 {
+  max-width: 13ch;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.checkout-experience header > p:last-child {
+  max-width: 38rem;
+}
+.checkout-experience nav[aria-label="Checkout progress"] {
+  border-color: var(--checkout-border);
+  background: color-mix(in srgb, var(--surface, #151515) 92%, transparent);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 10%);
+}
+.checkout-experience nav[aria-label="Checkout progress"] ol {
+  align-items: center;
+}
+.checkout-experience nav[aria-label="Checkout progress"] li {
+  min-width: 0;
+}
+.checkout-experience nav[aria-label="Checkout progress"] li > span:first-child {
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.checkout-experience .grid.min-w-0.items-start > main > div,
+.checkout-experience aside > div {
+  border-color: var(--checkout-border);
+  border-radius: var(--checkout-radius);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 12%);
+}
+.checkout-experience .grid.min-w-0.items-start > main {
+  min-width: 0;
+}
+.checkout-experience aside {
+  min-width: 0;
+}
+.checkout-experience aside > div {
+  background: var(--surface, #151515);
+}
+.checkout-experience aside dl dd {
+  font-variant-numeric: tabular-nums;
+}
+.checkout-experience input,
+.checkout-experience select,
+.checkout-experience textarea,
+.checkout-experience button {
+  -webkit-tap-highlight-color: transparent;
+}
+.checkout-experience input:focus-visible,
+.checkout-experience select:focus-visible,
+.checkout-experience textarea:focus-visible,
+.checkout-experience button:focus-visible,
+.checkout-experience a:focus-visible {
+  outline: 2px solid var(--gold, #d8ad6a);
+  outline-offset: 3px;
+}
+.checkout-experience button {
+  touch-action: manipulation;
+}
+.checkout-experience button:disabled {
+  cursor: not-allowed;
+}
+.checkout-experience [role="alert"] {
+  overflow-wrap: anywhere;
+}
+.checkout-experience .break-words {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 1024px) {
+  .checkout-experience .grid.min-w-0.items-start {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 1.25rem;
+  }
+  .checkout-experience aside > div {
+    position: sticky;
+    top: 6rem;
+  }
+}
+@media (max-width: 639px) {
+  .checkout-experience {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: 1rem;
+  }
+  .checkout-experience header h1 {
+    font-size: clamp(1.8rem, 8vw, 2.2rem);
+    letter-spacing: -0.045em;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] {
+    margin-top: 1.15rem;
+    padding: .8rem;
+    border-radius: 16px;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] ol {
+    gap: .35rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li {
+    gap: .45rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li > span:first-child {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: .65rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li > span:nth-child(2) > span:first-child {
+    font-size: .72rem;
+    line-height: 1.2;
+  }
+  .checkout-experience .grid.min-w-0.items-start {
+    gap: .85rem;
+  }
+  .checkout-experience .grid.min-w-0.items-start > main {
+    gap: .85rem;
+  }
+  .checkout-experience .grid.min-w-0.items-start > main > div,
+  .checkout-experience aside > div {
+    border-radius: 17px;
+    padding: 1rem;
+  }
+  .checkout-experience aside {
+    margin-top: .1rem;
+  }
+  .checkout-experience aside > div {
+    position: static;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkout-experience *,
+  .checkout-experience *::before,
+  .checkout-experience *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
