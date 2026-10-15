@@ -26,6 +26,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import { useToast } from '../context/ToastContext';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
+import '../styles/checkout-redesign.css';
 
 const stripePromise = getStripePromise();
 
@@ -924,7 +925,7 @@ export default function CheckoutPage() {
   }));
 
   return (
-    <div className="page container py-5 sm:py-8 lg:py-10">
+    <div className="page container checkout-redesign py-5 sm:py-8 lg:py-10">
       <div className="mx-auto max-w-6xl">
         <button
           type="button"
@@ -936,7 +937,7 @@ export default function CheckoutPage() {
           Back to cart
         </button>
 
-        <header className="max-w-2xl">
+        <header className="checkout-heading max-w-2xl">
           <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[.13em] text-gold-soft">
             <RiLockLine size={14} aria-hidden="true" />
             Secure checkout
@@ -949,7 +950,7 @@ export default function CheckoutPage() {
           </p>
         </header>
 
-        <nav aria-label="Checkout progress" className="mt-6 rounded-2xl border border-line bg-surface p-3 sm:p-4">
+        <nav aria-label="Checkout progress" className="checkout-progress mt-6 rounded-2xl border border-line bg-surface p-3 sm:p-4">
           <ol className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
               { number: '01', title: 'Delivery', detail: 'Address' },
@@ -979,9 +980,9 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <div className="mt-5 grid min-w-0 items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
+        <div className="checkout-content mt-5 grid min-w-0 items-start gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
           <main className="min-w-0 space-y-4 sm:space-y-5">
-            <div className="rounded-2xl border border-line bg-surface p-4 shadow-luviio-card sm:rounded-3xl sm:p-6">
+            <div className="checkout-section rounded-2xl border border-line bg-surface p-4 shadow-luviio-card sm:rounded-3xl sm:p-6">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
                   <RiMapPinLine size={17} aria-hidden="true" />
@@ -1074,7 +1075,7 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+            <div className="checkout-section rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-bg text-gold-soft">
                   <RiCoupon3Line size={17} aria-hidden="true" />
@@ -1154,7 +1155,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+            <div className="checkout-section rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold-dim text-gold-soft">
@@ -1211,8 +1212,8 @@ export default function CheckoutPage() {
             </div>
           </main>
 
-          <aside className="order-first min-w-0 lg:order-last lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
+          <aside className="checkout-summary order-last min-w-0 lg:order-last lg:sticky lg:top-24 lg:self-start">
+            <div className="checkout-section rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[.12em] text-gold-soft">
