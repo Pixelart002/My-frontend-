@@ -26,6 +26,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import { useToast } from '../context/ToastContext';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
+import '../styles/checkout-redesign.css';
 
 const stripePromise = getStripePromise();
 
