@@ -223,8 +223,8 @@ export function ToastProvider({ children }) {
 
       <div
         className="toast-stack"
+        role="region"
         aria-label="Notifications"
-        aria-live="polite"
       >
         {toasts.map((item) => {
           const Icon =
