@@ -26,6 +26,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import { useToast } from '../context/ToastContext';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
+import './CheckoutPage.css';
 
 const stripePromise = getStripePromise();
 
@@ -924,8 +925,8 @@ export default function CheckoutPage() {
   }));
 
   return (
-    <div className="page container py-5 sm:py-8 lg:py-10">
-      <div className="mx-auto max-w-6xl">
+    <div className="page container py-5 sm:py-8 lg:py-10 checkout-experience">
+      <div className="mx-auto max-w-6xl checkout-experience__inner">
         <button
           type="button"
           className="mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-muted transition hover:text-gold disabled:opacity-50"
