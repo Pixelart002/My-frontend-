@@ -165,6 +165,8 @@ export default function HomePage() {
                 src="/luviio-hero-scene.svg"
                 alt="Luviio hardware and sanitary product scene"
                 className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/10 bg-black/65 p-4 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[.18em] text-gold">Luviio essentials</p>
