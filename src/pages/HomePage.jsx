@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   RiArrowRightLine,
@@ -12,7 +12,7 @@ import {
   RiWaterFlashLine,
 } from '@remixicon/react';
 import { productService } from '../services/products';
-import ProductCard from '../components/ProductCard';
+const ProductCard = lazy(() => import('../components/ProductCard'));
 import { ProductSkeletons, ErrorState } from '../components/ui/States';
 
 const CATEGORY_ICONS = {
@@ -221,11 +221,13 @@ export default function HomePage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-            {products.slice(0, FEATURED_PRODUCT_LIMIT).map((product) => (
-              <ProductCard key={product.id || product.slug} product={product} />
-            ))}
-          </div>
+          <Suspense fallback={<ProductSkeletons count={FEATURED_PRODUCT_LIMIT} />}>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+              {products.slice(0, FEATURED_PRODUCT_LIMIT).map((product) => (
+                <ProductCard key={product.id || product.slug} product={product} />
+              ))}
+            </div>
+          </Suspense>
         )}
 
         <Link className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-gold sm:hidden" to="/shop">
