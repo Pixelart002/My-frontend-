@@ -4,7 +4,7 @@ import {
   RiArrowRightLine,
   RiCheckLine,
   RiCloseLine,
-  RiCrownLine,
+  RiVipCrownLine,
   RiRefreshLine,
   RiShieldCheckLine,
   RiTruckLine,
@@ -18,7 +18,7 @@ import './subscription-page.css';
 const tierRank = { free: 0, premium: 1, platinum: 2 };
 const tierMeta = {
   free: { eyebrow: 'A good place to start', icon: RiShieldCheckLine },
-  premium: { eyebrow: 'More value on every order', icon: RiCrownLine },
+  premium: { eyebrow: 'More value on every order', icon: RiVipCrownLine },
   platinum: { eyebrow: 'The complete member experience', icon: RiVipCrownLine },
 };
 
@@ -235,7 +235,7 @@ export default function SubscriptionPage() {
 
         <section className="sub-benefit-strip" aria-label="Membership highlights">
           <div><RiTruckLine size={21} /><span><strong>Shipping benefits</strong><small>Included on eligible memberships</small></span></div>
-          <div><RiCrownLine size={21} /><span><strong>Member savings</strong><small>Tier-based discounts at checkout</small></span></div>
+          <div><RiVipCrownLine size={21} /><span><strong>Member savings</strong><small>Tier-based discounts at checkout</small></span></div>
           <div><RiShieldCheckLine size={21} /><span><strong>Clear and secure</strong><small>Your membership stays in your account</small></span></div>
         </section>
       </div>
