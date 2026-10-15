@@ -36,9 +36,8 @@ const getOptimizedProductImageUrl = (source, width) => {
     fit: 'cover',
     output: 'webp',
     q: '75',
-    we: '',
   });
-  return `https://wsrv.nl/?${params.toString()}`;
+  return `https://wsrv.nl/?${params.toString()}&we`;
 };
 
 export default function ProductCard({ product }) {
@@ -240,7 +239,7 @@ export default function ProductCard({ product }) {
               className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               src={renderedImageSrc}
               srcSet={renderedImageSrcSet}
-              sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 298px"
+              sizes="(max-width: 1023px) 46vw, 24vw"
               alt={name}
               width="480"
               height="480"
