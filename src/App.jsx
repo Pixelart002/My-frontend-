@@ -14,6 +14,7 @@ import { ToastProvider } from './context/ToastContext';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import StoreLayout from './layouts/StoreLayout';
+import './styles/checkout-flow-polish.css';
 
 import HomePage from './pages/HomePage';
 
