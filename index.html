@@ -22,7 +22,7 @@
       a{color:inherit;text-decoration:none}
       button,input,select,textarea{font:inherit}
       .store-main,.store-page-frame{min-width:0}
-      .store-page-frame{width:100%;max-width:1240px;margin-inline:auto}
+      .store-page-frame{width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(14px,3vw,28px);padding-block-end:clamp(28px,5vw,64px)}
       .header{position:sticky;top:0;z-index:120;display:flex;align-items:center;height:68px;min-height:68px;padding-inline:14px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(8,8,8,.94);color:#f4f1eb}
       .header-reference-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:68px;min-width:0;padding-inline:0}
       .brand{min-width:0;color:#d9aa5b;font-family:Georgia,serif;font-size:28px;font-weight:500;line-height:1;letter-spacing:-.035em;white-space:nowrap}
@@ -36,10 +36,11 @@
       main[aria-labelledby="home-title"]>section:first-child>div:first-child{position:absolute;inset:0;z-index:-20;background-image:url('/luviio-hero-background.webp');background-position:center;background-size:cover}
       main[aria-labelledby="home-title"]>section:first-child>div:nth-child(2),main[aria-labelledby="home-title"]>section:first-child>div:nth-child(3){position:absolute;inset:0;z-index:-10;pointer-events:none}
       main[aria-labelledby="home-title"]>section:first-child>div:last-child{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:2.5rem;width:100%;max-width:1280px;min-height:680px;margin-inline:auto;padding:80px 16px}
-      main[aria-labelledby="home-title"] h1{max-width:11ch;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(3.25rem,12vw,3.5rem);font-weight:600;line-height:.92;letter-spacing:-.05em}
+      main[aria-labelledby="home-title"] h1{max-width:11ch;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:3.5rem;font-weight:600;line-height:.92;letter-spacing:-.05em}
       main[aria-labelledby="home-title"] h1 span{color:#f0cf97}
       main[aria-labelledby="home-title"] p{max-width:68ch}
       main[aria-labelledby="home-title"] a{touch-action:manipulation}
+      @media(min-width:640px){main[aria-labelledby="home-title"] h1{font-size:3.75rem}}
       @media(min-width:641px){main[aria-labelledby="home-title"]>section:first-child>div:last-child{padding-inline:24px}}
       @media(min-width:901px){
         .header{height:72px;min-height:72px;padding-inline:5vw}
@@ -49,8 +50,11 @@
         .search-form{display:flex;align-items:center;gap:8px;width:220px;min-width:0;height:38px;padding-inline:12px;border:1px solid rgba(255,255,255,.17);border-radius:999px;background:rgba(12,12,12,.72)}
         .search-form input{width:100%;min-width:0;border:0;background:transparent;color:#f4f1eb}
         .menu-button{display:none}
+        main[aria-labelledby="home-title"]>section:first-child>div:last-child{padding:96px 32px}
+      }
+      @media(min-width:1024px){
         main[aria-labelledby="home-title"]>section:first-child>div:last-child{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;padding-inline:32px}
-        main[aria-labelledby="home-title"] h1{font-size:clamp(3.5rem,6vw,6rem)}
+        main[aria-labelledby="home-title"] h1{font-size:6rem}
       }
       @media(max-width:640px){.search-form{display:none}}
     </style>
