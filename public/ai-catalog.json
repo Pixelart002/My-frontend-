@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "name": "Luviio",
+  "description": "Indian ecommerce storefront for hardware, sanitary fittings, floor drainers, sink waste couplings, and drainage products.",
+  "website": "https://www.luviio.in/",
+  "language": "en-IN",
+  "resources": [
+    {
+      "type": "website",
+      "title": "Luviio homepage",
+      "url": "https://www.luviio.in/"
+    },
+    {
+      "type": "catalog",
+      "title": "Public product catalogue",
+      "url": "https://www.luviio.in/shop"
+    },
+    {
+      "type": "documentation",
+      "title": "AI crawler guidance",
+      "url": "https://www.luviio.in/llms.txt",
+      "format": "text/markdown"
+    },
+    {
+      "type": "policy",
+      "title": "Privacy policy",
+      "url": "https://www.luviio.in/privacy"
+    },
+    {
+      "type": "policy",
+      "title": "Shipping policy",
+      "url": "https://www.luviio.in/shipping"
+    },
+    {
+      "type": "policy",
+      "title": "Refund policy",
+      "url": "https://www.luviio.in/refund"
+    }
+  ],
+  "product_data_policy": {
+    "source_of_truth": "live product pages and authoritative backend API",
+    "invent_missing_attributes": false,
+    "invent_prices_or_availability": false
+  }
+}
