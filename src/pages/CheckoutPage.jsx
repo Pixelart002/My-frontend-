@@ -26,6 +26,7 @@ import PaymentMethodModal from '../components/checkout/PaymentMethodModal';
 import { useToast } from '../context/ToastContext';
 import { ErrorState, Spinner } from '../components/ui/States';
 import { formatMoney } from '../utils/format';
+import '../styles/checkout-experience.css';
 
 const stripePromise = getStripePromise();
 
@@ -924,7 +925,7 @@ export default function CheckoutPage() {
   }));
 
   return (
-    <div className="page container py-5 sm:py-8 lg:py-10">
+    <div className="page container py-5 sm:py-8 lg:py-10 checkout-experience">
       <div className="mx-auto max-w-6xl">
         <button
           type="button"
@@ -1211,7 +1212,7 @@ export default function CheckoutPage() {
             </div>
           </main>
 
-          <aside className="order-first min-w-0 lg:order-last lg:sticky lg:top-24 lg:self-start">
+          <aside className="order-last min-w-0 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
