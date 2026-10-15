@@ -12,6 +12,35 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
+const isOptimizableProductImage = (source) => {
+  if (typeof source !== 'string' || !source) return false;
+
+  try {
+    const url = new URL(source, window.location.origin);
+    return (
+      url.hostname === 'enqcujmzxtrbfkaungpm.supabase.co' &&
+      url.pathname.startsWith('/storage/v1/object/public/product-images/')
+    );
+  } catch {
+    return false;
+  }
+};
+
+const getOptimizedProductImageUrl = (source, width) => {
+  if (!isOptimizableProductImage(source)) return source;
+
+  const params = new URLSearchParams({
+    url: source,
+    w: String(width),
+    h: String(width),
+    fit: 'cover',
+    output: 'webp',
+    q: '75',
+    we: '',
+  });
+  return `https://wsrv.nl/?${params.toString()}`;
+};
+
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const { isAuthenticated } = useAuth();
@@ -22,7 +51,7 @@ export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
-  const [imageTransformFailed, setImageTransformFailed] = useState(false);
+  const [imageOptimizerFailed, setImageOptimizerFailed] = useState(false);
 
   const addedTimer = useRef(null);
   const touchStart = useRef(null);
@@ -38,7 +67,7 @@ export default function ProductCard({ product }) {
   useEffect(() => {
     setActiveImage(0);
     setImageFailed(false);
-    setImageTransformFailed(false);
+    setImageOptimizerFailed(false);
   }, [product?.id]);
 
   if (!product) return null;
@@ -77,6 +106,17 @@ export default function ProductCard({ product }) {
       : 0;
 
   const currentImage = gallery[safeIndex];
+  const canOptimizeCurrentImage =
+    !imageOptimizerFailed && isOptimizableProductImage(currentImage);
+  const renderedImageSrc = canOptimizeCurrentImage
+    ? getOptimizedProductImageUrl(currentImage, 480)
+    : currentImage;
+  const renderedImageSrcSet = canOptimizeCurrentImage
+    ? [320, 480, 640].map(
+        (width) =>
+          `${getOptimizedProductImageUrl(currentImage, width)} ${width}w`,
+      ).join(', ')
+    : undefined;
   const savings = Math.max(comparePrice - price, 0);
 
   const moveImage = (event, direction) => {
@@ -198,22 +238,8 @@ export default function ProductCard({ product }) {
           {currentImage && !imageFailed ? (
             <img
               className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-              src={
-                !imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')
-                  ? currentImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/').concat(
-                      currentImage.includes('?') ? '&width=480&height=480&resize=cover&quality=75' : '?width=480&height=480&resize=cover&quality=75',
-                    )
-                  : currentImage
-              }
-              srcSet={
-                !imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')
-                  ? [320, 480, 640].map((width) => {
-                      const transformed = currentImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-                      const separator = transformed.includes('?') ? '&' : '?';
-                      return `${transformed}${separator}width=${width}&height=${width}&resize=cover&quality=75 ${width}w`;
-                    }).join(', ')
-                  : undefined
-              }
+              src={renderedImageSrc}
+              srcSet={renderedImageSrcSet}
               sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 298px"
               alt={name}
               width="480"
@@ -223,8 +249,8 @@ export default function ProductCard({ product }) {
               fetchPriority="low"
               draggable="false"
               onError={() => {
-                if (!imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')) {
-                  setImageTransformFailed(true);
+                if (canOptimizeCurrentImage) {
+                  setImageOptimizerFailed(true);
                   return;
                 }
                 setImageFailed(true);
