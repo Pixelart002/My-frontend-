@@ -22,6 +22,7 @@ export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
+  const [imageTransformFailed, setImageTransformFailed] = useState(false);
 
   const addedTimer = useRef(null);
   const touchStart = useRef(null);
@@ -37,6 +38,7 @@ export default function ProductCard({ product }) {
   useEffect(() => {
     setActiveImage(0);
     setImageFailed(false);
+    setImageTransformFailed(false);
   }, [product?.id]);
 
   if (!product) return null;
@@ -84,6 +86,7 @@ export default function ProductCard({ product }) {
     if (imageCount < 2) return;
 
     setImageFailed(false);
+    setImageTransformFailed(false);
     setActiveImage(
       (current) => (current + direction + imageCount) % imageCount,
     );
@@ -94,6 +97,7 @@ export default function ProductCard({ product }) {
     event.stopPropagation();
 
     setImageFailed(false);
+    setImageTransformFailed(false);
     setActiveImage(index);
   };
 
@@ -194,12 +198,37 @@ export default function ProductCard({ product }) {
           {currentImage && !imageFailed ? (
             <img
               className="product-image block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.035] group-focus-within:scale-[1.015] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-              src={currentImage}
+              src={
+                !imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')
+                  ? currentImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/').concat(
+                      currentImage.includes('?') ? '&width=480&height=480&resize=cover&quality=75' : '?width=480&height=480&resize=cover&quality=75',
+                    )
+                  : currentImage
+              }
+              srcSet={
+                !imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')
+                  ? [320, 480, 640].map((width) => {
+                      const transformed = currentImage.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+                      const separator = transformed.includes('?') ? '&' : '?';
+                      return `${transformed}${separator}width=${width}&height=${width}&resize=cover&quality=75 ${width}w`;
+                    }).join(', ')
+                  : undefined
+              }
+              sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 298px"
               alt={name}
+              width="480"
+              height="480"
               loading="lazy"
               decoding="async"
+              fetchPriority="low"
               draggable="false"
-              onError={() => setImageFailed(true)}
+              onError={() => {
+                if (!imageTransformFailed && currentImage.includes('.supabase.co/storage/v1/object/public/')) {
+                  setImageTransformFailed(true);
+                  return;
+                }
+                setImageFailed(true);
+              }}
             />
           ) : (
             <span className="flex h-full w-full items-center justify-center bg-surface-2 font-display text-5xl text-gold">
