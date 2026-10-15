@@ -1,7 +1,8 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -15,14 +16,7 @@ import {
 import {
   RiArchive2Line,
   RiArrowRightSLine,
-  RiBankCardLine,
-  RiBarChart2Line,
-  RiBuilding4Line,
   RiCloseLine,
-  RiCoupon3Line,
-  RiDashboardLine,
-  RiFileList3Line,
-  RiFolder2Line,
   RiGridLine,
   RiHomeLine,
   RiInformationLine,
@@ -30,22 +24,12 @@ import {
   RiMailLine,
   RiMapPin2Line,
   RiMenuLine,
-  RiNotification3Line,
-  RiPriceTag3Line,
   RiSearchLine,
-  RiSettings3Line,
-  RiShieldKeyholeLine,
   RiShieldStarLine,
   RiShoppingBagLine,
-  RiShoppingCart2Line,
-  RiStackLine,
   RiStore2Line,
-  RiTruckLine,
   RiUser3Line,
   RiUserLine,
-  RiUserSettingsLine,
-  RiVipCrownLine,
-  RiStarLine,
 } from '@remixicon/react';
 
 import { useAuth } from '../context/AuthContext';
@@ -58,67 +42,6 @@ const ADMIN_ROLES = new Set([
   'super_admin',
   'owner',
 ]);
-
-const ADMIN_NAV = [
-  ['dashboard', 'Dashboard', RiDashboardLine],
-  ['products', 'Products', RiPriceTag3Line],
-  ['categories', 'Categories', RiFolder2Line],
-  ['orders', 'Orders', RiShoppingCart2Line],
-  ['coupons', 'Coupons', RiCoupon3Line],
-  ['inventory', 'Inventory', RiStackLine],
-  ['shipping', 'Shipping', RiTruckLine],
-  ['subscriptions', 'Subscriptions', RiVipCrownLine],
-  ['users', 'Users', RiUser3Line],
-  ['user-actions', 'User Actions', RiUserSettingsLine],
-  ['reviews', 'Reviews', RiStarLine],
-  ['rbac', 'Roles & Permissions', RiShieldKeyholeLine],
-  ['notifications', 'Notifications', RiNotification3Line],
-  ['settings', 'Settings', RiSettings3Line],
-  ['business-profile', 'Business Profile', RiBuilding4Line],
-  ['payments', 'Payments', RiBankCardLine],
-  ['reports', 'Reports', RiBarChart2Line],
-  ['audit', 'Audit Logs', RiFileList3Line],
-];
-
-const ADMIN_GROUPS = [
-  ['Overview', ['dashboard']],
-  ['Catalogue', ['products', 'categories']],
-  [
-    'Commerce',
-    [
-      'orders',
-      'coupons',
-      'inventory',
-      'shipping',
-      'subscriptions',
-      'payments',
-    ],
-  ],
-  [
-    'Customers',
-    ['users', 'user-actions', 'reviews'],
-  ],
-  ['Business', ['business-profile']],
-  [
-    'Operations',
-    [
-      'rbac',
-      'notifications',
-      'reports',
-      'audit',
-      'settings',
-    ],
-  ],
-];
-
-const ADMIN_ITEM_MAP = new Map(
-  ADMIN_NAV.map(
-    ([key, label, Icon]) => [
-      key,
-      { label, Icon },
-    ],
-  ),
-);
 
 function getUserDisplayName(user) {
   return (
@@ -178,41 +101,7 @@ function MenuLink({
     </Link>
   );
 }
-function AdminMenuLink({
-  item,
-  active,
-  onClick,
-}) {
-  const { label, Icon } = item;
-
-  return (
-    <Link
-      to={`/admin?panel=${encodeURIComponent(
-        item.key,
-      )}`}
-      onClick={onClick}
-      className={
-        active
-          ? 'is-active'
-          : undefined
-      }
-      aria-current={
-        active ? 'page' : undefined
-      }
-    >
-      <Icon
-        size={18}
-        aria-hidden="true"
-      />
-      <span>{label}</span>
-      <RiArrowRightSLine
-        className="admin-menu-arrow"
-        size={16}
-        aria-hidden="true"
-      />
-    </Link>
-  );
-}
+const AdminMobileNavigation = lazy(() => import('../components/AdminMobileNavigation'));
 
 export default function Header() {
   const {
@@ -438,93 +327,15 @@ export default function Header() {
     ],
   );
 
-  const adminMenuItems = useMemo(
-    () =>
-      ADMIN_GROUPS.map(
-        ([group, keys]) => ({
-          group,
-          items: keys
-            .map((key) => {
-              const item =
-                ADMIN_ITEM_MAP.get(
-                  key,
-                );
-
-              if (!item) {
-                return null;
-              }
-
-              return {
-                key,
-                ...item,
-              };
-            })
-            .filter(Boolean),
-        }),
-      ),
-    [],
-  );
-
-  const mobileContent =
-    isAdminPage && isAdmin ? (
-      <>
-        <div
-          className="mobile-nav-section mobile-admin-nav flex min-w-0 flex-col gap-1"
-          aria-label="Admin navigation"
-        >
-          {adminMenuItems.map(
-            ({
-              group,
-              items,
-            }) => (
-              <section
-                key={group}
-                className="mobile-admin-group flex min-w-0 flex-col gap-1 [&+&]:mt-2 [&+&]:border-t [&+&]:border-line [&+&]:pt-2"
-                aria-labelledby={`mobile-admin-${group
-                  .toLowerCase()
-                  .replace(/\s+/g, '-')}`}
-              >
-                <h2
-                  id={`mobile-admin-${group
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')}`}
-                  className="mobile-admin-label px-2.5 pb-1 pt-0 text-[10px] font-bold uppercase tracking-[.14em] leading-[1.4] text-dim"
-                >
-                  {group}
-                </h2>
-
-                {items.map(
-                  (item) => (
-                    <AdminMenuLink
-                      key={item.key}
-                      item={item}
-                      active={
-                        activeAdminPanel ===
-                        item.key
-                      }
-                      onClick={
-                        closeAll
-                      }
-                    />
-                  ),
-                )}
-              </section>
-            ),
-          )}
-        </div>
-
-        <div className="mobile-nav-section mobile-account-actions mt-2 flex min-w-0 flex-col gap-1 border-t border-line pt-4">
-          <MenuLink
-            to="/"
-            label="View storefront"
-            Icon={RiHomeLine}
-            accent="gold"
-            onClick={closeAll}
-          />
-        </div>
-      </>
-    ) : (
-      <>
+  const mobileContent = isAdminPage && isAdmin ? (
+    <Suspense fallback={<div className="min-h-24" aria-hidden="true" />}>
+      <AdminMobileNavigation
+        activeAdminPanel={activeAdminPanel}
+        onNavigate={closeAll}
+      />
+    </Suspense>
+  ) : (
+    <>
         <nav
           className="mobile-nav-section mobile-primary-nav flex min-w-0 flex-col gap-1"
           aria-label="Explore"
@@ -646,8 +457,8 @@ export default function Header() {
             </button>
           )}
         </div>
-      </>
-    );
+    </>
+  );
 
   return (
     <header className="header sticky top-0 z-[120] isolate h-[72px] min-h-[72px] border-b border-[rgb(255_255_255_/_0.07)] bg-[rgb(8_8_8_/_0.94)] text-text backdrop-blur-xl transition-[box-shadow,background-color] duration-200 max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:backdrop-blur-none">
