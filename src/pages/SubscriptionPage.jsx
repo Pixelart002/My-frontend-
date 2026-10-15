@@ -4,7 +4,6 @@ import {
   RiArrowRightLine,
   RiCheckLine,
   RiCloseLine,
-  RiVipCrownLine,
   RiRefreshLine,
   RiShieldCheckLine,
   RiTruckLine,
