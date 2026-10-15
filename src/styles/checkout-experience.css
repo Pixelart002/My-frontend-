@@ -82,10 +82,6 @@
     grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
     gap: 1.25rem;
   }
-  .checkout-experience aside > div {
-    position: sticky;
-    top: 6rem;
-  }
 }
 @media (max-width: 639px) {
   .checkout-experience {
