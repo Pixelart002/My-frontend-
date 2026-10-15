@@ -18,7 +18,7 @@ module.exports = {
         line: 'var(--line, #3a3530)',
         text: 'var(--text, #f5efe7)',
         muted: 'var(--muted, #a59b91)',
-        dim: 'var(--dim, #6d655c)',
+        dim: 'var(--dim, #a59b91)',
         success: 'var(--success, #6fbf8a)',
         'success-dim': 'var(--success-dim, rgba(111,191,138,.12))',
         danger: 'var(--danger, #e0735f)',
