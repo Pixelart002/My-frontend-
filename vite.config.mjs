@@ -32,12 +32,12 @@ function deferEntryStylesheet() {
       // <head>. This starts the single-page-app bootstrap as early as possible
       // without hard-coding a hash that changes on every production build.
       const entryScript = html.match(
-        /<script\\b(?=[^>]*\\btype=["']module["'])[^>]*\\bsrc=["'](\\/assets\\/[^"']+\\.js)["'][^>]*>\\s*<\\/script>/i,
+        /<script\b(?=[^>]*\btype=["']module["'])[^>]*\bsrc=["'](\/assets\/[^"']+\.js)["'][^>]*>\s*<\/script>/i,
       )
       if (entryScript && !html.includes(`rel="modulepreload" href="${entryScript[1]}"`)) {
         html = html.replace(
           '</head>',
-          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\\n  </head>`,
+          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\n  </head>`,
         )
       }
 
