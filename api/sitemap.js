@@ -8,13 +8,6 @@ const SITE_URL = (
   'https://www.luviio.in'
 ).replace(/\/$/, '');
 
-const esc = (value) => String(value ?? '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&apos;');
-
 async function fetchProducts() {
   const products = [];
   let page = 1;
@@ -61,7 +54,7 @@ export default async function handler(req, res) {
       })
       .join('\n');
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>${SITE_URL}/</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/shop</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/about</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/privacy</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/terms</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/shipping</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/refund</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/returns</loc>\n  </url>\n  <url>\n    <loc>https://blog.luviio.in/</loc>\n  </url>${urls ? `\n${urls}` : ''}\n</urlset>\n`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>${SITE_URL}/</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/shop</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/about</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/privacy</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/terms</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/shipping</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/refund</loc>\n  </url>\n  <url>\n    <loc>${SITE_URL}/returns</loc>\n  </url>${urls ? `\n${urls}` : ''}\n</urlset>\n`;
 
     res.status(200);
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
