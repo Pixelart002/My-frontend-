@@ -1,0 +1,31 @@
+/* Checkout-only visual system. All selectors are scoped to prevent store-wide regressions. */
+.checkout-redesign { padding-top: clamp(1.25rem, 3vw, 2.75rem); padding-bottom: clamp(2rem, 5vw, 4rem); }
+.checkout-redesign .checkout-heading { max-width: 46rem; }
+.checkout-redesign .checkout-progress { border-radius: 1rem; background: var(--surface, #141414); }
+.checkout-redesign .checkout-content { align-items: start; }
+.checkout-redesign .checkout-section { min-width: 0; border-radius: 1.15rem; box-shadow: 0 8px 28px rgb(0 0 0 / .12); }
+.checkout-redesign .checkout-address-grid { grid-template-columns: minmax(0, 1fr); }
+.checkout-redesign .checkout-summary { min-width: 0; }
+.checkout-redesign input:not([type="radio"]):not([type="checkbox"]) { max-width: 100%; }
+.checkout-redesign button, .checkout-redesign a { -webkit-tap-highlight-color: transparent; }
+.checkout-redesign button:focus-visible, .checkout-redesign a:focus-visible, .checkout-redesign input:focus-visible { outline: 2px solid var(--gold, #d8ad6a); outline-offset: 3px; }
+.checkout-redesign .checkout-address-card { min-height: 100%; }
+.checkout-redesign .checkout-total { font-variant-numeric: tabular-nums; }
+@media (min-width: 640px) {
+  .checkout-redesign .checkout-address-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .checkout-redesign .checkout-content { grid-template-columns: minmax(0, 1fr) 21.5rem; gap: 1.5rem; }
+  .checkout-redesign .checkout-summary { position: sticky; top: 6rem; }
+}
+@media (max-width: 639px) {
+  .checkout-redesign { padding-left: 0; padding-right: 0; }
+  .checkout-redesign .checkout-heading h1 { font-size: clamp(1.75rem, 8vw, 2.25rem); line-height: 1.12; }
+  .checkout-redesign .checkout-progress { padding: .75rem; }
+  .checkout-redesign .checkout-section { border-radius: 1rem; padding: 1rem; }
+  .checkout-redesign .checkout-address-grid { gap: .65rem; }
+  .checkout-redesign .checkout-summary { margin-top: .15rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkout-redesign *, .checkout-redesign *::before, .checkout-redesign *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
