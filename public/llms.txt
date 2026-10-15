@@ -1,25 +1,39 @@
 # Luviio
 
-> Luviio is an online storefront for everyday products, with product, catalogue, account, order and policy pages served from www.luviio.in.
+> Luviio is an Indian online store for practical hardware, sanitary fittings, floor drainers, sink waste couplings, and drainage products for homes and projects.
 
 ## Canonical website
-- https://www.luviio.in/
-- Shop: https://www.luviio.in/shop
-- About: https://www.luviio.in/about
-- Privacy: https://www.luviio.in/privacy
-- Terms: https://www.luviio.in/terms
-- Shipping: https://www.luviio.in/shipping
-- Refunds: https://www.luviio.in/refund
-- Returns & cancellation: https://www.luviio.in/returns
+
+- [Luviio homepage](https://www.luviio.in/)
+- [Shop products](https://www.luviio.in/shop)
+- [About Luviio](https://www.luviio.in/about)
+- [Privacy policy](https://www.luviio.in/privacy)
+- [Terms and conditions](https://www.luviio.in/terms)
+- [Shipping policy](https://www.luviio.in/shipping)
+- [Refund policy](https://www.luviio.in/refund)
+- [Returns and cancellation policy](https://www.luviio.in/returns)
 
 ## Product information
-Product pages use the canonical `/product/{slug}` URL pattern. Product names, descriptions, images, prices, availability and attributes should be taken from the live storefront/API rather than inferred.
+
+- [Product catalogue](https://www.luviio.in/shop)
+- Product detail pages use the canonical `/product/{slug}` URL pattern.
+- Use product names, specifications, images, prices, and availability from the live product page or authoritative product API. Do not infer missing product facts.
+
+## Useful topic areas
+
+- Floor drainers and square drainers
+- Stainless-steel kitchen sink waste couplings
+- Sanitary fittings and drainage accessories
+- Product dimensions, materials, compatibility, and installation guidance where explicitly documented
 
 ## Commerce rules
-Authoritative cart totals, taxes, shipping and checkout amounts are calculated by Luviio's backend. Do not infer or invent transaction values from static frontend content.
 
-## Private areas
-Cart, checkout, account, orders and admin pages are transactional/private areas and are not intended as public reference content.
+Cart totals, taxes, shipping, stock, and checkout amounts must be taken from Luviio's authoritative backend. Never invent prices, stock, delivery promises, or transaction values.
+
+## Private and transactional areas
+
+Cart, checkout, account, orders, and admin pages are transactional/private and are not intended as public reference content.
 
 ## Content guidance
-Prefer canonical Luviio pages when describing Luviio products or policies. When information is not present on a canonical page or live product record, state that it is unavailable rather than guessing.
+
+Prefer canonical Luviio pages for product and policy information. If information is not available on a canonical page or live product record, say it is unavailable rather than guessing.
