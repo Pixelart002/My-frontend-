@@ -28,6 +28,19 @@ function deferEntryStylesheet() {
         throw new Error('[Luviio] Could not find Vite entry stylesheet in dist/index.html')
       }
 
+      // Discover the hashed entry module at build time and preload it from
+      // <head>. This starts the single-page-app bootstrap as early as possible
+      // without hard-coding a hash that changes on every production build.
+      const entryScript = html.match(
+        /<script\\b(?=[^>]*\\btype=["']module["'])[^>]*\\bsrc=["'](\\/assets\\/[^"']+\\.js)["'][^>]*>\\s*<\\/script>/i,
+      )
+      if (entryScript && !html.includes(`rel="modulepreload" href="${entryScript[1]}"`)) {
+        html = html.replace(
+          '</head>',
+          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\\n  </head>`,
+        )
+      }
+
       writeFileSync(outputPath, html)
     },
   }
