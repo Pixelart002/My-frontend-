@@ -354,7 +354,10 @@ export default function CartPage() {
   const [removingId, setRemovingId] = useState(null);
   const [clearing, setClearing] = useState(false);
 
-  const items = cart?.items || [];
+  // Treat malformed/stale cart payloads as recoverable data, not a page crash.
+  const items = Array.isArray(cart?.items)
+    ? cart.items.filter((item) => item && typeof item === 'object')
+    : [];
 
   const handleQuantity = useCallback(
     async (productId, quantity) => {
@@ -554,7 +557,7 @@ export default function CartPage() {
 
         <div className="min-w-0 lg:sticky lg:top-24">
           <OrderSummary
-            cart={cart}
+            cart={cart || { subtotal: 0, total_amount: 0, tax_enabled: false, shipping_enabled: false, items: [] }}
             disabled={actionBusy || hasUnavailableItems}
             onCheckout={() => navigate('/checkout')}
           />
