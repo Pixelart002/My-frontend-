@@ -1,0 +1,39 @@
+name: One-time complete npm audit inventory
+
+on:
+  push:
+    branches:
+      - security/full-npm-audit-inventory
+
+permissions:
+  contents: read
+
+jobs:
+  audit-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Inventory full dependency audit
+        shell: bash
+        run: |
+          set +e
+          npm audit --json > /tmp/npm-audit-full.json
+          set -e
+          node --input-type=commonjs -e '
+            const report = require("/tmp/npm-audit-full.json");
+            const meta = report.metadata?.vulnerabilities || {};
+            console.log("Full audit totals:", JSON.stringify(meta));
+            for (const [name, v] of Object.entries(report.vulnerabilities || {})) {
+              const via = (v.via || []).map(x => typeof x === "string" ? x : (x.title || x.name || x.url)).join(" | ");
+              console.log(JSON.stringify({name, severity:v.severity, direct:v.isDirect, range:v.range, via, fixAvailable:v.fixAvailable}));
+            }
+          '
