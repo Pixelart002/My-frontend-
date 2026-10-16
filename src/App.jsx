@@ -66,85 +66,45 @@ const ForgotPasswordPage = lazyWithChunkRecovery(() => import('./pages/ForgotPas
 
 const ChangePasswordPage = lazyWithChunkRecovery(() => import('./pages/ChangePasswordPage'));
 
-const CartPage = lazy(() =>
-  import('./pages/CartPage'),
-);
+const CartPage = lazyWithChunkRecovery(() => import('./pages/CartPage'));
 
-const CheckoutPage = lazy(() =>
-  import('./pages/CheckoutPage'),
-);
+const CheckoutPage = lazyWithChunkRecovery(() => import('./pages/CheckoutPage'));
 
-const OrderSuccessPage = lazy(() =>
-  import('./pages/OrderSuccessPage'),
-);
+const OrderSuccessPage = lazyWithChunkRecovery(() => import('./pages/OrderSuccessPage'));
 
-const OrderFailedPage = lazy(() =>
-  import('./pages/OrderFailedPage'),
-);
+const OrderFailedPage = lazyWithChunkRecovery(() => import('./pages/OrderFailedPage'));
 
-const OrdersPage = lazy(() =>
-  import('./pages/OrdersPage'),
-);
+const OrdersPage = lazyWithChunkRecovery(() => import('./pages/OrdersPage'));
 
-const SubscriptionPage = lazy(() =>
-  import('./pages/SubscriptionPage'),
-);
+const SubscriptionPage = lazyWithChunkRecovery(() => import('./pages/SubscriptionPage'));
 
-const OrderDetailPage = lazy(() =>
-  import('./pages/OrderDetailPage'),
-);
+const OrderDetailPage = lazyWithChunkRecovery(() => import('./pages/OrderDetailPage'));
 
-const ProfilePage = lazy(() =>
-  import('./pages/ProfilePage'),
-);
+const ProfilePage = lazyWithChunkRecovery(() => import('./pages/ProfilePage'));
 
-const AddressesPage = lazy(() =>
-  import('./pages/AddressesPage'),
-);
+const AddressesPage = lazyWithChunkRecovery(() => import('./pages/AddressesPage'));
 
-const SettingsPage = lazy(() =>
-  import('./pages/SettingsPage'),
-);
+const SettingsPage = lazyWithChunkRecovery(() => import('./pages/SettingsPage'));
 
-const PrivacyPage = lazy(() =>
-  import('./pages/policies/PrivacyPage'),
-);
+const PrivacyPage = lazyWithChunkRecovery(() => import('./pages/policies/PrivacyPage'));
 
-const DPDPNoticePage = lazy(() =>
-  import('./pages/policies/DPDPNoticePage'),
-);
+const DPDPNoticePage = lazyWithChunkRecovery(() => import('./pages/policies/DPDPNoticePage'));
 
-const TermsPage = lazy(() =>
-  import('./pages/policies/TermsPage'),
-);
+const TermsPage = lazyWithChunkRecovery(() => import('./pages/policies/TermsPage'));
 
-const ShippingPage = lazy(() =>
-  import('./pages/policies/ShippingPage'),
-);
+const ShippingPage = lazyWithChunkRecovery(() => import('./pages/policies/ShippingPage'));
 
-const RefundPage = lazy(() =>
-  import('./pages/policies/RefundPage'),
-);
+const RefundPage = lazyWithChunkRecovery(() => import('./pages/policies/RefundPage'));
 
-const ReturnCancelPage = lazy(() =>
-  import('./pages/policies/ReturnCancelPage'),
-);
+const ReturnCancelPage = lazyWithChunkRecovery(() => import('./pages/policies/ReturnCancelPage'));
 
-const AboutPage = lazy(() =>
-  import('./pages/policies/AboutPage'),
-);
+const AboutPage = lazyWithChunkRecovery(() => import('./pages/policies/AboutPage'));
 
-const ReviewsPage = lazy(() =>
-  import('./pages/ReviewsPage'),
-);
+const ReviewsPage = lazyWithChunkRecovery(() => import('./pages/ReviewsPage'));
 
-const NotFoundPage = lazy(() =>
-  import('./pages/NotFoundPage'),
-);
+const NotFoundPage = lazyWithChunkRecovery(() => import('./pages/NotFoundPage'));
 
-const AdminPage = lazy(() =>
-  import('./pages/admin/AdminPage'),
-);
+const AdminPage = lazyWithChunkRecovery(() => import('./pages/admin/AdminPage'));
 
 function StoreRoutes() {
   return (
