@@ -223,7 +223,7 @@ export default function ProfilePage() {
     'Not available';
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div className="mx-auto w-full max-w-5xl">
       <header className="mb-6 sm:mb-8">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -312,8 +312,8 @@ export default function ProfilePage() {
         )}
 
         {!editing ? (
-          <div className="grid divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            <div className="px-5 py-5 sm:px-7 sm:py-6">
+          <div className="grid divide-y divide-line md:grid-cols-3 md:divide-x md:divide-y-0">
+            <div className="px-5 py-5 md:px-7 md:py-6">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                 Full name
               </p>
@@ -322,7 +322,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="px-5 py-5 sm:px-7 sm:py-6">
+            <div className="px-5 py-5 md:px-7 md:py-6">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                 Email
               </p>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
               </p>
             </div>
 
-            <div className="px-5 py-5 sm:px-7 sm:py-6">
+            <div className="px-5 py-5 md:px-7 md:py-6">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                 Phone
               </p>
@@ -449,6 +449,6 @@ export default function ProfilePage() {
           </form>
         )}
       </section>
-    </main>
+    </div>
   );
 }
