@@ -14,7 +14,6 @@ export default class AppErrorBoundary extends Component {
   state = {
     error: null,
     errorId: null,
-    retryCount: 0,
   };
   
   static getDerivedStateFromError(error) {
@@ -51,7 +50,6 @@ export default class AppErrorBoundary extends Component {
     const {
       error,
       errorId,
-      retryCount,
     } = this.state;
     
     if (!error) {
