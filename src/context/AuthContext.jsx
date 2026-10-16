@@ -29,6 +29,9 @@ import { userService } from '../services/users';
 
 const SESSION_HINT = '__lv_has_session';
 const REFRESH_TIMEOUT_MS = 9000;
+const SESSION_RESTORE_ATTEMPTS = 3;
+
+const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 const AuthContext = createContext(null);
 
@@ -89,6 +92,8 @@ export function AuthProvider({ children }) {
   // Access tokens live only in memory; the refresh token is the only persistent auth credential and is an HttpOnly cookie.
 
   const [initializing, setInitializing] = useState(true);
+  const [restoreError, setRestoreError] = useState(false);
+  const [restoreAttempt, setRestoreAttempt] = useState(0);
 
   /**
    * Keep React state and the API client synchronized in one place.
@@ -170,67 +175,82 @@ export function AuthProvider({ children }) {
     let active = true;
 
     const bootstrap = async () => {
-      try {
-        const response = await fetch(
-          `${API_BASE}/auth/refresh`,
-          {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            signal: createTimeoutSignal(
-              REFRESH_TIMEOUT_MS,
-            ),
-          },
-        );
+      setRestoreError(false);
 
-        if (!response.ok) {
-          if (active) {
-            clearSession();
+      for (let attempt = 0; attempt < SESSION_RESTORE_ATTEMPTS; attempt += 1) {
+        if (!active) return;
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/auth/refresh`,
+            {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              signal: createTimeoutSignal(REFRESH_TIMEOUT_MS),
+            },
+          );
+
+          if (!response.ok) {
+            // Invalid/expired credentials are definitive. Server errors,
+            // rate limits and gateway failures may be transient.
+            if ([401, 403].includes(response.status)) {
+              if (active) clearSession();
+              return;
+            }
+
+            if (response.status < 500 && response.status !== 429) {
+              if (active) clearSession();
+              return;
+            }
+
+            if (attempt < SESSION_RESTORE_ATTEMPTS - 1) {
+              await wait(300 * (attempt + 1));
+              continue;
+            }
+
+            if (active) setRestoreError(true);
+            return;
           }
 
+          const json = await response.json();
+          const payload = json?.data || json;
+          const access = payload?.access_token || null;
+
+          if (!active) return;
+
+          if (!access) {
+            clearSession();
+            return;
+          }
+
+          persistToken(access);
+          writeStorage(SESSION_HINT, '1');
+
+          // Finish restoring the session and profile before protected routes
+          // render, so they never observe a false logged-out startup state.
+          await loadProfile();
           return;
-        }
+        } catch {
+          if (!active) return;
 
-        const json = await response.json();
+          if (attempt < SESSION_RESTORE_ATTEMPTS - 1) {
+            await wait(300 * (attempt + 1));
+            continue;
+          }
 
-        const payload =
-          json?.data || json;
-
-        const access =
-          payload?.access_token || null;
-
-        if (!active) {
-          return;
-        }
-
-        if (!access) {
-          clearSession();
-          return;
-        }
-
-        persistToken(access);
-        writeStorage(SESSION_HINT, '1');
-
-        await loadProfile();
-      } catch {
-        /*
-         * A refresh failure during startup means there is no usable
-         * access token for this page lifecycle. Keep the handling
-         * deterministic and let protected routes redirect normally.
-         */
-        if (active) {
-          clearSession();
-        }
-      } finally {
-        if (active) {
-          setInitializing(false);
+          // Network failure is not proof that the user's session is invalid.
+          // Keep the session hint and let the user retry restoration.
+          setRestoreError(true);
         }
       }
     };
 
-    bootstrap();
+    bootstrap().finally(() => {
+      if (active) setInitializing(false);
+    });
 
     return () => {
       active = false;
@@ -239,7 +259,14 @@ export function AuthProvider({ children }) {
     clearSession,
     loadProfile,
     persistToken,
+    restoreAttempt,
   ]);
+
+  const retrySession = useCallback(() => {
+    setRestoreError(false);
+    setInitializing(true);
+    setRestoreAttempt((attempt) => attempt + 1);
+  }, []);
 
   /**
    * Login.
@@ -333,6 +360,7 @@ export function AuthProvider({ children }) {
       user,
       token,
       initializing,
+      restoreError,
       isAuthenticated: Boolean(token),
 
       login,
@@ -340,16 +368,19 @@ export function AuthProvider({ children }) {
       logout,
       refreshProfile,
       clearSession,
+      retrySession,
     }),
     [
       user,
       token,
       initializing,
+      restoreError,
       login,
       register,
       logout,
       refreshProfile,
       clearSession,
+      retrySession,
     ],
   );
 
