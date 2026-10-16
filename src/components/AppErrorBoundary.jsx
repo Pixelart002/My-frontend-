@@ -31,7 +31,7 @@ export default class AppErrorBoundary extends Component {
       componentStack: info?.componentStack,
       errorId,
       pathname: window.location.pathname,
-      href: window.location.href,
+      pathname: window.location.pathname,
     });
   }
   
