@@ -17,17 +17,54 @@ import StoreLayout from './layouts/StoreLayout';
 
 import HomePage from './pages/HomePage';
 
+// A stale HTML document can point at hashed chunks from an older deployment.
+// Retry one failed dynamic import with a fresh document, without looping forever.
+function importWithChunkRecovery(importer) {
+  const key = `__luviio_chunk_retry__:${window.location.pathname}`;
+
+  return importer()
+    .then((module) => {
+      try {
+        window.sessionStorage.removeItem(key);
+      } catch {
+        // Storage may be disabled.
+      }
+      return module;
+    })
+    .catch((error) => {
+      const message = String(error?.message || error);
+      const isChunkFailure =
+        /failed to fetch dynamically imported module|importing a module script failed|chunkloaderror|loading chunk .* failed/i.test(message);
+
+      if (isChunkFailure) {
+        try {
+          if (!window.sessionStorage.getItem(key)) {
+            window.sessionStorage.setItem(key, '1');
+            window.location.reload();
+          }
+        } catch {
+          // If storage is unavailable, let the error boundary show recovery UI.
+        }
+      }
+
+      throw error;
+    });
+}
+
+const lazyWithChunkRecovery = (importer) =>
+  lazy(() => importWithChunkRecovery(importer));
+
 // Keep the first storefront render small; load catalogue-heavy routes on demand.
-const ShopPage = lazy(() => import('./pages/ShopPage'));
-const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const ShopPage = lazyWithChunkRecovery(() => import('./pages/ShopPage'));
+const ProductDetailPage = lazyWithChunkRecovery(() => import('./pages/ProductDetailPage'));
 
-const LoginPage = lazy(() => import('./pages/LoginPage'));
+const LoginPage = lazyWithChunkRecovery(() => import('./pages/LoginPage'));
 
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const RegisterPage = lazyWithChunkRecovery(() => import('./pages/RegisterPage'));
 
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ForgotPasswordPage = lazyWithChunkRecovery(() => import('./pages/ForgotPasswordPage'));
 
-const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
+const ChangePasswordPage = lazyWithChunkRecovery(() => import('./pages/ChangePasswordPage'));
 
 const CartPage = lazy(() =>
   import('./pages/CartPage'),
