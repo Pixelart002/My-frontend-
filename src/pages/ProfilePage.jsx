@@ -223,7 +223,7 @@ export default function ProfilePage() {
     'Not available';
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <main className="mx-auto w-full max-w-5xl">
       <header className="mb-6 sm:mb-8">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -449,6 +449,6 @@ export default function ProfilePage() {
           </form>
         )}
       </section>
-    </div>
+    </main>
   );
 }
