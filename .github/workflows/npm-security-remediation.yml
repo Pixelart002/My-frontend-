@@ -1,0 +1,70 @@
+name: Safe npm vulnerability remediation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: npm-security-remediation
+  cancel-in-progress: false
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Apply compatible security fixes
+        run: npm audit fix
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Report remaining vulnerabilities
+        if: always()
+        run: npm audit --json > npm-audit-report.json || true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+          if-no-files-found: ignore
+
+      - name: Create security update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/npm-audit-remediation
+          delete-branch: true
+          title: "fix(security): remediate npm audit vulnerabilities"
+          commit-message: "fix(security): remediate compatible npm vulnerabilities"
+          body: |
+            Automated, semver-compatible npm audit remediation.
+
+            Validation performed by this workflow:
+            - npm audit fix
+            - npm run build
+            - npm test
+
+            Review the changed lockfile and the attached npm audit report before merging.
+            No force upgrades or major-version overrides are applied.
+          labels: security, dependencies
