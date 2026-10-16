@@ -2,6 +2,9 @@ name: Safe npm vulnerability remediation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - security/npm-audit-trigger
 
 permissions:
   contents: write
