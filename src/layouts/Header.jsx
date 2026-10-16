@@ -25,6 +25,7 @@ import {
   RiMapPin2Line,
   RiMenuLine,
   RiSearchLine,
+  RiSettings3Line,
   RiShieldStarLine,
   RiShoppingBagLine,
   RiStore2Line,
