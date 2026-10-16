@@ -1,0 +1,47 @@
+name: One-time minimal lockfile verification
+
+on:
+  push:
+    branches:
+      - security/source-map-js-lockfix
+
+permissions:
+  contents: read
+
+jobs:
+  verify-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Assert patched transitive version
+        run: node -e "const p=require('./node_modules/source-map-js/package.json'); console.log('source-map-js',p.version); if(p.version!=='1.2.2') process.exit(1)"
+      - name: Production dependency audit
+        shell: bash
+        run: |
+          set +e
+          npm audit --omit=dev --json > /tmp/npm-audit-production.json
+          set -e
+          node --input-type=commonjs -e '
+            const report = require("/tmp/npm-audit-production.json");
+            const meta = report.metadata?.vulnerabilities || {};
+            console.log("Production audit:", JSON.stringify(meta));
+            for (const [name, v] of Object.entries(report.vulnerabilities || {})) {
+              console.log(name + ": " + v.severity + " (" + v.range + ")");
+            }
+            if ((meta.high || 0) + (meta.critical || 0) > 0) process.exit(1);
+          '
+      - name: ESLint
+        run: npm run lint
+      - name: Unit and component tests
+        run: npm test
+      - name: Production build
+        run: npm run build
