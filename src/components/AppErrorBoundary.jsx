@@ -31,15 +31,16 @@ export default class AppErrorBoundary extends Component {
       error,
       componentStack: info?.componentStack,
       errorId,
+      pathname: window.location.pathname,
+      href: window.location.href,
     });
   }
   
   handleReset = () => {
-    this.setState((state) => ({
-      error: null,
-      errorId: null,
-      retryCount: state.retryCount + 1,
-    }));
+    // Reload the current route so failed lazy chunks and stale module
+    // state can recover after a deployment. Resetting only the boundary
+    // state can immediately render the same broken component again.
+    window.location.reload();
   };
   
   handleGoHome = () => {
@@ -104,9 +105,7 @@ export default class AppErrorBoundary extends Component {
                   aria-hidden="true"
                 />
                 <span>
-                  {retryCount > 0
-                    ? 'Try again'
-                    : 'Retry page'}
+                  Try again
                 </span>
               </button>
 
