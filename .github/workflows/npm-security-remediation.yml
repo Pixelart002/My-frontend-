@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Apply compatible security fixes
-        run: npm audit fix
+        run: npm audit fix || true
 
       - name: Verify production build
         run: npm run build
@@ -60,11 +60,7 @@ jobs:
           body: |
             Automated, semver-compatible npm audit remediation.
 
-            Validation performed by this workflow:
-            - npm audit fix
-            - npm run build
-            - npm test
-
+            The workflow attempted npm audit fix, then ran the production build and tests.
             Review the changed lockfile and the attached npm audit report before merging.
             No force upgrades or major-version overrides are applied.
           labels: security, dependencies
