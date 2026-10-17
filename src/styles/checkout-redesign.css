@@ -1,0 +1,142 @@
+/* Checkout experience: predictable, compact, and mobile-first. Scoped to the checkout page only. */
+.page.container:has(nav[aria-label="Checkout progress"]) {
+  --checkout-gap: clamp(14px, 2vw, 22px);
+  padding-top: clamp(18px, 3vw, 32px);
+  padding-bottom: max(36px, env(safe-area-inset-bottom));
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl {
+  width: 100%;
+  max-width: 1120px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) header h1 {
+  font-size: clamp(27px, 4vw, 40px);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) nav[aria-label="Checkout progress"] {
+  margin-top: 22px;
+  padding: clamp(12px, 2vw, 18px);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(216,173,106,.075), rgba(255,255,255,.015));
+}
+.page.container:has(nav[aria-label="Checkout progress"]) nav ol {
+  align-items: center;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) nav ol li {
+  min-height: 40px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) nav ol li > span:first-child {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid {
+  gap: var(--checkout-gap);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > main {
+  display: grid;
+  gap: var(--checkout-gap);
+  min-width: 0;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > main > div,
+.page.container:has(nav[aria-label="Checkout progress"]) aside > div {
+  min-width: 0;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > main > div {
+  padding: clamp(16px, 2.3vw, 24px);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside > div {
+  padding: clamp(16px, 2vw, 22px);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside .mt-4.space-y-3 > div {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside .mt-4.space-y-3 > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside dl > div {
+  gap: 14px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside dl dd {
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) aside dl > div:last-child dd {
+  font-size: clamp(20px, 2vw, 25px);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) input:not([type="radio"]):not([type="checkbox"]) {
+  min-width: 0;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) button {
+  touch-action: manipulation;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) button:focus-visible,
+.page.container:has(nav[aria-label="Checkout progress"]) a:focus-visible,
+.page.container:has(nav[aria-label="Checkout progress"]) input:focus-visible {
+  outline: 2px solid #d8ad6a;
+  outline-offset: 3px;
+}
+@media (min-width: 1024px) {
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid {
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 340px);
+    align-items: start;
+    gap: 24px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) aside {
+    position: sticky;
+    top: 88px;
+  }
+}
+@media (max-width: 640px) {
+  .page.container:has(nav[aria-label="Checkout progress"]) {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) nav ol {
+    gap: 6px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) nav ol li {
+    gap: 7px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) nav ol li > span:first-child {
+    width: 29px;
+    height: 29px;
+    font-size: 10px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) nav ol li > span:nth-child(2) > span:first-child {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) nav ol li > span:nth-child(2) > span:nth-child(2) {
+    display: none;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid {
+    display: flex;
+    flex-direction: column;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > main,
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > aside {
+    width: 100%;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > aside {
+    order: 2;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > .mx-auto.max-w-6xl > .mt-5.grid > main {
+    order: 1;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) aside {
+    position: static;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page.container:has(nav[aria-label="Checkout progress"]) * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
