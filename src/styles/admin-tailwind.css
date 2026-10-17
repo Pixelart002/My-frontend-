@@ -4842,3 +4842,199 @@ button:disabled {
     padding: 14px;
   }
 }
+
+
+/* Header hierarchy, active-state contrast and compact admin telemetry. */
+.admin-head {
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 72px;
+  padding: 12px clamp(14px, 2.4vw, 30px);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+}
+.admin-head-brand {
+  align-items: center;
+  gap: 13px;
+}
+.admin-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: #fff;
+  transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+}
+.admin-menu-trigger:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+}
+.admin-menu-trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.admin-head-context {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.admin-breadcrumb {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.admin-breadcrumb-root {
+  color: #d7d7d7;
+  font-size: 12px;
+  font-weight: 750;
+}
+.admin-breadcrumb-current {
+  overflow: hidden;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: -.01em;
+  text-overflow: ellipsis;
+}
+.admin-head-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+.admin-role-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  max-width: 170px;
+  overflow: hidden;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #ededed;
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-live-status {
+  color: #a5f3c2;
+  font-size: 12px;
+  font-weight: 800;
+}
+.admin-live-dot {
+  border: 2px solid rgba(8,8,8,.65);
+}
+.business-section-collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  margin-left: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gold-soft);
+  font-size: 20px;
+  font-weight: 550;
+  line-height: 1;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.business-section-collapse:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+.business-section-collapse:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.audit-search {
+  flex: 1 1 240px;
+  max-width: 410px;
+}
+.audit-search input {
+  min-width: 0;
+  width: 100%;
+}
+.audit-log-table-wrap {
+  max-height: min(70dvh, 760px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+.audit-log-table-wrap .admin-telemetry-table {
+  min-width: 900px;
+}
+@media (max-width: 640px) {
+  .admin-head {
+    min-height: 64px;
+    gap: 8px;
+    padding: 9px 12px;
+  }
+  .admin-head-brand {
+    gap: 9px;
+  }
+  .admin-menu-trigger {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 10px;
+  }
+  .admin-breadcrumb-root {
+    color: #cfcfcf;
+    font-size: 11px;
+  }
+  .admin-breadcrumb-current {
+    font-size: 13px;
+  }
+  .admin-head-caption {
+    margin-top: 1px;
+    font-size: 10px;
+  }
+  .admin-head-meta {
+    gap: 7px;
+  }
+  .admin-role-chip {
+    max-width: 92px;
+    min-height: 28px;
+    padding-inline: 8px;
+    font-size: 10px;
+  }
+  .admin-live-status {
+    gap: 5px;
+    font-size: 10px;
+  }
+}
+@media (max-width: 380px) {
+  .admin-breadcrumb-root,
+  .admin-breadcrumb-separator {
+    display: none;
+  }
+  .admin-role-chip {
+    max-width: 68px;
+  }
+  .admin-head-meta {
+    gap: 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-menu-trigger,
+  .business-section-collapse {
+    transition: none;
+  }
+}
