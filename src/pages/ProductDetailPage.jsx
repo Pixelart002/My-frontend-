@@ -24,6 +24,7 @@ import {
 } from '@remixicon/react';
 import { productService } from '../services/products';
 import { formatMoney } from '../utils/format';
+import ProductPrice from '../components/ProductPrice';
 import {
  absoluteUrl,
  defaultShareImage,
@@ -832,24 +833,7 @@ export default function ProductDetailPage() {
             </p>
           )}
 
-          <div className="product-price">
-            <span className="now">
-              {formatMoney(price)}
-            </span>
-
-            {compare > price &&
-              price > 0 && (
-                <span className="was">
-                  {formatMoney(compare)}
-                </span>
-              )}
-
-            {discount > 0 && (
-              <span className="save">
-                Save {discount}%
-              </span>
-            )}
-          </div>
+          <ProductPrice price={price} comparePrice={compare} variant="detail" showSavings={false} />
 
           <p
             className={`stock-note ${
