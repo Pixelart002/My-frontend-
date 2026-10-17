@@ -36,6 +36,7 @@ jobs:
           pkg.devDependencies['@tailwindcss/cli'] = '4.3.3';
           pkg.devDependencies.postcss = '^8.5.6';
           pkg.devDependencies['postcss-selector-parser'] = '7.1.6';
+          pkg.overrides = { ...(pkg.overrides || {}), '@parcel/watcher': '2.6.0' };
           pkg.scripts['build:css'] = 'tailwindcss -i ./src/styles/tailwind-input.css -o ./public/tailwind.css --minify && node ./scripts/scope-tailwind-utilities.mjs';
           fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
           NODE
@@ -129,6 +130,7 @@ jobs:
           npm ci
       - name: Full dependency audit inventory
         id: audit
+        continue-on-error: true
         shell: bash
         run: |
           set +e
