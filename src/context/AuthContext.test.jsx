@@ -129,6 +129,21 @@ describe('AuthContext session restoration', () => {
     expect(sessionStorage.getItem('__lv_has_session')).toBe('1');
   });
 
+  it('treats a missing refresh cookie as a normal signed-out state', async () => {
+    fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    renderSession();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('initializing')).toHaveTextContent('false');
+    });
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+    expect(screen.getByTestId('restore-error')).toHaveTextContent('false');
+    expect(setAccessToken).toHaveBeenLastCalledWith(null);
+  });
+
   it('clears a definitively expired session without retrying', async () => {
     sessionStorage.setItem('__lv_has_session', '1');
     fetch.mockResolvedValueOnce(
