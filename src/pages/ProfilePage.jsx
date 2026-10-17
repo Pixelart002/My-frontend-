@@ -111,10 +111,7 @@ export default function ProfilePage() {
   const onSubmit = async (event) => {
     event.preventDefault();
 
-    if (
-      savingRef.current ||
-      saving
-    ) {
+    if (savingRef.current || saving) {
       return;
     }
 
@@ -122,52 +119,42 @@ export default function ProfilePage() {
 
     const nextFullName = text(fullName);
     const nextPhone = normalizePhone(phone);
+    const currentFullName = getUserName(user);
+    const currentPhone = normalizePhone(getUserPhone(user));
 
-    if (
-      nextFullName &&
-      nextFullName.length > 120
-    ) {
-      setError(
-        'Full name must be 120 characters or fewer.',
-      );
+    if (currentFullName && !nextFullName) {
+      setError('Full name is required.');
       return;
     }
 
-    if (
-      nextPhone &&
-      !PHONE_PATTERN.test(nextPhone)
-    ) {
-      setError(
-        'Please enter a valid Indian mobile number.',
-      );
+    if (nextFullName && nextFullName.length < 2) {
+      setError('Full name must contain at least 2 characters.');
       return;
     }
 
-    const currentFullName =
-      getUserName(user);
+    if (nextFullName.length > 120) {
+      setError('Full name must be 120 characters or fewer.');
+      return;
+    }
 
-    const currentPhone =
-      normalizePhone(getUserPhone(user));
+    if (nextPhone && !PHONE_PATTERN.test(nextPhone)) {
+      setError('Please enter a valid Indian mobile number.');
+      return;
+    }
 
     const payload = {};
 
-    if (
-      nextFullName !== currentFullName
-    ) {
-      payload.full_name =
-        nextFullName || undefined;
+    if (nextFullName !== currentFullName) {
+      payload.full_name = nextFullName || undefined;
     }
 
-    if (
-      nextPhone !== currentPhone
-    ) {
-      payload.phone =
-        nextPhone || undefined;
+    if (nextPhone !== currentPhone) {
+      // Send null explicitly when the user clears an optional phone field;
+      // undefined is removed by JSON.stringify and would silently skip it.
+      payload.phone = nextPhone || null;
     }
 
-    if (
-      Object.keys(payload).length === 0
-    ) {
+    if (Object.keys(payload).length === 0) {
       setEditing(false);
       return;
     }
@@ -176,24 +163,57 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      await userService.updateMe(payload);
+      const savedProfile = await userService.updateMe(payload);
 
       if (!mountedRef.current) {
         return;
       }
 
-      await refreshProfile();
-
-      if (!mountedRef.current) {
-        return;
+      if (
+        !savedProfile ||
+        typeof savedProfile !== 'object' ||
+        Array.isArray(savedProfile)
+      ) {
+        throw new Error(
+          'The server did not confirm your profile changes. Please try again.',
+        );
       }
+
+      const hasFullName = Object.prototype.hasOwnProperty.call(
+        payload,
+        'full_name',
+      );
+      const hasPhone = Object.prototype.hasOwnProperty.call(
+        payload,
+        'phone',
+      );
+
+      if (
+        hasFullName &&
+        text(savedProfile.full_name) !== nextFullName
+      ) {
+        throw new Error(
+          'Your name was not confirmed as saved. Please retry.',
+        );
+      }
+
+      if (
+        hasPhone &&
+        normalizePhone(savedProfile.phone) !== nextPhone
+      ) {
+        throw new Error(
+          'Your phone number was not confirmed as saved. Please retry.',
+        );
+      }
+
+      // Update the shared header/account state from the row returned by the
+      // backend mutation. Do not overwrite it with a potentially cached GET.
+      applyProfileUpdate(savedProfile);
 
       setEditing(false);
       setError('');
 
-      toast.success(
-        'Profile updated.',
-      );
+      toast.success('Profile updated.');
     } catch (err) {
       if (!mountedRef.current) {
         return;
