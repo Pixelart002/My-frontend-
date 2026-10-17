@@ -163,3 +163,31 @@ header,
     display: none !important;
   }
 }
+
+
+/* ============================================================
+   STOREFRONT FULL-BLEED FRAME
+   Legacy refinement CSS may re-add horizontal padding to the
+   shared route frame. Keep page backgrounds edge-to-edge while
+   individual page components own their own content gutters.
+   ============================================================ */
+html body #root .store-layout > .store-main {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+html body #root .store-layout > .store-main > .store-page-frame {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html body #root .store-layout > .store-main > .store-page-frame > main[aria-labelledby="home-title"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
