@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import AdminModal from './Modal';
 
 import {
   RiAddLine,
@@ -948,11 +949,17 @@ export default function CouponsPanel({
         {formOpen &&
           (canCreate ||
             canUpdate) && (
-            <form
-              className="admin-card coupon-form"
-              onSubmit={save}
-              noValidate
+            <AdminModal
+              className="coupon-editor-modal"
+              title={editing ? `Edit coupon · ${editing.code || ''}` : 'Create coupon'}
+              sub="Configure discount rules, usage limits and validity dates."
+              onClose={closeForm}
             >
+              <form
+                className="coupon-form"
+                onSubmit={save}
+                noValidate
+              >
               <div className="field-grid">
                 <div className="field">
                   <label htmlFor="coupon-code">
@@ -1395,7 +1402,8 @@ export default function CouponsPanel({
                   Cancel
                 </button>
               </div>
-            </form>
+              </form>
+            </AdminModal>
           )}
 
         {!canCreate &&
