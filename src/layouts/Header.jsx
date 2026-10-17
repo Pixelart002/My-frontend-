@@ -126,6 +126,9 @@ export default function Header() {
   const mobileNavRef =
     useRef(null);
 
+  const mobileTriggerRef =
+    useRef(null);
+
   const mobileCloseRef =
     useRef(null);
 
@@ -267,11 +270,35 @@ export default function Header() {
     setMenuOpen(false);
   }, []);
 
+  // Return keyboard focus to the menu trigger after dismissing the drawer.
+  // The trigger is intentionally hidden while the drawer is open, so focus
+  // must be restored after React has made it visible again.
+  const closeMobileNavigation = useCallback(() => {
+    closeAll();
+
+    const restoreFocus = () => {
+      const trigger = mobileTriggerRef.current;
+      if (!trigger || trigger.disabled) return;
+
+      try {
+        trigger.focus({ preventScroll: true });
+      } catch {
+        trigger.focus();
+      }
+    };
+
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(restoreFocus);
+    } else {
+      Promise.resolve().then(restoreFocus);
+    }
+  }, [closeAll]);
+
   useFocusTrap({
     enabled: mobileOpen,
     containerRef: mobileNavRef,
     initialFocusRef: mobileCloseRef,
-    onEscape: closeAll,
+    onEscape: closeMobileNavigation,
   });
 
   const onSearch = useCallback(
@@ -708,12 +735,14 @@ export default function Header() {
 
           <button
             type="button"
-            className={`menu-button relative z-[1] inline-flex h-11 w-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] border border-line bg-surface p-0 text-text transition-[opacity,visibility,border-color,background-color,color] duration-150 hover:border-[rgb(216_173_106_/_0.38)] hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px] ${mobileOpen ? 'pointer-events-none invisible opacity-0' : 'visible opacity-100'}`}
+            ref={mobileTriggerRef}\n            className={`menu-button relative z-[1] inline-flex h-11 w-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] border border-line bg-surface p-0 text-text transition-[opacity,visibility,border-color,background-color,color] duration-150 hover:border-[rgb(216_173_106_/_0.38)] hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[375px]:h-[42px] max-[375px]:w-[42px] max-[375px]:min-w-[42px] ${mobileOpen ? 'pointer-events-none invisible opacity-0' : 'visible opacity-100'}`}
             onClick={() => {
-              setMobileOpen(
-                (current) =>
-                  !current,
-              );
+              if (mobileOpen) {
+                closeMobileNavigation();
+                return;
+              }
+
+              setMobileOpen(true);
               setMenuOpen(false);
             }}
             aria-expanded={
@@ -744,7 +773,7 @@ export default function Header() {
       <div
         className={`mobile-menu-backdrop fixed inset-0 z-[900] bg-black/60 transition-opacity duration-200 motion-reduce:transition-none ${mobileOpen ? 'pointer-events-auto visible opacity-100' : 'pointer-events-none invisible opacity-0'}`}
         aria-hidden="true"
-        onClick={closeAll}
+        onClick={closeMobileNavigation}
       />
 
       <aside
@@ -772,7 +801,7 @@ export default function Header() {
             ref={mobileCloseRef}
             type="button"
             className="mobile-nav-close absolute right-3 top-3 z-[121] inline-flex h-10 w-10 min-h-10 min-w-10 items-center justify-center rounded-[10px] border border-line bg-bg p-0 text-text shadow-[0_8px_24px_rgba(0,0,0,.22)] transition-colors hover:border-[rgb(216_173_106_/_0.35)] hover:bg-surface-2 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[900px]:top-3 max-[900px]:right-3 min-[901px]:static min-[901px]:h-[38px] min-[901px]:w-[38px] min-[901px]:min-w-[38px] min-[901px]:min-h-[38px]"
-            onClick={closeAll}
+            onClick={closeMobileNavigation}
             aria-label="Close menu"
             tabIndex={
               mobileOpen
