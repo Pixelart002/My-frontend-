@@ -1289,14 +1289,19 @@ function NotificationsPanel() {
             <div className="stat-value">
               {loading
                 ? '…'
-                : pretty(stats?.subscriptions ?? stats?.total ?? 0)}
+                : pretty(stats?.total_subscriptions ?? stats?.subscriptions ?? stats?.total ?? 0)}
             </div>
           </div>
 
           <div className="admin-stat">
-            <div className="stat-label">Delivery health</div>
+            <div className="stat-label">Subscribed customers</div>
+            <div className="stat-value">{loading ? '…' : pretty(stats?.unique_users ?? 0)}</div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Push configuration</div>
             <div className="stat-value ops-stat-value-sm">
-              Server-side
+              {loading ? 'Checking…' : stats?.vapid_configured ? 'Configured' : 'Not configured'}
             </div>
           </div>
         </div>
@@ -1884,6 +1889,14 @@ function ReportsPanel() {
   const topProducts = Array.isArray(report?.top_products)
     ? report.top_products
     : [];
+  const totalStatusOrders = statusCounts.reduce(
+    (total, [, count]) => total + (Number(count) || 0),
+    0,
+  );
+  const maxStatusCount = Math.max(
+    1,
+    ...statusCounts.map(([, count]) => Number(count) || 0),
+  );
 
   return (
     <section className="admin-panel">
@@ -1927,13 +1940,22 @@ function ReportsPanel() {
         <h3>Order status</h3>
 
         {statusCounts.length ? (
-          <div className="ops-report-grid">
-            {statusCounts.map(([key, value]) => (
-              <div className="ops-report-item" key={key}>
-                <span>{key}</span>
-                <strong>{value}</strong>
-              </div>
-            ))}
+          <div className="ops-report-grid" role="list" aria-label="Order status breakdown">
+            {statusCounts.map(([key, value]) => {
+              const count = Number(value) || 0;
+              const percentage = totalStatusOrders
+                ? Math.round((count / totalStatusOrders) * 100)
+                : 0;
+              return (
+                <div className="ops-report-item" role="listitem" key={key}>
+                  <span>{String(key).replaceAll('_', ' ')}</span>
+                  <strong>{pretty(count)} <span className="ops-report-percent">{percentage}%</span></strong>
+                  <div className="ops-report-track" role="meter" aria-label={`${key} orders`} aria-valuemin={0} aria-valuemax={maxStatusCount} aria-valuenow={count}>
+                    <span className="ops-report-fill" style={{ width: `${Math.max(0, Math.min(100, (count / maxStatusCount) * 100))}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="admin-empty">
