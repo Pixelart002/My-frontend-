@@ -1142,6 +1142,17 @@ function NotificationsPanel() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/');
+  const [icon, setIcon] = useState('/icon-192.png');
+  const [badge, setBadge] = useState('/icon-192.png');
+  const [image, setImage] = useState('');
+  const [tag, setTag] = useState('luviio-offer');
+  const [requireInteraction, setRequireInteraction] = useState(false);
+  const [renotify, setRenotify] = useState(false);
+  const [targetUsers, setTargetUsers] = useState('');
+  const [actionOneTitle, setActionOneTitle] = useState('');
+  const [actionOneUrl, setActionOneUrl] = useState('');
+  const [actionTwoTitle, setActionTwoTitle] = useState('');
+  const [actionTwoUrl, setActionTwoUrl] = useState('');
 
   const [sending, setSending] = useState(false);
 
@@ -1179,9 +1190,34 @@ function NotificationsPanel() {
     const normalizedTitle = text(title);
     const normalizedBody = text(body);
     const normalizedUrl = text(url) || '/';
+    const normalizedIcon = text(icon) || '/icon-192.png';
+    const normalizedBadge = text(badge) || '/icon-192.png';
+    const normalizedImage = text(image);
+    const normalizedTag = text(tag) || 'luviio-notification';
+    const normalizedTargets = targetUsers.trim()
+      ? targetUsers.split(/[\\s,;]+/).map((id) => id.trim()).filter(Boolean)
+      : null;
+    const actionFields = [
+      { title: text(actionOneTitle), action: text(actionOneUrl) },
+      { title: text(actionTwoTitle), action: text(actionTwoUrl) },
+    ];
+    const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
+    const actions = actionFields.filter((item) => item.title && item.action);
 
     if (!normalizedTitle || !normalizedBody) {
       toast.error('Title and message are required.');
+      return;
+    }
+    if (partialAction) {
+      toast.error('Each notification action needs both a title and an in-site path.');
+      return;
+    }
+    if ([normalizedUrl, normalizedIcon, normalizedBadge, normalizedImage, ...actions.map((item) => item.action)].some((value) => value && (!value.startsWith('/') || value.startsWith('//')))) {
+      toast.error('Notification links and assets must use in-site paths beginning with /.');
+      return;
+    }
+    if (normalizedTargets?.some((id) => id.length < 8)) {
+      toast.error('Check the targeted user IDs or leave the audience empty to send to all subscribed users.');
       return;
     }
 
@@ -1189,10 +1225,17 @@ function NotificationsPanel() {
 
     try {
       const result = await adminService.sendPush({
-        user_ids: null,
+        user_ids: normalizedTargets,
         title: normalizedTitle,
         body: normalizedBody,
         url: normalizedUrl,
+        icon: normalizedIcon,
+        badge: normalizedBadge,
+        ...(normalizedImage ? { image: normalizedImage } : {}),
+        tag: normalizedTag,
+        require_interaction: requireInteraction,
+        renotify,
+        actions,
       });
 
       if (!mountedRef.current) return;
@@ -1201,6 +1244,10 @@ function NotificationsPanel() {
 
       setTitle('');
       setBody('');
+      setActionOneTitle('');
+      setActionOneUrl('');
+      setActionTwoTitle('');
+      setActionTwoUrl('');
 
       await load();
     } catch (error) {
@@ -1244,42 +1291,76 @@ function NotificationsPanel() {
           </div>
         </div>
 
-        <form onSubmit={send} className="ops-form" noValidate>
+        <form onSubmit={send} className="ops-form notification-composer" noValidate>
+          <div className="notification-section-heading">
+            <h3>Message content</h3>
+            <p>Use a clear title, concise message and an in-site destination.</p>
+          </div>
           <label>
             Title
-            <input
-              required
-              maxLength={80}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-            />
+            <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
           </label>
-
           <label>
             Message
-            <textarea
-              required
-              maxLength={240}
-              rows="4"
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-            />
+            <textarea required maxLength={2000} rows="4" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
           </label>
-
-          <label>
-            Destination URL
-            <input
-              value={url}
-              maxLength={500}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="/shop"
-            />
-          </label>
-
-          <button className="btn" type="submit" disabled={sending}>
-            <RiSendPlaneLine size={16} aria-hidden="true" />
-            {sending ? 'Sending…' : 'Send notification'}
-          </button>
+          <div className="field-grid notification-media-grid">
+            <label>
+              Click destination
+              <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/products/floor-drainer-square-ring" />
+            </label>
+            <label>
+              Notification icon path
+              <input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" />
+            </label>
+            <label>
+              Badge path
+              <input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" />
+            </label>
+            <label>
+              Large image path (optional)
+              <input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" />
+            </label>
+            <label>
+              Campaign tag
+              <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" />
+            </label>
+            <label>
+              Specific user IDs (optional)
+              <input value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Leave empty to send to all subscribers" />
+            </label>
+          </div>
+          <fieldset className="notification-actions-config">
+            <legend>Optional notification buttons (up to 2)</legend>
+            <div className="field-grid">
+              <label>
+                Button 1 label
+                <input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" />
+              </label>
+              <label>
+                Button 1 destination path
+                <input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" />
+              </label>
+              <label>
+                Button 2 label
+                <input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" />
+              </label>
+              <label>
+                Button 2 destination path
+                <input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" />
+              </label>
+            </div>
+          </fieldset>
+          <div className="notification-toggles">
+            <label><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /> Keep visible until interaction (where supported)</label>
+            <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
+          </div>
+          <div className="notification-form-actions">
+            <button className="btn" type="submit" disabled={sending || loading}>
+              <RiSendPlaneLine size={16} aria-hidden="true" />
+              {sending ? 'Sending…' : 'Send notification'}
+            </button>
+          </div>
         </form>
       </div>
     </section>
@@ -1512,20 +1593,34 @@ function SettingsPanel() {
                 Value
               </label>
 
-              <textarea
-                id="admin-setting-value"
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                rows={
-                  editing.data_type === 'json' ||
-                  typeof editing.value === 'object'
-                    ? 9
-                    : 5
-                }
-                spellCheck="false"
-                autoFocus
-                aria-describedby="admin-setting-help"
-              />
+              {editing.data_type === 'boolean' ? (
+                <div className="setting-radio-options" role="radiogroup" aria-labelledby="admin-setting-value">
+                  <span id="admin-setting-value" className="setting-radio-label">Choose a value</span>
+                  <label>
+                    <input type="radio" name="admin-setting-boolean" value="true" checked={draft.trim().toLowerCase() === 'true'} onChange={() => setDraft('true')} />
+                    <span>Enabled · true</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="admin-setting-boolean" value="false" checked={draft.trim().toLowerCase() === 'false'} onChange={() => setDraft('false')} />
+                    <span>Disabled · false</span>
+                  </label>
+                </div>
+              ) : (
+                <textarea
+                  id="admin-setting-value"
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  rows={
+                    editing.data_type === 'json' ||
+                    typeof editing.value === 'object'
+                      ? 9
+                      : 5
+                  }
+                  spellCheck="false"
+                  autoFocus
+                  aria-describedby="admin-setting-help"
+                />
+              )}
 
               <small id="admin-setting-help">
                 JSON settings must contain valid JSON. String values are
