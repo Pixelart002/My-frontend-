@@ -622,6 +622,8 @@ export default function BusinessProfilePanel() {
     setEditingAddress,
   ] = useState(false);
 
+  const [collapsedSections, setCollapsedSections] = useState({});
+
   const logoInput =
     useRef(null);
 
@@ -1075,23 +1077,6 @@ export default function BusinessProfilePanel() {
             Refresh
           </button>
 
-          <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-            type="button"
-            onClick={save}
-            disabled={
-              saving || !dirty
-            }
-            aria-busy={saving}
-          >
-            <RiSave3Line
-              size={16}
-              aria-hidden="true"
-            />
-            {saving
-              ? 'Saving…'
-              : 'Save changes'}
-          </button>
         </div>
       </div>
 
@@ -1167,256 +1152,295 @@ export default function BusinessProfilePanel() {
                   </button>
                 </div>
               )}
+
+              <button
+                type="button"
+                className="business-section-collapse"
+                onClick={() => setCollapsedSections((current) => ({
+                  ...current,
+                  [section]: !current[section],
+                }))}
+                aria-expanded={!collapsedSections[section]}
+                aria-label={`${collapsedSections[section] ? 'Expand' : 'Collapse'} ${section}`}
+                title={collapsedSections[section] ? 'Expand section' : 'Collapse section'}
+              >
+                <span aria-hidden="true">{collapsedSections[section] ? '+' : '−'}</span>
+              </button>
             </div>
 
-            {section ===
-            'Brand assets' ? (
-              <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
-                <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
-                  <div>
-                    <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
-                      Business logo
+            {!collapsedSections[section] && (
+              <>
+                              {section ===
+              'Brand assets' ? (
+                <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
+                  <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
+                    <div>
+                      <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
+                        Business logo
+                      </div>
+
+                      <p className="mt-1 text-[11px] leading-6 text-muted">
+                        Shown on newly generated
+                        invoices when uploaded.
+                      </p>
                     </div>
 
-                    <p className="mt-1 text-[11px] leading-6 text-muted">
-                      Shown on newly generated
-                      invoices when uploaded.
-                    </p>
-                  </div>
+                    <div className="flex min-h-[90px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-bg text-dim [&_img]:block [&_img]:max-h-[100px] [&_img]:max-w-[90%] [&_img]:object-contain">
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt="Business logo preview"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span>
+                          No logo uploaded
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="flex min-h-[90px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-bg text-dim [&_img]:block [&_img]:max-h-[100px] [&_img]:max-w-[90%] [&_img]:object-contain">
-                    {logoUrl ? (
-                      <img
-                        src={logoUrl}
-                        alt="Business logo preview"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span>
-                        No logo uploaded
-                      </span>
-                    )}
-                  </div>
-
-                  <input
-                    ref={logoInput}
-                    className="asset-file-input"
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={
-                      uploadLogo
-                    }
-                    aria-label="Choose business logo"
-                  />
-
-                  <button
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
-                    type="button"
-                    onClick={() =>
-                      logoInput.current?.click()
-                    }
-                    disabled={assetBusy}
-                    aria-busy={
-                      assetBusy
-                    }
-                  >
-                    <RiUploadCloud2Line
-                      size={16}
-                      aria-hidden="true"
+                    <input
+                      ref={logoInput}
+                      className="asset-file-input"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={
+                        uploadLogo
+                      }
+                      aria-label="Choose business logo"
                     />
 
-                    {assetBusy
-                      ? 'Uploading…'
-                      : logoUrl
-                        ? 'Replace logo'
-                        : 'Upload from device'}
-                  </button>
+                    <button
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-transparent bg-gold px-4 text-xs font-bold text-gold-ink transition-colors hover:bg-gold-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-50"
+                      type="button"
+                      onClick={() =>
+                        logoInput.current?.click()
+                      }
+                      disabled={assetBusy}
+                      aria-busy={
+                        assetBusy
+                      }
+                    >
+                      <RiUploadCloud2Line
+                        size={16}
+                        aria-hidden="true"
+                      />
 
-                  <small>
-                    PNG, JPG or WebP ·
-                    max 5 MB
-                  </small>
-                </div>
+                      {assetBusy
+                        ? 'Uploading…'
+                        : logoUrl
+                          ? 'Replace logo'
+                          : 'Upload from device'}
+                    </button>
 
-                <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
-                  <div>
-                    <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
-                      Authorised signature
-                    </div>
-
-                    <p className="mt-1 text-[11px] leading-6 text-muted">
-                      Optional. Appears on
-                      newly issued invoices
-                      when saved.
-                    </p>
+                    <small>
+                      PNG, JPG or WebP ·
+                      max 5 MB
+                    </small>
                   </div>
 
-                  {signatureUrl ? (
-                    <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim [&_img]:block [&_img]:max-h-[68px] [&_img]:max-w-[90%] [&_img]:object-contain">
-                      <img
-                        src={signatureUrl}
-                        alt="Saved authorised signature"
-                        loading="lazy"
-                      />
+                  <div className="flex min-w-0 flex-col gap-2.5 rounded-xl border border-line bg-surface-2 p-4">
+                    <div>
+                      <div className="text-xs font-extrabold uppercase tracking-[.08em] leading-tight text-text">
+                        Authorised signature
+                      </div>
+
+                      <p className="mt-1 text-[11px] leading-6 text-muted">
+                        Optional. Appears on
+                        newly issued invoices
+                        when saved.
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim">
-                      <span>
-                        No signature saved
-                      </span>
-                    </div>
-                  )}
 
-                  <SignaturePad
-                    onSaved={(url) => {
-                      setSignatureUrl(
-                        url,
-                      );
-
-                      toast.success(
-                        'Authorised signature saved.',
-                      );
-                    }}
-                    onError={(error) =>
-                      toast.error(
-                        error?.message ||
-                          'Unable to save signature.',
-                      )
-                    }
-                  />
-
-                  <small>
-                    Sign with your finger,
-                    then save. You can clear
-                    and redraw before saving.
-                  </small>
-                </div>
-              </div>
-            ) : (
-              <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
-                {items.map(
-                  ([
-                    key,
-                    label,
-                    hint,
-                    required,
-                  ]) => {
-                    if (
-                      key ===
-                        'seller_gstin' &&
-                      !gstRegistered
-                    ) {
-                      return null;
-                    }
-
-                    const addressLocked =
-                      ADDRESS_KEYS.has(
-                        key,
-                      ) &&
-                      !editingAddress;
-
-                    return (
-                      <label
-                        className="flex min-w-0 flex-col gap-1.5 [&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:gap-2 [&>span]:text-[11px] [&>span]:font-bold [&>span]:uppercase [&>span]:tracking-[.08em] [&>span]:text-muted [&_em]:shrink-0 [&_em]:text-[9px] [&_em]:font-semibold [&_em]:not-italic [&_em]:normal-case [&_em]:text-gold-soft [&_input]:min-h-[42px] [&_input]:w-full [&_input]:min-w-0 [&_input]:rounded-lg [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_input:disabled]:cursor-not-allowed [&_input:disabled]:opacity-60 [&_select]:min-h-[42px] [&_select]:w-full [&_select]:min-w-0 [&_select]:rounded-lg [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3 [&_select]:text-sm [&_select]:text-text [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)]"
-                        key={key}
-                      >
+                    {signatureUrl ? (
+                      <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim [&_img]:block [&_img]:max-h-[68px] [&_img]:max-w-[90%] [&_img]:object-contain">
+                        <img
+                          src={signatureUrl}
+                          alt="Saved authorised signature"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex min-h-[76px] items-center justify-center overflow-hidden rounded-lg border border-dashed border-line bg-white text-dim">
                         <span>
-                          {label}
-
-                          {required && (
-                            <em>
-                              Required
-                            </em>
-                          )}
+                          No signature saved
                         </span>
+                      </div>
+                    )}
 
-                        {key ===
-                        'seller_gst_registered' ? (
-                          <select
-                            value={
-                              gstRegistered
-                                ? 'true'
-                                : 'false'
-                            }
-                            onChange={(
-                              event,
-                            ) =>
-                              setValue(
-                                key,
-                                event.target
-                                  .value ===
-                                  'true',
-                              )
-                            }
-                          >
-                            <option value="false">
-                              Not registered
-                            </option>
+                    <SignaturePad
+                      onSaved={(url) => {
+                        setSignatureUrl(
+                          url,
+                        );
 
-                            <option value="true">
-                              GST registered
-                            </option>
-                          </select>
-                        ) : (
-                          <input
-                            value={
-                              values[key] ??
-                              ''
-                            }
-                            onChange={(
-                              event,
-                            ) =>
-                              setValue(
-                                key,
-                                event.target
-                                  .value,
-                              )
-                            }
-                            placeholder={
-                              hint
-                            }
-                            readOnly={
-                              addressLocked
-                            }
-                            aria-readonly={
-                              addressLocked
-                            }
-                            className={
-                              addressLocked
-                                ? 'address-readonly'
-                                : ''
-                            }
-                            autoComplete={
-                              key ===
-                              'business_email'
-                                ? 'email'
-                                : key ===
-                                    'business_phone'
-                                  ? 'tel'
-                                  : 'off'
-                            }
-                          />
-                        )}
+                        toast.success(
+                          'Authorised signature saved.',
+                        );
+                      }}
+                      onError={(error) =>
+                        toast.error(
+                          error?.message ||
+                            'Unable to save signature.',
+                        )
+                      }
+                    />
 
-                        {key ===
+                    <small>
+                      Sign with your finger,
+                      then save. You can clear
+                      and redraw before saving.
+                    </small>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid min-w-0 grid-cols-2 gap-4 max-[700px]:grid-cols-1 max-[700px]:gap-3">
+                  {items.map(
+                    ([
+                      key,
+                      label,
+                      hint,
+                      required,
+                    ]) => {
+                      if (
+                        key ===
                           'seller_gstin' &&
-                          gstRegistered && (
-                            <small>
-                              Enter the
-                              15-character
-                              GSTIN exactly
-                              as issued.
-                            </small>
+                        !gstRegistered
+                      ) {
+                        return null;
+                      }
+
+                      const addressLocked =
+                        ADDRESS_KEYS.has(
+                          key,
+                        ) &&
+                        !editingAddress;
+
+                      return (
+                        <label
+                          className="flex min-w-0 flex-col gap-1.5 [&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:gap-2 [&>span]:text-[11px] [&>span]:font-bold [&>span]:uppercase [&>span]:tracking-[.08em] [&>span]:text-muted [&_em]:shrink-0 [&_em]:text-[9px] [&_em]:font-semibold [&_em]:not-italic [&_em]:normal-case [&_em]:text-gold-soft [&_input]:min-h-[42px] [&_input]:w-full [&_input]:min-w-0 [&_input]:rounded-lg [&_input]:border [&_input]:border-line [&_input]:bg-bg [&_input]:px-3 [&_input]:text-sm [&_input]:text-text [&_input]:outline-none [&_input:focus]:border-gold [&_input:focus]:ring-2 [&_input:focus]:ring-[rgba(216,173,106,.10)] [&_input:disabled]:cursor-not-allowed [&_input:disabled]:opacity-60 [&_select]:min-h-[42px] [&_select]:w-full [&_select]:min-w-0 [&_select]:rounded-lg [&_select]:border [&_select]:border-line [&_select]:bg-bg [&_select]:px-3 [&_select]:text-sm [&_select]:text-text [&_select:focus]:border-gold [&_select:focus]:ring-2 [&_select:focus]:ring-[rgba(216,173,106,.10)]"
+                          key={key}
+                        >
+                          <span>
+                            {label}
+
+                            {required && (
+                              <em>
+                                Required
+                              </em>
+                            )}
+                          </span>
+
+                          {key ===
+                          'seller_gst_registered' ? (
+                            <select
+                              value={
+                                gstRegistered
+                                  ? 'true'
+                                  : 'false'
+                              }
+                              onChange={(
+                                event,
+                              ) =>
+                                setValue(
+                                  key,
+                                  event.target
+                                    .value ===
+                                    'true',
+                                )
+                              }
+                            >
+                              <option value="false">
+                                Not registered
+                              </option>
+
+                              <option value="true">
+                                GST registered
+                              </option>
+                            </select>
+                          ) : (
+                            <input
+                              value={
+                                values[key] ??
+                                ''
+                              }
+                              onChange={(
+                                event,
+                              ) =>
+                                setValue(
+                                  key,
+                                  event.target
+                                    .value,
+                                )
+                              }
+                              placeholder={
+                                hint
+                              }
+                              readOnly={
+                                addressLocked
+                              }
+                              aria-readonly={
+                                addressLocked
+                              }
+                              className={
+                                addressLocked
+                                  ? 'address-readonly'
+                                  : ''
+                              }
+                              autoComplete={
+                                key ===
+                                'business_email'
+                                  ? 'email'
+                                  : key ===
+                                      'business_phone'
+                                    ? 'tel'
+                                    : 'off'
+                              }
+                            />
                           )}
-                      </label>
-                    );
-                  },
-                )}
-              </div>
+
+                          {key ===
+                            'seller_gstin' &&
+                            gstRegistered && (
+                              <small>
+                                Enter the
+                                15-character
+                                GSTIN exactly
+                                as issued.
+                              </small>
+                            )}
+                        </label>
+                      );
+                    },
+                  )}
+                </div>
+              )}
+              </>
             )}
           </div>
         ),
       )}
+
+      <div className="business-profile-form-actions" role="group" aria-label="Business profile changes">
+        <button
+          className="btn btn-quiet"
+          type="button"
+          onClick={load}
+          disabled={saving || assetBusy || !dirty}
+        >
+          Cancel changes
+        </button>
+        <button
+          className="btn"
+          type="button"
+          onClick={save}
+          disabled={saving || !dirty || assetBusy}
+          aria-busy={saving}
+        >
+          <RiSave3Line size={16} aria-hidden="true" />
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
     </section>
   );
 }

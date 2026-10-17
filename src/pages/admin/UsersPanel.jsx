@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RiEditLine, RiSearchLine } from '@remixicon/react';
+import { RiEditLine, RiSearchLine, RiUserSettingsLine } from '@remixicon/react';
+import { useNavigate } from 'react-router-dom';
 import { adminService, itemsOfList } from '../../services/admin';
 import { useToast } from '../../context/ToastContext';
 import { ErrorState, Spinner } from '../../components/ui/States';
@@ -36,6 +37,7 @@ function formatDate(value) {
 export default function UsersPanel({ capabilities = {} }) {
   const canUpdate = capabilities.userUpdate === true;
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [items, setItems] = useState(null);
   const [error, setError] = useState('');
@@ -255,9 +257,7 @@ export default function UsersPanel({ capabilities = {} }) {
 
                   {canUpdate && (
                     <th scope="col">
-                      <span className="sr-only">
-                        Actions
-                      </span>
+                      <span className="sr-only">Actions</span>
                     </th>
                   )}
                 </tr>
@@ -298,20 +298,27 @@ export default function UsersPanel({ capabilities = {} }) {
 
                     {canUpdate && (
                       <td>
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() =>
-                            openEdit(user)
-                          }
-                          aria-label={`Edit ${user.email || 'user'}`}
-                        >
-                          <RiEditLine
-                            size={14}
-                            aria-hidden="true"
-                          />
-                          Edit
-                        </button>
+                        <div className="user-row-actions" role="group" aria-label={`Actions for ${user.email || 'user'}`}>
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm user-action-shortcut"
+                            onClick={() => navigate(`/admin?panel=user-actions&user_id=${encodeURIComponent(user.id)}`)}
+                            aria-label={`Manage actions for ${user.email || 'user'}`}
+                            title="Manage user actions"
+                          >
+                            <RiUserSettingsLine size={16} aria-hidden="true" />
+                            <span>User actions</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm"
+                            onClick={() => openEdit(user)}
+                            aria-label={`Edit ${user.email || 'user'}`}
+                          >
+                            <RiEditLine size={14} aria-hidden="true" />
+                            <span className="user-action-label">Edit</span>
+                          </button>
+                        </div>
                       </td>
                     )}
                   </tr>

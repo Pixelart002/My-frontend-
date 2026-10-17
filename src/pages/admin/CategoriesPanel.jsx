@@ -403,30 +403,23 @@ export default function CategoriesPanel({
         className="admin-panel categories-admin"
         aria-labelledby="categories-title"
       >
-        <div className="admin-head">
-          <div>
-            <h1 id="categories-title">
-              Categories
-            </h1>
-
-            <p className="admin-sub">
-              Organise the catalogue by
-              category.
-            </p>
+        <div className="admin-page-head categories-page-head">
+          <div className="categories-page-copy">
+            <h1 id="categories-title">Categories</h1>
+            <p className="admin-sub">Organise the catalogue by category.</p>
           </div>
 
           {canCreate && (
             <button
-              className="btn btn-sm"
+              className="btn btn-sm category-add-trigger"
               type="button"
               onClick={openAdd}
               disabled={saving}
+              aria-label="Add category"
+              title="Add category"
             >
-              <RiAddLine
-                size={16}
-                aria-hidden="true"
-              />
-              Add category
+              <RiAddLine size={20} aria-hidden="true" />
+              <span>Add category</span>
             </button>
           )}
         </div>
@@ -552,6 +545,7 @@ export default function CategoriesPanel({
 
       {editing && (
         <AdminModal
+          className="category-editor-modal"
           title="Add category"
           sub="Use a short, URL-safe slug for shop links."
           onClose={closeAdd}

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -12,6 +13,7 @@ import {
   RiDeleteBinLine,
   RiEditLine,
   RiRefreshLine,
+  RiSearchLine,
 } from '@remixicon/react';
 
 import {
@@ -181,6 +183,8 @@ export default function CouponsPanel({
     coupons,
     setCoupons,
   ] = useState([]);
+  
+  const [search, setSearch] = useState('');
   
   const [
     deleteTarget,
@@ -851,6 +855,23 @@ export default function CouponsPanel({
       toast,
     ]);
   
+  const visibleCoupons = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return coupons;
+    return coupons.filter((coupon) =>
+      [
+        coupon?.code,
+        coupon?.description,
+        coupon?.type,
+        coupon?.status,
+      ]
+        .filter((value) => value !== null && value !== undefined)
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [coupons, search]);
+
   return (
     <>
       <section
@@ -902,6 +923,18 @@ export default function CouponsPanel({
             )}
           </div>
         </div>
+
+        <label className="admin-search coupons-search" htmlFor="coupons-search">
+          <RiSearchLine size={16} aria-hidden="true" />
+          <input
+            id="coupons-search"
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search coupon code, description or type…"
+            autoComplete="off"
+          />
+        </label>
 
         {error && (
           <div
@@ -1387,10 +1420,10 @@ export default function CouponsPanel({
             >
               Loading coupons…
             </div>
-          ) : coupons.length ===
+          ) : visibleCoupons.length ===
             0 ? (
             <div className="state">
-              No coupons yet.
+              {search.trim() ? 'No coupons match your search.' : 'No coupons yet.'}
             </div>
           ) : (
             <div className="admin-table-wrap">
@@ -1434,7 +1467,7 @@ export default function CouponsPanel({
                 </thead>
 
                 <tbody>
-                  {coupons.map(
+                  {visibleCoupons.map(
                     (coupon) => {
                       const deleting =
                         deletingId ===

@@ -792,14 +792,17 @@ function SubscriptionPanel() {
 function UserActionsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
+  const [searchParams] = useSearchParams();
+  const requestedUserId = searchParams.get('user_id') || '';
 
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(requestedUserId);
   const [data, setData] = useState(null);
+  const autoLoadedUserIdRef = useRef('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
 
-  const load = useCallback(async () => {
-    const normalizedUserId = text(userId);
+  const load = useCallback(async (userIdOverride) => {
+    const normalizedUserId = text(typeof userIdOverride === 'string' ? userIdOverride : userId);
 
     if (!normalizedUserId) {
       toast.error('Enter a customer UUID.');
@@ -824,6 +827,13 @@ function UserActionsPanel() {
       }
     }
   }, [mountedRef, toast, userId]);
+
+  useEffect(() => {
+    if (!requestedUserId || autoLoadedUserIdRef.current === requestedUserId) return;
+    autoLoadedUserIdRef.current = requestedUserId;
+    setUserId(requestedUserId);
+    load(requestedUserId);
+  }, [load, requestedUserId]);
 
   const toggle = async (action, blocked) => {
     if (busy) return;
@@ -1003,10 +1013,10 @@ function RbacPanel() {
     [matrix],
   );
 
-  const toggle = async (row) => {
+  const setPermission = async (row, enabled) => {
     const key = `${row.role}:${row.permission}`;
 
-    if (busyKey) return;
+    if (busyKey || row.role === 'super_admin' || enabled === row.enabled) return;
 
     setBusyKey(key);
 
@@ -1014,7 +1024,7 @@ function RbacPanel() {
       await adminService.togglePermission(
         row.role,
         row.permission,
-        !row.enabled,
+        enabled,
       );
 
       if (!mountedRef.current) return;
@@ -1061,7 +1071,7 @@ function RbacPanel() {
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
                 <th scope="col">State</th>
-                <th scope="col">Action</th>
+                <th scope="col">Policy</th>
               </tr>
             </thead>
 
@@ -1089,20 +1099,22 @@ function RbacPanel() {
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() => toggle(row)}
-                          disabled={immutable || Boolean(busyKey)}
-                        >
-                          {immutable
-                            ? 'Absolute'
-                            : busyKey === key
-                              ? 'Saving…'
-                              : row.enabled
-                                ? 'Deny'
-                                : 'Allow'}
-                        </button>
+                        {immutable ? (
+                          <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
+                        ) : (
+                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
+                            <legend className="sr-only">{row.role} — {row.permission}</legend>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="allow" checked={row.enabled} onChange={() => setPermission(row, true)} disabled={Boolean(busyKey)} />
+                              <span>Allow</span>
+                            </label>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="deny" checked={!row.enabled} onChange={() => setPermission(row, false)} disabled={Boolean(busyKey)} />
+                              <span>Deny</span>
+                            </label>
+                            {busyKey === key && <span role="status">Saving…</span>}
+                          </fieldset>
+                        )}
                       </td>
                     </tr>
                   );
@@ -1140,6 +1152,17 @@ function NotificationsPanel() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/');
+  const [icon, setIcon] = useState('/icon-192.png');
+  const [badge, setBadge] = useState('/icon-192.png');
+  const [image, setImage] = useState('');
+  const [tag, setTag] = useState('luviio-offer');
+  const [requireInteraction, setRequireInteraction] = useState(false);
+  const [renotify, setRenotify] = useState(false);
+  const [targetUsers, setTargetUsers] = useState('');
+  const [actionOneTitle, setActionOneTitle] = useState('');
+  const [actionOneUrl, setActionOneUrl] = useState('');
+  const [actionTwoTitle, setActionTwoTitle] = useState('');
+  const [actionTwoUrl, setActionTwoUrl] = useState('');
 
   const [sending, setSending] = useState(false);
 
@@ -1177,9 +1200,34 @@ function NotificationsPanel() {
     const normalizedTitle = text(title);
     const normalizedBody = text(body);
     const normalizedUrl = text(url) || '/';
+    const normalizedIcon = text(icon) || '/icon-192.png';
+    const normalizedBadge = text(badge) || '/icon-192.png';
+    const normalizedImage = text(image);
+    const normalizedTag = text(tag) || 'luviio-notification';
+    const normalizedTargets = targetUsers.trim()
+      ? targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)
+      : null;
+    const actionFields = [
+      { title: text(actionOneTitle), action: text(actionOneUrl) },
+      { title: text(actionTwoTitle), action: text(actionTwoUrl) },
+    ];
+    const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
+    const actions = actionFields.filter((item) => item.title && item.action);
 
     if (!normalizedTitle || !normalizedBody) {
       toast.error('Title and message are required.');
+      return;
+    }
+    if (partialAction) {
+      toast.error('Each notification action needs both a title and an in-site path.');
+      return;
+    }
+    if ([normalizedUrl, normalizedIcon, normalizedBadge, normalizedImage, ...actions.map((item) => item.action)].some((value) => value && (!value.startsWith('/') || value.startsWith('//')))) {
+      toast.error('Notification links and assets must use in-site paths beginning with /.');
+      return;
+    }
+    if (normalizedTargets?.some((id) => id.length < 8)) {
+      toast.error('Check the targeted user IDs or leave the audience empty to send to all subscribed users.');
       return;
     }
 
@@ -1187,10 +1235,17 @@ function NotificationsPanel() {
 
     try {
       const result = await adminService.sendPush({
-        user_ids: null,
+        user_ids: normalizedTargets,
         title: normalizedTitle,
         body: normalizedBody,
         url: normalizedUrl,
+        icon: normalizedIcon,
+        badge: normalizedBadge,
+        ...(normalizedImage ? { image: normalizedImage } : {}),
+        tag: normalizedTag,
+        require_interaction: requireInteraction,
+        renotify,
+        actions,
       });
 
       if (!mountedRef.current) return;
@@ -1199,6 +1254,10 @@ function NotificationsPanel() {
 
       setTitle('');
       setBody('');
+      setActionOneTitle('');
+      setActionOneUrl('');
+      setActionTwoTitle('');
+      setActionTwoUrl('');
 
       await load();
     } catch (error) {
@@ -1230,54 +1289,93 @@ function NotificationsPanel() {
             <div className="stat-value">
               {loading
                 ? '…'
-                : pretty(stats?.subscriptions ?? stats?.total ?? 0)}
+                : pretty(stats?.total_subscriptions ?? stats?.subscriptions ?? stats?.total ?? 0)}
             </div>
           </div>
 
           <div className="admin-stat">
-            <div className="stat-label">Delivery health</div>
+            <div className="stat-label">Subscribed customers</div>
+            <div className="stat-value">{loading ? '…' : pretty(stats?.unique_users ?? 0)}</div>
+          </div>
+
+          <div className="admin-stat">
+            <div className="stat-label">Push configuration</div>
             <div className="stat-value ops-stat-value-sm">
-              Server-side
+              {loading ? 'Checking…' : stats?.vapid_configured ? 'Configured' : 'Not configured'}
             </div>
           </div>
         </div>
 
-        <form onSubmit={send} className="ops-form" noValidate>
+        <form onSubmit={send} className="ops-form notification-composer" noValidate>
+          <div className="notification-section-heading">
+            <h3>Message content</h3>
+            <p>Use a clear title, concise message and an in-site destination.</p>
+          </div>
           <label>
             Title
-            <input
-              required
-              maxLength={80}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-            />
+            <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
           </label>
-
           <label>
             Message
-            <textarea
-              required
-              maxLength={240}
-              rows="4"
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-            />
+            <textarea required maxLength={2000} rows="4" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
           </label>
-
-          <label>
-            Destination URL
-            <input
-              value={url}
-              maxLength={500}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="/shop"
-            />
-          </label>
-
-          <button className="btn" type="submit" disabled={sending}>
-            <RiSendPlaneLine size={16} aria-hidden="true" />
-            {sending ? 'Sending…' : 'Send notification'}
-          </button>
+          <div className="field-grid notification-media-grid">
+            <label>
+              Click destination
+              <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/products/floor-drainer-square-ring" />
+            </label>
+            <label>
+              Notification icon path
+              <input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" />
+            </label>
+            <label>
+              Badge path
+              <input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" />
+            </label>
+            <label>
+              Large image path (optional)
+              <input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" />
+            </label>
+            <label>
+              Campaign tag
+              <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" />
+            </label>
+            <label>
+              Specific user IDs (optional)
+              <input value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Leave empty to send to all subscribers" />
+            </label>
+          </div>
+          <fieldset className="notification-actions-config">
+            <legend>Optional notification buttons (up to 2)</legend>
+            <div className="field-grid">
+              <label>
+                Button 1 label
+                <input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" />
+              </label>
+              <label>
+                Button 1 destination path
+                <input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" />
+              </label>
+              <label>
+                Button 2 label
+                <input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" />
+              </label>
+              <label>
+                Button 2 destination path
+                <input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" />
+              </label>
+            </div>
+          </fieldset>
+          <div className="notification-toggles">
+            <label><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /> Keep visible until interaction (where supported)</label>
+            <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
+          </div>
+          <div className="notification-form-actions">
+            <button className="btn" type="submit" disabled={sending || loading}>
+              <RiSendPlaneLine size={16} aria-hidden="true" />
+              {sending ? 'Sending…' : 'Send notification'}
+            </button>
+          </div>
         </form>
       </div>
     </section>
@@ -1510,20 +1608,34 @@ function SettingsPanel() {
                 Value
               </label>
 
-              <textarea
-                id="admin-setting-value"
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                rows={
-                  editing.data_type === 'json' ||
-                  typeof editing.value === 'object'
-                    ? 9
-                    : 5
-                }
-                spellCheck="false"
-                autoFocus
-                aria-describedby="admin-setting-help"
-              />
+              {editing.data_type === 'boolean' ? (
+                <div className="setting-radio-options" role="radiogroup" aria-labelledby="admin-setting-value">
+                  <span id="admin-setting-value" className="setting-radio-label">Choose a value</span>
+                  <label>
+                    <input type="radio" name="admin-setting-boolean" value="true" checked={draft.trim().toLowerCase() === 'true'} onChange={() => setDraft('true')} />
+                    <span>Enabled · true</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="admin-setting-boolean" value="false" checked={draft.trim().toLowerCase() === 'false'} onChange={() => setDraft('false')} />
+                    <span>Disabled · false</span>
+                  </label>
+                </div>
+              ) : (
+                <textarea
+                  id="admin-setting-value"
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  rows={
+                    editing.data_type === 'json' ||
+                    typeof editing.value === 'object'
+                      ? 9
+                      : 5
+                  }
+                  spellCheck="false"
+                  autoFocus
+                  aria-describedby="admin-setting-help"
+                />
+              )}
 
               <small id="admin-setting-help">
                 JSON settings must contain valid JSON. String values are
@@ -1777,6 +1889,14 @@ function ReportsPanel() {
   const topProducts = Array.isArray(report?.top_products)
     ? report.top_products
     : [];
+  const totalStatusOrders = statusCounts.reduce(
+    (total, [, count]) => total + (Number(count) || 0),
+    0,
+  );
+  const maxStatusCount = Math.max(
+    1,
+    ...statusCounts.map(([, count]) => Number(count) || 0),
+  );
 
   return (
     <section className="admin-panel">
@@ -1820,13 +1940,22 @@ function ReportsPanel() {
         <h3>Order status</h3>
 
         {statusCounts.length ? (
-          <div className="ops-report-grid">
-            {statusCounts.map(([key, value]) => (
-              <div className="ops-report-item" key={key}>
-                <span>{key}</span>
-                <strong>{value}</strong>
-              </div>
-            ))}
+          <div className="ops-report-grid" role="list" aria-label="Order status breakdown">
+            {statusCounts.map(([key, value]) => {
+              const count = Number(value) || 0;
+              const percentage = totalStatusOrders
+                ? Math.round((count / totalStatusOrders) * 100)
+                : 0;
+              return (
+                <div className="ops-report-item" role="listitem" key={key}>
+                  <span>{String(key).replaceAll('_', ' ')}</span>
+                  <strong>{pretty(count)} <span className="ops-report-percent">{percentage}%</span></strong>
+                  <div className="ops-report-track" role="meter" aria-label={`${key} orders`} aria-valuemin={0} aria-valuemax={maxStatusCount} aria-valuenow={count}>
+                    <span className="ops-report-fill" style={{ width: `${Math.max(0, Math.min(100, (count / maxStatusCount) * 100))}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="admin-empty">

@@ -354,27 +354,32 @@ export const adminService = {
   uploadProductImages: async (
     id,
     files,
+    onProgress,
   ) => {
-    const form =
-      new FormData();
+    const queue = Array.from(files || []);
+    const results = [];
 
-    Array.from(files || []).forEach(
-      (file) => {
-        form.append(
-          'files',
-          file,
-          file.name,
-        );
-      },
-    );
+    for (let index = 0; index < queue.length; index += 1) {
+      const file = queue[index];
+      const form = new FormData();
+      form.append('files', file, file.name);
 
-    return request(
-      'POST',
-      `/products/${encodeId(
-        id,
-      )}/images`,
-      form,
-    );
+      const result = await request(
+        'POST',
+        `/products/${encodeId(id)}/images`,
+        form,
+      );
+
+      results.push(result);
+      onProgress?.({
+        completed: index + 1,
+        total: queue.length,
+        file,
+        result,
+      });
+    }
+
+    return results;
   },
 
   deleteProductImage: (

@@ -308,7 +308,7 @@ const CAPABILITIES = {
 };
 
 const NAV_GROUPS = [
-  ['Overview', ['dashboard']],
+  ['Overview', ['dashboard', 'reports']],
 
   [
     'Catalogue',
@@ -324,7 +324,6 @@ const NAV_GROUPS = [
       'shipping',
       'subscriptions',
       'payments',
-      'stripe',
     ],
   ],
 
@@ -339,14 +338,8 @@ const NAV_GROUPS = [
   ],
 
   [
-    'Operations',
-    [
-      'rbac',
-      'notifications',
-      'reports',
-      'audit',
-      'settings',
-    ],
+    'System configuration',
+    ['settings', 'stripe', 'rbac', 'notifications', 'audit'],
   ],
 ];
 
@@ -1092,6 +1085,7 @@ function AdminNavigation({
     'Staff';
   const initials =
     displayName.trim().charAt(0).toUpperCase() || 'S';
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   return (
     <nav
@@ -1119,27 +1113,32 @@ function AdminNavigation({
                   className="min-w-0"
                   aria-label={label}
                 >
-                  <div
-                    className={
-                      compact
-                        ? 'sr-only'
-                        : 'mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/35'
-                    }
-                  >
-                    {label}
-                  </div>
+                  {compact ? (
+                    <div className="sr-only">{label}</div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="admin-nav-group-toggle"
+                      aria-expanded={!collapsedGroups[label]}
+                      onClick={() =>
+                        setCollapsedGroups((current) => ({
+                          ...current,
+                          [label]: !current[label],
+                        }))
+                      }
+                    >
+                      <span>{label}</span>
+                      <span className="admin-nav-group-chevron" aria-hidden="true">
+                        {collapsedGroups[label] ? '+' : '−'}
+                      </span>
+                    </button>
+                  )}
 
-                  <div className="grid gap-1">
-                    {visible.map(
-                      (key) => {
-                        const nav =
-                          NAV_BY_KEY.get(
-                            key,
-                          );
-
-                        if (!nav) {
-                          return null;
-                        }
+                  {(!collapsedGroups[label] || compact) && (
+                    <div className="grid gap-1">
+                      {visible.map((key) => {
+                        const nav = NAV_BY_KEY.get(key);
+                        if (!nav) return null;
 
                         return (
                           <SideBtn
@@ -1150,9 +1149,9 @@ function AdminNavigation({
                             compact={compact}
                           />
                         );
-                      },
-                    )}
-                  </div>
+                      })}
+                    </div>
+                  )}
                 </section>
               );
             },
