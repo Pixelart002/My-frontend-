@@ -3,7 +3,6 @@
 
 .admin-console-root {
   --admin-card: color-mix(in srgb, var(--surface) 94%, white 6%);
-  --admin-card-raised: color-mix(in srgb, var(--surface-2) 90%, white 10%);
   --admin-border: color-mix(in srgb, var(--line) 78%, white 22%);
   --admin-border-soft: color-mix(in srgb, var(--line-soft) 82%, white 18%);
   --admin-focus: color-mix(in srgb, var(--gold) 82%, white 18%);
@@ -79,7 +78,7 @@
   padding-top: 0;
 }
 
-.admin-console-root .admin-head {
+.admin-console-root > .admin-console-main > .admin-head {
   min-height: 76px;
   gap: clamp(10px, 1.6vw, 22px);
   margin: 0 0 clamp(20px, 2.2vw, 30px);
@@ -990,7 +989,7 @@ body:has(.admin-console-root) .toast .toast-dismiss:hover {
     gap: 16px;
   }
 
-  .admin-console-root .admin-head {
+  .admin-console-root > .admin-console-main > .admin-head {
     top: 0;
   }
 }
@@ -1001,7 +1000,7 @@ body:has(.admin-console-root) .toast .toast-dismiss:hover {
     gap: 0;
   }
 
-  .admin-console-root .admin-head {
+  .admin-console-root > .admin-console-main > .admin-head {
     min-height: 64px;
     gap: 10px;
     margin-bottom: 18px;
