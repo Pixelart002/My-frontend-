@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   RiAddLine,
   RiCheckLine,
@@ -930,9 +931,7 @@ function UserActionsPanel() {
           description="Per-customer controls for checkout and commerce capabilities."
           onRefresh={load}
           refreshing={loading}
-        >
-          <RiShieldCheckLine size={18} aria-hidden="true" />
-        </Toolbar>
+        />
 
         <div className="ops-inline">
           <label className="sr-only" htmlFor="admin-user-action-id">
@@ -978,18 +977,30 @@ function UserActionsPanel() {
                     {blocked ? 'Blocked' : 'Enabled'}
                   </div>
 
-                  <button
-                    type="button"
-                    className="btn btn-quiet btn-sm"
-                    disabled={Boolean(busy)}
-                    onClick={() => toggle(action, blocked)}
-                  >
-                    {busy === action
-                      ? 'Saving…'
-                      : blocked
-                        ? 'Restore'
-                        : 'Disable'}
-                  </button>
+                  <div className="permission-control-cell">
+                    <button
+                      type="button"
+                      className="admin-switch"
+                      role="switch"
+                      aria-checked={!blocked}
+                      aria-label={`${blocked ? 'Restore' : 'Disable'} ${String(action).replaceAll('_', ' ')}`}
+                      disabled={Boolean(busy)}
+                      onClick={() => toggle(action, blocked)}
+                    >
+                      <span className="admin-switch-thumb" aria-hidden="true">
+                        {busy === action ? (
+                          <span className="admin-switch-spinner" />
+                        ) : blocked ? (
+                          <RiCloseLine size={13} />
+                        ) : (
+                          <RiCheckLine size={13} />
+                        )}
+                      </span>
+                    </button>
+                    <span className="settings-switch-label" aria-live="polite">
+                      {busy === action ? 'Saving…' : blocked ? 'Disabled' : 'Enabled'}
+                    </span>
+                  </div>
                 </div>
               );
             })}
