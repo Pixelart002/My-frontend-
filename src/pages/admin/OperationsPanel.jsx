@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
+  RiAddLine,
   RiCheckLine,
+  RiEditLine,
   RiCloseLine,
   RiDeleteBinLine,
   RiRefreshLine,
@@ -66,7 +69,14 @@ function useAsyncGuard() {
   };
 }
 
-function Toolbar({ title, description, onRefresh, children, refreshing = false }) {
+function Toolbar({
+  title,
+  description,
+  onRefresh,
+  children,
+  refreshing = false,
+  showRefresh = true,
+}) {
   return (
     <div className="admin-toolbar ops-toolbar">
       <div className="ops-toolbar-copy">
@@ -74,24 +84,29 @@ function Toolbar({ title, description, onRefresh, children, refreshing = false }
         {description && <p>{description}</p>}
       </div>
 
-      <div className="btn-row">
-        {children}
-
-        <button
-          type="button"
-          className="btn btn-quiet btn-sm"
-          onClick={onRefresh}
-          disabled={refreshing}
-          aria-label={`Refresh ${title}`}
-        >
-          <RiRefreshLine
-            size={16}
-            className={refreshing ? 'ops-spin' : undefined}
-            aria-hidden="true"
-          />
-          {refreshing ? 'Refreshing…' : 'Refresh'}
-        </button>
-      </div>
+      {(children || showRefresh) && (
+        <div className="ops-toolbar-actions">
+          {children}
+          {showRefresh && (
+            <button
+              type="button"
+              className="btn btn-quiet btn-sm ops-toolbar-refresh"
+              onClick={onRefresh}
+              disabled={refreshing}
+              aria-label={`Refresh ${title}`}
+              title={`Refresh ${title}`}
+              aria-busy={refreshing}
+            >
+              <RiRefreshLine
+                size={16}
+                className={refreshing ? 'ops-spin' : undefined}
+                aria-hidden="true"
+              />
+              <span className="ops-refresh-label">{refreshing ? 'Refreshing…' : 'Refresh'}</span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -404,6 +419,7 @@ function ShippingPanel() {
           description="Read-only operational view. Change values from System settings so the server remains the single source of truth."
           onRefresh={load}
           refreshing={loading}
+          showRefresh={false}
         />
 
         <div className="admin-table-wrap">
@@ -477,6 +493,7 @@ function SubscriptionPanel() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_SUBSCRIPTION);
   const [saving, setSaving] = useState(false);
 
@@ -509,12 +526,20 @@ function SubscriptionPanel() {
   }, [load]);
 
   const resetForm = () => {
+    setEditorOpen(false);
     setEditing(null);
     setForm({ ...EMPTY_SUBSCRIPTION });
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_SUBSCRIPTION });
+    setEditorOpen(true);
+  };
+
   const editPlan = (plan) => {
     setEditing(plan.id);
+    setEditorOpen(true);
     setForm({
       ...EMPTY_SUBSCRIPTION,
       ...plan,
@@ -591,9 +616,29 @@ function SubscriptionPanel() {
           description="Manage membership plans and customer entitlements."
           onRefresh={load}
           refreshing={loading}
-        />
+        >
+          <button
+            type="button"
+            className="subscription-add-button"
+            onClick={openCreate}
+            disabled={saving}
+            aria-label="Create subscription plan"
+            title="Create subscription plan"
+          >
+            <RiAddLine size={21} aria-hidden="true" />
+          </button>
+        </Toolbar>
 
-        <form onSubmit={save} noValidate>
+        {editorOpen && (
+          <AdminModal
+            className="subscription-editor-modal"
+            title={editing ? 'Edit subscription plan' : 'Create subscription plan'}
+            sub="Set the plan's customer-facing name, entitlement tier and price."
+            onClose={() => {
+              if (!saving) resetForm();
+            }}
+          >
+            <form onSubmit={save} noValidate>
           <div className="field-grid">
             <label>
               Tier
@@ -700,18 +745,18 @@ function SubscriptionPanel() {
                   : 'Create plan'}
             </button>
 
-            {editing && (
-              <button
-                className="btn btn-quiet btn-sm"
-                type="button"
-                onClick={resetForm}
-                disabled={saving}
-              >
-                Cancel edit
-              </button>
-            )}
+            <button
+              className="btn btn-quiet btn-sm"
+              type="button"
+              onClick={resetForm}
+              disabled={saving}
+            >
+              Cancel
+            </button>
           </div>
         </form>
+          </AdminModal>
+        )}
       </div>
 
       <div className="admin-card">
@@ -761,7 +806,7 @@ function SubscriptionPanel() {
                         title={`Edit ${plan.name || 'plan'}`}
                         aria-label={`Edit ${plan.name || 'plan'}`}
                       >
-                        <RiSaveLine size={15} aria-hidden="true" />
+                        <RiEditLine size={15} aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -886,9 +931,7 @@ function UserActionsPanel() {
           description="Per-customer controls for checkout and commerce capabilities."
           onRefresh={load}
           refreshing={loading}
-        >
-          <RiShieldCheckLine size={18} aria-hidden="true" />
-        </Toolbar>
+        />
 
         <div className="ops-inline">
           <label className="sr-only" htmlFor="admin-user-action-id">
@@ -934,18 +977,30 @@ function UserActionsPanel() {
                     {blocked ? 'Blocked' : 'Enabled'}
                   </div>
 
-                  <button
-                    type="button"
-                    className="btn btn-quiet btn-sm"
-                    disabled={Boolean(busy)}
-                    onClick={() => toggle(action, blocked)}
-                  >
-                    {busy === action
-                      ? 'Saving…'
-                      : blocked
-                        ? 'Restore'
-                        : 'Disable'}
-                  </button>
+                  <div className="permission-control-cell">
+                    <button
+                      type="button"
+                      className="admin-switch"
+                      role="switch"
+                      aria-checked={!blocked}
+                      aria-label={`${blocked ? 'Restore' : 'Disable'} ${String(action).replaceAll('_', ' ')}`}
+                      disabled={Boolean(busy)}
+                      onClick={() => toggle(action, blocked)}
+                    >
+                      <span className="admin-switch-thumb" aria-hidden="true">
+                        {busy === action ? (
+                          <span className="admin-switch-spinner" />
+                        ) : blocked ? (
+                          <RiCloseLine size={13} />
+                        ) : (
+                          <RiCheckLine size={13} />
+                        )}
+                      </span>
+                    </button>
+                    <span className="settings-switch-label" aria-live="polite">
+                      {busy === action ? 'Saving…' : blocked ? 'Disabled' : 'Enabled'}
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -1070,8 +1125,7 @@ function RbacPanel() {
               <tr>
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
-                <th scope="col">State</th>
-                <th scope="col">Policy</th>
+                <th scope="col">Access</th>
               </tr>
             </thead>
 
@@ -1087,33 +1141,34 @@ function RbacPanel() {
                       <td>{row.permission}</td>
 
                       <td>
-                        <span
-                          className={`admin-pill ${
-                            row.enabled
-                              ? 'pill-success'
-                              : 'pill-danger'
-                          }`}
-                        >
-                          {row.enabled ? 'Allowed' : 'Denied'}
-                        </span>
-                      </td>
-
-                      <td>
                         {immutable ? (
                           <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
                         ) : (
-                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
-                            <legend className="sr-only">{row.role} — {row.permission}</legend>
-                            <label>
-                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="allow" checked={row.enabled} onChange={() => setPermission(row, true)} disabled={Boolean(busyKey)} />
-                              <span>Allow</span>
-                            </label>
-                            <label>
-                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="deny" checked={!row.enabled} onChange={() => setPermission(row, false)} disabled={Boolean(busyKey)} />
-                              <span>Deny</span>
-                            </label>
-                            {busyKey === key && <span role="status">Saving…</span>}
-                          </fieldset>
+                          <div className="permission-control-cell">
+                            <button
+                              type="button"
+                              className="admin-switch permission-switch"
+                              role="switch"
+                              aria-checked={row.enabled}
+                              aria-label={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission} for ${row.role}`}
+                              title={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission}`}
+                              onClick={() => setPermission(row, !row.enabled)}
+                              disabled={Boolean(busyKey)}
+                            >
+                              <span className="admin-switch-thumb" aria-hidden="true">
+                                {busyKey === key ? (
+                                  <span className="admin-switch-spinner" />
+                                ) : row.enabled ? (
+                                  <RiCheckLine size={13} />
+                                ) : (
+                                  <RiCloseLine size={13} />
+                                )}
+                              </span>
+                            </button>
+                            <span className="settings-switch-label" aria-live="polite">
+                              {busyKey === key ? 'Saving…' : row.enabled ? 'Allowed' : 'Denied'}
+                            </span>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -1121,7 +1176,7 @@ function RbacPanel() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="4">
+                  <td colSpan="3">
                     <div className="admin-empty">
                       {loading
                         ? 'Loading permissions…'
@@ -1274,7 +1329,7 @@ function NotificationsPanel() {
   };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel notifications-panel">
       <div className="admin-card">
         <Toolbar
           title="Notifications"
@@ -1395,6 +1450,7 @@ function SettingsPanel() {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [switchBusyKey, setSwitchBusyKey] = useState('');
 
   const load = useCallback(async () => {
     const requestId = startRequest();
@@ -1444,6 +1500,33 @@ function SettingsPanel() {
 
     setEditing(null);
     setDraft('');
+  };
+
+  const toggleBooleanSetting = async (setting) => {
+    if (!setting || setting.is_system_locked || saving || switchBusyKey) return;
+
+    const currentValue =
+      setting.value === true ||
+      String(setting.value ?? '').trim().toLowerCase() === 'true';
+    const nextValue = !currentValue;
+    setSwitchBusyKey(setting.key);
+
+    try {
+      await adminService.updateSetting(
+        setting.key,
+        nextValue,
+        'Toggled from System settings',
+      );
+      if (!mountedRef.current) return;
+      toast.success(`${setting.key} ${nextValue ? 'enabled' : 'disabled'}.`);
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, `Unable to update ${setting.key}.`));
+      }
+    } finally {
+      if (mountedRef.current) setSwitchBusyKey('');
+    }
   };
 
   const parseDraft = (setting) => {
@@ -1551,33 +1634,62 @@ function SettingsPanel() {
 
             <tbody>
               {settings.length ? (
-                settings.map((setting) => (
-                  <tr key={setting.key}>
-                    <td className="td-strong">{setting.key}</td>
-                    <td>{pretty(setting.category)}</td>
-                    <td>{pretty(setting.data_type)}</td>
-                    <td className="td-dim">
-                      <span title={pretty(setting.value)}>
-                        {pretty(setting.value)}
-                      </span>
-                    </td>
-                    <td>
-                      {setting.is_system_locked ? (
-                        <span className="admin-pill pill-muted">
-                          Locked
+                settings.map((setting) => {
+                  const isBooleanSetting =
+                    setting.data_type === 'boolean' ||
+                    typeof setting.value === 'boolean';
+                  const booleanValue =
+                    setting.value === true ||
+                    String(setting.value ?? '').trim().toLowerCase() === 'true';
+                  const switchBusy = switchBusyKey === setting.key;
+
+                  return (
+                    <tr key={setting.key}>
+                      <td className="td-strong">{setting.key}</td>
+                      <td>{pretty(setting.category)}</td>
+                      <td>{pretty(setting.data_type)}</td>
+                      <td className="td-dim">
+                        <span title={pretty(setting.value)}>
+                          {pretty(setting.value)}
                         </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() => openEditor(setting)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        {setting.is_system_locked ? (
+                          <span className="admin-pill pill-muted">Locked</span>
+                        ) : isBooleanSetting ? (
+                          <div className="settings-switch-cell">
+                            <button
+                              type="button"
+                              className="admin-switch"
+                              role="switch"
+                              aria-checked={booleanValue}
+                              aria-label={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              title={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              disabled={Boolean(switchBusyKey) || saving}
+                              onClick={() => toggleBooleanSetting(setting)}
+                            >
+                              <span className="admin-switch-thumb" aria-hidden="true">
+                                {switchBusy ? <span className="admin-switch-spinner" /> : booleanValue ? <RiCheckLine size={14} /> : <RiCloseLine size={14} />}
+                              </span>
+                            </button>
+                            <span className="settings-switch-label" aria-live="polite">
+                              {switchBusy ? 'Saving…' : booleanValue ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm"
+                            onClick={() => openEditor(setting)}
+                            disabled={Boolean(switchBusyKey) || saving}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="5">
@@ -1899,8 +2011,8 @@ function ReportsPanel() {
   );
 
   return (
-    <section className="admin-panel">
-      <div className="admin-card">
+    <section className="admin-panel reports-panel">
+      <div className="admin-card reports-summary-card">
         <Toolbar
           title="Reports"
           description="Business signals for stock, order volume, revenue and product performance."
@@ -1936,7 +2048,7 @@ function ReportsPanel() {
         </div>
       </div>
 
-      <div className="admin-card">
+      <div className="admin-card reports-visual-card">
         <h3>Order status</h3>
 
         {statusCounts.length ? (
@@ -2215,7 +2327,7 @@ function ReviewsModerationPanel() {
   };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel reviews-panel">
       <div className="admin-card">
         <Toolbar
           title="Review moderation"

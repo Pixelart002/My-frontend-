@@ -1010,6 +1010,12 @@ export default function BusinessProfilePanel() {
       [toast],
     );
 
+  const cancelChanges = useCallback(() => {
+    if (saving || assetBusy) return;
+    setValues({ ...original });
+    setEditingAddress(false);
+  }, [assetBusy, original, saving]);
+
   if (loading) {
     return (
       <section className="min-w-0">
@@ -1040,7 +1046,7 @@ export default function BusinessProfilePanel() {
       className="grid min-w-0 gap-0"
       aria-labelledby="business-profile-title"
     >
-      <div className="flex min-w-0 items-center justify-between gap-6 rounded-2xl border border-line bg-surface p-6 max-[700px]:flex-col max-[700px]:items-stretch max-[700px]:gap-4">
+      <div className="business-profile-header flex min-w-0 items-center justify-between gap-6 rounded-2xl border border-line bg-surface p-6 max-[700px]:flex-row max-[700px]:items-center max-[700px]:gap-3">
         <div>
           <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.12em] text-gold-soft">
             <RiShieldCheckLine
@@ -1074,7 +1080,7 @@ export default function BusinessProfilePanel() {
               size={16}
               aria-hidden="true"
             />
-            Refresh
+            <span>Refresh</span>
           </button>
 
         </div>
@@ -1147,7 +1153,7 @@ export default function BusinessProfilePanel() {
                     )}
 
                     {editingAddress
-                      ? 'Cancel edit'
+                      ? 'Lock address'
                       : 'Edit address'}
                   </button>
                 </div>
@@ -1425,7 +1431,7 @@ export default function BusinessProfilePanel() {
         <button
           className="btn btn-quiet"
           type="button"
-          onClick={load}
+          onClick={cancelChanges}
           disabled={saving || assetBusy || !dirty}
         >
           Cancel changes

@@ -319,66 +319,46 @@ export default function OrdersPanel({
           </p>
         </div>
 
-        <div className="admin-toolbar orders-toolbar flex w-full min-w-0 flex-col items-stretch gap-2 min-[901px]:w-auto min-[901px]:flex-row min-[901px]:items-center">
-          <label className="admin-search orders-search min-w-0" htmlFor="orders-search">
+        <div className="admin-toolbar orders-toolbar" role="search" aria-label="Search and filter orders">
+          <label className="admin-search orders-search" htmlFor="orders-search">
             <RiSearchLine size={16} aria-hidden="true" />
             <input
               id="orders-search"
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search order, customer, invoice…"
+              placeholder="Search order, customer, invoice or tracking…"
               autoComplete="off"
               aria-label="Search orders by order number, customer, invoice or tracking"
             />
           </label>
 
-          <label
-            className="sr-only"
-            htmlFor="orders-status-filter"
-          >
-            Filter orders by status
-          </label>
+          <div className="orders-filter-actions">
+            <label className="sr-only" htmlFor="orders-status-filter">Filter orders by status</label>
+            <select
+              id="orders-status-filter"
+              className="admin-select orders-status-select"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+            >
+              <option value="">All statuses</option>
+              {STATUSES.map((value) => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
 
-          <select
-            id="orders-status-filter"
-            className="admin-select min-w-0 w-full min-[901px]:w-auto"
-            value={filter}
-            onChange={(event) =>
-              setFilter(event.target.value)
-            }
-          >
-            <option value="">
-              All statuses
-            </option>
-
-            {STATUSES.map((value) => (
-              <option
-                key={value}
-                value={value}
-              >
-                {value}
-              </option>
-            ))}
-          </select>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={load}
-            disabled={loading}
-            title="Refresh orders"
-            aria-label="Refresh orders"
-            aria-busy={loading}
-          >
-            <RiRefreshLine
-              size={16}
-              aria-hidden="true"
-            />
-            {loading
-              ? 'Refreshing…'
-              : 'Refresh'}
-          </button>
+            <button
+              type="button"
+              className="icon-btn orders-refresh-button"
+              onClick={load}
+              disabled={loading}
+              title="Refresh orders"
+              aria-label="Refresh orders"
+              aria-busy={loading}
+            >
+              <RiRefreshLine size={17} className={loading ? 'spin' : undefined} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 

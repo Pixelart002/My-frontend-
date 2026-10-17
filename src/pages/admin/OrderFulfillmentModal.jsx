@@ -460,11 +460,11 @@ export default function OrderFulfillmentModal({
       title={'Fulfillment · ' + text(currentOrder?.order_number)}
       sub="Dispatch controls stay attached to the order. Luviio uses manual shipping; the order remains the source of truth."
       onClose={busy ? undefined : onClose}
-      className="max-w-[720px]"
+      className="admin-fulfillment-modal"
     >
       <div className="grid gap-4">
         <section
-          className="rounded-2xl border border-line bg-surface-2 p-4 sm:p-5"
+          className="fulfillment-status-summary rounded-2xl border border-line bg-surface-2 p-4 sm:p-5"
           aria-labelledby="fulfillment-status-title"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -585,7 +585,7 @@ export default function OrderFulfillmentModal({
         {(status === 'processing' || (status === 'paid' && isCodOrder)) && (
           <form
             onSubmit={saveTracking}
-            className="rounded-2xl border border-line bg-surface-2 p-4 sm:p-5"
+            className="fulfillment-form rounded-2xl border border-line bg-surface-2 p-4 sm:p-5"
           >
             <label
               htmlFor="order-fulfillment-tracking"

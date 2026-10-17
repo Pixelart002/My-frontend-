@@ -70,6 +70,36 @@ describe('admin product image upload queue', () => {
     );
   });
 
+  it('does not upload later files after a queue item fails', async () => {
+    mocks.request
+      .mockResolvedValueOnce({ ok: true, name: 'one.png' })
+      .mockRejectedValueOnce(new Error('Storage temporarily unavailable'));
+
+    const files = [
+      new File(['one'], 'one.png', { type: 'image/png' }),
+      new File(['two'], 'two.png', { type: 'image/png' }),
+      new File(['three'], 'three.png', { type: 'image/png' }),
+    ];
+    const progress = [];
+
+    await expect(
+      adminService.uploadProductImages(
+        'product-123',
+        files,
+        (entry) => progress.push(entry.file.name),
+      ),
+    ).rejects.toThrow('Storage temporarily unavailable');
+
+    expect(mocks.request).toHaveBeenCalledTimes(2);
+    expect(progress).toEqual(['one.png']);
+    expect(mocks.request).toHaveBeenNthCalledWith(
+      2,
+      'POST',
+      '/products/product-123/images',
+      expect.any(FormData),
+    );
+  });
+
   it('does not issue requests for an empty queue', async () => {
     await expect(adminService.uploadProductImages('product-123', [])).resolves.toEqual([]);
     expect(mocks.request).not.toHaveBeenCalled();

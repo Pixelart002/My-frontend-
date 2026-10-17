@@ -228,7 +228,7 @@ export default function StripeConfigPanel() {
 
           <button
             type="button"
-            className="btn btn-quiet btn-sm"
+            className="btn btn-quiet btn-sm stripe-refresh-button"
             onClick={handleRefresh}
             disabled={loading || saving}
           >
@@ -236,7 +236,7 @@ export default function StripeConfigPanel() {
               size={16}
               aria-hidden="true"
             />
-            {loading ? 'Loading…' : 'Refresh'}
+            <span className="stripe-refresh-label">{loading ? 'Loading…' : 'Refresh'}</span>
           </button>
         </div>
 
