@@ -66,7 +66,14 @@ function useAsyncGuard() {
   };
 }
 
-function Toolbar({ title, description, onRefresh, children, refreshing = false }) {
+function Toolbar({
+  title,
+  description,
+  onRefresh,
+  children,
+  refreshing = false,
+  showRefresh = true,
+}) {
   return (
     <div className="admin-toolbar ops-toolbar">
       <div className="ops-toolbar-copy">
@@ -74,24 +81,28 @@ function Toolbar({ title, description, onRefresh, children, refreshing = false }
         {description && <p>{description}</p>}
       </div>
 
-      <div className="btn-row">
-        {children}
-
-        <button
-          type="button"
-          className="btn btn-quiet btn-sm"
-          onClick={onRefresh}
-          disabled={refreshing}
-          aria-label={`Refresh ${title}`}
-        >
-          <RiRefreshLine
-            size={16}
-            className={refreshing ? 'ops-spin' : undefined}
-            aria-hidden="true"
-          />
-          {refreshing ? 'Refreshing…' : 'Refresh'}
-        </button>
-      </div>
+      {(children || showRefresh) && (
+        <div className="ops-toolbar-actions">
+          {children}
+          {showRefresh && (
+            <button
+              type="button"
+              className="icon-btn ops-toolbar-refresh"
+              onClick={onRefresh}
+              disabled={refreshing}
+              aria-label={`Refresh ${title}`}
+              title={`Refresh ${title}`}
+              aria-busy={refreshing}
+            >
+              <RiRefreshLine
+                size={17}
+                className={refreshing ? 'ops-spin' : undefined}
+                aria-hidden="true"
+              />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -404,6 +415,7 @@ function ShippingPanel() {
           description="Read-only operational view. Change values from System settings so the server remains the single source of truth."
           onRefresh={load}
           refreshing={loading}
+          showRefresh={false}
         />
 
         <div className="admin-table-wrap">
