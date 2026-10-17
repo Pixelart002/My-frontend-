@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   RiBarChart2Line,
   RiCoupon3Line,
@@ -162,6 +162,25 @@ export default function DashboardPanel({ onNavigate }) {
 
   return (
     <div className="dashboard-panel">
+      <section className="dashboard-quick-actions-section" aria-label="Dashboard quick actions">
+        <details className="dashboard-quick-actions-menu">
+          <summary className="dashboard-quick-actions-trigger">
+            <span>Quick actions</span>
+            <span className="dashboard-quick-actions-chevron" aria-hidden="true">⌄</span>
+          </summary>
+          <div className="dashboard-quick-actions-popover">
+            <button type="button" onClick={() => onNavigate?.('products')}>Manage products</button>
+            <button type="button" onClick={() => onNavigate?.('categories')}>Manage categories</button>
+            <button type="button" onClick={() => onNavigate?.('orders')}>View orders</button>
+            <button type="button" onClick={() => onNavigate?.('users')}>Manage users</button>
+            <button type="button" onClick={() => onNavigate?.('coupons')}>Manage coupons</button>
+            <button type="button" onClick={load} disabled={refreshing}>
+              {refreshing ? 'Refreshing…' : 'Refresh dashboard'}
+            </button>
+          </div>
+        </details>
+      </section>
+
       {error && (
         <div className="dashboard-error">
           <ErrorState message={error} onRetry={load} />
@@ -227,25 +246,6 @@ export default function DashboardPanel({ onNavigate }) {
             })}
           </div>
         )}
-      </section>
-
-      <section className="dashboard-quick-actions-section" aria-label="Dashboard quick actions">
-        <details className="dashboard-quick-actions-menu">
-          <summary className="dashboard-quick-actions-trigger">
-            <span>Quick actions</span>
-            <span className="dashboard-quick-actions-chevron" aria-hidden="true">⌄</span>
-          </summary>
-          <div className="dashboard-quick-actions-popover">
-            <button type="button" onClick={() => onNavigate?.('products')}>Manage products</button>
-            <button type="button" onClick={() => onNavigate?.('categories')}>Manage categories</button>
-            <button type="button" onClick={() => onNavigate?.('orders')}>View orders</button>
-            <button type="button" onClick={() => onNavigate?.('users')}>Manage users</button>
-            <button type="button" onClick={() => onNavigate?.('coupons')}>Manage coupons</button>
-            <button type="button" onClick={load} disabled={refreshing}>
-              {refreshing ? 'Refreshing…' : 'Refresh dashboard'}
-            </button>
-          </div>
-        </details>
       </section>
 
       <section
