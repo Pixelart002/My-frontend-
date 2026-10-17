@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  RiAddLine,
   RiCheckLine,
+  RiEditLine,
   RiCloseLine,
   RiDeleteBinLine,
   RiRefreshLine,
@@ -489,6 +491,7 @@ function SubscriptionPanel() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_SUBSCRIPTION);
   const [saving, setSaving] = useState(false);
 
@@ -521,12 +524,20 @@ function SubscriptionPanel() {
   }, [load]);
 
   const resetForm = () => {
+    setEditorOpen(false);
     setEditing(null);
     setForm({ ...EMPTY_SUBSCRIPTION });
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_SUBSCRIPTION });
+    setEditorOpen(true);
+  };
+
   const editPlan = (plan) => {
     setEditing(plan.id);
+    setEditorOpen(true);
     setForm({
       ...EMPTY_SUBSCRIPTION,
       ...plan,
@@ -603,9 +614,29 @@ function SubscriptionPanel() {
           description="Manage membership plans and customer entitlements."
           onRefresh={load}
           refreshing={loading}
-        />
+        >
+          <button
+            type="button"
+            className="subscription-add-button"
+            onClick={openCreate}
+            disabled={saving}
+            aria-label="Create subscription plan"
+            title="Create subscription plan"
+          >
+            <RiAddLine size={21} aria-hidden="true" />
+          </button>
+        </Toolbar>
 
-        <form onSubmit={save} noValidate>
+        {editorOpen && (
+          <AdminModal
+            className="subscription-editor-modal"
+            title={editing ? 'Edit subscription plan' : 'Create subscription plan'}
+            sub="Set the plan's customer-facing name, entitlement tier and price."
+            onClose={() => {
+              if (!saving) resetForm();
+            }}
+          >
+            <form onSubmit={save} noValidate>
           <div className="field-grid">
             <label>
               Tier
@@ -712,18 +743,18 @@ function SubscriptionPanel() {
                   : 'Create plan'}
             </button>
 
-            {editing && (
-              <button
-                className="btn btn-quiet btn-sm"
-                type="button"
-                onClick={resetForm}
-                disabled={saving}
-              >
-                Cancel edit
-              </button>
-            )}
+            <button
+              className="btn btn-quiet btn-sm"
+              type="button"
+              onClick={resetForm}
+              disabled={saving}
+            >
+              Cancel
+            </button>
           </div>
         </form>
+          </AdminModal>
+        )}
       </div>
 
       <div className="admin-card">
@@ -773,7 +804,7 @@ function SubscriptionPanel() {
                         title={`Edit ${plan.name || 'plan'}`}
                         aria-label={`Edit ${plan.name || 'plan'}`}
                       >
-                        <RiSaveLine size={15} aria-hidden="true" />
+                        <RiEditLine size={15} aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
