@@ -40,7 +40,7 @@ function deferEntryStylesheet() {
       const entryScript = html.match(
         /<script\b(?=[^>]*\btype=["']module["'])[^>]*\bsrc=["'](\/assets\/[^"']+\.js)["'][^>]*>\s*<\/script>/i,
       )
-      if (entryScript && !html.includes('rel="modulepreload" href="${entryScript[1]}"')) {
+      if (entryScript && !html.includes('rel="modulepreload" href="' + entryScript[1] + '"')) {
         html = html.replace(
           '</head>',
           `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\n  </head>`,
