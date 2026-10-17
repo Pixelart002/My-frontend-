@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { RiRefreshLine } from '@remixicon/react';
+import { RiRefreshLine, RiSearchLine } from '@remixicon/react';
 
 import {
   adminService,
@@ -118,6 +118,8 @@ export default function AuditLogsPanel() {
     status,
     setStatus,
   ] = useState('all');
+
+  const [search, setSearch] = useState('');
 
   const mountedRef =
     useRef(true);
@@ -241,10 +243,23 @@ export default function AuditLogsPanel() {
               status === 'error' &&
               code >= 400
             );
+          const query = search.trim().toLowerCase();
+          const searchable = [
+            row?.path,
+            row?.method,
+            row?.actor_user_id,
+            row?.request_id,
+            row?.correlation_id,
+          ]
+            .filter((value) => value !== null && value !== undefined)
+            .join(' ')
+            .toLowerCase();
+          const searchMatch = !query || searchable.includes(query);
 
           return (
             methodMatch &&
-            statusMatch
+            statusMatch &&
+            searchMatch
           );
         },
       );
@@ -252,6 +267,7 @@ export default function AuditLogsPanel() {
       rows,
       method,
       status,
+      search,
     ]);
 
   return (
@@ -341,6 +357,17 @@ export default function AuditLogsPanel() {
           className="admin-telemetry-filters"
           aria-label="Audit log filters"
         >
+          <label className="admin-search audit-search" htmlFor="audit-search">
+            <RiSearchLine size={16} aria-hidden="true" />
+            <input
+              id="audit-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search route, actor or request ID…"
+              autoComplete="off"
+            />
+          </label>
           <label className="sr-only" htmlFor="audit-method">
             HTTP method
           </label>
@@ -398,7 +425,7 @@ export default function AuditLogsPanel() {
         </div>
       </div>
 
-      <div className="admin-table-wrap">
+      <div className="admin-table-wrap audit-log-table-wrap">
         <table className="admin-table admin-telemetry-table">
           <caption className="sr-only">
             Luviio admin audit logs
