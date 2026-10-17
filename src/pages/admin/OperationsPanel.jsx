@@ -792,14 +792,17 @@ function SubscriptionPanel() {
 function UserActionsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
+  const [searchParams] = useSearchParams();
+  const requestedUserId = searchParams.get('user_id') || '';
 
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(requestedUserId);
   const [data, setData] = useState(null);
+  const autoLoadedUserIdRef = useRef('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
 
-  const load = useCallback(async () => {
-    const normalizedUserId = text(userId);
+  const load = useCallback(async (userIdOverride) => {
+    const normalizedUserId = text(typeof userIdOverride === 'string' ? userIdOverride : userId);
 
     if (!normalizedUserId) {
       toast.error('Enter a customer UUID.');
@@ -824,6 +827,13 @@ function UserActionsPanel() {
       }
     }
   }, [mountedRef, toast, userId]);
+
+  useEffect(() => {
+    if (!requestedUserId || autoLoadedUserIdRef.current === requestedUserId) return;
+    autoLoadedUserIdRef.current = requestedUserId;
+    setUserId(requestedUserId);
+    load(requestedUserId);
+  }, [load, requestedUserId]);
 
   const toggle = async (action, blocked) => {
     if (busy) return;
