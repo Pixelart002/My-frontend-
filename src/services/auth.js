@@ -27,6 +27,7 @@ export const authService = {
     email,
     password,
     fullName,
+    acceptedTerms = false,
   ) =>
     request(
       'POST',
@@ -36,6 +37,7 @@ export const authService = {
         password,
         full_name:
           normalizeName(fullName),
+        terms_accepted: acceptedTerms,
       },
     ),
 
