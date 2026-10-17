@@ -345,6 +345,36 @@ export function AuthProvider({ children }) {
   }, [clearSession]);
 
   /**
+   * Apply only server-confirmed, self-editable profile fields.
+   * Never let a profile edit overwrite identity or authorization fields.
+   */
+  const applyProfileUpdate = useCallback((profile) => {
+    if (!profile || typeof profile !== 'object') {
+      return;
+    }
+
+    setUser((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const patch = {};
+
+      if (Object.prototype.hasOwnProperty.call(profile, 'full_name')) {
+        patch.full_name = profile.full_name;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(profile, 'phone')) {
+        patch.phone = profile.phone;
+      }
+
+      return Object.keys(patch).length
+        ? { ...current, ...patch }
+        : current;
+    });
+  }, []);
+
+  /**
    * Refresh the currently authenticated profile.
    */
   const refreshProfile = useCallback(async () => {
@@ -370,6 +400,7 @@ export function AuthProvider({ children }) {
       register,
       logout,
       refreshProfile,
+      applyProfileUpdate,
       clearSession,
       retrySession,
     }),
@@ -382,6 +413,7 @@ export function AuthProvider({ children }) {
       register,
       logout,
       refreshProfile,
+      applyProfileUpdate,
       clearSession,
       retrySession,
     ],
