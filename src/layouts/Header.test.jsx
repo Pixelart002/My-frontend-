@@ -1,4 +1,5 @@
-import { act, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
@@ -118,7 +119,7 @@ describe('Header hamburger navigation', () => {
     expect(navigation).toHaveAttribute('aria-hidden', 'false');
     expect(document.body.style.overflow).toBe('hidden');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close menu' }));
+    fireEvent.click(container.querySelector('.mobile-nav-close'));
 
     expect(navigation).toHaveAttribute('aria-hidden', 'true');
     expect(document.body.style.overflow).toBe('');
