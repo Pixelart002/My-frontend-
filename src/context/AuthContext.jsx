@@ -193,6 +193,13 @@ export function AuthProvider({ children }) {
             },
           );
 
+          // No refresh cookie is a normal signed-out state (including headless scans).
+          // The API returns 204 for this case so the browser does not log an expected 401.
+          if (response.status === 204) {
+            if (active) clearSession();
+            return;
+          }
+
           if (!response.ok) {
             // Invalid/expired credentials are definitive. Server errors,
             // rate limits and gateway failures may be transient.
