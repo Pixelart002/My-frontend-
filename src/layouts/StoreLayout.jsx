@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 import Header from './Header';
 import Footer from './Footer';
+import CookieConsent from '../components/CookieConsent';
 
 const FOOTER_PATHS = new Set([
   '/',
@@ -39,6 +40,8 @@ export default function StoreLayout() {
       {shouldShowFooter(pathname) && (
         <Footer />
       )}
+
+      <CookieConsent />
     </div>
   );
 }
