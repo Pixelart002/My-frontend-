@@ -5732,3 +5732,19 @@ button:disabled {
     min-height: 56px;
   }
 }
+
+@media (max-width: 760px) {
+  .stripe-refresh-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  .stripe-refresh-label { display: none; }
+}
