@@ -727,6 +727,7 @@
 .store-page-frame > .page:not(.home-landing) {
   width: min(100%,var(--maxw));
   margin-inline: auto;
+  padding-inline: clamp(18px, 2.5vw, 36px);
   box-sizing: border-box;
 }
 
