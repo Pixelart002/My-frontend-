@@ -56,7 +56,7 @@ function getUserPhone(user) {
 }
 
 export default function ProfilePage() {
-  const { user, refreshProfile } = useAuth();
+  const { user, applyProfileUpdate } = useAuth();
   const { toast } = useToast();
 
   const [editing, setEditing] = useState(false);
