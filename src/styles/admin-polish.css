@@ -18,9 +18,20 @@
   text-rendering: optimizeLegibility;
 }
 
-.admin-console-root *,
-.admin-console-root *::before,
-.admin-console-root *::after {
+.admin-console-root :where(
+  .admin-main,
+  .admin-console-main,
+  .admin-head,
+  .admin-head-brand,
+  .admin-head-meta,
+  .admin-card,
+  .dashboard-panel,
+  .dashboard-section,
+  .admin-toolbar,
+  .ops-toolbar,
+  .field-grid,
+  .admin-table-wrap
+) {
   min-width: 0;
 }
 
@@ -522,7 +533,27 @@
   color: var(--muted);
 }
 
-.admin-console-root :where(.admin-search, .admin-select, .admin-input, .field input, .field select, .field textarea, .form-field input, .form-field select, .form-field textarea, .ops-form input, .ops-form select, .ops-form textarea, .ops-inline input, .coupon-form input, .coupon-form select, .coupon-form textarea) {
+.admin-console-root :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .admin-search,
+  .admin-select,
+  .admin-input,
+  .field input,
+  .field select,
+  .field textarea,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .ops-form input,
+  .ops-form select,
+  .ops-form textarea,
+  .ops-inline input,
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form textarea
+) {
   min-height: 42px;
   border: 1px solid var(--admin-border);
   border-radius: 10px;
@@ -538,7 +569,27 @@
   opacity: 1;
 }
 
-.admin-console-root :where(.admin-search, .admin-select, .admin-input, .field input, .field select, .field textarea, .form-field input, .form-field select, .form-field textarea, .ops-form input, .ops-form select, .ops-form textarea, .ops-inline input, .coupon-form input, .coupon-form select, .coupon-form textarea):focus {
+.admin-console-root :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .admin-search,
+  .admin-select,
+  .admin-input,
+  .field input,
+  .field select,
+  .field textarea,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .ops-form input,
+  .ops-form select,
+  .ops-form textarea,
+  .ops-inline input,
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form textarea
+):focus {
   border-color: var(--gold);
   outline: 0;
   box-shadow: 0 0 0 3px var(--gold-dim);
@@ -787,6 +838,84 @@
   border-top-color: var(--gold);
 }
 
+
+/* Shared toast provider: refine placement only while the admin console is active. */
+body:has(.admin-console-root) .toast-stack {
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+  width: min(400px, calc(100vw - 32px));
+  margin: 0;
+  gap: 9px;
+  z-index: var(--ui-z-toast, 700);
+}
+
+body:has(.admin-console-root) .toast {
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-color: var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-3) 92%, black 8%);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 34%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: admin-toast-in 180ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+body:has(.admin-console-root) .toast .toast-icon {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 11px;
+}
+
+body:has(.admin-console-root) .toast-success .toast-icon {
+  background: var(--success-dim);
+}
+
+body:has(.admin-console-root) .toast-error .toast-icon {
+  background: var(--danger-dim);
+}
+
+body:has(.admin-console-root) .toast-info .toast-icon {
+  background: var(--info-dim);
+}
+
+body:has(.admin-console-root) .toast .toast-message {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+body:has(.admin-console-root) .toast .toast-dismiss {
+  flex: 0 0 32px;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+body:has(.admin-console-root) .toast .toast-dismiss:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+@keyframes admin-toast-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes admin-spin {
   to { transform: rotate(360deg); }
 }
@@ -955,10 +1084,13 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-console-root *,
   .admin-console-root *::before,
-  .admin-console-root *::after {
+  .admin-console-root *::after,
+  body:has(.admin-console-root) .toast,
+  body:has(.admin-console-root) .toast * {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transform: none !important;
   }
 }
