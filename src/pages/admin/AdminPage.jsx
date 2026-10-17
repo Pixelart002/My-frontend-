@@ -329,7 +329,7 @@ const NAV_GROUPS = [
 
   [
     'Customers',
-    ['users', 'user-actions', 'reviews'],
+    ['users', 'reviews'],
   ],
 
   [
