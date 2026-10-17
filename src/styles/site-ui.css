@@ -103,10 +103,12 @@ main {
 }
 
 .store-page-frame {
-  width: min(100%, var(--rw-content));
-  margin-inline: auto;
-  padding-inline: clamp(14px, 3vw, 28px);
-  padding-block-end: clamp(28px, 5vw, 64px);
+  /* The route frame must not inset full-bleed storefront sections. */
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+  padding-block-end: 0;
 }
 
 .page-heading,
