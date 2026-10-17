@@ -24,6 +24,7 @@ import { formatMoney } from '../utils/format';
 import { Spinner, ErrorState } from '../components/ui/States';
 import { useToast } from '../context/ToastContext';
 import ShipmentTimeline from '../components/orders/ShipmentTimeline';
+import { getShippingAddress } from '../utils/orderAddress';
 
 const stripePromise = getStripePromise();
 
@@ -466,6 +467,9 @@ export default function OrderDetailPage() {
       ? order.billing_address
       : null;
 
+  // The API's order snapshot commonly exposes shipping fields at the top level.
+  // Normalize both response shapes so customer order details don't hide a saved address.
+
   const retryAddress = hasAddressValue(
     shippingSnapshot,
   )
@@ -473,6 +477,8 @@ export default function OrderDetailPage() {
     : nestedShippingAddress ||
       nestedBillingAddress ||
       null;
+
+  const displayShippingAddress = getShippingAddress(order);
 
   const publicOrderNumber =
     text(order.order_number) ||
@@ -645,13 +651,19 @@ export default function OrderDetailPage() {
                 <h2 id="delivery-title" className="mt-1 text-lg font-bold text-text">Shipping address</h2>
               </div>
             </div>
-            {hasAddressValue(nestedShippingAddress) ? (
+            {displayShippingAddress ? (
               <div className="mt-4 rounded-2xl border border-line bg-surface-2 p-4 text-sm leading-6 text-muted">
-                <p className="font-semibold text-text">{text(nestedShippingAddress.full_name, nestedShippingAddress.name)}</p>
-                <p>{text(nestedShippingAddress.line1, 'Address unavailable')}</p>
-                {nestedShippingAddress.line2 && <p>{nestedShippingAddress.line2}</p>}
-                <p>{[nestedShippingAddress.city, nestedShippingAddress.state].filter(Boolean).join(', ')}{nestedShippingAddress.postal_code ? ` — ${nestedShippingAddress.postal_code}` : ''}</p>
-                {nestedShippingAddress.phone && <p className="mt-2">{nestedShippingAddress.phone}</p>}
+                {displayShippingAddress.full_name && <p className="font-semibold text-text">{displayShippingAddress.full_name}</p>}
+                {displayShippingAddress.company_name && <p>{displayShippingAddress.company_name}</p>}
+                {displayShippingAddress.line1 && <p>{displayShippingAddress.line1}</p>}
+                {displayShippingAddress.line2 && <p>{displayShippingAddress.line2}</p>}
+                {displayShippingAddress.landmark && <p>Near {displayShippingAddress.landmark}</p>}
+                {(displayShippingAddress.city || displayShippingAddress.state || displayShippingAddress.postal_code) && (
+                  <p>{[displayShippingAddress.city, displayShippingAddress.state].filter(Boolean).join(', ')}{displayShippingAddress.postal_code ? ` — ${displayShippingAddress.postal_code}` : ''}</p>
+                )}
+                {displayShippingAddress.country && <p>{displayShippingAddress.country}</p>}
+                {displayShippingAddress.phone && <p className="mt-2">{displayShippingAddress.phone}</p>}
+                {displayShippingAddress.email && <p>{displayShippingAddress.email}</p>}
               </div>
             ) : (
               <p className="mt-4 rounded-2xl border border-dashed border-line bg-surface-2 px-4 py-5 text-sm text-muted">Shipping address details are unavailable.</p>
