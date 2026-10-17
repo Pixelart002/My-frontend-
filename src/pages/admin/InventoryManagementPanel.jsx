@@ -384,49 +384,6 @@ export default function InventoryManagementPanel() {
           </div>
         </div>
 
-        <div
-          className="admin-stats inventory-stats"
-          aria-label="Inventory statistics"
-        >
-          <article className="admin-stat">
-            <div className="stat-label">
-              Products
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.total}
-            </div>
-          </article>
-
-          <article className="admin-stat">
-            <div className="stat-label">
-              Units on hand
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.units}
-            </div>
-          </article>
-
-          <article className="admin-stat">
-            <div className="stat-label">
-              Low stock
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.low}
-            </div>
-          </article>
-
-          <article className="admin-stat">
-            <div className="stat-label">
-              Out of stock
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.out}
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <div className="admin-table-wrap inventory-table-wrap">
         <div className="admin-toolbar inventory-list-toolbar">
           <label
             className="admin-search inventory-search"
@@ -485,6 +442,49 @@ export default function InventoryManagementPanel() {
           </label>
         </div>
 
+        <div
+          className="admin-stats inventory-stats"
+          aria-label="Inventory statistics"
+        >
+          <article className="admin-stat">
+            <div className="stat-label">
+              Products
+            </div>
+            <div className="stat-value">
+              {loading ? '…' : counts.total}
+            </div>
+          </article>
+
+          <article className="admin-stat">
+            <div className="stat-label">
+              Units on hand
+            </div>
+            <div className="stat-value">
+              {loading ? '…' : counts.units}
+            </div>
+          </article>
+
+          <article className="admin-stat">
+            <div className="stat-label">
+              Low stock
+            </div>
+            <div className="stat-value">
+              {loading ? '…' : counts.low}
+            </div>
+          </article>
+
+          <article className="admin-stat">
+            <div className="stat-label">
+              Out of stock
+            </div>
+            <div className="stat-value">
+              {loading ? '…' : counts.out}
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div className="admin-table-wrap inventory-table-wrap">
         <div className="inventory-table-scroll">
           <table className="admin-table inventory-table">
             <caption className="sr-only">
