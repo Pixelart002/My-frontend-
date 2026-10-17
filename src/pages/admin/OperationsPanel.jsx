@@ -2327,7 +2327,7 @@ function ReviewsModerationPanel() {
   };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel reviews-panel">
       <div className="admin-card">
         <Toolbar
           title="Review moderation"
