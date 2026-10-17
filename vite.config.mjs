@@ -23,7 +23,7 @@ function deferEntryStylesheet() {
       // Modify the generated HTML asset in-place instead of reading dist/index.html
       // from closeBundle(), where Vite 8/Rolldown may not have written it yet.
       html = html.replace(
-        /<link\\b(?=[^>]*\\brel=["']stylesheet["'])[^>]*\\bhref=["']([^"']+\\.css)["'][^>]*>/gi,
+        /<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+\.css)["'][^>]*>/gi,
         (tag, href) => {
           if (!href.startsWith('/assets/')) return tag
           converted += 1
@@ -38,12 +38,12 @@ function deferEntryStylesheet() {
       // Discover the hashed entry module at build time and preload it from
       // <head>. This starts the single-page-app bootstrap early without a fixed hash.
       const entryScript = html.match(
-        /<script\\b(?=[^>]*\\btype=["']module["'])[^>]*\\bsrc=["'](\\/assets\\/[^"']+\\.js)["'][^>]*>\\s*<\\/script>/i,
+        /<script\b(?=[^>]*\btype=["']module["'])[^>]*\bsrc=["'](\/assets\/[^"']+\.js)["'][^>]*>\s*<\/script>/i,
       )
-      if (entryScript && !html.includes(`rel="modulepreload" href="${entryScript[1]}"`)) {
+      if (entryScript && !html.includes('rel="modulepreload" href="${entryScript[1]}"')) {
         html = html.replace(
           '</head>',
-          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\\n  </head>`,
+          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\n  </head>`,
         )
       }
 
