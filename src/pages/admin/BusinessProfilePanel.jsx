@@ -1414,7 +1414,7 @@ export default function BusinessProfilePanel() {
                     },
                   )}
                 </div>
-
+              )}
               </>
             )}
           </div>
