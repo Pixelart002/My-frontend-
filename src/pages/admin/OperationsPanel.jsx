@@ -1003,10 +1003,10 @@ function RbacPanel() {
     [matrix],
   );
 
-  const toggle = async (row) => {
+  const setPermission = async (row, enabled) => {
     const key = `${row.role}:${row.permission}`;
 
-    if (busyKey) return;
+    if (busyKey || row.role === 'super_admin' || enabled === row.enabled) return;
 
     setBusyKey(key);
 
@@ -1014,7 +1014,7 @@ function RbacPanel() {
       await adminService.togglePermission(
         row.role,
         row.permission,
-        !row.enabled,
+        enabled,
       );
 
       if (!mountedRef.current) return;
@@ -1061,7 +1061,7 @@ function RbacPanel() {
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
                 <th scope="col">State</th>
-                <th scope="col">Action</th>
+                <th scope="col">Policy</th>
               </tr>
             </thead>
 
@@ -1089,20 +1089,22 @@ function RbacPanel() {
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() => toggle(row)}
-                          disabled={immutable || Boolean(busyKey)}
-                        >
-                          {immutable
-                            ? 'Absolute'
-                            : busyKey === key
-                              ? 'Saving…'
-                              : row.enabled
-                                ? 'Deny'
-                                : 'Allow'}
-                        </button>
+                        {immutable ? (
+                          <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
+                        ) : (
+                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
+                            <legend className="sr-only">{row.role} — {row.permission}</legend>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="allow" checked={row.enabled} onChange={() => setPermission(row, true)} disabled={Boolean(busyKey)} />
+                              <span>Allow</span>
+                            </label>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="deny" checked={!row.enabled} onChange={() => setPermission(row, false)} disabled={Boolean(busyKey)} />
+                              <span>Deny</span>
+                            </label>
+                            {busyKey === key && <span role="status">Saving…</span>}
+                          </fieldset>
+                        )}
                       </td>
                     </tr>
                   );
