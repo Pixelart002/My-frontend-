@@ -196,8 +196,16 @@ self.addEventListener('push', (event) => {
         renotify:
           data.renotify === true,
 
+        requireInteraction:
+          data.require_interaction === true,
+
         vibrate: [100, 50, 100],
       };
+
+      const image = resolveNotificationAsset(data.image);
+      if (image) {
+        options.image = image;
+      }
 
 
       if (Array.isArray(data.actions)) {
