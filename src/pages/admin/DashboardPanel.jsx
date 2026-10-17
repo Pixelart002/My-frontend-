@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   RiBarChart2Line,
   RiCoupon3Line,
@@ -193,78 +193,59 @@ export default function DashboardPanel({ onNavigate }) {
         ))}
       </section>
 
-      <section
-        className="dashboard-section dashboard-quick-actions-section"
-        aria-labelledby="dashboard-quick-actions"
-      >
-        <div
-          id="dashboard-quick-actions"
-          className="admin-section-label"
-        >
-          Quick actions
+      <section className="dashboard-visualization" aria-labelledby="dashboard-status-heading">
+        <div className="dashboard-visualization-heading">
+          <div>
+            <h2 id="dashboard-status-heading">Recent order status mix</h2>
+            <p>Based on the {recent.length} latest loaded orders</p>
+          </div>
         </div>
+        {recent.length === 0 ? (
+          <div className="dashboard-visualization-empty">Status data will appear when orders arrive.</div>
+        ) : (
+          <div className="dashboard-status-chart" role="list" aria-label="Recent order status distribution">
+            {Object.entries(
+              recent.reduce((counts, order) => {
+                const status = String(order?.status || 'unknown').trim().toLowerCase();
+                counts[status] = (counts[status] || 0) + 1;
+                return counts;
+              }, {}),
+            ).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
+              const percentage = Math.round((count / recent.length) * 100);
+              const label = status.charAt(0).toUpperCase() + status.slice(1);
+              return (
+                <div className="dashboard-status-row" role="listitem" key={status}>
+                  <div className="dashboard-status-meta">
+                    <span>{label}</span>
+                    <strong>{count} <span className="dashboard-status-percent">({percentage}%)</span></strong>
+                  </div>
+                  <div className="dashboard-status-track" aria-hidden="true">
+                    <span className="dashboard-status-fill" style={{ width: percentage + '%' }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-        <div className="dashboard-actions">
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm dashboard-action-btn"
-            onClick={() => onNavigate?.('products')}
-          >
-            Add product
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => onNavigate?.('categories')}
-          >
-            Add category
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => onNavigate?.('orders')}
-          >
-            View orders
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => onNavigate?.('users')}
-          >
-            Manage users
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => onNavigate?.('coupons')}
-          >
-            <RiCoupon3Line size={14} aria-hidden="true" />
-            <span>Create coupon</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm dashboard-refresh dashboard-action-btn"
-            onClick={load}
-            disabled={refreshing}
-            aria-label={
-              refreshing
-                ? 'Refreshing dashboard'
-                : 'Refresh dashboard'
-            }
-          >
-            <RiRefreshLine
-              size={14}
-              className={refreshing ? 'dashboard-refresh-icon spin' : ''}
-              aria-hidden="true"
-            />
-            <span>{refreshing ? 'Refreshing…' : 'Refresh'}</span>
-          </button>
-        </div>
+      <section className="dashboard-quick-actions-section" aria-label="Dashboard quick actions">
+        <details className="dashboard-quick-actions-menu">
+          <summary className="dashboard-quick-actions-trigger">
+            <span>Quick actions</span>
+            <span className="dashboard-quick-actions-chevron" aria-hidden="true">⌄</span>
+          </summary>
+          <div className="dashboard-quick-actions-popover">
+            <button type="button" onClick={() => onNavigate?.('products')}>Manage products</button>
+            <button type="button" onClick={() => onNavigate?.('categories')}>Manage categories</button>
+            <button type="button" onClick={() => onNavigate?.('orders')}>View orders</button>
+            <button type="button" onClick={() => onNavigate?.('users')}>Manage users</button>
+            <button type="button" onClick={() => onNavigate?.('coupons')}>Manage coupons</button>
+            <button type="button" onClick={load} disabled={refreshing}>
+              {refreshing ? 'Refreshing…' : 'Refresh dashboard'}
+            </button>
+          </div>
+        </details>
       </section>
 
       <section
