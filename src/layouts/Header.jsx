@@ -490,7 +490,7 @@ export default function Header() {
 
   return (
     <header className="header sticky top-0 z-[120] isolate h-[72px] min-h-[72px] border-b border-[rgb(255_255_255_/_0.07)] bg-[rgb(8_8_8_/_0.94)] text-text backdrop-blur-xl transition-[box-shadow,background-color] duration-200 max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:backdrop-blur-none">
-      <div className="header-reference-inner mx-auto grid h-[72px] w-full min-w-0 grid-cols-[160px_minmax(0,1fr)_auto] items-center gap-x-7 px-[8.333vw] max-[1100px]:grid-cols-[145px_minmax(0,1fr)_auto] max-[1100px]:gap-x-[18px] max-[1100px]:px-[5vw] max-[1024px]:gap-x-5 max-[1024px]:px-[clamp(24px,5vw,52px)] max-[900px]:flex max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:gap-x-0 max-[900px]:px-5 max-[768px]:px-4 max-[640px]:px-[14px] max-[375px]:px-3">
+      <div className="header-reference-inner mx-auto grid h-[72px] w-full min-w-0 grid-cols-[160px_minmax(0,1fr)_auto] items-center gap-x-7 px-[clamp(20px,4vw,56px)] max-[1100px]:grid-cols-[145px_minmax(0,1fr)_auto] max-[1100px]:gap-x-[18px] max-[1100px]:px-[clamp(18px,3vw,34px)] max-[1024px]:gap-x-5 max-[1024px]:px-[clamp(18px,3vw,28px)] max-[900px]:flex max-[900px]:h-[68px] max-[900px]:min-h-[68px] max-[900px]:gap-x-0 max-[900px]:px-5 max-[768px]:px-4 max-[640px]:px-[14px] max-[375px]:px-3">
         <Link
           className="brand min-w-0 whitespace-nowrap font-display text-[35px] font-medium leading-none tracking-[-.035em] text-gold no-underline max-[900px]:text-[30px] max-[768px]:text-[29px] max-[640px]:text-[28px] max-[375px]:text-[26px]"
           to="/"
