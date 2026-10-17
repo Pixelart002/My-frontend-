@@ -102,7 +102,7 @@
   gap: clamp(10px, 1.5vw, 20px);
 }
 
-.store-layout .products-grid > article.group {
+.store-layout article.group {
   border-color: var(--store-border-subtle);
   border-radius: var(--store-card-radius);
   background:
@@ -115,16 +115,16 @@
   isolation: isolate;
 }
 
-.store-layout .products-grid > article.group h3 {
+.store-layout article.group h3 {
   line-height: 1.35;
   text-wrap: pretty;
 }
 
-.store-layout .products-grid > article.group .product-image {
+.store-layout article.group .product-image {
   backface-visibility: hidden;
 }
 
-.store-layout .products-grid > article.group button {
+.store-layout article.group button {
   letter-spacing: 0;
   line-height: 1.25;
 }
@@ -214,7 +214,7 @@
   box-shadow: 0 18px 52px -42px rgb(0 0 0 / 90%);
 }
 
-.store-layout .auth-card :where(input, select, textarea) {
+.store-layout .auth-card :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
   width: 100%;
   min-width: 0;
 }
@@ -251,7 +251,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .store-layout .products-grid > article.group:hover {
+  .store-layout article.group:hover {
     border-color: color-mix(in srgb, var(--gold) 62%, var(--line));
     box-shadow: 0 18px 38px -28px rgb(0 0 0 / 86%);
   }
@@ -321,11 +321,11 @@
     gap: 10px;
   }
 
-  .store-layout .products-grid > article.group {
+  .store-layout article.group {
     border-radius: 14px;
   }
 
-  .store-layout .products-grid > article.group > div:last-child {
+  .store-layout article.group > div:last-child {
     padding: 10px;
   }
 
@@ -344,7 +344,7 @@
 }
 
 @media (hover: none) {
-  .store-layout .products-grid > article.group:hover {
+  .store-layout article.group:hover {
     transform: none;
   }
 
