@@ -1,0 +1,138 @@
+/* Luviio customer checkout — restrained, stable, mobile-first presentation. */
+.checkout-experience {
+  --checkout-border: rgba(255,255,255,.09);
+  --checkout-panel: #111214;
+  --checkout-panel-soft: #151619;
+  --checkout-copy: #a6a6a8;
+  --checkout-gold: #d8ad6a;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+.checkout-experience__inner {
+  width: 100%;
+}
+.checkout-experience header h1 {
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.checkout-experience nav[aria-label="Checkout progress"] {
+  background: linear-gradient(135deg, rgba(216,173,106,.055), rgba(255,255,255,.012)), var(--checkout-panel);
+  border-color: var(--checkout-border);
+}
+.checkout-experience nav[aria-label="Checkout progress"] ol {
+  align-items: center;
+}
+.checkout-experience nav[aria-label="Checkout progress"] li {
+  min-width: 0;
+}
+.checkout-experience nav[aria-label="Checkout progress"] li > span:first-child {
+  box-shadow: inset 0 0 0 1px rgba(216,173,106,.04);
+}
+.checkout-experience main > div,
+.checkout-experience aside > div {
+  border-color: var(--checkout-border) !important;
+  background: var(--checkout-panel) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12) !important;
+}
+.checkout-experience main > div {
+  scroll-margin-top: 1rem;
+}
+.checkout-experience main > div > div:first-child h2 {
+  letter-spacing: -.015em;
+}
+.checkout-experience label.block:has(input[name="delivery-address"]) {
+  min-width: 0;
+  height: 100%;
+}
+.checkout-experience input:not([type="radio"]):not([type="checkbox"]) {
+  min-width: 0;
+  max-width: 100%;
+}
+.checkout-experience button {
+  touch-action: manipulation;
+}
+.checkout-experience button:focus-visible,
+.checkout-experience a:focus-visible,
+.checkout-experience input:focus-visible {
+  outline: 2px solid var(--checkout-gold);
+  outline-offset: 3px;
+}
+.checkout-experience aside {
+  min-width: 0;
+}
+.checkout-experience aside dl dd {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.checkout-experience aside .break-words {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 1024px) {
+  .checkout-experience__inner {
+    max-width: 1120px;
+  }
+  .checkout-experience main > div,
+  .checkout-experience aside > div {
+    border-radius: 1.25rem !important;
+  }
+}
+@media (max-width: 639px) {
+  .checkout-experience {
+    padding-top: 1rem;
+  }
+  .checkout-experience__inner > button:first-child {
+    margin-bottom: 1rem;
+  }
+  .checkout-experience header h1 {
+    font-size: clamp(1.8rem, 8vw, 2.35rem);
+    letter-spacing: -.04em;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] {
+    padding: .75rem;
+    border-radius: 1rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] ol {
+    gap: .35rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li {
+    gap: .4rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li > span:first-child {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: .62rem;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li > span:nth-child(2) {
+    min-width: 0;
+  }
+  .checkout-experience nav[aria-label="Checkout progress"] li > span:nth-child(2) > span:first-child {
+    font-size: .69rem;
+    line-height: 1.2;
+  }
+  .checkout-experience main {
+    gap: .85rem;
+  }
+  .checkout-experience main > div,
+  .checkout-experience aside > div {
+    padding: 1rem !important;
+    border-radius: 1.1rem !important;
+  }
+  .checkout-experience main > div > div:first-child p {
+    line-height: 1.45;
+  }
+  .checkout-experience aside .space-y-3 {
+    gap: .65rem;
+  }
+  .checkout-experience .grid {
+    min-width: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkout-experience *,
+  .checkout-experience *::before,
+  .checkout-experience *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
