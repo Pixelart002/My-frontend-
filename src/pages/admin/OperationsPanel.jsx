@@ -1407,6 +1407,7 @@ function SettingsPanel() {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [switchBusyKey, setSwitchBusyKey] = useState('');
 
   const load = useCallback(async () => {
     const requestId = startRequest();
@@ -1456,6 +1457,33 @@ function SettingsPanel() {
 
     setEditing(null);
     setDraft('');
+  };
+
+  const toggleBooleanSetting = async (setting) => {
+    if (!setting || setting.is_system_locked || saving || switchBusyKey) return;
+
+    const currentValue =
+      setting.value === true ||
+      String(setting.value ?? '').trim().toLowerCase() === 'true';
+    const nextValue = !currentValue;
+    setSwitchBusyKey(setting.key);
+
+    try {
+      await adminService.updateSetting(
+        setting.key,
+        nextValue,
+        'Toggled from System settings',
+      );
+      if (!mountedRef.current) return;
+      toast.success(`${setting.key} ${nextValue ? 'enabled' : 'disabled'}.`);
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, `Unable to update ${setting.key}.`));
+      }
+    } finally {
+      if (mountedRef.current) setSwitchBusyKey('');
+    }
   };
 
   const parseDraft = (setting) => {
@@ -1563,33 +1591,62 @@ function SettingsPanel() {
 
             <tbody>
               {settings.length ? (
-                settings.map((setting) => (
-                  <tr key={setting.key}>
-                    <td className="td-strong">{setting.key}</td>
-                    <td>{pretty(setting.category)}</td>
-                    <td>{pretty(setting.data_type)}</td>
-                    <td className="td-dim">
-                      <span title={pretty(setting.value)}>
-                        {pretty(setting.value)}
-                      </span>
-                    </td>
-                    <td>
-                      {setting.is_system_locked ? (
-                        <span className="admin-pill pill-muted">
-                          Locked
+                settings.map((setting) => {
+                  const isBooleanSetting =
+                    setting.data_type === 'boolean' ||
+                    typeof setting.value === 'boolean';
+                  const booleanValue =
+                    setting.value === true ||
+                    String(setting.value ?? '').trim().toLowerCase() === 'true';
+                  const switchBusy = switchBusyKey === setting.key;
+
+                  return (
+                    <tr key={setting.key}>
+                      <td className="td-strong">{setting.key}</td>
+                      <td>{pretty(setting.category)}</td>
+                      <td>{pretty(setting.data_type)}</td>
+                      <td className="td-dim">
+                        <span title={pretty(setting.value)}>
+                          {pretty(setting.value)}
                         </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() => openEditor(setting)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        {setting.is_system_locked ? (
+                          <span className="admin-pill pill-muted">Locked</span>
+                        ) : isBooleanSetting ? (
+                          <div className="settings-switch-cell">
+                            <button
+                              type="button"
+                              className="admin-switch"
+                              role="switch"
+                              aria-checked={booleanValue}
+                              aria-label={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              title={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              disabled={Boolean(switchBusyKey) || saving}
+                              onClick={() => toggleBooleanSetting(setting)}
+                            >
+                              <span className="admin-switch-thumb" aria-hidden="true">
+                                {switchBusy ? <span className="admin-switch-spinner" /> : booleanValue ? <RiCheckLine size={14} /> : <RiCloseLine size={14} />}
+                              </span>
+                            </button>
+                            <span className="settings-switch-label" aria-live="polite">
+                              {switchBusy ? 'Saving…' : booleanValue ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm"
+                            onClick={() => openEditor(setting)}
+                            disabled={Boolean(switchBusyKey) || saving}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="5">
