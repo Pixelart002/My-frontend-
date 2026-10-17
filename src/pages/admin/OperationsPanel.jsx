@@ -1317,7 +1317,7 @@ function NotificationsPanel() {
   };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel notifications-panel">
       <div className="admin-card">
         <Toolbar
           title="Notifications"
@@ -1999,8 +1999,8 @@ function ReportsPanel() {
   );
 
   return (
-    <section className="admin-panel">
-      <div className="admin-card">
+    <section className="admin-panel reports-panel">
+      <div className="admin-card reports-summary-card">
         <Toolbar
           title="Reports"
           description="Business signals for stock, order volume, revenue and product performance."
@@ -2036,7 +2036,7 @@ function ReportsPanel() {
         </div>
       </div>
 
-      <div className="admin-card">
+      <div className="admin-card reports-visual-card">
         <h3>Order status</h3>
 
         {statusCounts.length ? (
