@@ -4015,3 +4015,145 @@
     transition: none;
   }
 }
+
+
+/* ============================================================
+   Admin spacing + alignment normalization
+   Scoped to the admin console; no route, data or API changes.
+   ============================================================ */
+.admin-console-root,
+.admin-console-root *,
+.admin-console-root *::before,
+.admin-console-root *::after {
+  box-sizing: border-box;
+}
+
+.admin-console-root {
+  --admin-layout-gap: clamp(16px, 2vw, 24px);
+  --admin-content-gutter: clamp(16px, 2.2vw, 32px);
+  width: min(100%, 1480px);
+  margin-inline: auto;
+  padding: clamp(16px, 2vw, 28px) var(--admin-content-gutter) clamp(32px, 4vw, 56px);
+  column-gap: var(--admin-layout-gap);
+}
+
+.admin-console-root .admin-sidebar {
+  min-width: 0;
+  width: 100%;
+  padding: 14px 10px;
+}
+
+.admin-console-root .admin-main,
+.admin-console-root .admin-panel,
+.admin-console-root .admin-console-content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-console-root .admin-head {
+  width: 100%;
+  margin-top: 0;
+  margin-inline: 0;
+}
+
+.admin-console-root .admin-card {
+  margin-bottom: 16px;
+  padding: clamp(14px, 1.8vw, 22px);
+}
+
+.admin-console-root .admin-toolbar {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+}
+
+.admin-console-root .admin-stats {
+  gap: clamp(10px, 1.3vw, 16px);
+  margin-bottom: 24px;
+}
+
+.admin-console-root .admin-stat {
+  padding: clamp(14px, 1.6vw, 20px);
+}
+
+.admin-console-root .admin-table-wrap {
+  max-width: 100%;
+}
+
+.admin-console-root .admin-modal-overlay {
+  padding: clamp(12px, 3vw, 24px);
+}
+
+.admin-console-root .admin-modal {
+  max-height: calc(100dvh - 2 * clamp(12px, 3vw, 24px));
+}
+
+@media (max-width: 1100px) {
+  .admin-console-root {
+    padding: 18px 18px 36px;
+    column-gap: 18px;
+  }
+
+  .admin-console-root .admin-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-console-root {
+    width: 100%;
+    padding: 12px 14px 28px;
+  }
+
+  .admin-console-root .admin-head {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .admin-console-root .admin-card {
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .admin-console-root .admin-toolbar {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .admin-console-root .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .admin-console-root .admin-stat {
+    padding: 13px;
+  }
+
+  .admin-console-root .admin-table th,
+  .admin-console-root .admin-table td {
+    padding: 10px 11px;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-console-root {
+    padding-inline: 10px;
+  }
+
+  .admin-console-root .admin-card {
+    padding: 12px;
+  }
+
+  .admin-console-root .admin-stats {
+    gap: 8px;
+  }
+
+  .admin-console-root .admin-stat {
+    padding: 11px;
+  }
+}
