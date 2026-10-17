@@ -196,6 +196,8 @@ export default function ProductsPanel({ capabilities = {} }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState('');
   const [loadingEditor, setLoadingEditor] = useState(false);
   const [deletingImage, setDeletingImage] = useState(null);
   const [primaryBusy, setPrimaryBusy] = useState(null);
@@ -745,16 +747,34 @@ export default function ProductsPanel({ capabilities = {} }) {
       };
 
       if (editingId) {
+        // Image changes are saved by their dedicated upload/reorder/delete APIs.
+        // Omitting image fields here prevents a retry after a partial upload from
+        // overwriting images that already reached the server.
+        delete payload.images;
+        delete payload.image_url;
+
         await adminService.updateProduct(
           editingId,
           payload,
         );
 
         if (selectedFiles.length) {
+          setUploadingImages(true);
+          setUploadMessage('Starting image upload queue…');
           await adminService.uploadProductImages(
             editingId,
             selectedFiles,
+            ({ completed, total, file: uploadedFile }) => {
+              setSelectedFiles((current) =>
+                current.filter((candidate) => candidate !== uploadedFile),
+              );
+              setUploadMessage(
+                'Uploaded ' + completed + ' of ' + total + ' images',
+              );
+            },
           );
+          setUploadingImages(false);
+          setUploadMessage('');
         }
 
         toast.success('Product updated.');
@@ -766,6 +786,8 @@ export default function ProductsPanel({ capabilities = {} }) {
         };
 
         if (selectedFiles.length) {
+          setUploadingImages(true);
+          setUploadMessage('Uploading product images…');
           await adminService.createProductWithImages(
             createPayload,
             selectedFiles,
@@ -794,6 +816,8 @@ export default function ProductsPanel({ capabilities = {} }) {
     } finally {
       if (mountedRef.current) {
         setSaving(false);
+        setUploadingImages(false);
+        setUploadMessage('');
       }
     }
   };
@@ -844,27 +868,24 @@ export default function ProductsPanel({ capabilities = {} }) {
   return (
     <>
       <div className="products-admin w-full min-w-0 space-y-6">
-        <div className="flex flex-col gap-4 rounded-3xl border border-line bg-surface p-5 shadow-luviio-card sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div>
+        <div className="admin-page-head products-page-head flex min-w-0 items-center justify-between gap-4">
+          <div className="min-w-0">
             <h1 className="font-display text-2xl font-semibold tracking-tight text-text sm:text-3xl">Products</h1>
-            <p className="mt-1.5 text-sm leading-6 text-muted">
-              {filtered.length} of {items.length} shown ·
-              catalogue, pricing, inventory & hardware
-              specifications
+            <p className="admin-sub mt-1.5 text-sm leading-6 text-muted">
+              {filtered.length} of {items.length} shown · catalogue, pricing, inventory and specifications
             </p>
           </div>
 
           {canCreate && (
             <button
               type="button"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-gold px-4 text-sm font-bold text-gold-ink shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn btn-sm product-add-trigger shrink-0"
               onClick={openCreate}
               disabled={saving}
+              aria-label="Add product"
+              title="Add product"
             >
-              <RiAddLine
-                size={18}
-                aria-hidden="true"
-              />
+              <RiAddLine size={20} aria-hidden="true" />
               <span>Add product</span>
             </button>
           )}
@@ -2009,6 +2030,12 @@ export default function ProductsPanel({ capabilities = {} }) {
               </section>
               )}
 
+              {uploadingImages && (
+                <p className="product-upload-progress" role="status" aria-live="polite">
+                  {uploadMessage || 'Uploading product images…'}
+                </p>
+              )}
+
               <div className="editor-footer">
                 <label className="check-line">
                   <input
@@ -2051,11 +2078,13 @@ export default function ProductsPanel({ capabilities = {} }) {
                   >
                     {loadingEditor
                       ? 'Loading product…'
-                      : saving
-                        ? 'Saving…'
-                        : editingId
-                          ? 'Save changes'
-                          : 'Create product'}
+                      : uploadingImages
+                        ? 'Uploading images…'
+                        : saving
+                          ? 'Saving…'
+                          : editingId
+                            ? 'Save changes'
+                            : 'Create product'}
                   </button>
                 </div>
               </div>
