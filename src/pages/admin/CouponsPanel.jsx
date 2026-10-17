@@ -879,13 +879,25 @@ export default function CouponsPanel({
         className="admin-panel coupons-panel"
         aria-labelledby="coupons-title"
       >
-        <div className="admin-toolbar">
+        <div className="admin-toolbar coupon-page-toolbar">
           <div>
             <h2 id="coupons-title">
               Coupons
             </h2>
 
           </div>
+
+          <label className="admin-search coupons-search" htmlFor="coupons-search">
+            <RiSearchLine size={16} aria-hidden="true" />
+            <input
+              id="coupons-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search coupon code, description or type…"
+              autoComplete="off"
+            />
+          </label>
 
           <div className="btn-row coupon-toolbar-actions">
             <button
@@ -925,17 +937,7 @@ export default function CouponsPanel({
           </div>
         </div>
 
-        <label className="admin-search coupons-search" htmlFor="coupons-search">
-          <RiSearchLine size={16} aria-hidden="true" />
-          <input
-            id="coupons-search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search coupon code, description or type…"
-            autoComplete="off"
-          />
-        </label>
+
 
         {error && (
           <div
