@@ -1,3 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+
+@source "../../index.html";
+@source "../**/*.{js,jsx,ts,tsx}";
+@source "../../js/**/*.js";
+
+@theme {
+  --color-gold: var(--gold, #d8ad6a);
+  --color-gold-ink: var(--gold-ink, #17130e);
+  --color-gold-soft: var(--gold-soft, #f0cf97);
+  --color-gold-dim: var(--gold-dim, rgba(216, 173, 106, 0.12));
+  --color-surface: var(--surface, #1b1917);
+  --color-surface-2: var(--surface-2, #24211e);
+  --color-line: var(--line, #3a3530);
+  --color-text: var(--text, #f5efe7);
+  --color-muted: var(--muted, #a59b91);
+  --color-dim: var(--dim, #a59b91);
+  --color-success: var(--success, #6fbf8a);
+  --color-success-dim: var(--success-dim, rgba(111, 191, 138, 0.12));
+  --color-danger: var(--danger, #e0735f);
+  --color-danger-dim: var(--danger-dim, rgba(224, 115, 95, 0.12));
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --shadow-luviio-card: 0 18px 44px rgba(0, 0, 0, 0.18);
+  --shadow-luviio-image: 0 10px 30px rgba(0, 0, 0, 0.16);
+}
