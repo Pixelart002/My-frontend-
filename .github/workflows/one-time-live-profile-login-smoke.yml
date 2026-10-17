@@ -62,7 +62,7 @@ jobs:
                 timeout: 15000,
               });
               await page.getByLabel('Email').waitFor({ state: 'visible' });
-              await page.getByLabel('Password').waitFor({ state: 'visible' });
+              await page.getByLabel(/^Password$/).waitFor({ state: 'visible' });
 
               const bodyText = await page.locator('body').innerText();
               if (/session could not be restored/i.test(bodyText)) {
