@@ -273,6 +273,9 @@ export function AuthProvider({ children }) {
    */
   const login = useCallback(
     async (email, password) => {
+      // A fresh credential-based login supersedes any previous refresh error.
+      setRestoreError(false);
+
       const data = await authService.login(
         email,
         password,
