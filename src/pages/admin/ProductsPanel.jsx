@@ -753,11 +753,6 @@ export default function ProductsPanel({ capabilities = {} }) {
         delete payload.images;
         delete payload.image_url;
 
-        await adminService.updateProduct(
-          editingId,
-          payload,
-        );
-
         if (selectedFiles.length) {
           setUploadingImages(true);
           setUploadMessage('Starting image upload queue…');
@@ -788,6 +783,11 @@ export default function ProductsPanel({ capabilities = {} }) {
           setUploadingImages(false);
           setUploadMessage('');
         }
+
+        await adminService.updateProduct(
+          editingId,
+          payload,
+        );
 
         toast.success('Product updated.');
       } else {
