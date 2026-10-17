@@ -8,6 +8,7 @@ import {
 import {
   RiMapPin2Line,
   RiRefreshLine,
+  RiSearchLine,
   RiTruckLine,
 } from '@remixicon/react';
 
@@ -191,6 +192,7 @@ export default function OrdersPanel({
   const [items, setItems] = useState(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
+  const [search, setSearch] = useState('');
   const [fulfilling, setFulfilling] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -260,18 +262,35 @@ export default function OrdersPanel({
   const filtered = useMemo(() => {
     if (!items) return [];
 
-    if (!filter) {
-      return items;
-    }
+    const query = search.trim().toLowerCase();
 
-    return items.filter(
-      (order) =>
-        String(order?.status ?? '')
-          .trim()
-          .toLowerCase() ===
-        filter.toLowerCase()
-    );
-  }, [items, filter]);
+    return items.filter((order) => {
+      const statusMatches =
+        !filter ||
+        String(order?.status ?? '').trim().toLowerCase() === filter.toLowerCase();
+
+      if (!statusMatches) return false;
+      if (!query) return true;
+
+      const searchable = [
+        order?.order_number,
+        order?.id,
+        order?.users?.full_name,
+        order?.users?.email,
+        order?.users?.phone,
+        order?.shipping_name,
+        order?.billing_name,
+        order?.shipping_phone,
+        order?.invoice_number,
+        order?.tracking_number,
+      ]
+        .filter((value) => value !== null && value !== undefined && value !== '')
+        .join(' ')
+        .toLowerCase();
+
+      return searchable.includes(query);
+    });
+  }, [items, filter, search]);
 
   if (error) {
     return (
@@ -300,7 +319,20 @@ export default function OrdersPanel({
           </p>
         </div>
 
-        <div className="admin-toolbar flex w-full min-w-0 flex-col items-stretch gap-2 min-[901px]:w-auto min-[901px]:flex-row min-[901px]:items-center">
+        <div className="admin-toolbar orders-toolbar flex w-full min-w-0 flex-col items-stretch gap-2 min-[901px]:w-auto min-[901px]:flex-row min-[901px]:items-center">
+          <label className="admin-search orders-search min-w-0" htmlFor="orders-search">
+            <RiSearchLine size={16} aria-hidden="true" />
+            <input
+              id="orders-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search order, customer, invoice…"
+              autoComplete="off"
+              aria-label="Search orders by order number, customer, invoice or tracking"
+            />
+          </label>
+
           <label
             className="sr-only"
             htmlFor="orders-status-filter"
