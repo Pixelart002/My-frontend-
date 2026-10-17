@@ -13,6 +13,7 @@ import './styles/loading.css';
 import './styles/location-autocomplete.css';
 import './styles/site-ui.css';
 import './styles/layout-stability.css';
+import './styles/cookie-consent.css';
 
 const rootElement = document.getElementById('root');
 
