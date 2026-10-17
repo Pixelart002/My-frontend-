@@ -89,7 +89,7 @@ function Toolbar({
           {showRefresh && (
             <button
               type="button"
-              className="icon-btn ops-toolbar-refresh"
+              className="btn btn-quiet btn-sm ops-toolbar-refresh"
               onClick={onRefresh}
               disabled={refreshing}
               aria-label={`Refresh ${title}`}
@@ -97,10 +97,11 @@ function Toolbar({
               aria-busy={refreshing}
             >
               <RiRefreshLine
-                size={17}
+                size={16}
                 className={refreshing ? 'ops-spin' : undefined}
                 aria-hidden="true"
               />
+              <span className="ops-refresh-label">{refreshing ? 'Refreshing…' : 'Refresh'}</span>
             </button>
           )}
         </div>
