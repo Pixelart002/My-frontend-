@@ -97,3 +97,69 @@ header,
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Header / drawer regression guard.
+   These rules intentionally stay outside Tailwind's utility layer so the
+   mobile menu remains usable even while CSS is being refreshed. */
+.header {
+  padding-inline: 0;
+}
+
+@media (max-width: 900px) {
+  .header {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .header .menu-button {
+    display: inline-flex !important;
+  }
+
+  .header .mobile-menu-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 900 !important;
+  }
+
+  .header .mobile-menu-backdrop[aria-hidden="true"] {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .header .mobile-menu-backdrop[aria-hidden="false"] {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .header .mobile-nav {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: min(344px, 90vw) !important;
+    max-width: 344px !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: 0 !important;
+    transform: translateX(-102%) !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: transform 200ms cubic-bezier(.22, .61, .36, 1), visibility 200ms !important;
+  }
+
+  .header .mobile-nav[aria-hidden="false"] {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .header .menu-button {
+    display: none !important;
+  }
+}
