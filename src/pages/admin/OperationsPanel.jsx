@@ -1205,7 +1205,7 @@ function NotificationsPanel() {
     const normalizedImage = text(image);
     const normalizedTag = text(tag) || 'luviio-notification';
     const normalizedTargets = targetUsers.trim()
-      ? targetUsers.split(/[\\s,;]+/).map((id) => id.trim()).filter(Boolean)
+      ? targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)
       : null;
     const actionFields = [
       { title: text(actionOneTitle), action: text(actionOneUrl) },
