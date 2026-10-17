@@ -528,8 +528,10 @@ export default function Header() {
           {!isAuthenticated && (
             <Link
               className="icon-btn header-account-icon relative inline-flex h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-xl border border-transparent bg-transparent text-text transition-colors duration-150 hover:bg-white/5 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold max-[768px]:h-11 max-[768px]:w-11 max-[768px]:min-w-11"
-              to="/account"
-              aria-label="Account"
+              to="/login"
+              state={{ from: '/account' }}
+              aria-label="Sign in to your account"
+              title="Sign in"
             >
               <RiUserLine
                 size={20}
