@@ -44,9 +44,17 @@ root.walkRules((rule) => {
 // layer so the existing #root specificity contract works as intended.
 root.walkAtRules('layer', (layer) => {
   const names = layer.params.split(',').map((name) => name.trim());
-  if (layer.nodes && names.length === 1 && names[0] === 'utilities') {
-    layer.unwrap();
+  if (!layer.nodes || names.length !== 1 || names[0] !== 'utilities') return;
+
+  const parent = layer.parent;
+  if (!parent) return;
+
+  // PostCSS containers don't expose unwrap() on all supported versions.
+  // Move each child before the wrapper, preserving its original order.
+  for (const child of [...layer.nodes]) {
+    parent.insertBefore(layer, child);
   }
+  layer.remove();
 });
 
 let remainingLayeredUtilityRules = 0;
