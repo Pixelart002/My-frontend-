@@ -3,6 +3,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 const mocks = vi.hoisted(() => ({
+  verify: vi.fn(),
+  authState: {
+    user: { id: 'admin-1', role: 'super_admin' },
+    logout: vi.fn(),
+    initializing: false,
+    isAuthenticated: true,
+    token: 'test-admin-token',
+  },
   listUsers: vi.fn(),
   userActions: vi.fn(),
   setUserAction: vi.fn(),
@@ -19,6 +27,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../../services/admin', () => ({
   adminService: {
+    verify: mocks.verify,
     listUsers: mocks.listUsers,
     userActions: mocks.userActions,
     setUserAction: mocks.setUserAction,
@@ -43,9 +52,14 @@ vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: mocks.toast }),
 }));
 
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: () => mocks.authState,
+}));
+
 import UsersPanel from './UsersPanel';
 import ProductsPanel from './ProductsPanel';
 import OperationsPanel from './OperationsPanel';
+import AdminPage from './AdminPage';
 
 function LocationProbe() {
   const location = useLocation();
@@ -59,6 +73,10 @@ function LocationProbe() {
 describe('admin panel routing and search', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    mocks.verify.mockResolvedValue({
+      profile: { id: 'admin-1', role: 'super_admin' },
+    });
 
     mocks.listUsers.mockResolvedValue([
       {
@@ -128,6 +146,25 @@ describe('admin panel routing and search', () => {
         '/admin?panel=user-actions&user_id=user-123',
       );
     });
+  });
+
+  it('switches the visible admin panel when a user action deep link changes the query', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin?panel=users']}>
+        <AdminPage />
+      </MemoryRouter>,
+    );
+
+    const actionButton = await screen.findByRole('button', {
+      name: 'Manage actions for customer@example.test',
+    });
+    fireEvent.click(actionButton);
+
+    expect(await screen.findByText('checkout')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mocks.userActions).toHaveBeenCalledWith('user-123');
+    });
+    expect(screen.getByRole('heading', { name: 'User actions' })).toBeInTheDocument();
   });
 
   it('loads the selected customer when User Actions is opened by URL', async () => {
