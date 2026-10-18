@@ -204,7 +204,7 @@ export default function UsersPanel({ capabilities = {} }) {
 
   return (
     <div className="users-admin">
-      <div className="admin-head users-admin-head">
+      <div className="users-page-head">
         <div>
           <h1>Users</h1>
 
