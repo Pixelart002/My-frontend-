@@ -5438,3 +5438,57 @@ button:disabled {
     padding-inline: 12px;
   }
 }
+
+
+/* Final override for legacy ops-toolbar nowrap rules that caused mobile clipping. */
+.admin-console-root .ops-toolbar {
+  flex-flow: row wrap !important;
+  align-items: flex-start !important;
+}
+.admin-console-root .ops-toolbar > .ops-toolbar-copy,
+.admin-console-root .ops-toolbar > :first-child {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-console-root .ops-toolbar > .btn-row {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-console-root .ops-toolbar > button:has(svg) {
+  flex: 0 0 auto;
+}
+@media (max-width: 560px) {
+  .admin-console-root .ops-toolbar {
+    flex-flow: row wrap !important;
+    align-items: flex-start !important;
+  }
+  .admin-console-root .ops-toolbar > .ops-toolbar-copy,
+  .admin-console-root .ops-toolbar > :first-child {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+  .admin-console-root .ops-toolbar > button:has(svg) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  .admin-console-root .ops-toolbar > button:has(svg) svg {
+    flex: 0 0 auto;
+  }
+  .admin-console-root .ops-toolbar > button:has(svg) span {
+    display: none;
+  }
+  .admin-console-root .ops-toolbar > .btn-row {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
