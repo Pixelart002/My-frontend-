@@ -939,8 +939,6 @@ export default function CouponsPanel({
 
 
 
-
-
         {error && (
           <div
             className="form-error"
