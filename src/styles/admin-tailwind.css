@@ -5140,3 +5140,308 @@ button:disabled {
     justify-content: center;
   }
 }
+
+
+/* Cross-panel responsive contract: no flex/grid child may force viewport overflow. */
+.admin-console-root,
+.admin-console-root .admin-panel,
+.admin-console-root .admin-card,
+.admin-console-root .admin-page-head,
+.admin-console-root .admin-toolbar,
+.admin-console-root .admin-table-wrap,
+.admin-console-root .admin-table-scroll,
+.admin-console-root .orders-ledger-track,
+.admin-console-root .inventory-table-scroll,
+.admin-console-root .product-editor,
+.admin-console-root .category-editor-modal,
+.admin-console-root .inventory-modal,
+.admin-console-root .stripe-config-card,
+.admin-console-root .business-profile-section-body {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-console-root .admin-page-head,
+.admin-console-root .categories-page-head,
+.admin-console-root .admin-toolbar,
+.admin-console-root .inventory-toolbar,
+.admin-console-root .inventory-list-toolbar,
+.admin-console-root .stripe-config-toolbar,
+.admin-console-root .orders-toolbar,
+.admin-console-root .admin-telemetry-card .ops-toolbar,
+.admin-console-root .admin-page-head .btn-row {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.admin-console-root .admin-page-head > :first-child,
+.admin-console-root .admin-toolbar > :first-child,
+.admin-console-root .inventory-heading,
+.admin-console-root .categories-page-copy,
+.admin-console-root .stripe-config-toolbar > div:first-child {
+  flex: 1 1 220px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-console-root .admin-page-head > .btn,
+.admin-console-root .admin-page-head > .btn-row,
+.admin-console-root .admin-toolbar > .btn-row,
+.admin-console-root .inventory-toolbar-actions {
+  flex: 0 0 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.admin-console-root .admin-toolbar > .btn-row,
+.admin-console-root .admin-page-head > .btn-row,
+.admin-console-root .inventory-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.admin-console-root .admin-page-head .btn-row:has(> .btn + .btn),
+.admin-console-root .admin-toolbar .btn-row:has(> .btn + .btn),
+.admin-console-root .inventory-toolbar-actions:has(> .btn + .btn) {
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.admin-console-root input,
+.admin-console-root select,
+.admin-console-root textarea,
+.admin-console-root button,
+.admin-console-root .field,
+.admin-console-root .field-grid,
+.admin-console-root form {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-console-root .field-grid,
+.admin-console-root .form-grid,
+.admin-console-root .product-editor-grid,
+.admin-console-root .inventory-editor-summary,
+.admin-console-root .admin-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.admin-console-root .admin-search,
+.admin-console-root .orders-search,
+.admin-console-root .coupons-search,
+.admin-console-root .audit-search,
+.admin-console-root .inventory-search {
+  flex: 1 1 220px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.admin-console-root .admin-search input,
+.admin-console-root .orders-search input,
+.admin-console-root .coupons-search input,
+.admin-console-root .audit-search input,
+.admin-console-root .inventory-search input {
+  width: 100%;
+  min-width: 0;
+}
+.admin-console-root .orders-ledger-track,
+.admin-console-root .inventory-table-scroll,
+.admin-console-root .admin-table-wrap,
+.admin-console-root .admin-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-console-root .orders-ledger-table,
+.admin-console-root .inventory-table,
+.admin-console-root .admin-table-scroll .admin-table {
+  width: max-content;
+  min-width: 760px;
+}
+.admin-console-root .admin-modal-overlay {
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-console-root .admin-modal {
+  min-width: 0;
+  max-width: min(960px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.admin-console-root .admin-modal form,
+.admin-console-root .admin-modal .product-editor {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-console-root .admin-modal .btn-row,
+.admin-console-root .admin-modal .coupon-form-actions,
+.admin-console-root .business-profile-form-actions,
+.admin-console-root .notification-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.admin-console-root .admin-modal .btn-row > .btn,
+.admin-console-root .coupon-form-actions > .btn,
+.admin-console-root .business-profile-form-actions > .btn,
+.admin-console-root .notification-form-actions > .btn {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.admin-console-root .admin-sub,
+.admin-console-root .admin-page-head p,
+.admin-console-root .admin-toolbar p,
+.admin-console-root .field small,
+.admin-console-root .modal-sub {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .admin-console-root .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-console-root .admin-page-head,
+  .admin-console-root .categories-page-head,
+  .admin-console-root .inventory-toolbar,
+  .admin-console-root .stripe-config-toolbar {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .admin-console-root .orders-toolbar {
+    width: 100%;
+  }
+  .admin-console-root .orders-toolbar > *,
+  .admin-console-root .inventory-list-toolbar > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .admin-console-root .admin-modal {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+}
+@media (max-width: 560px) {
+  .admin-console-root .admin-page-head,
+  .admin-console-root .categories-page-head {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .admin-console-root .admin-page-head > :first-child,
+  .admin-console-root .categories-page-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .admin-console-root .admin-page-head > .btn,
+  .admin-console-root .categories-page-head > .btn,
+  .admin-console-root .admin-page-head > .btn-row > .btn:last-child {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  .admin-console-root .admin-page-head > .btn svg,
+  .admin-console-root .categories-page-head > .btn svg,
+  .admin-console-root .admin-page-head > .btn-row > .btn:last-child svg {
+    flex: 0 0 auto;
+  }
+  .admin-console-root .admin-page-head > .btn span,
+  .admin-console-root .categories-page-head > .btn span,
+  .admin-console-root .admin-page-head > .btn-row > .btn:last-child span {
+    display: none;
+  }
+  .admin-console-root .admin-toolbar,
+  .admin-console-root .inventory-toolbar,
+  .admin-console-root .inventory-list-toolbar,
+  .admin-console-root .stripe-config-toolbar {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .admin-console-root .admin-toolbar > :first-child,
+  .admin-console-root .inventory-heading,
+  .admin-console-root .stripe-config-toolbar > div:first-child {
+    flex-basis: 100%;
+  }
+  .admin-console-root .admin-toolbar > .btn-row,
+  .admin-console-root .inventory-toolbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .admin-console-root .admin-stats,
+  .admin-console-root .field-grid,
+  .admin-console-root .form-grid,
+  .admin-console-root .product-editor-grid,
+  .admin-console-root .inventory-editor-summary {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .admin-console-root .admin-stat {
+    min-width: 0;
+  }
+  .admin-console-root .admin-search,
+  .admin-console-root .orders-search,
+  .admin-console-root .coupons-search,
+  .admin-console-root .audit-search,
+  .admin-console-root .inventory-search,
+  .admin-console-root .orders-toolbar select {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  .admin-console-root .orders-ledger-track,
+  .admin-console-root .inventory-table-scroll,
+  .admin-console-root .admin-table-wrap,
+  .admin-console-root .admin-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .admin-console-root .admin-modal-overlay {
+    align-items: stretch;
+    padding: 0 !important;
+  }
+  .admin-console-root .admin-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    padding: 22px 16px max(20px, env(safe-area-inset-bottom));
+  }
+  .admin-console-root .admin-modal .btn-row,
+  .admin-console-root .coupon-form-actions,
+  .admin-console-root .business-profile-form-actions,
+  .admin-console-root .notification-form-actions {
+    flex-wrap: nowrap;
+  }
+  .admin-console-root .admin-modal .btn-row > .btn,
+  .admin-console-root .coupon-form-actions > .btn,
+  .admin-console-root .business-profile-form-actions > .btn,
+  .admin-console-root .notification-form-actions > .btn {
+    flex: 1 1 0;
+    min-height: 44px;
+  }
+  .admin-console-root .stripe-key-input-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .admin-console-root .stripe-key-input-wrap {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}
+@media (max-width: 360px) {
+  .admin-console-root .admin-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-console-root .admin-modal {
+    padding-inline: 12px;
+  }
+}
