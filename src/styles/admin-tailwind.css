@@ -5219,8 +5219,7 @@ button:disabled {
 .admin-console-root .field-grid,
 .admin-console-root .form-grid,
 .admin-console-root .product-editor-grid,
-.admin-console-root .inventory-editor-summary,
-.admin-console-root .admin-stats {
+.admin-console-root .inventory-editor-summary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .admin-console-root .admin-search,
