@@ -939,17 +939,7 @@ export default function CouponsPanel({
 
 
 
-        <label className="admin-search coupons-search" htmlFor="coupons-search">
-          <RiSearchLine size={16} aria-hidden="true" />
-          <input
-            id="coupons-search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search coupon code, description or type…"
-            autoComplete="off"
-          />
-        </label>
+
 
         {error && (
           <div
