@@ -5333,9 +5333,9 @@ button:disabled {
     flex: 1 1 auto;
     min-width: 0;
   }
-  .admin-console-root .admin-page-head > .btn,
-  .admin-console-root .categories-page-head > .btn,
-  .admin-console-root .admin-page-head > .btn-row > .btn:last-child {
+  .admin-console-root .admin-page-head > .btn:has(svg),
+  .admin-console-root .categories-page-head > .btn:has(svg),
+  .admin-console-root .admin-page-head > .btn-row > .btn:last-child:has(svg) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -5353,9 +5353,9 @@ button:disabled {
   .admin-console-root .admin-page-head > .btn-row > .btn:last-child svg {
     flex: 0 0 auto;
   }
-  .admin-console-root .admin-page-head > .btn span,
-  .admin-console-root .categories-page-head > .btn span,
-  .admin-console-root .admin-page-head > .btn-row > .btn:last-child span {
+  .admin-console-root .admin-page-head > .btn:has(svg) span,
+  .admin-console-root .categories-page-head > .btn:has(svg) span,
+  .admin-console-root .admin-page-head > .btn-row > .btn:last-child:has(svg) span {
     display: none;
   }
   .admin-console-root .admin-toolbar,
@@ -5365,17 +5365,11 @@ button:disabled {
     align-items: flex-start;
     gap: 10px;
   }
-  .admin-console-root .admin-toolbar > :first-child,
-  .admin-console-root .inventory-heading,
-  .admin-console-root .stripe-config-toolbar > div:first-child {
-    flex-basis: 100%;
-  }
   .admin-console-root .admin-toolbar > .btn-row,
   .admin-console-root .inventory-toolbar-actions {
     width: 100%;
     justify-content: flex-end;
   }
-  .admin-console-root .admin-stats,
   .admin-console-root .field-grid,
   .admin-console-root .form-grid,
   .admin-console-root .product-editor-grid,
