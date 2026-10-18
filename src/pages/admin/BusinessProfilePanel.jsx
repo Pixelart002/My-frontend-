@@ -1447,6 +1447,27 @@ export default function BusinessProfilePanel() {
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
+
+      <div className="business-profile-form-actions" role="group" aria-label="Business profile changes">
+        <button
+          className="btn btn-quiet"
+          type="button"
+          onClick={load}
+          disabled={saving || assetBusy || !dirty}
+        >
+          Cancel changes
+        </button>
+        <button
+          className="btn"
+          type="button"
+          onClick={save}
+          disabled={saving || !dirty || assetBusy}
+          aria-busy={saving}
+        >
+          <RiSave3Line size={16} aria-hidden="true" />
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
     </section>
   );
 }
