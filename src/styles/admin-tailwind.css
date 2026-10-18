@@ -5038,3 +5038,105 @@ button:disabled {
     transition: none;
   }
 }
+
+
+/* Responsive hardening: keep panel title and primary utility action on one row. */
+.admin-console-root .ops-toolbar {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  min-width: 0;
+}
+.admin-console-root .ops-toolbar-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.admin-console-root .ops-toolbar > .btn-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: auto;
+  min-width: max-content;
+}
+.admin-console-root .ops-toolbar > .btn-row > .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.admin-console-root .admin-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-console-root .admin-table-wrap table {
+  min-width: 680px;
+}
+.admin-console-root .user-row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.admin-console-root .user-row-actions .btn {
+  flex: 0 0 auto;
+}
+.admin-console-root .admin-toolbar .btn,
+.admin-console-root .ops-toolbar .btn,
+.admin-console-root .user-row-actions .btn {
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.admin-console-root .admin-toolbar .btn:hover:not(:disabled),
+.admin-console-root .ops-toolbar .btn:hover:not(:disabled),
+.admin-console-root .user-row-actions .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.admin-console-root .admin-toolbar .btn:focus-visible,
+.admin-console-root .ops-toolbar .btn:focus-visible,
+.admin-console-root .user-row-actions .btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .admin-console-root .ops-toolbar {
+    gap: 8px !important;
+  }
+  .admin-console-root .ops-toolbar-copy h2 {
+    font-size: 17px;
+    overflow-wrap: anywhere;
+  }
+  .admin-console-root .ops-toolbar-copy p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .admin-console-root .ops-toolbar > .btn-row > .btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    font-size: 0;
+  }
+  .admin-console-root .ops-toolbar > .btn-row > .btn svg {
+    flex: 0 0 auto;
+  }
+  .admin-console-root .admin-table-wrap table {
+    min-width: 760px;
+  }
+  .admin-console-root .user-row-actions .btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+}
