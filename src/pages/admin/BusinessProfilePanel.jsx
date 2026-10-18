@@ -1447,7 +1447,6 @@ export default function BusinessProfilePanel() {
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
-
     </section>
   );
 }
