@@ -1126,6 +1126,7 @@ function RbacPanel() {
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
                 <th scope="col">Access</th>
+                <th scope="col">Policy</th>
               </tr>
             </thead>
 
@@ -1169,6 +1170,23 @@ function RbacPanel() {
                               {busyKey === key ? 'Saving…' : row.enabled ? 'Allowed' : 'Denied'}
                             </span>
                           </div>
+                        )}
+                      </td>
+                        {immutable ? (
+                          <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
+                        ) : (
+                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
+                            <legend className="sr-only">{row.role} — {row.permission}</legend>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="allow" checked={row.enabled} onChange={() => setPermission(row, true)} disabled={Boolean(busyKey)} />
+                              <span>Allow</span>
+                            </label>
+                            <label>
+                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="deny" checked={!row.enabled} onChange={() => setPermission(row, false)} disabled={Boolean(busyKey)} />
+                              <span>Deny</span>
+                            </label>
+                            {busyKey === key && <span role="status">Saving…</span>}
+                          </fieldset>
                         )}
                       </td>
                     </tr>
