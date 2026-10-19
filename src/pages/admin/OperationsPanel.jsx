@@ -2011,14 +2011,29 @@ function ReportsPanel() {
   );
 
   return (
-    <section className="admin-panel reports-panel">
+    <section className="admin-panel reports-panel" aria-label="Reports panel">
       <div className="admin-card reports-summary-card">
-        <Toolbar
-          title="Reports"
-          description="Business signals for stock, order volume, revenue and product performance."
-          onRefresh={load}
-          refreshing={loading}
-        />
+        <div className="admin-toolbar ops-toolbar reports-toolbar">
+          <p className="reports-description">
+            Business signals for stock, order volume, revenue and product performance.
+          </p>
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm ops-toolbar-refresh"
+            onClick={load}
+            disabled={loading}
+            aria-label="Refresh Reports"
+            title="Refresh Reports"
+            aria-busy={loading}
+          >
+            <RiRefreshLine
+              size={16}
+              className={loading ? 'ops-spin' : undefined}
+              aria-hidden="true"
+            />
+            <span className="ops-refresh-label">{loading ? 'Refreshing…' : 'Refresh'}</span>
+          </button>
+        </div>
 
         <div className="admin-stats">
           <div className="admin-stat">
@@ -2046,10 +2061,8 @@ function ReportsPanel() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="admin-card reports-visual-card">
-        <h3>Order status</h3>
+        <h3 className="reports-analysis-title">Order status</h3>
 
         {statusCounts.length ? (
           <div className="ops-report-grid" role="list" aria-label="Order status breakdown">
