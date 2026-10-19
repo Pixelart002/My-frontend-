@@ -460,6 +460,133 @@ export default function DashboardPanel({ onNavigate }) {
         ))}
       </section>
 
+      <section className="dashboard-visualization" aria-labelledby="dashboard-status-heading">
+        <div className="dashboard-visualization-heading">
+          <div>
+            <h2 id="dashboard-status-heading">Recent order status mix</h2>
+            <p>Based on the {recent.length} latest loaded orders</p>
+          </div>
+        </div>
+        {recent.length === 0 ? (
+          <div className="dashboard-visualization-empty">Status data will appear when orders arrive.</div>
+        ) : (
+          <div className="dashboard-status-chart" role="list" aria-label="Recent order status distribution">
+            {Object.entries(
+              recent.reduce((counts, order) => {
+                const status = String(order?.status || 'unknown').trim().toLowerCase();
+                counts[status] = (counts[status] || 0) + 1;
+                return counts;
+              }, {}),
+            ).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
+              const percentage = Math.round((count / recent.length) * 100);
+              const label = status.charAt(0).toUpperCase() + status.slice(1);
+              return (
+                <div className="dashboard-status-row" role="listitem" key={status}>
+                  <div className="dashboard-status-meta">
+                    <span>{label}</span>
+                    <strong>{count} <span className="dashboard-status-percent">({percentage}%)</span></strong>
+                  </div>
+                  <div className="dashboard-status-track" aria-hidden="true">
+                    <span className="dashboard-status-fill" style={{ width: percentage + '%' }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section
+        className="dashboard-section dashboard-recent-section"
+        aria-labelledby="dashboard-recent-orders"
+      >
+        <div
+          id="dashboard-recent-orders"
+          className="admin-section-label"
+        >
+          Recent orders
+        </div>
+
+        {ordersError ? (
+          <div className="admin-table-wrap dashboard-order-state">
+            <div
+              className="admin-empty"
+              role="alert"
+            >
+              {ordersError}
+            </div>
+
+            <div className="btn-row dashboard-order-retry">
+              <button
+                type="button"
+                className="btn btn-quiet btn-sm"
+                onClick={load}
+              >
+                Retry orders
+              </button>
+            </div>
+          </div>
+        ) : recent.length === 0 ? (
+          <div className="admin-table-wrap dashboard-order-state">
+            <div className="admin-empty">
+              No recent orders.
+            </div>
+          </div>
+        ) : (
+          <div className="admin-table-wrap admin-recent-orders">
+            <div className="dashboard-table-scroll">
+              <table className="admin-table dashboard-orders-table">
+                <caption className="sr-only">
+                  Five most recent orders
+                </caption>
+
+                <colgroup>
+                  <col className="dashboard-order-col" />
+                  <col className="dashboard-total-col" />
+                  <col className="dashboard-status-col" />
+                  <col className="dashboard-date-col" />
+                </colgroup>
+
+                <thead>
+                  <tr>
+                    <th scope="col">Order</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {recent.map((order) => (
+                    <tr key={order.id}>
+                      <td className="td-strong dashboard-order-number">
+                        {order.order_number
+                          ? `#${String(order.order_number).replace(/^#/, '')}`
+                          : '—'}
+                      </td>
+
+                      <td className="td-gold">
+                        {formatMoney(
+                          normalizeNumber(order.total_amount),
+                        )}
+                      </td>
+
+                      <td>
+                        <StatusPill status={order.status} />
+                      </td>
+
+                      <td className="td-dim dashboard-order-date">
+                        {formatOrderDate(order.created_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
+
       <DashboardMetricGroup
         title="Inventory snapshot"
         description={
@@ -598,132 +725,6 @@ export default function DashboardPanel({ onNavigate }) {
         ]}
       />
 
-      <section className="dashboard-visualization" aria-labelledby="dashboard-status-heading">
-        <div className="dashboard-visualization-heading">
-          <div>
-            <h2 id="dashboard-status-heading">Recent order status mix</h2>
-            <p>Based on the {recent.length} latest loaded orders</p>
-          </div>
-        </div>
-        {recent.length === 0 ? (
-          <div className="dashboard-visualization-empty">Status data will appear when orders arrive.</div>
-        ) : (
-          <div className="dashboard-status-chart" role="list" aria-label="Recent order status distribution">
-            {Object.entries(
-              recent.reduce((counts, order) => {
-                const status = String(order?.status || 'unknown').trim().toLowerCase();
-                counts[status] = (counts[status] || 0) + 1;
-                return counts;
-              }, {}),
-            ).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
-              const percentage = Math.round((count / recent.length) * 100);
-              const label = status.charAt(0).toUpperCase() + status.slice(1);
-              return (
-                <div className="dashboard-status-row" role="listitem" key={status}>
-                  <div className="dashboard-status-meta">
-                    <span>{label}</span>
-                    <strong>{count} <span className="dashboard-status-percent">({percentage}%)</span></strong>
-                  </div>
-                  <div className="dashboard-status-track" aria-hidden="true">
-                    <span className="dashboard-status-fill" style={{ width: percentage + '%' }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section
-        className="dashboard-section dashboard-recent-section"
-        aria-labelledby="dashboard-recent-orders"
-      >
-        <div
-          id="dashboard-recent-orders"
-          className="admin-section-label"
-        >
-          Recent orders
-        </div>
-
-        {ordersError ? (
-          <div className="admin-table-wrap dashboard-order-state">
-            <div
-              className="admin-empty"
-              role="alert"
-            >
-              {ordersError}
-            </div>
-
-            <div className="btn-row dashboard-order-retry">
-              <button
-                type="button"
-                className="btn btn-quiet btn-sm"
-                onClick={load}
-              >
-                Retry orders
-              </button>
-            </div>
-          </div>
-        ) : recent.length === 0 ? (
-          <div className="admin-table-wrap dashboard-order-state">
-            <div className="admin-empty">
-              No recent orders.
-            </div>
-          </div>
-        ) : (
-          <div className="admin-table-wrap admin-recent-orders">
-            <div className="dashboard-table-scroll">
-              <table className="admin-table dashboard-orders-table">
-                <caption className="sr-only">
-                  Five most recent orders
-                </caption>
-
-                <colgroup>
-                  <col className="dashboard-order-col" />
-                  <col className="dashboard-total-col" />
-                  <col className="dashboard-status-col" />
-                  <col className="dashboard-date-col" />
-                </colgroup>
-
-                <thead>
-                  <tr>
-                    <th scope="col">Order</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Date</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {recent.map((order) => (
-                    <tr key={order.id}>
-                      <td className="td-strong dashboard-order-number">
-                        {order.order_number
-                          ? `#${String(order.order_number).replace(/^#/, '')}`
-                          : '—'}
-                      </td>
-
-                      <td className="td-gold">
-                        {formatMoney(
-                          normalizeNumber(order.total_amount),
-                        )}
-                      </td>
-
-                      <td>
-                        <StatusPill status={order.status} />
-                      </td>
-
-                      <td className="td-dim dashboard-order-date">
-                        {formatOrderDate(order.created_at)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </section>
     </div>
   );
 }
