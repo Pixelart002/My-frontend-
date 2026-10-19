@@ -30,7 +30,7 @@ describe('Reports panel layout', () => {
     const markup = renderToStaticMarkup(
       <OperationsPanel section="reports" />,
     );
-    const cards = markup.match(/class="admin-card(?:\\s[^"]*)?"/g) ?? [];
+    const cards = markup.match(/class="admin-card/g) ?? [];
 
     expect(cards).toHaveLength(1);
     expect(markup).toContain('class="reports-description"');
