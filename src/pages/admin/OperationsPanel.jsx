@@ -238,14 +238,7 @@ function InventoryPanel() {
           </button>
         </Toolbar>
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Low-stock products</div>
-            <div className="stat-value">
-              {loading ? '…' : lowStock.length}
-            </div>
-          </div>
-        </div>
+
 
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -359,8 +352,7 @@ function ShippingPanel() {
         <Toolbar
           title="Shipping"
           description="Luviio uses manual shipping. Checkout pricing and shipping configuration are read from server-side settings."
-          onRefresh={load}
-          refreshing={loading}
+          showRefresh={false}
         />
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -1201,9 +1193,6 @@ function NotificationsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
 
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/');
@@ -1220,32 +1209,6 @@ function NotificationsPanel() {
   const [actionTwoUrl, setActionTwoUrl] = useState('');
 
   const [sending, setSending] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-
-    try {
-      const result = await adminService.pushStats();
-
-      if (!mountedRef.current) return;
-
-      setStats(result);
-    } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          errorMessage(error, 'Unable to load notification stats.'),
-        );
-      }
-    } finally {
-      if (mountedRef.current) {
-        setLoading(false);
-      }
-    }
-  }, [mountedRef, toast]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const send = async (event) => {
     event.preventDefault();
@@ -1338,28 +1301,7 @@ function NotificationsPanel() {
           refreshing={loading}
         />
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Subscribed devices</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : pretty(stats?.total_subscriptions ?? stats?.subscriptions ?? stats?.total ?? 0)}
-            </div>
-          </div>
 
-          <div className="admin-stat">
-            <div className="stat-label">Subscribed customers</div>
-            <div className="stat-value">{loading ? '…' : pretty(stats?.unique_users ?? 0)}</div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Push configuration</div>
-            <div className="stat-value ops-stat-value-sm">
-              {loading ? 'Checking…' : stats?.vapid_configured ? 'Configured' : 'Not configured'}
-            </div>
-          </div>
-        </div>
 
         <form onSubmit={send} className="ops-form notification-composer" noValidate>
           <div className="notification-section-heading">
@@ -1820,18 +1762,6 @@ function PaymentsPanel() {
     load();
   }, [load]);
 
-  const successfulCount = useMemo(
-    () =>
-      rows.filter((row) =>
-        ['succeeded', 'paid'].includes(
-          text(row.status).toLowerCase(),
-        ),
-      ).length,
-    [rows],
-  );
-
-  const attentionCount = Math.max(0, rows.length - successfulCount);
-
   return (
     <section className="admin-panel">
       <div className="admin-card">
@@ -1842,28 +1772,7 @@ function PaymentsPanel() {
           refreshing={loading}
         />
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Attempts</div>
-            <div className="stat-value">
-              {loading ? '…' : rows.length}
-            </div>
-          </div>
 
-          <div className="admin-stat">
-            <div className="stat-label">Successful</div>
-            <div className="stat-value">
-              {loading ? '…' : successfulCount}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Needs attention</div>
-            <div className="stat-value">
-              {loading ? '…' : attentionCount}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="admin-card">
@@ -2035,32 +1944,7 @@ function ReportsPanel() {
           </button>
         </div>
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Orders analysed</div>
-            <div className="stat-value">
-              {loading ? '…' : report?.orders ?? 0}
-            </div>
-          </div>
 
-          <div className="admin-stat">
-            <div className="stat-label">Revenue</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : formatMoney(Number(report?.revenue) || 0)}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Low stock</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : report?.low_stock_products ?? 0}
-            </div>
-          </div>
-        </div>
 
         <h3 className="reports-analysis-title">Order status</h3>
 
