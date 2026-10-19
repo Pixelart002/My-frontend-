@@ -191,32 +191,7 @@ export default function AuditLogsPanel() {
     load();
   }, [load]);
 
-  const stats =
-    useMemo(() => {
-      let successful = 0;
-      let errors = 0;
 
-      for (const row of rows) {
-        const code =
-          statusCodeOf(row);
-
-        if (
-          isSuccessStatus(code)
-        ) {
-          successful += 1;
-        } else if (
-          code >= 400
-        ) {
-          errors += 1;
-        }
-      }
-
-      return {
-        total: rows.length,
-        successful,
-        errors,
-      };
-    }, [rows]);
 
   const filtered =
     useMemo(() => {
@@ -309,49 +284,7 @@ export default function AuditLogsPanel() {
           </button>
         </div>
 
-        <div
-          className="admin-stats"
-          aria-label="Audit log summary"
-        >
-          <div className="admin-stat">
-            <div className="stat-label">
-              Entries
-            </div>
 
-            <div
-              className="stat-value"
-              aria-live="polite"
-            >
-              {loading
-                ? '…'
-                : stats.total}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Successful
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : stats.successful}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Errors
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : stats.errors}
-            </div>
-          </div>
-        </div>
 
         <div
           className="admin-telemetry-filters"
