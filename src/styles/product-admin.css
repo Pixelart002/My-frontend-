@@ -11,6 +11,40 @@
   max-width: 100%;
 }
 
+/* Keep the Products description and primary action in one stable row. */
+.products-admin .products-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.products-admin .products-page-head > div {
+  min-width: 0;
+  width: 100%;
+}
+.products-admin .products-page-head .admin-sub {
+  max-width: none;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
+}
+.products-admin .products-page-head .product-add-trigger {
+  justify-self: end;
+  min-width: max-content;
+  white-space: nowrap;
+}
+@media (max-width: 380px) {
+  .products-admin .products-page-head {
+    gap: 8px;
+  }
+  .products-admin .products-page-head .product-add-trigger {
+    padding-inline: 9px;
+  }
+}
+
 .products-admin .product-cell {
   display: flex;
   align-items: center;

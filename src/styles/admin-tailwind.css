@@ -1097,14 +1097,33 @@
    ============================================================ */
 
 .admin-page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
   min-width: 0;
   margin: 0 0 18px;
   padding: 0 0 18px;
   border-bottom: 1px solid var(--line);
+}
+.admin-page-head > * {
+  min-width: 0;
+}
+.admin-page-head > div:first-child {
+  width: 100%;
+  min-width: 0;
+}
+.admin-page-head .admin-sub {
+  max-width: none;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
+}
+.admin-page-head > :last-child {
+  justify-self: end;
+  min-width: max-content;
 }
 
 .admin-page-head > div:first-child {
@@ -1228,9 +1247,9 @@
 
 @media (max-width: 900px) {
   .admin-page-head {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 14px;
     padding-bottom: 14px;
   }
@@ -1264,7 +1283,11 @@
 
 @media (max-width: 520px) {
   .admin-page-head {
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .admin-page-head > :last-child {
+    min-width: max-content;
   }
 
   .admin-page-head h1 {
@@ -4496,16 +4519,37 @@ button:disabled {
 
 /* Admin panel form, policy and reporting components. */
 .ops-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  justify-content: stretch;
+  gap: 12px;
   width: 100%;
   min-width: 0;
 }
-.ops-toolbar-copy {
+.ops-toolbar > * {
   min-width: 0;
-  flex: 1 1 auto;
+}
+.ops-toolbar-copy {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.ops-toolbar-copy p {
+  max-width: none;
+  min-width: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
+}
+.ops-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  flex: 0 0 auto;
+  min-width: max-content;
+  margin-left: 0;
 }
 .ops-toolbar-copy h2 {
   margin: 0;
