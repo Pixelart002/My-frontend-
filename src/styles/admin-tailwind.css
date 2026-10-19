@@ -5424,21 +5424,36 @@ button:disabled {
 }
 .reports-panel .reports-toolbar {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 20px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 .reports-panel .reports-description {
-  flex: 1 1 260px;
+  flex: 1 1 auto;
   min-width: 0;
   margin: 0;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+  text-wrap: pretty;
 }
 .reports-panel .reports-toolbar .ops-toolbar-refresh {
   flex: 0 0 auto;
-  margin-left: auto;
+  margin-left: 0;
+  white-space: nowrap;
+}
+@media (max-width: 420px) {
+  .reports-panel .reports-toolbar {
+    gap: 8px;
+  }
+  .reports-panel .reports-description {
+    font-size: 12px;
+  }
+  .reports-panel .reports-toolbar .ops-toolbar-refresh {
+    padding-inline: 10px;
+  }
 }
 .reports-panel .reports-analysis-title {
   margin-top: 22px;
