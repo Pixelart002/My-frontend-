@@ -4496,16 +4496,37 @@ button:disabled {
 
 /* Admin panel form, policy and reporting components. */
 .ops-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  justify-content: stretch;
+  gap: 12px;
   width: 100%;
   min-width: 0;
 }
-.ops-toolbar-copy {
+.ops-toolbar > * {
   min-width: 0;
-  flex: 1 1 auto;
+}
+.ops-toolbar-copy {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.ops-toolbar-copy p {
+  max-width: none;
+  min-width: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
+}
+.ops-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  flex: 0 0 auto;
+  min-width: max-content;
+  margin-left: 0;
 }
 .ops-toolbar-copy h2 {
   margin: 0;
