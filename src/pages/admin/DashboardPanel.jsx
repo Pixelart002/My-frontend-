@@ -32,6 +32,161 @@ function formatOrderDate(value) {
   }).format(date);
 }
 
+
+const INVENTORY_PAGE_SIZE = 100;
+const INVENTORY_MAX_PAGES = 50;
+const DASHBOARD_PAYMENT_LIMIT = 50;
+const DASHBOARD_AUDIT_LIMIT = 200;
+const STRIPE_PUBLISHABLE_KEY_PATTERN = /^pk_(test|live)_[A-Za-z0-9]+$/;
+
+async function loadInventoryProducts() {
+  const products = [];
+  let truncated = false;
+
+  for (let page = 1; page <= INVENTORY_MAX_PAGES; page += 1) {
+    const response = await adminService.listProducts({
+      page,
+      page_size: INVENTORY_PAGE_SIZE,
+    });
+    const pageItems = itemsOfList(response);
+    products.push(...pageItems);
+
+    const payload = response?.data && typeof response.data === 'object'
+      ? response.data
+      : response;
+    const totalPages = Number(
+      payload?.meta?.total_pages ??
+        payload?.pagination?.total_pages ??
+        response?.meta?.total_pages,
+    );
+
+    if (
+      (Number.isFinite(totalPages) && totalPages > 0 && page >= totalPages) ||
+      pageItems.length < INVENTORY_PAGE_SIZE
+    ) {
+      break;
+    }
+
+    if (page === INVENTORY_MAX_PAGES) {
+      truncated = true;
+    }
+  }
+
+  let units = 0;
+  let outOfStock = 0;
+
+  products.forEach((product) => {
+    const stock = normalizeNumber(product?.stock);
+    units += stock;
+    if (stock <= 0) outOfStock += 1;
+  });
+
+  return {
+    units,
+    outOfStock,
+    productsScanned: products.length,
+    truncated,
+  };
+}
+
+function summarizePayments(rows) {
+  return rows.reduce(
+    (summary, row) => {
+      const status = String(row?.status || 'unknown').trim().toLowerCase();
+      const paymentMethod = String(row?.payment_method || '').trim().toLowerCase();
+      const orderStatus = String(row?.order_status || '').trim().toLowerCase();
+      const codOrderPaid = paymentMethod === 'cod' &&
+        ['paid', 'processing', 'shipped', 'delivered'].includes(orderStatus);
+      const succeeded = codOrderPaid || ['succeeded', 'paid'].includes(status);
+      const failed = ['failed', 'canceled', 'cancelled'].includes(status);
+      const amount = Number(row?.amount);
+
+      summary.attempts += 1;
+      if (Number.isFinite(amount)) summary.eventValue += amount;
+      if (succeeded) summary.succeeded += 1;
+      if (failed) summary.failed += 1;
+
+      return summary;
+    },
+    { attempts: 0, eventValue: 0, succeeded: 0, failed: 0 },
+  );
+}
+
+function summarizeAudit(rows) {
+  return rows.reduce(
+    (summary, row) => {
+      const code = Number(row?.status_code);
+      const statusCode = Number.isFinite(code) ? code : 0;
+      summary.entries += 1;
+      if (statusCode >= 200 && statusCode < 400) {
+        summary.successful += 1;
+      } else if (statusCode >= 400) {
+        summary.errors += 1;
+      }
+      return summary;
+    },
+    { entries: 0, successful: 0, errors: 0 },
+  );
+}
+
+function summarizeStripeSettings(result) {
+  const settings = Array.isArray(result)
+    ? result
+    : Array.isArray(result?.items)
+      ? result.items
+      : [];
+  const stripeSetting = settings.find(
+    (item) => String(item?.key || '').trim() === 'stripe_publishable_key',
+  );
+  const key = String(stripeSetting?.value || '').trim();
+  const valid = STRIPE_PUBLISHABLE_KEY_PATTERN.test(key);
+
+  return {
+    status: valid ? 'Configured' : 'Missing',
+    mode: valid && key.startsWith('pk_live_')
+      ? 'Live'
+      : valid && key.startsWith('pk_test_')
+        ? 'Test'
+        : 'Not configured',
+    storage: 'Runtime settings',
+  };
+}
+
+function DashboardMetricGroup({
+  title,
+  description,
+  metrics,
+  loading,
+  unavailable,
+}) {
+  return (
+    <section className="dashboard-summary-group" aria-label={title}>
+      <div className="dashboard-summary-heading">
+        <div>
+          <h2>{title}</h2>
+          {description && <p>{description}</p>}
+        </div>
+        {unavailable && (
+          <span className="dashboard-summary-unavailable">
+            Temporarily unavailable
+          </span>
+        )}
+      </div>
+      <div className="admin-stats dashboard-summary-stats">
+        {metrics.map((metric) => (
+          <article className="admin-stat" key={metric.label}>
+            <div className="stat-label">{metric.label}</div>
+            <div className="stat-value">
+              {loading ? '…' : unavailable ? '—' : metric.value ?? '—'}
+            </div>
+            {metric.hint && <div className="stat-hint">{metric.hint}</div>}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /** Real dashboard metrics from GET /admin/stats → { stats: {…} }. */
 export default function DashboardPanel({ onNavigate }) {
   const [stats, setStats] = useState(null);
@@ -40,23 +195,49 @@ export default function DashboardPanel({ onNavigate }) {
   const [ordersError, setOrdersError] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [overview, setOverview] = useState({
+    inventory: null,
+    lowStock: null,
+    payments: null,
+    audit: null,
+    notifications: null,
+    stripe: null,
+  });
+  const [overviewErrors, setOverviewErrors] = useState({});
 
   const mountedRef = useRef(true);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      requestIdRef.current += 1;
     };
   }, []);
 
   const load = useCallback(async () => {
     const requestId = ++requestIdRef.current;
 
-    setLoading((current) => current && !stats);
+    setLoading(true);
     setRefreshing(true);
+    setOverviewLoading(true);
+    setOverviewErrors({});
     setError('');
     setOrdersError('');
+
+    const overviewPromise = Promise.allSettled([
+      loadInventoryProducts(),
+      adminService.lowStock(),
+      adminService.paymentsReport({
+        limit: DASHBOARD_PAYMENT_LIMIT,
+        offset: 0,
+      }),
+      adminService.auditLogs(DASHBOARD_AUDIT_LIMIT),
+      adminService.pushStats(),
+      adminService.settings('financial'),
+    ]);
 
     try {
       const [statsRes, ordersRes] = await Promise.allSettled([
@@ -93,16 +274,72 @@ export default function DashboardPanel({ onNavigate }) {
             'Unable to load recent orders.',
         );
       }
+      setLoading(false);
+
+      const [
+        inventoryRes,
+        lowStockRes,
+        paymentsRes,
+        auditRes,
+        notificationsRes,
+        stripeRes,
+      ] = await overviewPromise;
+
+      if (
+        !mountedRef.current ||
+        requestId !== requestIdRef.current
+      ) {
+        return;
+      }
+
+      const results = {
+        inventory: inventoryRes,
+        lowStock: lowStockRes,
+        payments: paymentsRes,
+        audit: auditRes,
+        notifications: notificationsRes,
+        stripe: stripeRes,
+      };
+      const nextOverview = {
+        inventory: inventoryRes.status === 'fulfilled'
+          ? inventoryRes.value
+          : null,
+        lowStock: lowStockRes.status === 'fulfilled'
+          ? itemsOfList(lowStockRes.value).length
+          : null,
+        payments: paymentsRes.status === 'fulfilled'
+          ? summarizePayments(itemsOfList(paymentsRes.value))
+          : null,
+        audit: auditRes.status === 'fulfilled'
+          ? summarizeAudit(itemsOfList(auditRes.value))
+          : null,
+        notifications: notificationsRes.status === 'fulfilled'
+          ? notificationsRes.value
+          : null,
+        stripe: stripeRes.status === 'fulfilled'
+          ? summarizeStripeSettings(stripeRes.value)
+          : null,
+      };
+
+      setOverview(nextOverview);
+      setOverviewErrors(
+        Object.fromEntries(
+          Object.entries(results)
+            .filter(([, result]) => result.status === 'rejected')
+            .map(([name]) => [name, true]),
+        ),
+      );
     } finally {
       if (
         mountedRef.current &&
         requestId === requestIdRef.current
       ) {
         setLoading(false);
+        setOverviewLoading(false);
         setRefreshing(false);
       }
     }
-  }, [stats]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -156,6 +393,17 @@ export default function DashboardPanel({ onNavigate }) {
           value: formatMoney(normalizeNumber(stats.revenue)),
           hint: 'Paid / shipped / delivered',
           icon: RiBarChart2Line,
+        },
+        {
+          label: 'Low stock',
+          value: overviewLoading
+            ? '…'
+            : overviewErrors.lowStock
+              ? '—'
+              : normalizeNumber(overview.lowStock),
+          hint: 'Needs restocking',
+          danger: !overviewLoading && !overviewErrors.lowStock && normalizeNumber(overview.lowStock) > 0,
+          icon: RiStackLine,
         },
       ]
     : [];
@@ -211,6 +459,144 @@ export default function DashboardPanel({ onNavigate }) {
           </article>
         ))}
       </section>
+
+      <DashboardMetricGroup
+        title="Inventory snapshot"
+        description={
+          overview.inventory
+            ? `Stock levels across ${overview.inventory.productsScanned}${overview.inventory.truncated ? '+' : ''} catalog products.`
+            : 'Live stock counts from the catalog.'
+        }
+        loading={overviewLoading}
+        unavailable={Boolean(overviewErrors.inventory)}
+        metrics={[
+          {
+            label: 'Units on hand',
+            value: overview.inventory?.units?.toLocaleString('en-IN'),
+            hint: 'Current listed quantity',
+          },
+          {
+            label: 'Out of stock',
+            value: overview.inventory?.outOfStock?.toLocaleString('en-IN'),
+            hint: 'Zero or negative stock',
+          },
+        ]}
+      />
+
+      <DashboardMetricGroup
+        title="Payment activity"
+        description={`Based on the ${DASHBOARD_PAYMENT_LIMIT} most recent loaded payment attempts; values are not lifetime totals.`}
+        loading={overviewLoading}
+        unavailable={Boolean(overviewErrors.payments)}
+        metrics={[
+          {
+            label: 'Recent attempts',
+            value: overview.payments?.attempts?.toLocaleString('en-IN'),
+            hint: 'Loaded payment records',
+          },
+          {
+            label: 'Recent event value',
+            value: overview.payments ? formatMoney(overview.payments.eventValue) : undefined,
+            hint: 'Sum of loaded attempt values',
+          },
+          {
+            label: 'Succeeded',
+            value: overview.payments?.succeeded?.toLocaleString('en-IN'),
+            hint: 'Recent attempts',
+          },
+          {
+            label: 'Failed',
+            value: overview.payments?.failed?.toLocaleString('en-IN'),
+            hint: 'Explicit failed/cancelled states',
+          },
+          {
+            label: 'Needs attention',
+            value: overview.payments
+              ? Math.max(0, overview.payments.attempts - overview.payments.succeeded).toLocaleString('en-IN')
+              : undefined,
+            hint: 'Not confirmed successful',
+          },
+        ]}
+      />
+
+      <DashboardMetricGroup
+        title="Audit activity"
+        description={`Security and operational events from up to ${DASHBOARD_AUDIT_LIMIT} recent entries.`}
+        loading={overviewLoading}
+        unavailable={Boolean(overviewErrors.audit)}
+        metrics={[
+          {
+            label: 'Entries',
+            value: overview.audit?.entries?.toLocaleString('en-IN'),
+            hint: 'Loaded audit records',
+          },
+          {
+            label: 'Successful',
+            value: overview.audit?.successful?.toLocaleString('en-IN'),
+            hint: 'HTTP 2xx–3xx',
+          },
+          {
+            label: 'Errors',
+            value: overview.audit?.errors?.toLocaleString('en-IN'),
+            hint: 'HTTP 4xx and 5xx',
+          },
+        ]}
+      />
+
+      <DashboardMetricGroup
+        title="Customer notifications"
+        description="Current Web Push audience and delivery configuration."
+        loading={overviewLoading}
+        unavailable={Boolean(overviewErrors.notifications)}
+        metrics={[
+          {
+            label: 'Subscribed devices',
+            value: overview.notifications?.total_subscriptions ??
+              overview.notifications?.subscriptions ??
+              overview.notifications?.total ??
+              0,
+            hint: 'Push endpoints',
+          },
+          {
+            label: 'Subscribed customers',
+            value: overview.notifications?.unique_users ?? 0,
+            hint: 'Unique users',
+          },
+          {
+            label: 'Push configuration',
+            value: overview.notifications
+              ? overview.notifications.vapid_configured
+                ? 'Configured'
+                : 'Not configured'
+              : undefined,
+            hint: 'Web Push server settings',
+          },
+        ]}
+      />
+
+      <DashboardMetricGroup
+        title="Payment gateway configuration"
+        description="Browser-safe Stripe publishable-key status only; secret keys stay server-side."
+        loading={overviewLoading}
+        unavailable={Boolean(overviewErrors.stripe)}
+        metrics={[
+          {
+            label: 'Status',
+            value: overview.stripe?.status,
+            hint: 'Publishable key validation',
+          },
+          {
+            label: 'Mode',
+            value: overview.stripe?.mode,
+            hint: 'Test or live',
+          },
+          {
+            label: 'Storage',
+            value: overview.stripe?.storage,
+            hint: 'Configuration source',
+          },
+        ]}
+      />
 
       <section className="dashboard-visualization" aria-labelledby="dashboard-status-heading">
         <div className="dashboard-visualization-heading">
