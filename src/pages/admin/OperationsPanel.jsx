@@ -1277,7 +1277,6 @@ function NotificationsPanel() {
       setActionTwoTitle('');
       setActionTwoUrl('');
 
-      await load();
     } catch (error) {
       if (mountedRef.current) {
         toast.error(
@@ -1297,11 +1296,8 @@ function NotificationsPanel() {
         <Toolbar
           title="Notifications"
           description="Send controlled customer messaging and monitor Web Push subscriptions."
-          onRefresh={load}
-          refreshing={loading}
+          showRefresh={false}
         />
-
-
 
         <form onSubmit={send} className="ops-form notification-composer" noValidate>
           <div className="notification-section-heading">
@@ -1368,7 +1364,7 @@ function NotificationsPanel() {
             <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
           </div>
           <div className="notification-form-actions">
-            <button className="btn" type="submit" disabled={sending || loading}>
+            <button className="btn" type="submit" disabled={sending}>
               <RiSendPlaneLine size={16} aria-hidden="true" />
               {sending ? 'Sending…' : 'Send notification'}
             </button>
