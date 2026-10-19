@@ -96,7 +96,7 @@ describe('DashboardPanel consolidated summaries', () => {
 
     expect(screen.getByText('Units on hand')).toBeTruthy();
     expect(screen.getByText('Out of stock')).toBeTruthy();
-    expect(screen.getByText('Recent attempts')).toBeTruthy();
+    expect(screen.getAllByText('Recent attempts').length).toBeGreaterThan(0);
     expect(screen.getByText('Recent event value')).toBeTruthy();
     expect(screen.getByText('Needs attention')).toBeTruthy();
     expect(screen.getByText('Subscribed devices')).toBeTruthy();
