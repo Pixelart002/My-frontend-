@@ -672,43 +672,7 @@ export default function PaymentsPanel() {
     [rows],
   );
 
-  const summary = useMemo(
-    () =>
-      rows.reduce(
-        (result, row) => {
-          const state = paymentState(
-            row?.status,
-            row?.payment_method,
-            row?.order_status,
-          );
 
-          result.events += 1;
-          result.amount += Number(
-            row?.amount || 0,
-          );
-
-          if (
-            Object.prototype.hasOwnProperty.call(
-              result,
-              state.key,
-            )
-          ) {
-            result[state.key] += 1;
-          }
-
-          return result;
-        },
-        {
-          events: 0,
-          amount: 0,
-          succeeded: 0,
-          failed: 0,
-          pending: 0,
-          expired: 0,
-        },
-      ),
-    [rows],
-  );
 
   return (
     <section className="admin-panel">
@@ -750,55 +714,6 @@ export default function PaymentsPanel() {
           </button>
         </div>
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">
-              Attempts
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : summary.events}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Event value
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : money(summary.amount)}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Succeeded
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : summary.succeeded}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Failed
-            </div>
-
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : summary.failed}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="payment-orders-list">
