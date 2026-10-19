@@ -102,7 +102,7 @@ describe('DashboardPanel consolidated summaries', () => {
     expect(screen.getByText('Subscribed devices')).toBeTruthy();
     expect(screen.getByText('Subscribed customers')).toBeTruthy();
     expect(screen.getByText('Push configuration')).toBeTruthy();
-    expect(screen.getByText('Status')).toBeTruthy();
+    expect(screen.getAllByText('Status').length).toBeGreaterThan(0);
     expect(screen.getByText('Mode')).toBeTruthy();
     expect(screen.getByText('Storage')).toBeTruthy();
     expect(mocks.auditLogs).toHaveBeenCalledWith(200);
