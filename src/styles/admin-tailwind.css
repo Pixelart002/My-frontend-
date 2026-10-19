@@ -5423,22 +5423,43 @@ button:disabled {
   letter-spacing: -.01em;
 }
 .reports-panel .reports-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 20px;
+  width: 100%;
+  min-width: 0;
+  gap: 12px;
 }
 .reports-panel .reports-description {
-  flex: 1 1 260px;
+  display: block;
+  width: 100%;
+  max-width: none;
   min-width: 0;
   margin: 0;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
+  word-break: normal;
+  overflow-wrap: break-word;
+  writing-mode: horizontal-tb;
 }
 .reports-panel .reports-toolbar .ops-toolbar-refresh {
-  flex: 0 0 auto;
-  margin-left: auto;
+  justify-self: end;
+  align-self: center;
+  min-width: max-content;
+  margin: 0;
+  white-space: nowrap;
+}
+@media (max-width: 420px) {
+  .reports-panel .reports-toolbar {
+    gap: 8px;
+  }
+  .reports-panel .reports-description {
+    font-size: 12px;
+  }
+  .reports-panel .reports-toolbar .ops-toolbar-refresh {
+    padding-inline: 10px;
+  }
 }
 .reports-panel .reports-analysis-title {
   margin-top: 22px;
