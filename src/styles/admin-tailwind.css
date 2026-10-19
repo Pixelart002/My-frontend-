@@ -5833,3 +5833,60 @@ button:disabled {
   }
   .stripe-refresh-label { display: none; }
 }
+
+
+/* =========================================================
+   DASHBOARD — CONSOLIDATED ADMIN SUMMARIES
+   ========================================================= */
+.dashboard-summary-group {
+  width: 100%;
+  min-width: 0;
+  margin-top: 24px;
+}
+.dashboard-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+.dashboard-summary-heading > div {
+  min-width: 0;
+}
+.dashboard-summary-heading h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.dashboard-summary-heading p {
+  margin: 4px 0 0;
+  color: var(--muted, var(--dim));
+  font-size: 12px;
+  line-height: 1.5;
+}
+.dashboard-summary-stats {
+  margin-top: 0;
+}
+.dashboard-summary-stats .admin-stat {
+  min-width: 0;
+}
+.dashboard-summary-unavailable {
+  flex: 0 0 auto;
+  color: var(--muted, var(--dim));
+  font-size: 11px;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .dashboard-summary-group {
+    margin-top: 20px;
+  }
+  .dashboard-summary-heading {
+    align-items: flex-start;
+  }
+  .dashboard-summary-unavailable {
+    white-space: normal;
+    text-align: right;
+  }
+}

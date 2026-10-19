@@ -53,20 +53,6 @@ function formatUpdatedAt(value) {
   return date.toLocaleString('en-IN');
 }
 
-function getStripeMode(value) {
-  const key = normalizePublishableKey(value);
-
-  if (key.startsWith('pk_live_')) {
-    return 'Live';
-  }
-
-  if (key.startsWith('pk_test_')) {
-    return 'Test';
-  }
-
-  return 'Not configured';
-}
-
 export default function StripeConfigPanel() {
   const { toast } = useToast();
 
@@ -138,7 +124,6 @@ export default function StripeConfigPanel() {
 
   const key = normalizePublishableKey(draft);
   const configured = isValidPublishableKey(key);
-  const mode = getStripeMode(key);
 
   const save = async (event) => {
     event.preventDefault();
@@ -240,41 +225,7 @@ export default function StripeConfigPanel() {
           </button>
         </div>
 
-        <div className="admin-stats stripe-config-stats">
-          <div className="admin-stat">
-            <div className="stat-label">
-              Status
-            </div>
 
-            <div className="stat-value stripe-stat-value">
-              {loading
-                ? '…'
-                : configured
-                  ? 'Configured'
-                  : 'Missing'}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Mode
-            </div>
-
-            <div className="stat-value stripe-stat-value">
-              {loading ? '…' : mode}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">
-              Storage
-            </div>
-
-            <div className="stat-value stripe-storage-value">
-              Runtime settings
-            </div>
-          </div>
-        </div>
 
         <form
           onSubmit={save}

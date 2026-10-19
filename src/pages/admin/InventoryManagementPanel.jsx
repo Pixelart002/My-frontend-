@@ -154,38 +154,7 @@ export default function InventoryManagementPanel() {
     });
   }, [products, query, filter]);
 
-  const counts = useMemo(
-    () =>
-      products.reduce(
-        (result, product) => {
-          const stock = normalizeStock(
-            product?.stock,
-          );
-          const state = getStockState(stock);
 
-          result.total += 1;
-          result.units += stock;
-
-          if (state === 'out') {
-            result.out += 1;
-          } else if (state === 'low') {
-            result.low += 1;
-          } else {
-            result.healthy += 1;
-          }
-
-          return result;
-        },
-        {
-          total: 0,
-          units: 0,
-          out: 0,
-          low: 0,
-          healthy: 0,
-        },
-      ),
-    [products],
-  );
 
   const openEditor = useCallback((product) => {
     if (!product?.id) return;
@@ -442,46 +411,8 @@ export default function InventoryManagementPanel() {
           </label>
         </div>
 
-        <div
-          className="admin-stats inventory-stats"
-          aria-label="Inventory statistics"
-        >
-          <article className="admin-stat">
-            <div className="stat-label">
-              Products
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.total}
-            </div>
-          </article>
 
-          <article className="admin-stat">
-            <div className="stat-label">
-              Units on hand
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.units}
-            </div>
-          </article>
 
-          <article className="admin-stat">
-            <div className="stat-label">
-              Low stock
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.low}
-            </div>
-          </article>
-
-          <article className="admin-stat">
-            <div className="stat-label">
-              Out of stock
-            </div>
-            <div className="stat-value">
-              {loading ? '…' : counts.out}
-            </div>
-          </article>
-        </div>
       </div>
 
       <div className="admin-table-wrap inventory-table-wrap">
