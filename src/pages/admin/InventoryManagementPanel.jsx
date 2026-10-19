@@ -413,6 +413,8 @@ export default function InventoryManagementPanel() {
 
 
 
+      </div>
+
       <div className="admin-table-wrap inventory-table-wrap">
         <div className="inventory-table-scroll">
           <table className="admin-table inventory-table">
