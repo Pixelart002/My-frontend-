@@ -323,6 +323,7 @@ export default function OrdersPanel({
       loading ||
       loadingMore ||
       loadMoreError ||
+      search.trim() ||
       page >= totalPages ||
       items === null
     ) {
@@ -344,7 +345,7 @@ export default function OrdersPanel({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [filter, items, load, loadMoreError, loading, loadingMore, page, totalPages]);
+  }, [filter, items, load, loadMoreError, loading, loadingMore, page, search, totalPages]);
 
   const filtered = useMemo(() => {
     if (!items) return [];
@@ -379,11 +380,11 @@ export default function OrdersPanel({
     });
   }, [items, filter, search]);
 
-  if (error) {
+  if (error && items === null) {
     return (
       <ErrorState
         message={error}
-        onRetry={load}
+        onRetry={() => void load(1, filter, false)}
       />
     );
   }
@@ -396,12 +397,29 @@ export default function OrdersPanel({
 
   return (
     <div className="orders-admin-full w-full min-w-0 max-w-none overflow-x-clip">
+      {error && (
+        <div className="orders-load-more-error orders-refresh-error" role="alert">
+          <span>Refresh failed: {error}. Previously loaded orders are still shown.</span>
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={() => void load(1, filter, false)}
+            disabled={loading}
+          >
+            Retry refresh
+          </button>
+        </div>
+      )}
+
       <div className="admin-page-head flex w-full min-w-0 flex-col items-stretch gap-3 min-[901px]:flex-row min-[901px]:items-end min-[901px]:justify-between">
         <div className="min-w-0 flex-1">
           <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
-            {filtered.length} loaded orders · {totalOrders} total orders{filter ? ` matching “${filter}”` : ''}
+            {filtered.length === items.length
+              ? `${items.length} loaded`
+              : `${filtered.length} matching · ${items.length} loaded`
+            } · {totalOrders} {filter ? `${filter} orders` : 'total orders'}
           </p>
         </div>
 
@@ -439,7 +457,7 @@ export default function OrdersPanel({
             <button
               type="button"
               className="icon-btn orders-refresh-button"
-              onClick={() => load(page, filter)}
+              onClick={() => void load(1, filter, false)}
               disabled={loading}
               title="Refresh orders"
               aria-label="Refresh orders"
@@ -568,7 +586,9 @@ export default function OrdersPanel({
 
       <div className="orders-pagination flex flex-wrap items-center justify-between gap-3 py-3" aria-label="Orders loading status">
         <p className="admin-sub" aria-live="polite">
-          {totalOrders === 0 ? 'No orders found' : `Showing ${items.length} of ${totalOrders} orders`}
+          {totalOrders === 0
+            ? 'No orders found'
+            : `Loaded ${items.length} of ${totalOrders} ${filter ? `${filter} orders` : 'orders'}`}
         </p>
         {!loadingMore && !loadMoreError && page < totalPages && (
           <span className="text-sm text-muted">Scroll down to load more</span>
