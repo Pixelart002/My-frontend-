@@ -1,5 +1,3 @@
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -7,9 +5,12 @@ function deferEntryStylesheet() {
   return {
     name: 'luviio-defer-entry-stylesheet',
     apply: 'build',
-    closeBundle() {
-      const outputPath = resolve(process.cwd(), 'dist/index.html')
-      let html = readFileSync(outputPath, 'utf8')
+    generateBundle(_options, bundle) {
+      const htmlAsset = bundle['index.html']
+      if (!htmlAsset || htmlAsset.type !== 'asset') {
+        throw new Error('[Luviio] Could not find generated index.html in the Vite bundle')
+      }
+      let html = String(htmlAsset.source)
       let converted = 0
 
       // Vite injects the app's hashed CSS link into the production HTML.
@@ -41,7 +42,7 @@ function deferEntryStylesheet() {
         )
       }
 
-      writeFileSync(outputPath, html)
+      htmlAsset.source = html
     },
   }
 }
