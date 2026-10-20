@@ -2,6 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   RiAddLine,
+  RiBellLine,
+  RiImageLine,
+  RiLinkM,
+  RiMegaphoneLine,
+  RiMouseLine,
+  RiUsersLine,
   RiCheckLine,
   RiEditLine,
   RiCloseLine,
@@ -1207,12 +1213,10 @@ function NotificationsPanel() {
   const [actionOneUrl, setActionOneUrl] = useState('');
   const [actionTwoTitle, setActionTwoTitle] = useState('');
   const [actionTwoUrl, setActionTwoUrl] = useState('');
-
   const [sending, setSending] = useState(false);
 
   const send = async (event) => {
     event.preventDefault();
-
     if (sending) return;
 
     const normalizedTitle = text(title);
@@ -1223,7 +1227,7 @@ function NotificationsPanel() {
     const normalizedImage = text(image);
     const normalizedTag = text(tag) || 'luviio-notification';
     const normalizedTargets = targetUsers.trim()
-      ? targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)
+      ? targetUsers.split(/[\\s,;]+/).map((id) => id.trim()).filter(Boolean)
       : null;
     const actionFields = [
       { title: text(actionOneTitle), action: text(actionOneUrl) },
@@ -1250,7 +1254,6 @@ function NotificationsPanel() {
     }
 
     setSending(true);
-
     try {
       const result = await adminService.sendPush({
         user_ids: normalizedTargets,
@@ -1265,106 +1268,103 @@ function NotificationsPanel() {
         renotify,
         actions,
       });
-
       if (!mountedRef.current) return;
-
       toast.success(result?.message || 'Notification dispatched.');
-
       setTitle('');
       setBody('');
       setActionOneTitle('');
       setActionOneUrl('');
       setActionTwoTitle('');
       setActionTwoUrl('');
-
     } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          errorMessage(error, 'Unable to send notification.'),
-        );
-      }
+      if (mountedRef.current) toast.error(errorMessage(error, 'Unable to send notification.'));
     } finally {
-      if (mountedRef.current) {
-        setSending(false);
-      }
+      if (mountedRef.current) setSending(false);
     }
   };
 
   return (
-    <section className="admin-panel notifications-panel">
-      <div className="admin-card">
+    <section className="admin-panel notifications-panel" aria-labelledby="notifications-title">
+      <div className="admin-card notification-card">
         <Toolbar
           title="Notifications"
-          description="Send controlled customer messaging and monitor Web Push subscriptions."
+          description="Compose a customer notification and choose where it takes customers."
           showRefresh={false}
         />
 
         <form onSubmit={send} className="ops-form notification-composer" noValidate>
-          <div className="notification-section-heading">
-            <h3>Message content</h3>
-            <p>Use a clear title, concise message and an in-site destination.</p>
-          </div>
-          <label>
-            Title
-            <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
-          </label>
-          <label>
-            Message
-            <textarea required maxLength={2000} rows="4" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
-          </label>
-          <div className="field-grid notification-media-grid">
-            <label>
-              Click destination
-              <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/products/floor-drainer-square-ring" />
-            </label>
-            <label>
-              Notification icon path
-              <input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Badge path
-              <input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Large image path (optional)
-              <input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" />
-            </label>
-            <label>
-              Campaign tag
-              <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" />
-            </label>
-            <label>
-              Specific user IDs (optional)
-              <input value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Leave empty to send to all subscribers" />
-            </label>
-          </div>
-          <fieldset className="notification-actions-config">
-            <legend>Optional notification buttons (up to 2)</legend>
-            <div className="field-grid">
-              <label>
-                Button 1 label
-                <input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" />
-              </label>
-              <label>
-                Button 1 destination path
-                <input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" />
-              </label>
-              <label>
-                Button 2 label
-                <input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" />
-              </label>
-              <label>
-                Button 2 destination path
-                <input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" />
-              </label>
+          <section className="notification-block" aria-labelledby="notification-message-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiMegaphoneLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-message-heading">Message content</h3><p>Keep it clear, concise and useful.</p></div>
             </div>
-          </fieldset>
-          <div className="notification-toggles">
-            <label><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /> Keep visible until interaction (where supported)</label>
-            <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
-          </div>
+            <label className="notification-field">
+              <span>Title <em>Required</em></span>
+              <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
+              <small>{title.length}/120 characters</small>
+            </label>
+            <label className="notification-field">
+              <span>Message <em>Required</em></span>
+              <textarea required maxLength={2000} rows={4} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
+              <small>{body.length}/2000 characters</small>
+            </label>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-destination-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiLinkM size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-destination-heading">Destination & appearance</h3><p>Use paths from your LUVIIO website. External URLs are not accepted.</p></div>
+            </div>
+            <div className="field-grid notification-media-grid">
+              <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
+              <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
+              <label className="notification-field"><span><RiBellLine size={15} aria-hidden="true" /> Notification icon path</span><input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" /></label>
+              <label className="notification-field"><span><RiImageLine size={15} aria-hidden="true" /> Badge path</span><input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" /></label>
+              <label className="notification-field notification-field-full"><span><RiImageLine size={15} aria-hidden="true" /> Large image path <small>Optional</small></span><input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" /></label>
+            </div>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-audience-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiUsersLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-audience-heading">Audience</h3><p>Choose specific subscribers or send to everyone subscribed.</p></div>
+            </div>
+            <label className="notification-field">
+              <span>Specific user IDs <small>Optional</small></span>
+              <textarea rows={2} value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Paste user IDs separated by commas or spaces" />
+              <small>Leave empty to send to all subscribers.</small>
+            </label>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-actions-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiMouseLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-actions-heading">Action buttons</h3><p>Optional. Add up to two buttons to guide customers.</p></div>
+            </div>
+            <fieldset className="notification-actions-config">
+              <legend>Button 1</legend>
+              <div className="field-grid">
+                <label className="notification-field"><span>Button label</span><input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" /></label>
+                <label className="notification-field"><span>Destination path</span><input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" /></label>
+              </div>
+            </fieldset>
+            <fieldset className="notification-actions-config">
+              <legend>Button 2</legend>
+              <div className="field-grid">
+                <label className="notification-field"><span>Button label</span><input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" /></label>
+                <label className="notification-field"><span>Destination path</span><input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" /></label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section className="notification-block notification-delivery-options" aria-label="Delivery options">
+            <label className="notification-toggle"><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /><span><strong>Keep visible until interaction</strong><small>Where supported by the browser or device.</small></span></label>
+            <label className="notification-toggle"><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /><span><strong>Re-alert for same campaign tag</strong><small>May alert users again for a repeated campaign.</small></span></label>
+          </section>
+
           <div className="notification-form-actions">
-            <button className="btn" type="submit" disabled={sending}>
+            <span><RiShieldCheckLine size={15} aria-hidden="true" /> Review message and destination before sending.</span>
+            <button className="btn notification-send-button" type="submit" disabled={sending}>
               <RiSendPlaneLine size={16} aria-hidden="true" />
               {sending ? 'Sending…' : 'Send notification'}
             </button>
