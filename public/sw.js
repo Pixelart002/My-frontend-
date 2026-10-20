@@ -123,16 +123,29 @@ const resolveNotificationAsset = (value) => {
       self.location.origin
     );
 
-    /*
-     * Keep notification assets same-origin.
-     * This prevents arbitrary remote URLs from being accepted from
-     * notification payloads.
-     */
-    if (url.origin !== self.location.origin) {
-      return undefined;
+    if (url.origin === self.location.origin) {
+      return url.href;
     }
 
-    return url.href;
+    /*
+     * Admin-uploaded campaign images are stored in Luviio's managed
+     * Supabase bucket. Permit only that narrow HTTPS path; do not allow
+     * arbitrary remote hosts or arbitrary Storage objects.
+     */
+    const managedNotificationAsset =
+      url.protocol === 'https:' &&
+      url.hostname.endsWith('.supabase.co') &&
+      url.username === '' &&
+      url.password === '' &&
+      url.port === '' &&
+      !url.search &&
+      !url.hash &&
+      url.pathname.startsWith('/storage/v1/object/public/product-images/notifications/') &&
+      url.pathname.endsWith('.webp') &&
+      !url.pathname.split('/').includes('..') &&
+      !url.pathname.includes('\\');
+
+    return managedNotificationAsset ? url.href : undefined;
   } catch {
     return undefined;
   }
