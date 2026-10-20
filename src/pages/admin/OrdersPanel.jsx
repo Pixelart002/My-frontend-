@@ -199,6 +199,8 @@ export default function OrdersPanel({
   const [fulfilling, setFulfilling] = useState(null);
 
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreRef = useRef(null);
 
   const mountedRef = useRef(false);
   const requestIdRef = useRef(0);
@@ -211,11 +213,12 @@ export default function OrdersPanel({
     };
   }, []);
 
-  const load = useCallback(async (targetPage = page, targetFilter = filter) => {
+  const load = useCallback(async (targetPage = 1, targetFilter = filter, append = false) => {
     const requestId =
       ++requestIdRef.current;
 
-    setLoading(true);
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     setError('');
 
     try {
@@ -236,7 +239,11 @@ export default function OrdersPanel({
 
       const nextItems = itemsOfList(result);
       const meta = result?.meta ?? result?.data?.meta ?? {};
-      setItems(nextItems);
+      setItems((current) => {
+        if (!append || !Array.isArray(current)) return nextItems;
+        const seen = new Set(current.map((order) => String(order?.id ?? order?.order_number ?? '')));
+        return [...current, ...nextItems.filter((order) => !seen.has(String(order?.id ?? order?.order_number ?? '')))];
+      });
       setPage(Number(meta.page) > 0 ? Number(meta.page) : targetPage);
       setTotalOrders(Number.isFinite(Number(meta.total_items)) ? Number(meta.total_items) : nextItems.length);
       setTotalPages(Number.isFinite(Number(meta.total_pages)) ? Number(meta.total_pages) : (nextItems.length ? 1 : 0));
@@ -254,18 +261,29 @@ export default function OrdersPanel({
           'Unable to load orders.'
       );
     } finally {
-      if (
-        mountedRef.current &&
-        requestId === requestIdRef.current
-      ) {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setLoading(false);
+        setLoadingMore(false);
       }
     }
-  }, [filter, page]);
+  }, [filter]);
 
   useEffect(() => {
-    load(page, filter);
-  }, [load]);
+    setItems(null);
+    setPage(1);
+    setTotalPages(0);
+    load(1, filter, false);
+  }, [filter, load]);
+
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || loading || loadingMore || page >= totalPages || items === null) return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) load(page + 1, filter, true);
+    }, { root: null, rootMargin: '320px 0px', threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [filter, items, load, loading, loadingMore, page, totalPages]);
 
   const filtered = useMemo(() => {
     if (!items) return [];
@@ -492,33 +510,14 @@ export default function OrdersPanel({
         </div>
       </div>
 
-      <div className="orders-pagination flex flex-wrap items-center justify-between gap-3 py-3" aria-label="Orders pagination">
+      <div className="orders-pagination flex flex-wrap items-center justify-between gap-3 py-3" aria-label="Orders loading status">
         <p className="admin-sub" aria-live="polite">
-          {totalOrders === 0
-            ? 'No orders found'
-            : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalOrders)} of ${totalOrders} orders`}
+          {totalOrders === 0 ? 'No orders found' : `Showing ${items.length} of ${totalOrders} orders`}
         </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => load(page - 1, filter)}
-            disabled={loading || page <= 1}
-          >
-            Previous
-          </button>
-          <span className="text-sm text-muted" aria-label={`Page ${page} of ${totalPages}`}>
-            Page {page} of {Math.max(totalPages, 1)}
-          </span>
-          <button
-            type="button"
-            className="btn btn-quiet btn-sm"
-            onClick={() => load(page + 1, filter)}
-            disabled={loading || page >= totalPages}
-          >
-            Next
-          </button>
-        </div>
+        {page < totalPages && <span className="text-sm text-muted">Scroll down to load more</span>}
+        <div ref={loadMoreRef} className="orders-load-more-sentinel" aria-hidden="true" />
+        {loadingMore && <p className="admin-sub" role="status">Loading more orders…</p>}
+        {!loading && page >= totalPages && totalOrders > 0 && <p className="admin-sub">All orders loaded</p>}
       </div>
 
       {fulfilling && (
