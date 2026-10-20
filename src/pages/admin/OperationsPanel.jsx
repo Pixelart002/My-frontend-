@@ -2,6 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   RiAddLine,
+  RiBellLine,
+  RiImageLine,
+  RiLinkM,
+  RiMegaphoneLine,
+  RiMouseLine,
+  RiUserLine,
   RiCheckLine,
   RiEditLine,
   RiCloseLine,
@@ -1189,6 +1195,90 @@ function RbacPanel() {
 /* Notifications                                                              */
 /* -------------------------------------------------------------------------- */
 
+function NotificationImagePicker({ label, value, onChange, optional = false }) {
+  const { toast } = useToast();
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const fieldId = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  const handleImageSelect = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Images must be 5 MB or smaller.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await adminService.uploadNotificationImage(file);
+      const uploadedUrl = result?.url || result?.data?.url;
+      if (!uploadedUrl) throw new Error('The image upload did not return a hosted URL.');
+      onChange(uploadedUrl);
+      toast.success(`${label} uploaded.`);
+    } catch (error) {
+      toast.error(errorMessage(error, `Unable to upload ${label.toLowerCase()}.`));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="notification-field notification-asset-field">
+      <label className="notification-asset-label" htmlFor={`${fieldId}-path`}>
+        {label} {optional && <small>Optional</small>}
+      </label>
+      <div className="notification-path-control">
+        <input
+          id={`${fieldId}-path`}
+          aria-label={`${label} URL path`}
+          value={value}
+          maxLength={500}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={label === 'Large image' ? '/products/offer-banner.webp' : '/icon-192.png'}
+          autoComplete="off"
+        />
+        {value && (
+          <img
+            className="notification-inline-preview"
+            src={value}
+            alt=""
+            aria-hidden="true"
+            onError={(event) => { event.currentTarget.hidden = true; }}
+            onLoad={(event) => { event.currentTarget.hidden = false; }}
+          />
+        )}
+        <button
+          type="button"
+          className="notification-image-pick-button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          aria-label={uploading ? `Uploading ${label.toLowerCase()}` : `Choose ${label.toLowerCase()} image`}
+          title={uploading ? 'Uploading image…' : 'Choose image from phone'}
+        >
+          {uploading
+            ? <span className="admin-switch-spinner" aria-hidden="true" />
+            : <RiImageLine size={17} aria-hidden="true" />}
+        </button>
+      </div>
+      <input
+        ref={inputRef}
+        className="notification-image-file-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        aria-label={`Choose ${label.toLowerCase()} from phone`}
+        onChange={handleImageSelect}
+        disabled={uploading}
+      />
+      <small className="notification-asset-hint">
+        {uploading ? 'Uploading and optimizing image…' : value ? 'Image URL ready for push payload.' : 'Enter a hosted path or tap the image icon to upload.'}
+      </small>
+    </div>
+  );
+}
+
 function NotificationsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
@@ -1207,12 +1297,10 @@ function NotificationsPanel() {
   const [actionOneUrl, setActionOneUrl] = useState('');
   const [actionTwoTitle, setActionTwoTitle] = useState('');
   const [actionTwoUrl, setActionTwoUrl] = useState('');
-
   const [sending, setSending] = useState(false);
 
   const send = async (event) => {
     event.preventDefault();
-
     if (sending) return;
 
     const normalizedTitle = text(title);
@@ -1223,7 +1311,7 @@ function NotificationsPanel() {
     const normalizedImage = text(image);
     const normalizedTag = text(tag) || 'luviio-notification';
     const normalizedTargets = targetUsers.trim()
-      ? targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)
+      ? targetUsers.split(/[\\s,;]+/).map((id) => id.trim()).filter(Boolean)
       : null;
     const actionFields = [
       { title: text(actionOneTitle), action: text(actionOneUrl) },
@@ -1240,8 +1328,27 @@ function NotificationsPanel() {
       toast.error('Each notification action needs both a title and an in-site path.');
       return;
     }
-    if ([normalizedUrl, normalizedIcon, normalizedBadge, normalizedImage, ...actions.map((item) => item.action)].some((value) => value && (!value.startsWith('/') || value.startsWith('//')))) {
-      toast.error('Notification links and assets must use in-site paths beginning with /.');
+    const isSitePath = (value) => value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
+    const isLuviioNotificationAsset = (value) => {
+      if (isSitePath(value)) return true;
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:'
+          && parsed.hostname.endsWith('.supabase.co')
+          && parsed.pathname.startsWith('/storage/v1/object/public/product-images/notifications/')
+          && parsed.pathname.endsWith('.webp')
+          && !parsed.search
+          && !parsed.hash;
+      } catch {
+        return false;
+      }
+    };
+    if (!isSitePath(normalizedUrl) || actions.some((item) => !isSitePath(item.action))) {
+      toast.error('Notification destinations and action buttons must use in-site paths beginning with /.');
+      return;
+    }
+    if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isLuviioNotificationAsset(value))) {
+      toast.error('Notification images must use an in-site path or an image uploaded through this picker.');
       return;
     }
     if (normalizedTargets?.some((id) => id.length < 8)) {
@@ -1250,7 +1357,6 @@ function NotificationsPanel() {
     }
 
     setSending(true);
-
     try {
       const result = await adminService.sendPush({
         user_ids: normalizedTargets,
@@ -1265,106 +1371,105 @@ function NotificationsPanel() {
         renotify,
         actions,
       });
-
       if (!mountedRef.current) return;
-
       toast.success(result?.message || 'Notification dispatched.');
-
       setTitle('');
       setBody('');
       setActionOneTitle('');
       setActionOneUrl('');
       setActionTwoTitle('');
       setActionTwoUrl('');
-
     } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          errorMessage(error, 'Unable to send notification.'),
-        );
-      }
+      if (mountedRef.current) toast.error(errorMessage(error, 'Unable to send notification.'));
     } finally {
-      if (mountedRef.current) {
-        setSending(false);
-      }
+      if (mountedRef.current) setSending(false);
     }
   };
 
   return (
-    <section className="admin-panel notifications-panel">
-      <div className="admin-card">
+    <section className="admin-panel notifications-panel" aria-labelledby="notifications-title">
+      <div className="admin-card notification-card">
         <Toolbar
           title="Notifications"
-          description="Send controlled customer messaging and monitor Web Push subscriptions."
+          description="Compose a customer notification and choose where it takes customers."
           showRefresh={false}
         />
 
         <form onSubmit={send} className="ops-form notification-composer" noValidate>
-          <div className="notification-section-heading">
-            <h3>Message content</h3>
-            <p>Use a clear title, concise message and an in-site destination.</p>
-          </div>
-          <label>
-            Title
-            <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
-          </label>
-          <label>
-            Message
-            <textarea required maxLength={2000} rows="4" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
-          </label>
-          <div className="field-grid notification-media-grid">
-            <label>
-              Click destination
-              <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/products/floor-drainer-square-ring" />
-            </label>
-            <label>
-              Notification icon path
-              <input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Badge path
-              <input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Large image path (optional)
-              <input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" />
-            </label>
-            <label>
-              Campaign tag
-              <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" />
-            </label>
-            <label>
-              Specific user IDs (optional)
-              <input value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Leave empty to send to all subscribers" />
-            </label>
-          </div>
-          <fieldset className="notification-actions-config">
-            <legend>Optional notification buttons (up to 2)</legend>
-            <div className="field-grid">
-              <label>
-                Button 1 label
-                <input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" />
-              </label>
-              <label>
-                Button 1 destination path
-                <input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" />
-              </label>
-              <label>
-                Button 2 label
-                <input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" />
-              </label>
-              <label>
-                Button 2 destination path
-                <input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" />
-              </label>
+          <section className="notification-block" aria-labelledby="notification-message-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiMegaphoneLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-message-heading">Message content</h3><p>Keep it clear, concise and useful.</p></div>
             </div>
-          </fieldset>
-          <div className="notification-toggles">
-            <label><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /> Keep visible until interaction (where supported)</label>
-            <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
-          </div>
+            <label className="notification-field">
+              <span>Title <em>Required</em></span>
+              <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
+              <small>{title.length}/120 characters</small>
+            </label>
+            <label className="notification-field">
+              <span>Message <em>Required</em></span>
+              <textarea required maxLength={2000} rows={4} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
+              <small>{body.length}/2000 characters</small>
+            </label>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-destination-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiLinkM size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-destination-heading">Destination & appearance</h3><p>Use paths from your LUVIIO website. External URLs are not accepted.</p></div>
+            </div>
+            <div className="field-grid notification-media-grid">
+              <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
+              <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
+              <NotificationImagePicker label="Notification icon" value={icon} onChange={setIcon} />
+              <NotificationImagePicker label="Badge image" value={badge} onChange={setBadge} />
+              <div className="notification-field-full">
+                <NotificationImagePicker label="Large image" value={image} onChange={setImage} optional />
+              </div>
+            </div>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-audience-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiUserLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-audience-heading">Audience</h3><p>Choose specific subscribers or send to everyone subscribed.</p></div>
+            </div>
+            <label className="notification-field">
+              <span>Specific user IDs <small>Optional</small></span>
+              <textarea rows={2} value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Paste user IDs separated by commas or spaces" />
+              <small>Leave empty to send to all subscribers.</small>
+            </label>
+          </section>
+
+          <section className="notification-block" aria-labelledby="notification-actions-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiMouseLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-actions-heading">Action buttons</h3><p>Optional. Add up to two buttons to guide customers.</p></div>
+            </div>
+            <fieldset className="notification-actions-config">
+              <legend>Button 1</legend>
+              <div className="field-grid">
+                <label className="notification-field"><span>Button label</span><input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" /></label>
+                <label className="notification-field"><span>Destination path</span><input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" /></label>
+              </div>
+            </fieldset>
+            <fieldset className="notification-actions-config">
+              <legend>Button 2</legend>
+              <div className="field-grid">
+                <label className="notification-field"><span>Button label</span><input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" /></label>
+                <label className="notification-field"><span>Destination path</span><input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" /></label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section className="notification-block notification-delivery-options" aria-label="Delivery options">
+            <label className="notification-toggle"><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /><span><strong>Keep visible until interaction</strong><small>Where supported by the browser or device.</small></span></label>
+            <label className="notification-toggle"><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /><span><strong>Re-alert for same campaign tag</strong><small>May alert users again for a repeated campaign.</small></span></label>
+          </section>
+
           <div className="notification-form-actions">
-            <button className="btn" type="submit" disabled={sending}>
+            <span><RiShieldCheckLine size={15} aria-hidden="true" /> Review message and destination before sending.</span>
+            <button className="btn notification-send-button" type="submit" disabled={sending}>
               <RiSendPlaneLine size={16} aria-hidden="true" />
               {sending ? 'Sending…' : 'Send notification'}
             </button>

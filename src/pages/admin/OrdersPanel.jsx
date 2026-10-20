@@ -264,10 +264,8 @@ export default function OrdersPanel({
   }, [filter, page]);
 
   useEffect(() => {
-    load(1, filter);
-    // Initial load and status changes are intentionally server-paginated.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+    load(page, filter);
+  }, [load]);
 
   const filtered = useMemo(() => {
     if (!items) return [];

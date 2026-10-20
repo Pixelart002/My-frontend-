@@ -1,5 +1,3 @@
-import { readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -7,41 +5,39 @@ function deferEntryStylesheet() {
   return {
     name: 'luviio-defer-entry-stylesheet',
     apply: 'build',
-    closeBundle() {
-      const outputPath = resolve(process.cwd(), 'dist/index.html')
-      let html = readFileSync(outputPath, 'utf8')
-      let converted = 0
+    transformIndexHtml: {
+      // Run after Vite has injected the hashed entry stylesheet and script.
+      // This avoids relying on output-bundle hook ordering, which changed in Vite 8.
+      order: 'post',
+      handler(html) {
+        let converted = 0
 
-      // Vite injects the app's hashed CSS link into the production HTML.
-      // Preload it without blocking first paint; the inline critical CSS in
-      // index.html keeps the storefront header and hero stable while it loads.
-      html = html.replace(
-        /<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+\.css)["'][^>]*>/gi,
-        (tag, href) => {
-          if (!href.startsWith('/assets/')) return tag
-          converted += 1
-          return `<link rel="preload" as="style" href="${href}" fetchpriority="high" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="${href}"></noscript>`
-        },
-      )
-
-      if (converted === 0) {
-        throw new Error('[Luviio] Could not find Vite entry stylesheet in dist/index.html')
-      }
-
-      // Discover the hashed entry module at build time and preload it from
-      // <head>. This starts the single-page-app bootstrap as early as possible
-      // without hard-coding a hash that changes on every production build.
-      const entryScript = html.match(
-        /<script\b(?=[^>]*\btype=["']module["'])[^>]*\bsrc=["'](\/assets\/[^"']+\.js)["'][^>]*>\s*<\/script>/i,
-      )
-      if (entryScript && !html.includes(`rel="modulepreload" href="${entryScript[1]}"`)) {
         html = html.replace(
-          '</head>',
-          `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\n  </head>`,
+          /<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']([^"']+\.css)["'][^>]*>/gi,
+          (tag, href) => {
+            if (!href.startsWith('/assets/')) return tag
+            converted += 1
+            return `<link rel="preload" as="style" href="${href}" fetchpriority="high" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="${href}"></noscript>`
+          },
         )
-      }
 
-      writeFileSync(outputPath, html)
+        if (converted === 0) {
+          throw new Error('[Luviio] Could not find Vite entry stylesheet in transformed index.html')
+        }
+
+        // Preload the hashed entry module to begin the SPA bootstrap earlier.
+        const entryScript = html.match(
+          /<script\b(?=[^>]*\btype=["']module["'])[^>]*\bsrc=["'](\/assets\/[^"']+\.js)["'][^>]*>\s*<\/script>/i,
+        )
+        if (entryScript && !html.includes(`rel="modulepreload" href="${entryScript[1]}"`)) {
+          html = html.replace(
+            '</head>',
+            `    <link rel="modulepreload" href="${entryScript[1]}" fetchpriority="high" crossorigin />\n  </head>`,
+          )
+        }
+
+        return html
+      },
     },
   }
 }
