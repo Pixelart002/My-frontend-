@@ -1195,6 +1195,48 @@ function RbacPanel() {
 /* Notifications                                                              */
 /* -------------------------------------------------------------------------- */
 
+function NotificationImagePicker({ label, name, value, onChange, optional = false }) {
+  const [preview, setPreview] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!value) {
+      setPreview('');
+      return undefined;
+    }
+    const objectUrl = URL.createObjectURL(value);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [value]);
+
+  return (
+    <div className="notification-field notification-image-picker">
+      <span>{label} {optional && <small>Optional</small>}</span>
+      <input
+        ref={inputRef}
+        className="notification-image-file-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+        aria-label={`Choose ${label.toLowerCase()} from phone`}
+        onChange={(event) => onChange(event.target.files?.[0] || null)}
+      />
+      <div className="notification-image-picker-row">
+        <button type="button" className="btn btn-quiet btn-sm" onClick={() => inputRef.current?.click()}>
+          <RiImageLine size={16} aria-hidden="true" />
+          {value ? 'Choose another image' : 'Choose from phone'}
+        </button>
+        {value && (
+          <button type="button" className="btn btn-quiet btn-sm" onClick={() => { onChange(null); if (inputRef.current) inputRef.current.value = ''; }}>
+            <RiCloseLine size={15} aria-hidden="true" /> Remove
+          </button>
+        )}
+      </div>
+      {preview && <img className="notification-image-preview" src={preview} alt={`Selected ${label.toLowerCase()} preview`} />}
+      {value && <small>{value.name} · {(value.size / 1024).toFixed(0)} KB</small>}
+    </div>
+  );
+}
+
 function NotificationsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
@@ -1205,6 +1247,9 @@ function NotificationsPanel() {
   const [icon, setIcon] = useState('/icon-192.png');
   const [badge, setBadge] = useState('/icon-192.png');
   const [image, setImage] = useState('');
+  const [iconFile, setIconFile] = useState(null);
+  const [badgeFile, setBadgeFile] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [tag, setTag] = useState('luviio-offer');
   const [requireInteraction, setRequireInteraction] = useState(false);
   const [renotify, setRenotify] = useState(false);
@@ -1318,9 +1363,18 @@ function NotificationsPanel() {
             <div className="field-grid notification-media-grid">
               <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
               <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
-              <label className="notification-field"><span><RiBellLine size={15} aria-hidden="true" /> Notification icon path</span><input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" /></label>
-              <label className="notification-field"><span><RiImageLine size={15} aria-hidden="true" /> Badge path</span><input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" /></label>
-              <label className="notification-field notification-field-full"><span><RiImageLine size={15} aria-hidden="true" /> Large image path <small>Optional</small></span><input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" /></label>
+              <div className="notification-image-field">
+                <NotificationImagePicker label="Notification icon" name="notification-icon" value={iconFile} onChange={setIconFile} />
+                <label className="notification-field"><span>Icon URL path</span><input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
+              </div>
+              <div className="notification-image-field">
+                <NotificationImagePicker label="Badge image" name="notification-badge" value={badgeFile} onChange={setBadgeFile} />
+                <label className="notification-field"><span>Badge URL path</span><input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
+              </div>
+              <div className="notification-image-field notification-field-full">
+                <NotificationImagePicker label="Large image" name="notification-large-image" value={imageFile} onChange={setImageFile} optional />
+                <label className="notification-field"><span>Large image URL path <small>Optional</small></span><input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" /><small>Enter the uploaded, site-hosted image path.</small></label>
+              </div>
             </div>
           </section>
 
