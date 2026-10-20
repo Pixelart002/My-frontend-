@@ -7,7 +7,7 @@ import {
   RiLinkM,
   RiMegaphoneLine,
   RiMouseLine,
-  RiUsersLine,
+  RiUserLine,
   RiCheckLine,
   RiEditLine,
   RiCloseLine,
@@ -1326,7 +1326,7 @@ function NotificationsPanel() {
 
           <section className="notification-block" aria-labelledby="notification-audience-heading">
             <div className="notification-block-heading">
-              <span className="notification-heading-icon"><RiUsersLine size={18} aria-hidden="true" /></span>
+              <span className="notification-heading-icon"><RiUserLine size={18} aria-hidden="true" /></span>
               <div><h3 id="notification-audience-heading">Audience</h3><p>Choose specific subscribers or send to everyone subscribed.</p></div>
             </div>
             <label className="notification-field">
