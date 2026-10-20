@@ -19,7 +19,7 @@ import { ErrorState, Spinner } from '../../components/ui/States';
 import { StatusPill } from './DashboardPanel';
 import OrderFulfillmentModal from './OrderFulfillmentModal';
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 20;
 
 const STATUSES = [
   'pending',
@@ -190,6 +190,9 @@ export default function OrdersPanel({
   const { toast } = useToast();
 
   const [items, setItems] = useState(null);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -208,7 +211,7 @@ export default function OrdersPanel({
     };
   }, []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (targetPage = page, targetFilter = filter) => {
     const requestId =
       ++requestIdRef.current;
 
@@ -218,8 +221,9 @@ export default function OrdersPanel({
     try {
       const result =
         await adminService.listOrders({
-          page: 1,
+          page: targetPage,
           page_size: PAGE_SIZE,
+          status_filter: targetFilter || undefined,
           _ts: Date.now(),
         });
 
@@ -231,7 +235,11 @@ export default function OrdersPanel({
       }
 
       const nextItems = itemsOfList(result);
+      const meta = result?.meta ?? result?.data?.meta ?? {};
       setItems(nextItems);
+      setPage(Number(meta.page) > 0 ? Number(meta.page) : targetPage);
+      setTotalOrders(Number.isFinite(Number(meta.total_items)) ? Number(meta.total_items) : nextItems.length);
+      setTotalPages(Number.isFinite(Number(meta.total_pages)) ? Number(meta.total_pages) : (nextItems.length ? 1 : 0));
       return nextItems;
     } catch (err) {
       if (
@@ -253,11 +261,13 @@ export default function OrdersPanel({
         setLoading(false);
       }
     }
-  }, []);
+  }, [filter, page]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load(1, filter);
+    // Initial load and status changes are intentionally server-paginated.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const filtered = useMemo(() => {
     if (!items) return [];
@@ -314,8 +324,7 @@ export default function OrdersPanel({
           <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
-            {filtered.length} of {items.length}{' '}
-            shown · essential order operations
+            {filtered.length} shown on this page · {totalOrders} total orders{filter ? ` matching “${filter}”` : ''}
           </p>
         </div>
 
@@ -327,9 +336,9 @@ export default function OrdersPanel({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search order, customer, invoice or tracking…"
+              placeholder="Search this page’s orders…"
               autoComplete="off"
-              aria-label="Search orders by order number, customer, invoice or tracking"
+              aria-label="Search currently loaded orders by order number, customer, invoice or tracking"
             />
           </label>
 
@@ -339,7 +348,12 @@ export default function OrdersPanel({
               id="orders-status-filter"
               className="admin-select orders-status-select"
               value={filter}
-              onChange={(event) => setFilter(event.target.value)}
+              onChange={(event) => {
+                const nextFilter = event.target.value;
+                setFilter(nextFilter);
+                setSearch('');
+                load(1, nextFilter);
+              }}
             >
               <option value="">All statuses</option>
               {STATUSES.map((value) => (
@@ -350,7 +364,7 @@ export default function OrdersPanel({
             <button
               type="button"
               className="icon-btn orders-refresh-button"
-              onClick={load}
+              onClick={() => load(page, filter)}
               disabled={loading}
               title="Refresh orders"
               aria-label="Refresh orders"
@@ -479,6 +493,35 @@ export default function OrdersPanel({
               </table>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="orders-pagination flex flex-wrap items-center justify-between gap-3 py-3" aria-label="Orders pagination">
+        <p className="admin-sub" aria-live="polite">
+          {totalOrders === 0
+            ? 'No orders found'
+            : `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalOrders)} of ${totalOrders} orders`}
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={() => load(page - 1, filter)}
+            disabled={loading || page <= 1}
+          >
+            Previous
+          </button>
+          <span className="text-sm text-muted" aria-label={`Page ${page} of ${totalPages}`}>
+            Page {page} of {Math.max(totalPages, 1)}
+          </span>
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm"
+            onClick={() => load(page + 1, filter)}
+            disabled={loading || page >= totalPages}
+          >
+            Next
+          </button>
         </div>
       </div>
 
