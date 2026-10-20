@@ -55,6 +55,13 @@ const text = (value) => {
   return String(value);
 };
 
+const orderKey = (order, index = 0) =>
+  String(
+    order?.id ??
+      order?.order_number ??
+      `${order?.created_at ?? 'order'}-${index}`,
+  );
+
 const dateTime = (value) => {
   if (!value) return '—';
 
@@ -200,7 +207,9 @@ export default function OrdersPanel({
 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState('');
   const loadMoreRef = useRef(null);
+  const loadMoreLockRef = useRef(false);
 
   const mountedRef = useRef(false);
   const requestIdRef = useRef(0);
@@ -214,56 +223,86 @@ export default function OrdersPanel({
   }, []);
 
   const load = useCallback(async (targetPage = 1, targetFilter = filter, append = false) => {
-    const requestId =
-      ++requestIdRef.current;
+    // Lock synchronously so multiple IntersectionObserver callbacks cannot
+    // issue duplicate requests before React commits the loading state.
+    if (append && loadMoreLockRef.current) return;
+    if (append) {
+      loadMoreLockRef.current = true;
+      setLoadingMore(true);
+      setLoadMoreError('');
+    } else {
+      loadMoreLockRef.current = false;
+      setLoading(true);
+      setLoadingMore(false);
+      setLoadMoreError('');
+    }
 
-    if (append) setLoadingMore(true);
-    else setLoading(true);
+    const requestId = ++requestIdRef.current;
     setError('');
 
     try {
-      const result =
-        await adminService.listOrders({
-          page: targetPage,
-          page_size: PAGE_SIZE,
-          status_filter: targetFilter || undefined,
-          _ts: Date.now(),
-        });
+      const result = await adminService.listOrders({
+        page: targetPage,
+        page_size: PAGE_SIZE,
+        status_filter: targetFilter || undefined,
+        _ts: Date.now(),
+      });
 
-      if (
-        !mountedRef.current ||
-        requestId !== requestIdRef.current
-      ) {
+      if (!mountedRef.current || requestId !== requestIdRef.current) {
         return;
       }
 
       const nextItems = itemsOfList(result);
       const meta = result?.meta ?? result?.data?.meta ?? {};
+      const metaPage = Number(meta.page);
+      const resolvedPage = Number.isInteger(metaPage) && metaPage > 0
+        ? Math.max(metaPage, targetPage)
+        : targetPage;
+      const metaTotalItems = Number(meta.total_items);
+      const metaTotalPages = Number(meta.total_pages);
+      const resolvedTotalItems = meta.total_items != null && Number.isFinite(metaTotalItems)
+        ? metaTotalItems
+        : nextItems.length;
+      const resolvedTotalPages = meta.total_pages != null && Number.isFinite(metaTotalPages)
+        ? Math.max(0, metaTotalPages)
+        : (nextItems.length >= PAGE_SIZE ? resolvedPage + 1 : resolvedPage);
+
       setItems((current) => {
         if (!append || !Array.isArray(current)) return nextItems;
-        const seen = new Set(current.map((order) => String(order?.id ?? order?.order_number ?? '')));
-        return [...current, ...nextItems.filter((order) => !seen.has(String(order?.id ?? order?.order_number ?? '')))];
+
+        const seen = new Set(current.map((order, index) => orderKey(order, index)));
+        const additions = [];
+
+        nextItems.forEach((order, index) => {
+          const key = orderKey(order, current.length + index);
+          if (seen.has(key)) return;
+          seen.add(key);
+          additions.push(order);
+        });
+
+        return [...current, ...additions];
       });
-      setPage(Number(meta.page) > 0 ? Number(meta.page) : targetPage);
-      setTotalOrders(Number.isFinite(Number(meta.total_items)) ? Number(meta.total_items) : nextItems.length);
-      setTotalPages(Number.isFinite(Number(meta.total_pages)) ? Number(meta.total_pages) : (nextItems.length ? 1 : 0));
+
+      // Empty pages must not repeatedly trigger the observer at the end.
+      setPage(append && nextItems.length === 0
+        ? Math.max(resolvedPage, resolvedTotalPages)
+        : resolvedPage);
+      setTotalOrders(resolvedTotalItems);
+      setTotalPages(resolvedTotalPages);
       return nextItems;
     } catch (err) {
-      if (
-        !mountedRef.current ||
-        requestId !== requestIdRef.current
-      ) {
+      if (!mountedRef.current || requestId !== requestIdRef.current) {
         return;
       }
 
-      setError(
-        err?.message ||
-          'Unable to load orders.'
-      );
+      const message = err?.message || 'Unable to load orders.';
+      if (append) setLoadMoreError(message);
+      else setError(message);
     } finally {
       if (mountedRef.current && requestId === requestIdRef.current) {
         setLoading(false);
         setLoadingMore(false);
+        loadMoreLockRef.current = false;
       }
     }
   }, [filter]);
@@ -277,13 +316,35 @@ export default function OrdersPanel({
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
-    if (!sentinel || loading || loadingMore || page >= totalPages || items === null) return undefined;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) load(page + 1, filter, true);
-    }, { root: null, rootMargin: '320px 0px', threshold: 0 });
+
+    if (
+      !sentinel ||
+      typeof IntersectionObserver === 'undefined' ||
+      loading ||
+      loadingMore ||
+      loadMoreError ||
+      page >= totalPages ||
+      items === null
+    ) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void load(page + 1, filter, true);
+        }
+      },
+      {
+        root: null,
+        rootMargin: '240px 0px',
+        threshold: 0,
+      },
+    );
+
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [filter, items, load, loading, loadingMore, page, totalPages]);
+  }, [filter, items, load, loadMoreError, loading, loadingMore, page, totalPages]);
 
   const filtered = useMemo(() => {
     if (!items) return [];
@@ -340,7 +401,7 @@ export default function OrdersPanel({
           <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
-            {filtered.length} shown on this page · {totalOrders} total orders{filter ? ` matching “${filter}”` : ''}
+            {filtered.length} loaded orders · {totalOrders} total orders{filter ? ` matching “${filter}”` : ''}
           </p>
         </div>
 
@@ -352,7 +413,7 @@ export default function OrdersPanel({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search this page’s orders…"
+              placeholder="Search loaded orders…"
               autoComplete="off"
               aria-label="Search currently loaded orders by order number, customer, invoice or tracking"
             />
@@ -430,13 +491,8 @@ export default function OrdersPanel({
               <tbody>
                 {filtered.map(
                   (order, index) => {
-                    const rowKey =
-                      order?.id ??
-                      order?.order_number ??
-                      `${order?.created_at ?? 'order'}-${index}`;
-
                     return (
-                      <tr key={String(rowKey)}>
+                      <tr key={orderKey(order, index)}>
                         {columns.map(
                           (column) => {
                             const value =
@@ -514,10 +570,27 @@ export default function OrdersPanel({
         <p className="admin-sub" aria-live="polite">
           {totalOrders === 0 ? 'No orders found' : `Showing ${items.length} of ${totalOrders} orders`}
         </p>
-        {page < totalPages && <span className="text-sm text-muted">Scroll down to load more</span>}
+        {!loadingMore && !loadMoreError && page < totalPages && (
+          <span className="text-sm text-muted">Scroll down to load more</span>
+        )}
         <div ref={loadMoreRef} className="orders-load-more-sentinel" aria-hidden="true" />
-        {loadingMore && <p className="admin-sub" role="status">Loading more orders…</p>}
-        {!loading && page >= totalPages && totalOrders > 0 && <p className="admin-sub">All orders loaded</p>}
+        {loadingMore && <p className="admin-sub" role="status" aria-live="polite">Loading more orders…</p>}
+        {loadMoreError && (
+          <div className="orders-load-more-error" role="alert">
+            <span>Could not load more orders: {loadMoreError}</span>
+            <button
+              type="button"
+              className="btn btn-quiet btn-sm"
+              onClick={() => void load(page + 1, filter, true)}
+              disabled={loadingMore}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!loading && !loadingMore && !loadMoreError && page >= totalPages && totalOrders > 0 && (
+          <p className="admin-sub">All orders loaded</p>
+        )}
       </div>
 
       {fulfilling && (
