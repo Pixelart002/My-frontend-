@@ -44,6 +44,7 @@ import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import AdminMfaGate from './AdminMfaGate';
+import OrdersPanelSkeleton from './OrdersPanelSkeleton';
 import { classifyAdminAccessError } from './adminAccess';
 import '../../styles/admin-tailwind.css';
 import '../../styles/product-media.css';
@@ -949,7 +950,9 @@ export default function AdminPage() {
         >
           <Suspense
             fallback={
-              <AdminPanelFallback />
+              effectivePanel === 'orders'
+                ? <OrdersPanelSkeleton canUpdate={capabilities.orderUpdate === true} />
+                : <AdminPanelFallback />
             }
           >
             {effectivePanel ===
@@ -982,9 +985,9 @@ export default function AdminPage() {
             {effectivePanel ===
               'orders' && (
               <OrdersPanel
-                capabilities={
-                  capabilities
-                }
+                key={String(user?.id ?? user?.user_id ?? profile?.id ?? profile?.user_id ?? user?.email ?? profile?.email ?? 'authenticated-admin-session')}
+                cacheScope={String(user?.id ?? user?.user_id ?? profile?.id ?? profile?.user_id ?? user?.email ?? profile?.email ?? 'authenticated-admin-session')}
+                capabilities={capabilities}
               />
             )}
 
