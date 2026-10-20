@@ -5890,3 +5890,56 @@ button:disabled {
     text-align: right;
   }
 }
+
+
+/* Orders panel: viewport-safe layout and isolated table scrolling */
+.orders-admin-full {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: calc(100dvh - 72px);
+}
+
+.orders-admin-full .admin-page-head,
+.orders-admin-full .orders-toolbar,
+.orders-admin-full .orders-search,
+.orders-admin-full .orders-filter-actions,
+.orders-admin-full .orders-ledger-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.orders-admin-full .orders-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  width: min(100%, 720px);
+}
+
+.orders-admin-full .orders-search input { min-width: 0; width: 100%; }
+.orders-admin-full .orders-filter-actions { display: flex; align-items: center; gap: 8px; }
+.orders-admin-full .orders-ledger-scroll {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.orders-admin-full .orders-ledger-track { min-width: 0; width: 100%; }
+.orders-admin-full .orders-ledger-table { min-width: 1080px; width: max-content; }
+.orders-admin-full .orders-load-more-sentinel { width: 100%; height: 1px; }
+
+@media (max-width: 600px) {
+  .admin-shell { width: 100%; padding-inline: 10px; }
+  .orders-admin-full { min-height: calc(100dvh - 56px); }
+  .orders-admin-full .admin-page-head { display: flex; align-items: stretch; gap: 10px; }
+  .orders-admin-full .orders-toolbar { grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .orders-admin-full .orders-filter-actions { display: grid; grid-template-columns: minmax(0, 1fr) 44px; }
+  .orders-admin-full .orders-status-select { width: 100%; min-width: 0; }
+  .orders-admin-full .orders-pagination { align-items: flex-start; }
+}
