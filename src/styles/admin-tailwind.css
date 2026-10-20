@@ -5964,3 +5964,82 @@ button:disabled {
   .orders-admin-full .orders-load-more-error .btn { margin-left: 0; }
   .orders-admin-full .orders-refresh-error { align-items: flex-start; }
 }
+
+
+/* Orders initial preload: reserve the real layout so controls never jump in. */
+.orders-loading-state {
+  min-height: calc(100dvh - 120px);
+}
+
+.orders-loading-state .orders-skeleton-search {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-2, #17191f);
+}
+
+.orders-loading-state .orders-skeleton-line,
+.orders-loading-state .orders-skeleton-select,
+.orders-loading-state .orders-skeleton-refresh,
+.orders-loading-state .orders-skeleton-cell {
+  display: block;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--line, #343943) 56%, transparent);
+}
+
+.orders-loading-state .orders-skeleton-search-line {
+  width: 68%;
+  height: 10px;
+}
+
+.orders-loading-state .orders-skeleton-select {
+  width: 100px;
+  height: 44px;
+  border: 1px solid var(--line);
+}
+
+.orders-loading-state .orders-skeleton-refresh {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.orders-loading-state .orders-ledger-table thead th {
+  height: 42px;
+}
+
+.orders-loading-state .orders-ledger-table tbody td {
+  height: 48px;
+}
+
+.orders-loading-state .orders-skeleton-cell {
+  height: 9px;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .orders-loading-state .orders-toolbar {
+    width: 100%;
+  }
+
+  .orders-loading-state .orders-filter-actions {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .orders-loading-state .orders-skeleton-select {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orders-loading-state * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
