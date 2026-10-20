@@ -220,6 +220,22 @@ export default function OrdersPanel({
 
   const load = useCallback(async (force = false) => {
     const cached = getOrdersSnapshot(scopeKey);
+    const cacheIsFresh = cached && Date.now() - cached.fetchedAt < 15_000;
+
+    // A warm, complete snapshot is already the intended display state. Do
+    // not briefly enable a spinner while resolving an in-memory cache hit.
+    if (!force && cacheIsFresh) {
+      if (itemsRef.current !== cached.items) {
+        itemsRef.current = cached.items;
+        setItems(cached.items);
+        setTotalOrders(cached.totalOrders);
+      }
+      setLoading(false);
+      setRefreshing(false);
+      setError('');
+      return cached.items;
+    }
+
     const hasData = Array.isArray(itemsRef.current) || Array.isArray(cached?.items);
     const requestId = ++requestIdRef.current;
 
