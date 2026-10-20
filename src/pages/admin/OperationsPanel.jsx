@@ -1196,43 +1196,85 @@ function RbacPanel() {
 /* -------------------------------------------------------------------------- */
 
 function NotificationImagePicker({ label, value, onChange, optional = false }) {
-  const [preview, setPreview] = useState('');
+  const { toast } = useToast();
   const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const fieldId = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-  useEffect(() => {
-    if (!value) {
-      setPreview('');
-      return undefined;
+  const handleImageSelect = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Images must be 5 MB or smaller.');
+      return;
     }
-    const objectUrl = URL.createObjectURL(value);
-    setPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [value]);
+
+    setUploading(true);
+    try {
+      const result = await adminService.uploadNotificationImage(file);
+      const uploadedUrl = result?.url || result?.data?.url;
+      if (!uploadedUrl) throw new Error('The image upload did not return a hosted URL.');
+      onChange(uploadedUrl);
+      toast.success(`${label} uploaded.`);
+    } catch (error) {
+      toast.error(errorMessage(error, `Unable to upload ${label.toLowerCase()}.`));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <div className="notification-field notification-image-picker">
-      <span>{label} {optional && <small>Optional</small>}</span>
+    <div className="notification-field notification-asset-field">
+      <label className="notification-asset-label" htmlFor={`${fieldId}-path`}>
+        {label} {optional && <small>Optional</small>}
+      </label>
+      <div className="notification-path-control">
+        <input
+          id={`${fieldId}-path`}
+          aria-label={`${label} URL path`}
+          value={value}
+          maxLength={500}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={label === 'Large image' ? '/products/offer-banner.webp' : '/icon-192.png'}
+          autoComplete="off"
+        />
+        {value && (
+          <img
+            className="notification-inline-preview"
+            src={value}
+            alt=""
+            aria-hidden="true"
+            onError={(event) => { event.currentTarget.hidden = true; }}
+            onLoad={(event) => { event.currentTarget.hidden = false; }}
+          />
+        )}
+        <button
+          type="button"
+          className="notification-image-pick-button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          aria-label={uploading ? `Uploading ${label.toLowerCase()}` : `Choose ${label.toLowerCase()} image`}
+          title={uploading ? 'Uploading image…' : 'Choose image from phone'}
+        >
+          {uploading
+            ? <span className="admin-switch-spinner" aria-hidden="true" />
+            : <RiImageLine size={17} aria-hidden="true" />}
+        </button>
+      </div>
       <input
         ref={inputRef}
         className="notification-image-file-input"
         type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+        accept="image/png,image/jpeg,image/webp,image/gif"
         aria-label={`Choose ${label.toLowerCase()} from phone`}
-        onChange={(event) => onChange(event.target.files?.[0] || null)}
+        onChange={handleImageSelect}
+        disabled={uploading}
       />
-      <div className="notification-image-picker-row">
-        <button type="button" className="btn btn-quiet btn-sm" onClick={() => inputRef.current?.click()}>
-          <RiImageLine size={16} aria-hidden="true" />
-          {value ? 'Choose another image' : 'Choose from phone'}
-        </button>
-        {value && (
-          <button type="button" className="btn btn-quiet btn-sm" onClick={() => { onChange(null); if (inputRef.current) inputRef.current.value = ''; }}>
-            <RiCloseLine size={15} aria-hidden="true" /> Remove
-          </button>
-        )}
-      </div>
-      {preview && <img className="notification-image-preview" src={preview} alt={`Selected ${label.toLowerCase()} preview`} />}
-      {value && <small>{value.name} · {(value.size / 1024).toFixed(0)} KB</small>}
+      <small className="notification-asset-hint">
+        {uploading ? 'Uploading and optimizing image…' : value ? 'Image URL ready for push payload.' : 'Enter a hosted path or tap the image icon to upload.'}
+      </small>
     </div>
   );
 }
@@ -1247,9 +1289,6 @@ function NotificationsPanel() {
   const [icon, setIcon] = useState('/icon-192.png');
   const [badge, setBadge] = useState('/icon-192.png');
   const [image, setImage] = useState('');
-  const [iconFile, setIconFile] = useState(null);
-  const [badgeFile, setBadgeFile] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
   const [tag, setTag] = useState('luviio-offer');
   const [requireInteraction, setRequireInteraction] = useState(false);
   const [renotify, setRenotify] = useState(false);
@@ -1289,8 +1328,27 @@ function NotificationsPanel() {
       toast.error('Each notification action needs both a title and an in-site path.');
       return;
     }
-    if ([normalizedUrl, normalizedIcon, normalizedBadge, normalizedImage, ...actions.map((item) => item.action)].some((value) => value && (!value.startsWith('/') || value.startsWith('//')))) {
-      toast.error('Notification links and assets must use in-site paths beginning with /.');
+    const isSitePath = (value) => value.startsWith('/') && !value.startsWith('//') && !value.includes('\\\\');
+    const isLuviioNotificationAsset = (value) => {
+      if (isSitePath(value)) return true;
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:'
+          && parsed.hostname.endsWith('.supabase.co')
+          && parsed.pathname.startsWith('/storage/v1/object/public/product-images/notifications/')
+          && parsed.pathname.endsWith('.webp')
+          && !parsed.search
+          && !parsed.hash;
+      } catch {
+        return false;
+      }
+    };
+    if (!isSitePath(normalizedUrl) || actions.some((item) => !isSitePath(item.action))) {
+      toast.error('Notification destinations and action buttons must use in-site paths beginning with /.');
+      return;
+    }
+    if (![normalizedIcon, normalizedBadge, normalizedImage].every(isLuviioNotificationAsset)) {
+      toast.error('Notification images must use an in-site path or an image uploaded through this picker.');
       return;
     }
     if (normalizedTargets?.some((id) => id.length < 8)) {
@@ -1363,17 +1421,10 @@ function NotificationsPanel() {
             <div className="field-grid notification-media-grid">
               <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
               <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
-              <div className="notification-image-field">
-                <NotificationImagePicker label="Notification icon" value={iconFile} onChange={setIconFile} />
-                <label className="notification-field"><span>Icon URL path</span><input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
-              </div>
-              <div className="notification-image-field">
-                <NotificationImagePicker label="Badge image" value={badgeFile} onChange={setBadgeFile} />
-                <label className="notification-field"><span>Badge URL path</span><input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
-              </div>
-              <div className="notification-image-field notification-field-full">
-                <NotificationImagePicker label="Large image" value={imageFile} onChange={setImageFile} optional />
-                <label className="notification-field"><span>Large image URL path <small>Optional</small></span><input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" /><small>Enter the uploaded, site-hosted image path.</small></label>
+              <NotificationImagePicker label="Notification icon" value={icon} onChange={setIcon} />
+              <NotificationImagePicker label="Badge image" value={badge} onChange={setBadge} />
+              <div className="notification-field-full">
+                <NotificationImagePicker label="Large image" value={image} onChange={setImage} optional />
               </div>
             </div>
           </section>
