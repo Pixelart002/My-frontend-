@@ -5949,6 +5949,7 @@ button:disabled {
   font-size: 12px;
 }
 .orders-admin-full .orders-load-more-error .btn { margin-left: auto; }
+.orders-admin-full .orders-refresh-error { margin: 0 0 12px; }
 .orders-admin-full .admin-page-head > :last-child { min-width: 0; max-width: 100%; }
 
 @media (max-width: 600px) {
@@ -5961,4 +5962,5 @@ button:disabled {
   .orders-admin-full .orders-pagination { align-items: flex-start; }
   .orders-admin-full .orders-load-more-error { align-items: flex-start; }
   .orders-admin-full .orders-load-more-error .btn { margin-left: 0; }
+  .orders-admin-full .orders-refresh-error { align-items: flex-start; }
 }
