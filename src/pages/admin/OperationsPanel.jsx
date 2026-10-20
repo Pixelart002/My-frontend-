@@ -1237,7 +1237,7 @@ function NotificationImagePicker({ label, value, onChange, optional = false }) {
           value={value}
           maxLength={500}
           onChange={(event) => onChange(event.target.value)}
-          placeholder={label === 'Large image' ? '/products/offer-banner.webp' : '/icon-192.png'}
+          placeholder={label === 'Large image' ? '/products/offer-banner.webp' : '/icon-512.png'}
           autoComplete="off"
         />
         {value && (
