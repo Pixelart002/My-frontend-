@@ -1328,7 +1328,7 @@ function NotificationsPanel() {
       toast.error('Each notification action needs both a title and an in-site path.');
       return;
     }
-    const isSitePath = (value) => value.startsWith('/') && !value.startsWith('//') && !value.includes('\\\\');
+    const isSitePath = (value) => value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
     const isLuviioNotificationAsset = (value) => {
       if (isSitePath(value)) return true;
       try {
@@ -1347,7 +1347,7 @@ function NotificationsPanel() {
       toast.error('Notification destinations and action buttons must use in-site paths beginning with /.');
       return;
     }
-    if (![normalizedIcon, normalizedBadge, normalizedImage].every(isLuviioNotificationAsset)) {
+    if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isLuviioNotificationAsset(value))) {
       toast.error('Notification images must use an in-site path or an image uploaded through this picker.');
       return;
     }
