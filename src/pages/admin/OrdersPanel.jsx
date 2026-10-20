@@ -349,10 +349,8 @@ export default function OrdersPanel({
               className="admin-select orders-status-select"
               value={filter}
               onChange={(event) => {
-                const nextFilter = event.target.value;
-                setFilter(nextFilter);
+                setFilter(event.target.value);
                 setSearch('');
-                load(1, nextFilter);
               }}
             >
               <option value="">All statuses</option>
