@@ -1195,7 +1195,7 @@ function RbacPanel() {
 /* Notifications                                                              */
 /* -------------------------------------------------------------------------- */
 
-function NotificationImagePicker({ label, name, value, onChange, optional = false }) {
+function NotificationImagePicker({ label, value, onChange, optional = false }) {
   const [preview, setPreview] = useState('');
   const inputRef = useRef(null);
 
@@ -1364,15 +1364,15 @@ function NotificationsPanel() {
               <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
               <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
               <div className="notification-image-field">
-                <NotificationImagePicker label="Notification icon" name="notification-icon" value={iconFile} onChange={setIconFile} />
+                <NotificationImagePicker label="Notification icon" value={iconFile} onChange={setIconFile} />
                 <label className="notification-field"><span>Icon URL path</span><input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
               </div>
               <div className="notification-image-field">
-                <NotificationImagePicker label="Badge image" name="notification-badge" value={badgeFile} onChange={setBadgeFile} />
+                <NotificationImagePicker label="Badge image" value={badgeFile} onChange={setBadgeFile} />
                 <label className="notification-field"><span>Badge URL path</span><input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" /><small>Enter the uploaded, site-hosted image path.</small></label>
               </div>
               <div className="notification-image-field notification-field-full">
-                <NotificationImagePicker label="Large image" name="notification-large-image" value={imageFile} onChange={setImageFile} optional />
+                <NotificationImagePicker label="Large image" value={imageFile} onChange={setImageFile} optional />
                 <label className="notification-field"><span>Large image URL path <small>Optional</small></span><input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" /><small>Enter the uploaded, site-hosted image path.</small></label>
               </div>
             </div>
