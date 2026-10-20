@@ -121,4 +121,38 @@ describe('Notifications panel', () => {
     expect(screen.queryByRole('alertdialog')).toBeNull();
     expect(mocks.sendPush).not.toHaveBeenCalled();
   });
+
+  it('uploads a selected image and includes its hosted URL in the push payload', async () => {
+    const hostedImage = 'https://luviio-test.supabase.co/storage/v1/object/public/product-images/notifications/campaign.webp';
+    mocks.uploadNotificationImage.mockResolvedValue({ url: hostedImage });
+
+    render(<OperationsPanel section="notifications" />);
+
+    fireEvent.change(screen.getByPlaceholderText('e.g. New Luviio offer'), {
+      target: { value: 'Image campaign' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Tell customers what is new or on offer…'), {
+      target: { value: 'See the offer image' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /add options/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /large image/i }));
+
+    const file = new File([new Uint8Array(200)], 'offer.png', { type: 'image/png' });
+    fireEvent.change(screen.getByLabelText(/choose large image from phone/i), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => {
+      expect(mocks.uploadNotificationImage).toHaveBeenCalledWith(file);
+      expect(screen.getByLabelText('Large image URL path').value).toBe(hostedImage);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /send notification/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Send now' }));
+
+    await waitFor(() => expect(mocks.sendPush).toHaveBeenCalledTimes(1));
+    expect(mocks.sendPush.mock.calls[0][0].image).toBe(hostedImage);
+  });
+
 });
