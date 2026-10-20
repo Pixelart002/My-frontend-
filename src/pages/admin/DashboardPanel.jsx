@@ -206,6 +206,46 @@ export default function DashboardPanel({ onNavigate }) {
   });
   const [overviewErrors, setOverviewErrors] = useState({});
 
+  const defaultWidgetOrder = ['Products', 'Orders', 'Pending', 'Users', 'Revenue', 'Low stock'];
+  const [widgetPrefs, setWidgetPrefs] = useState(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('luviio-admin-dashboard-widgets') || 'null');
+      return {
+        order: Array.isArray(saved?.order)
+          ? [...new Set([...saved.order.filter((id) => defaultWidgetOrder.includes(id)), ...defaultWidgetOrder.filter((id) => !saved.order.includes(id))])]
+          : defaultWidgetOrder,
+        hidden: Array.isArray(saved?.hidden) ? saved.hidden.filter((id) => defaultWidgetOrder.includes(id)) : [],
+        collapsed: Array.isArray(saved?.collapsed) ? saved.collapsed.filter((id) => defaultWidgetOrder.includes(id)) : [],
+      };
+    } catch {
+      return { order: defaultWidgetOrder, hidden: [], collapsed: [] };
+    }
+  });
+  const [draggingWidget, setDraggingWidget] = useState('');
+  const [widgetMenuOpen, setWidgetMenuOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('luviio-admin-dashboard-widgets', JSON.stringify(widgetPrefs));
+    } catch {
+      // Dashboard preferences are optional; storage restrictions must not break the dashboard.
+    }
+  }, [widgetPrefs]);
+
+  const updateWidgetPrefs = useCallback((update) => {
+    setWidgetPrefs((current) => ({ ...current, ...update }));
+  }, []);
+
+  const moveWidget = useCallback((fromId, toId) => {
+    if (!fromId || !toId || fromId === toId) return;
+    setWidgetPrefs((current) => {
+      const order = current.order.filter((id) => id !== fromId);
+      const targetIndex = order.indexOf(toId);
+      order.splice(targetIndex < 0 ? order.length : targetIndex, 0, fromId);
+      return { ...current, order };
+    });
+  }, []);
+
   const mountedRef = useRef(true);
   const requestIdRef = useRef(0);
 
@@ -435,36 +475,112 @@ export default function DashboardPanel({ onNavigate }) {
         </div>
       )}
 
+      <section className="dashboard-widget-toolbar" aria-label="Customize dashboard widgets">
+        <span className="dashboard-widget-toolbar-label">Dashboard widgets</span>
+        <button
+          type="button"
+          className="btn btn-quiet btn-sm"
+          aria-expanded={widgetMenuOpen}
+          onClick={() => setWidgetMenuOpen((open) => !open)}
+        >
+          {widgetMenuOpen ? 'Done' : 'Add / restore widgets'}
+        </button>
+        {widgetMenuOpen && (
+          <div className="dashboard-widget-picker">
+            {defaultWidgetOrder.map((id) => {
+              const isHidden = widgetPrefs.hidden.includes(id);
+              return (
+                <button
+                  type="button"
+                  key={id}
+                  className="dashboard-widget-picker-item"
+                  disabled={!isHidden}
+                  onClick={() => {
+                    updateWidgetPrefs({ hidden: widgetPrefs.hidden.filter((item) => item !== id) });
+                  }}
+                >
+                  <span>{id}</span>
+                  <span>{isHidden ? 'Add' : 'Added'}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <section
-        className={`admin-stats${error ? ' has-error' : ''}`}
+        className={`admin-stats dashboard-customizable-stats${error ? ' has-error' : ''}`}
         aria-label="Dashboard statistics"
       >
-        {cards.map((card) => (
-          <article
-            key={card.label}
-            className={`admin-stat${
-              card.danger ? ' tone-danger' : ''
-            }`}
-          >
-            <div className="stat-topline">
-              <div className="stat-label">{card.label}</div>
-              {card.icon && (
-                <span className="stat-icon" aria-hidden="true">
-                  <card.icon size={17} />
-                </span>
-              )}
-            </div>
-            <div className="stat-value">{card.value}</div>
-            <div className="stat-hint">{card.hint}</div>
-          </article>
-        ))}
+        {widgetPrefs.order
+          .filter((id) => !widgetPrefs.hidden.includes(id))
+          .map((id) => {
+            const card = cards.find((item) => item.label === id);
+            if (!card) return null;
+            const collapsed = widgetPrefs.collapsed.includes(id);
+            return (
+              <article
+                key={card.label}
+                className={`admin-stat dashboard-metric-widget${card.danger ? ' tone-danger' : ''}${collapsed ? ' is-collapsed' : ''}`}
+                draggable
+                onDragStart={(event) => {
+                  setDraggingWidget(id);
+                  event.dataTransfer.effectAllowed = 'move';
+                  event.dataTransfer.setData('text/plain', id);
+                }}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  moveWidget(event.dataTransfer.getData('text/plain') || draggingWidget, id);
+                  setDraggingWidget('');
+                }}
+                onDragEnd={() => setDraggingWidget('')}
+                aria-label={`${id} dashboard widget`}
+              >
+                <div className="dashboard-widget-controls">
+                  <span className="dashboard-widget-drag-handle" title="Drag to rearrange" aria-hidden="true">⠿</span>
+                  <button
+                    type="button"
+                    className="dashboard-widget-control"
+                    onClick={() => updateWidgetPrefs({
+                      collapsed: collapsed
+                        ? widgetPrefs.collapsed.filter((item) => item !== id)
+                        : [...widgetPrefs.collapsed, id],
+                    })}
+                    aria-expanded={!collapsed}
+                    aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${id} widget`}
+                  >{collapsed ? 'Expand' : 'Collapse'}</button>
+                  <button
+                    type="button"
+                    className="dashboard-widget-control"
+                    onClick={() => updateWidgetPrefs({ hidden: [...widgetPrefs.hidden, id] })}
+                    aria-label={`Remove ${id} widget from dashboard`}
+                  >Remove</button>
+                </div>
+                <div className="stat-topline">
+                  <div className="stat-label">{card.label}</div>
+                  {card.icon && (
+                    <span className="stat-icon" aria-hidden="true">
+                      <card.icon size={17} />
+                    </span>
+                  )}
+                </div>
+                {!collapsed && (
+                  <>
+                    <div className="stat-value">{card.value}</div>
+                    <div className="stat-hint">{card.hint}</div>
+                  </>
+                )}
+              </article>
+            );
+          })}
       </section>
 
       <section className="dashboard-visualization" aria-labelledby="dashboard-status-heading">
         <div className="dashboard-visualization-heading">
           <div>
             <h2 id="dashboard-status-heading">Recent order status mix</h2>
-            <p>Based on the {recent.length} latest loaded orders</p>
+            <p>Recent sample only · not the lifetime order total</p>
           </div>
         </div>
         {recent.length === 0 ? (

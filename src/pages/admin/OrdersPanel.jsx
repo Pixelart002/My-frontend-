@@ -266,7 +266,7 @@ export default function OrdersPanel({
   useEffect(() => {
     load(1, filter);
     // Initial load and status changes are intentionally server-paginated.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // The filter is the only trigger; load reads the current page/filter values.
   }, [filter]);
 
   const filtered = useMemo(() => {
@@ -324,7 +324,7 @@ export default function OrdersPanel({
           <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
-            {filtered.length} shown on this page · {totalOrders} total orders{filter ? ` matching “${filter}”` : ''}
+            {totalOrders.toLocaleString('en-IN')} total orders{filter ? ` · ${filter}` : ''}
           </p>
         </div>
 
@@ -336,9 +336,9 @@ export default function OrdersPanel({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search this page’s orders…"
+              placeholder="Search current page…"
               autoComplete="off"
-              aria-label="Search currently loaded orders by order number, customer, invoice or tracking"
+              aria-label="Search orders on the current page by order number, customer, invoice or tracking"
             />
           </label>
 
