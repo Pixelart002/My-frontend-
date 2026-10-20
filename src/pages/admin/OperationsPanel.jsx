@@ -1403,6 +1403,15 @@ function NotificationsPanel() {
       return;
     }
 
+    if (
+      (enabledOptions.icon && !normalizedIcon) ||
+      (enabledOptions.badge && !normalizedBadge) ||
+      (enabledOptions.image && !normalizedImage)
+    ) {
+      toast.error('Choose or upload an image for each enabled image option.');
+      return;
+    }
+
     if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isAllowedAsset(value))) {
       toast.error('Images must use an in-site path or be uploaded with the image picker.');
       return;
@@ -1416,15 +1425,19 @@ function NotificationsPanel() {
     const payload = {
       title: normalizedTitle,
       body: normalizedBody,
-      user_ids: normalizedTargets,
+      ...(enabledOptions.audience ? { user_ids: normalizedTargets } : {}),
       ...(enabledOptions.destination ? { url: normalizedUrl } : {}),
       ...(normalizedIcon ? { icon: normalizedIcon } : {}),
       ...(normalizedBadge ? { badge: normalizedBadge } : {}),
       ...(normalizedImage ? { image: normalizedImage } : {}),
       ...(normalizedTag ? { tag: normalizedTag } : {}),
-      require_interaction: Boolean(enabledOptions.delivery && requireInteraction),
-      renotify: Boolean(enabledOptions.delivery && renotify),
-      actions,
+      ...(enabledOptions.delivery
+        ? {
+            require_interaction: Boolean(requireInteraction),
+            renotify: Boolean(renotify),
+          }
+        : {}),
+      ...(enabledOptions.actions ? { actions } : {}),
     };
 
     setPendingPayload(payload);
