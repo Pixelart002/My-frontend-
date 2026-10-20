@@ -1279,6 +1279,17 @@ function NotificationImagePicker({ label, value, onChange, optional = false }) {
   );
 }
 
+const OPTIONAL_NOTIFICATION_OPTIONS = [
+  { key: 'destination', label: 'Click destination', hint: 'Open an in-site page when tapped.' },
+  { key: 'tag', label: 'Campaign tag', hint: 'Group repeated sends by the same tag.' },
+  { key: 'icon', label: 'Custom notification icon', hint: 'Replace Luviio’s default notification icon.' },
+  { key: 'badge', label: 'Custom badge', hint: 'Choose the small status-bar badge.' },
+  { key: 'image', label: 'Large image', hint: 'Attach a wider promotional image.' },
+  { key: 'audience', label: 'Specific audience', hint: 'Send only to selected subscriber IDs.' },
+  { key: 'actions', label: 'Action buttons', hint: 'Add up to two in-notification buttons.' },
+  { key: 'delivery', label: 'Delivery behaviour', hint: 'Request supported keep-visible / re-alert behaviour.' },
+];
+
 function NotificationsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
@@ -1286,10 +1297,10 @@ function NotificationsPanel() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/');
-  const [icon, setIcon] = useState('/icon-192.png');
-  const [badge, setBadge] = useState('/icon-192.png');
+  const [icon, setIcon] = useState('');
+  const [badge, setBadge] = useState('');
   const [image, setImage] = useState('');
-  const [tag, setTag] = useState('luviio-offer');
+  const [tag, setTag] = useState('');
   const [requireInteraction, setRequireInteraction] = useState(false);
   const [renotify, setRenotify] = useState(false);
   const [targetUsers, setTargetUsers] = useState('');
@@ -1297,26 +1308,43 @@ function NotificationsPanel() {
   const [actionOneUrl, setActionOneUrl] = useState('');
   const [actionTwoTitle, setActionTwoTitle] = useState('');
   const [actionTwoUrl, setActionTwoUrl] = useState('');
+  const [enabledOptions, setEnabledOptions] = useState({});
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [sendReport, setSendReport] = useState(null);
 
-  const send = async (event) => {
+  const toggleOption = (key) => {
+    setEnabledOptions((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  };
+
+  const enabledOptionCount = Object.values(enabledOptions).filter(Boolean).length;
+
+  const prepareSend = (event) => {
     event.preventDefault();
     if (sending) return;
 
     const normalizedTitle = text(title);
     const normalizedBody = text(body);
-    const normalizedUrl = text(url) || '/';
-    const normalizedIcon = text(icon) || '/icon-192.png';
-    const normalizedBadge = text(badge) || '/icon-192.png';
-    const normalizedImage = text(image);
-    const normalizedTag = text(tag) || 'luviio-notification';
-    const normalizedTargets = targetUsers.trim()
-      ? targetUsers.split(/[\\s,;]+/).map((id) => id.trim()).filter(Boolean)
+    const normalizedUrl = enabledOptions.destination ? text(url) || '/' : '/';
+    const normalizedIcon = enabledOptions.icon ? text(icon) : '';
+    const normalizedBadge = enabledOptions.badge ? text(badge) : '';
+    const normalizedImage = enabledOptions.image ? text(image) : '';
+    const normalizedTag = enabledOptions.tag ? text(tag) : '';
+    const normalizedTargets = enabledOptions.audience && targetUsers.trim()
+      ? Array.from(new Set(targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)))
       : null;
-    const actionFields = [
-      { title: text(actionOneTitle), action: text(actionOneUrl) },
-      { title: text(actionTwoTitle), action: text(actionTwoUrl) },
-    ];
+
+    const actionFields = enabledOptions.actions
+      ? [
+          { title: text(actionOneTitle), action: text(actionOneUrl) },
+          { title: text(actionTwoTitle), action: text(actionTwoUrl) },
+        ]
+      : [];
     const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
     const actions = actionFields.filter((item) => item.title && item.action);
 
@@ -1324,13 +1352,33 @@ function NotificationsPanel() {
       toast.error('Title and message are required.');
       return;
     }
-    if (partialAction) {
-      toast.error('Each notification action needs both a title and an in-site path.');
+
+    if (enabledOptions.audience && !normalizedTargets?.length) {
+      toast.error('Enter at least one subscriber ID, or turn off Specific audience to send to everyone.');
       return;
     }
-    const isSitePath = (value) => value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
-    const isLuviioNotificationAsset = (value) => {
+
+    if (normalizedTargets?.length > 500) {
+      toast.error('A campaign can target at most 500 subscriber IDs.');
+      return;
+    }
+
+    if (normalizedTargets?.some((id) => id.length < 8)) {
+      toast.error('Check the subscriber IDs; each ID must contain at least 8 characters.');
+      return;
+    }
+
+    if (partialAction) {
+      toast.error('Each action button needs both a label and an in-site destination path.');
+      return;
+    }
+
+    const isSitePath = (value) =>
+      value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
+
+    const isAllowedAsset = (value) => {
       if (isSitePath(value)) return true;
+
       try {
         const parsed = new URL(value);
         return parsed.protocol === 'https:'
@@ -1338,41 +1386,87 @@ function NotificationsPanel() {
           && parsed.pathname.startsWith('/storage/v1/object/public/product-images/notifications/')
           && parsed.pathname.endsWith('.webp')
           && !parsed.search
-          && !parsed.hash;
+          && !parsed.hash
+          && !parsed.pathname.split('/').includes('..');
       } catch {
         return false;
       }
     };
-    if (!isSitePath(normalizedUrl) || actions.some((item) => !isSitePath(item.action))) {
-      toast.error('Notification destinations and action buttons must use in-site paths beginning with /.');
-      return;
-    }
-    if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isLuviioNotificationAsset(value))) {
-      toast.error('Notification images must use an in-site path or an image uploaded through this picker.');
-      return;
-    }
-    if (normalizedTargets?.some((id) => id.length < 8)) {
-      toast.error('Check the targeted user IDs or leave the audience empty to send to all subscribed users.');
+
+    if (enabledOptions.destination && !isSitePath(normalizedUrl)) {
+      toast.error('Click destination must be an in-site path starting with /.');
       return;
     }
 
+    if (actions.some((item) => !isSitePath(item.action))) {
+      toast.error('Action destinations must be in-site paths starting with /.');
+      return;
+    }
+
+    if (
+      (enabledOptions.icon && !normalizedIcon) ||
+      (enabledOptions.badge && !normalizedBadge) ||
+      (enabledOptions.image && !normalizedImage)
+    ) {
+      toast.error('Choose or upload an image for each enabled image option.');
+      return;
+    }
+
+    if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isAllowedAsset(value))) {
+      toast.error('Images must use an in-site path or be uploaded with the image picker.');
+      return;
+    }
+
+    if (enabledOptions.delivery && renotify && (!enabledOptions.tag || !normalizedTag)) {
+      toast.error('To re-alert on a replaced notification, enable Campaign tag and enter the same tag you will reuse.');
+      return;
+    }
+
+    const payload = {
+      title: normalizedTitle,
+      body: normalizedBody,
+      ...(enabledOptions.audience ? { user_ids: normalizedTargets } : {}),
+      ...(enabledOptions.destination ? { url: normalizedUrl } : {}),
+      ...(normalizedIcon ? { icon: normalizedIcon } : {}),
+      ...(normalizedBadge ? { badge: normalizedBadge } : {}),
+      ...(normalizedImage ? { image: normalizedImage } : {}),
+      ...(normalizedTag ? { tag: normalizedTag } : {}),
+      ...(enabledOptions.delivery
+        ? {
+            require_interaction: Boolean(requireInteraction),
+            renotify: Boolean(renotify),
+          }
+        : {}),
+      ...(enabledOptions.actions ? { actions } : {}),
+    };
+
+    setPendingPayload(payload);
+    setConfirmationOpen(true);
+  };
+
+  const dispatchPush = async () => {
+    if (!pendingPayload || sending) return;
+
     setSending(true);
+
     try {
-      const result = await adminService.sendPush({
-        user_ids: normalizedTargets,
-        title: normalizedTitle,
-        body: normalizedBody,
-        url: normalizedUrl,
-        icon: normalizedIcon,
-        badge: normalizedBadge,
-        ...(normalizedImage ? { image: normalizedImage } : {}),
-        tag: normalizedTag,
-        require_interaction: requireInteraction,
-        renotify,
-        actions,
-      });
+      const result = await adminService.sendPush(pendingPayload);
       if (!mountedRef.current) return;
-      toast.success(result?.message || 'Notification dispatched.');
+
+      const details = Array.isArray(result?.details) ? result.details : [];
+      const report = {
+        title: pendingPayload.title,
+        body: pendingPayload.body,
+        audience: Number(result?.audience) || 0,
+        success: Number(result?.success) || 0,
+        failed: Number(result?.failed) || 0,
+        noSubscription: details.filter((item) => item?.status === 'no_subscription').length,
+        errors: details.filter((item) => item?.status === 'error').length,
+      };
+
+      setConfirmationOpen(false);
+      setPendingPayload(null);
+      setSendReport(report);
       setTitle('');
       setBody('');
       setActionOneTitle('');
@@ -1380,26 +1474,36 @@ function NotificationsPanel() {
       setActionTwoTitle('');
       setActionTwoUrl('');
     } catch (error) {
-      if (mountedRef.current) toast.error(errorMessage(error, 'Unable to send notification.'));
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, 'Unable to send the notification.'));
+      }
     } finally {
       if (mountedRef.current) setSending(false);
     }
   };
+
+  const confirmationMessage = pendingPayload
+    ? [
+        'Title: ' + pendingPayload.title,
+        'Audience: ' + (pendingPayload.user_ids ? pendingPayload.user_ids.length + ' selected subscriber(s)' : 'all subscribed users'),
+        'This will dispatch a push campaign now.',
+      ].join('\n')
+    : '';
 
   return (
     <section className="admin-panel notifications-panel" aria-labelledby="notifications-title">
       <div className="admin-card notification-card">
         <Toolbar
           title="Notifications"
-          description="Compose a customer notification and choose where it takes customers."
+          description="Write the message first. Add only the options you actually need."
           showRefresh={false}
         />
 
-        <form onSubmit={send} className="ops-form notification-composer" noValidate>
+        <form onSubmit={prepareSend} className="ops-form notification-composer" noValidate>
           <section className="notification-block" aria-labelledby="notification-message-heading">
             <div className="notification-block-heading">
               <span className="notification-heading-icon"><RiMegaphoneLine size={18} aria-hidden="true" /></span>
-              <div><h3 id="notification-message-heading">Message content</h3><p>Keep it clear, concise and useful.</p></div>
+              <div><h3 id="notification-message-heading">Message</h3><p>Only the title and message are required.</p></div>
             </div>
             <label className="notification-field">
               <span>Title <em>Required</em></span>
@@ -1413,69 +1517,173 @@ function NotificationsPanel() {
             </label>
           </section>
 
-          <section className="notification-block" aria-labelledby="notification-destination-heading">
+          <section className="notification-block notification-optional-block" aria-labelledby="notification-options-heading">
             <div className="notification-block-heading">
-              <span className="notification-heading-icon"><RiLinkM size={18} aria-hidden="true" /></span>
-              <div><h3 id="notification-destination-heading">Destination & appearance</h3><p>Use paths from your LUVIIO website. External URLs are not accepted.</p></div>
-            </div>
-            <div className="field-grid notification-media-grid">
-              <label className="notification-field"><span>Click destination</span><input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" /></label>
-              <label className="notification-field"><span>Campaign tag</span><input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" /></label>
-              <NotificationImagePicker label="Notification icon" value={icon} onChange={setIcon} />
-              <NotificationImagePicker label="Badge image" value={badge} onChange={setBadge} />
-              <div className="notification-field-full">
-                <NotificationImagePicker label="Large image" value={image} onChange={setImage} optional />
+              <span className="notification-heading-icon"><RiAddLine size={18} aria-hidden="true" /></span>
+              <div>
+                <h3 id="notification-options-heading">Optional settings</h3>
+                <p>Add only the fields you want to use. Nothing below is enabled by default.</p>
               </div>
             </div>
-          </section>
 
-          <section className="notification-block" aria-labelledby="notification-audience-heading">
-            <div className="notification-block-heading">
-              <span className="notification-heading-icon"><RiUserLine size={18} aria-hidden="true" /></span>
-              <div><h3 id="notification-audience-heading">Audience</h3><p>Choose specific subscribers or send to everyone subscribed.</p></div>
-            </div>
-            <label className="notification-field">
-              <span>Specific user IDs <small>Optional</small></span>
-              <textarea rows={2} value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Paste user IDs separated by commas or spaces" />
-              <small>Leave empty to send to all subscribers.</small>
-            </label>
-          </section>
+            <button
+              type="button"
+              className="btn btn-quiet notification-add-options-button"
+              onClick={() => setOptionsOpen((open) => !open)}
+              aria-expanded={optionsOpen}
+              aria-controls="notification-option-picker"
+            >
+              <RiAddLine size={17} aria-hidden="true" />
+              {optionsOpen ? 'Close options' : 'Add options'}
+              {enabledOptionCount > 0 && <span className="notification-option-count">{enabledOptionCount} selected</span>}
+            </button>
 
-          <section className="notification-block" aria-labelledby="notification-actions-heading">
-            <div className="notification-block-heading">
-              <span className="notification-heading-icon"><RiMouseLine size={18} aria-hidden="true" /></span>
-              <div><h3 id="notification-actions-heading">Action buttons</h3><p>Optional. Add up to two buttons to guide customers.</p></div>
-            </div>
-            <fieldset className="notification-actions-config">
-              <legend>Button 1</legend>
-              <div className="field-grid">
-                <label className="notification-field"><span>Button label</span><input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" /></label>
-                <label className="notification-field"><span>Destination path</span><input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" /></label>
+            {optionsOpen && (
+              <div id="notification-option-picker" className="notification-option-picker" role="group" aria-label="Choose optional notification settings">
+                {OPTIONAL_NOTIFICATION_OPTIONS.map((option) => (
+                  <label key={option.key} className={'notification-option-choice' + (enabledOptions[option.key] ? ' is-selected' : '')}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(enabledOptions[option.key])}
+                      onChange={() => toggleOption(option.key)}
+                    />
+                    <span>
+                      <strong>{option.label}</strong>
+                      <small>{option.hint}</small>
+                    </span>
+                  </label>
+                ))}
               </div>
-            </fieldset>
-            <fieldset className="notification-actions-config">
-              <legend>Button 2</legend>
-              <div className="field-grid">
-                <label className="notification-field"><span>Button label</span><input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" /></label>
-                <label className="notification-field"><span>Destination path</span><input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" /></label>
-              </div>
-            </fieldset>
-          </section>
+            )}
 
-          <section className="notification-block notification-delivery-options" aria-label="Delivery options">
-            <label className="notification-toggle"><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /><span><strong>Keep visible until interaction</strong><small>Where supported by the browser or device.</small></span></label>
-            <label className="notification-toggle"><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /><span><strong>Re-alert for same campaign tag</strong><small>May alert users again for a repeated campaign.</small></span></label>
+            {enabledOptionCount > 0 && (
+              <div className="notification-optional-fields">
+                {enabledOptions.destination && (
+                  <label className="notification-field">
+                    <span>Click destination</span>
+                    <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" />
+                    <small>Where the customer lands after tapping the notification.</small>
+                  </label>
+                )}
+
+                {enabledOptions.tag && (
+                  <label className="notification-field">
+                    <span>Campaign tag</span>
+                    <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="e.g. diwali-offer-2026" />
+                    <small>Reuse exactly the same tag when you want to replace a previous campaign notification.</small>
+                  </label>
+                )}
+
+                {enabledOptions.icon && <NotificationImagePicker label="Notification icon" value={icon} onChange={setIcon} />}
+                {enabledOptions.badge && <NotificationImagePicker label="Badge image" value={badge} onChange={setBadge} />}
+                {enabledOptions.image && <NotificationImagePicker label="Large image" value={image} onChange={setImage} optional />}
+
+                {enabledOptions.audience && (
+                  <label className="notification-field notification-field-full">
+                    <span>Specific subscriber IDs <em>Required for this option</em></span>
+                    <textarea rows={3} value={targetUsers} maxLength={8000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Paste IDs separated by commas, spaces or new lines" />
+                    <small>Only these subscribers will be targeted. Maximum 500 IDs; this field cannot be left empty.</small>
+                  </label>
+                )}
+
+                {enabledOptions.actions && (
+                  <div className="notification-field-full notification-action-options">
+                    <fieldset className="notification-actions-config">
+                      <legend>Action button 1</legend>
+                      <div className="field-grid">
+                        <label className="notification-field"><span>Button label</span><input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" /></label>
+                        <label className="notification-field"><span>Destination path</span><input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" /></label>
+                      </div>
+                    </fieldset>
+                    <fieldset className="notification-actions-config">
+                      <legend>Action button 2</legend>
+                      <div className="field-grid">
+                        <label className="notification-field"><span>Button label</span><input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" /></label>
+                        <label className="notification-field"><span>Destination path</span><input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" /></label>
+                      </div>
+                    </fieldset>
+                  </div>
+                )}
+
+                {enabledOptions.delivery && (
+                  <div className="notification-field-full notification-delivery-options">
+                    <label className="notification-toggle">
+                      <input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} />
+                      <span>
+                        <strong>Keep visible until interaction</strong>
+                        <small>Honoured by supported browsers, mainly desktop. Chrome on Android controls tray behaviour and can ignore this hint.</small>
+                      </span>
+                    </label>
+                    <label className="notification-toggle">
+                      <input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} />
+                      <span>
+                        <strong>Re-alert when replacing the same campaign</strong>
+                        <small>Enable Campaign tag and reuse the exact tag on a later send. Device sound/vibration settings still apply.</small>
+                      </span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
 
           <div className="notification-form-actions">
-            <span><RiShieldCheckLine size={15} aria-hidden="true" /> Review message and destination before sending.</span>
+            <span><RiShieldCheckLine size={15} aria-hidden="true" /> Review the audience before sending.</span>
             <button className="btn notification-send-button" type="submit" disabled={sending}>
               <RiSendPlaneLine size={16} aria-hidden="true" />
-              {sending ? 'Sending…' : 'Send notification'}
+              Send notification
             </button>
           </div>
         </form>
       </div>
+
+      <ConfirmDialog
+        open={confirmationOpen}
+        title="Send this notification?"
+        message={confirmationMessage}
+        confirmLabel="Send now"
+        cancelLabel="Go back"
+        busy={sending}
+        onConfirm={dispatchPush}
+        onCancel={() => {
+          if (sending) return;
+          setConfirmationOpen(false);
+          setPendingPayload(null);
+        }}
+      />
+
+      {sendReport && (
+        <AdminModal
+          className="notification-report-modal"
+          title="Notification dispatch report"
+          sub="Counts below come from the backend push-delivery results."
+          onClose={() => setSendReport(null)}
+        >
+          <div className="notification-report-message">
+            <strong>{sendReport.title}</strong>
+            <p>{sendReport.body}</p>
+          </div>
+          <div className="notification-report-metrics" role="status" aria-live="polite">
+            <div><small>Audience</small><strong>{sendReport.audience}</strong></div>
+            <div><small>Delivered responses</small><strong>{sendReport.success}</strong></div>
+            <div><small>Failed / no delivery</small><strong>{sendReport.failed}</strong></div>
+          </div>
+          {sendReport.audience === 0 ? (
+            <p className="notification-report-note">No active subscriber records were found for this audience.</p>
+          ) : sendReport.success === 0 ? (
+            <p className="notification-report-note">No recipient returned a successful delivery. Check active subscriptions and the push service before retrying.</p>
+          ) : sendReport.failed > 0 ? (
+            <p className="notification-report-note">Some recipients did not receive a successful delivery response. No device-level display confirmation is available from Web Push.</p>
+          ) : (
+            <p className="notification-report-note">The backend reports successful push delivery attempts. Actual heads-up display, sound and persistence remain controlled by the browser and device settings.</p>
+          )}
+          {sendReport.noSubscription > 0 && <p className="notification-report-note">{sendReport.noSubscription} recipient(s) had no active push subscription.</p>}
+          {sendReport.errors > 0 && <p className="notification-report-note">{sendReport.errors} recipient(s) encountered delivery errors.</p>}
+          <div className="notification-report-actions">
+            <button type="button" className="btn" onClick={() => setSendReport(null)}>Done</button>
+          </div>
+        </AdminModal>
+      )}
     </section>
   );
 }
