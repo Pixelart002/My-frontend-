@@ -464,7 +464,7 @@ export default function AdminMfaGate({
         try {
           await adminService.mfaUnenroll(replacingFactorId);
           setReplacingFactorId('');
-        } catch (cleanupError) {
+        } catch {
           if (!mountedRef.current) {
             return;
           }
