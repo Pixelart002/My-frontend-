@@ -185,7 +185,7 @@ export const adminService = {
     ),
 
   mfaEnroll: (
-    friendlyName = 'Luviio Admin',
+    friendlyName = 'Authenticator',
   ) =>
     request(
       'POST',
