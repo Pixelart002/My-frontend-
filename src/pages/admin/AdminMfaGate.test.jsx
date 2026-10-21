@@ -1,6 +1,49 @@
+describe('authenticatorFriendlyName', () => {
+  it('uses the authenticated account name instead of a hard-coded product label', () => {
+    expect(
+      authenticatorFriendlyName('', {
+        full_name: 'Asha Sharma',
+        email: 'asha@example.com',
+      }),
+    ).toBe('Asha Sharma');
+  });
+
+  it('prefers the profile name when a display label is not supplied', () => {
+    expect(
+      authenticatorFriendlyName(undefined, {
+        full_name: 'Asha Sharma',
+        email: 'asha@example.com',
+      }),
+    ).toBe('Asha Sharma');
+  });
+
+  it('uses the real account email when no name is stored', () => {
+    expect(
+      authenticatorFriendlyName('', {
+        email: 'asha@example.com',
+      }),
+    ).toBe('asha@example.com');
+  });
+
+  it('uses a neutral fallback only when no account label exists', () => {
+    expect(authenticatorFriendlyName('', {})).toBe('Authenticator');
+  });
+
+  it('normalizes whitespace and respects the backend label limit', () => {
+    expect(
+      authenticatorFriendlyName(`  ${'A'.repeat(90)}   `, {}),
+    ).toBe('A'.repeat(80));
+
+    expect(
+      authenticatorFriendlyName('  Asha   Sharma  ', {}),
+    ).toBe('Asha Sharma');
+  });
+});
+
 import { describe, expect, it } from 'vitest';
 
 import {
+  authenticatorFriendlyName,
   qrCodeImageSource,
 } from './AdminMfaGate';
 
