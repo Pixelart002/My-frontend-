@@ -1,3 +1,10 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  authenticatorFriendlyName,
+  qrCodeImageSource,
+} from './AdminMfaGate';
+
 describe('authenticatorFriendlyName', () => {
   it('uses the authenticated account name instead of a hard-coded product label', () => {
     expect(
@@ -39,13 +46,6 @@ describe('authenticatorFriendlyName', () => {
     ).toBe('Asha Sharma');
   });
 });
-
-import { describe, expect, it } from 'vitest';
-
-import {
-  authenticatorFriendlyName,
-  qrCodeImageSource,
-} from './AdminMfaGate';
 
 describe('qrCodeImageSource', () => {
   it('converts raw SVG QR output into an image data URL', () => {
