@@ -1459,3 +1459,144 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* ============================================================
+   CHECKOUT — CUSTOMER FLOW POLISH
+   Scoped to the checkout progress landmark; no store-wide side effects.
+   ============================================================ */
+.page.container:has(nav[aria-label="Checkout progress"]) {
+  width: min(100% - 32px, 1120px);
+  padding-top: clamp(22px, 4vw, 40px);
+  padding-bottom: max(40px, env(safe-area-inset-bottom));
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > header {
+  max-width: 760px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > header h1 {
+  max-width: 16ch;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(120deg, rgba(216,173,106,.075), rgba(255,255,255,.012));
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] ol {
+  align-items: center;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] li {
+  min-height: 44px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) {
+  align-items: start;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main {
+  order: 1;
+  min-width: 0;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside {
+  order: 2;
+  min-width: 0;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main > div,
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside > div {
+  min-width: 0;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(0,0,0,.12);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) input:not([type="radio"]):not([type="checkbox"]) {
+  min-height: 46px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) button {
+  touch-action: manipulation;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) button:focus-visible,
+.page.container:has(nav[aria-label="Checkout progress"]) input:focus-visible {
+  outline: 2px solid var(--luviio-gold-soft, #efd3a1);
+  outline-offset: 3px;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) [role="alert"] {
+  overflow-wrap: anywhere;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside {
+  width: 100%;
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside > div {
+  border-color: rgba(216,173,106,.24);
+  background: linear-gradient(155deg, rgba(255,255,255,.025), transparent 55%), var(--luviio-panel, #121110);
+}
+.page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside dl > div:last-child dd {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em;
+}
+@media (min-width: 1024px) {
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: clamp(20px, 3vw, 32px);
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside {
+    position: sticky;
+    top: calc(var(--header-h, 72px) + 20px);
+  }
+}
+@media (max-width: 1023px) {
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) {
+    display: flex;
+    flex-direction: column;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main,
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside {
+    width: 100%;
+    order: initial;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main {
+    display: flex;
+    flex-direction: column;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main > div:nth-child(1) { order: 1; }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main > div:nth-child(2) { order: 2; }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main > div:nth-child(3) { order: 3; }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside { order: 4; }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside > div {
+    margin-top: 0;
+  }
+}
+@media (max-width: 480px) {
+  .page.container:has(nav[aria-label="Checkout progress"]) {
+    width: min(100% - 24px, 1120px);
+    padding-top: 18px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] {
+    padding: 10px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] ol {
+    gap: 6px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] li {
+    gap: 6px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > nav[aria-label="Checkout progress"] li > span:first-child {
+    height: 28px;
+    width: 28px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main {
+    gap: 12px;
+  }
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > main > div,
+  .page.container:has(nav[aria-label="Checkout progress"]) > div:has(> main) > aside > div {
+    border-radius: 17px;
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page.container:has(nav[aria-label="Checkout progress"]) * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
