@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 const mocks = vi.hoisted(() => ({
   verify: vi.fn(),
+  mfaStatus: vi.fn(),
   authState: {
     user: { id: 'admin-1', role: 'super_admin' },
     logout: vi.fn(),
@@ -28,6 +29,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../services/admin', () => ({
   adminService: {
     verify: mocks.verify,
+    mfaStatus: mocks.mfaStatus,
     listUsers: mocks.listUsers,
     userActions: mocks.userActions,
     setUserAction: mocks.setUserAction,
@@ -76,6 +78,11 @@ describe('admin panel routing and search', () => {
 
     mocks.verify.mockResolvedValue({
       profile: { id: 'admin-1', role: 'super_admin' },
+    });
+
+    mocks.mfaStatus.mockResolvedValue({
+      privileged_mfa_required: false,
+      aal: 'aal2',
     });
 
     mocks.listUsers.mockResolvedValue([

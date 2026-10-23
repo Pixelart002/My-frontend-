@@ -185,7 +185,7 @@ export const adminService = {
     ),
 
   mfaEnroll: (
-    friendlyName = 'Luviio Admin',
+    friendlyName = 'Authenticator',
   ) =>
     request(
       'POST',
@@ -850,6 +850,21 @@ export const adminService = {
       'GET',
       '/push/admin/stats',
     ),
+
+  uploadNotificationImage: (file) => {
+    if (!file) {
+      throw new Error('Choose an image to upload.');
+    }
+
+    const form = new FormData();
+    form.append('file', file, file.name || 'notification-image');
+
+    return request(
+      'POST',
+      '/push/admin/assets',
+      form,
+    );
+  },
 
   sendPush: (data) =>
     request(

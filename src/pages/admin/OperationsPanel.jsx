@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
+  RiAddLine,
+  RiBellLine,
+  RiImageLine,
+  RiLinkM,
+  RiMegaphoneLine,
+  RiMouseLine,
+  RiUserLine,
   RiCheckLine,
+  RiEditLine,
   RiCloseLine,
   RiDeleteBinLine,
   RiRefreshLine,
@@ -67,7 +75,14 @@ function useAsyncGuard() {
   };
 }
 
-function Toolbar({ title, description, onRefresh, children, refreshing = false }) {
+function Toolbar({
+  title,
+  description,
+  onRefresh,
+  children,
+  refreshing = false,
+  showRefresh = true,
+}) {
   return (
     <div className="admin-toolbar ops-toolbar">
       <div className="ops-toolbar-copy">
@@ -75,24 +90,29 @@ function Toolbar({ title, description, onRefresh, children, refreshing = false }
         {description && <p>{description}</p>}
       </div>
 
-      <div className="btn-row">
-        {children}
-
-        <button
-          type="button"
-          className="btn btn-quiet btn-sm"
-          onClick={onRefresh}
-          disabled={refreshing}
-          aria-label={`Refresh ${title}`}
-        >
-          <RiRefreshLine
-            size={16}
-            className={refreshing ? 'ops-spin' : undefined}
-            aria-hidden="true"
-          />
-          {refreshing ? 'Refreshing…' : 'Refresh'}
-        </button>
-      </div>
+      {(children || showRefresh) && (
+        <div className="ops-toolbar-actions">
+          {children}
+          {showRefresh && (
+            <button
+              type="button"
+              className="btn btn-quiet btn-sm ops-toolbar-refresh"
+              onClick={onRefresh}
+              disabled={refreshing}
+              aria-label={`Refresh ${title}`}
+              title={`Refresh ${title}`}
+              aria-busy={refreshing}
+            >
+              <RiRefreshLine
+                size={16}
+                className={refreshing ? 'ops-spin' : undefined}
+                aria-hidden="true"
+              />
+              <span className="ops-refresh-label">{refreshing ? 'Refreshing…' : 'Refresh'}</span>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -224,14 +244,7 @@ function InventoryPanel() {
           </button>
         </Toolbar>
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Low-stock products</div>
-            <div className="stat-value">
-              {loading ? '…' : lowStock.length}
-            </div>
-          </div>
-        </div>
+
 
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -345,8 +358,7 @@ function ShippingPanel() {
         <Toolbar
           title="Shipping"
           description="Luviio uses manual shipping. Checkout pricing and shipping configuration are read from server-side settings."
-          onRefresh={load}
-          refreshing={loading}
+          showRefresh={false}
         />
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -405,6 +417,7 @@ function ShippingPanel() {
           description="Read-only operational view. Change values from System settings so the server remains the single source of truth."
           onRefresh={load}
           refreshing={loading}
+          showRefresh={false}
         />
 
         <div className="admin-table-wrap">
@@ -478,6 +491,7 @@ function SubscriptionPanel() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_SUBSCRIPTION);
   const [saving, setSaving] = useState(false);
 
@@ -510,12 +524,20 @@ function SubscriptionPanel() {
   }, [load]);
 
   const resetForm = () => {
+    setEditorOpen(false);
     setEditing(null);
     setForm({ ...EMPTY_SUBSCRIPTION });
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_SUBSCRIPTION });
+    setEditorOpen(true);
+  };
+
   const editPlan = (plan) => {
     setEditing(plan.id);
+    setEditorOpen(true);
     setForm({
       ...EMPTY_SUBSCRIPTION,
       ...plan,
@@ -592,9 +614,29 @@ function SubscriptionPanel() {
           description="Manage membership plans and customer entitlements."
           onRefresh={load}
           refreshing={loading}
-        />
+        >
+          <button
+            type="button"
+            className="subscription-add-button"
+            onClick={openCreate}
+            disabled={saving}
+            aria-label="Create subscription plan"
+            title="Create subscription plan"
+          >
+            <RiAddLine size={21} aria-hidden="true" />
+          </button>
+        </Toolbar>
 
-        <form onSubmit={save} noValidate>
+        {editorOpen && (
+          <AdminModal
+            className="subscription-editor-modal"
+            title={editing ? 'Edit subscription plan' : 'Create subscription plan'}
+            sub="Set the plan's customer-facing name, entitlement tier and price."
+            onClose={() => {
+              if (!saving) resetForm();
+            }}
+          >
+            <form onSubmit={save} noValidate>
           <div className="field-grid">
             <label>
               Tier
@@ -701,18 +743,18 @@ function SubscriptionPanel() {
                   : 'Create plan'}
             </button>
 
-            {editing && (
-              <button
-                className="btn btn-quiet btn-sm"
-                type="button"
-                onClick={resetForm}
-                disabled={saving}
-              >
-                Cancel edit
-              </button>
-            )}
+            <button
+              className="btn btn-quiet btn-sm"
+              type="button"
+              onClick={resetForm}
+              disabled={saving}
+            >
+              Cancel
+            </button>
           </div>
         </form>
+          </AdminModal>
+        )}
       </div>
 
       <div className="admin-card">
@@ -762,7 +804,7 @@ function SubscriptionPanel() {
                         title={`Edit ${plan.name || 'plan'}`}
                         aria-label={`Edit ${plan.name || 'plan'}`}
                       >
-                        <RiSaveLine size={15} aria-hidden="true" />
+                        <RiEditLine size={15} aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -887,9 +929,7 @@ function UserActionsPanel() {
           description="Per-customer controls for checkout and commerce capabilities."
           onRefresh={load}
           refreshing={loading}
-        >
-          <RiShieldCheckLine size={18} aria-hidden="true" />
-        </Toolbar>
+        />
 
         <div className="ops-inline">
           <label className="sr-only" htmlFor="admin-user-action-id">
@@ -935,18 +975,30 @@ function UserActionsPanel() {
                     {blocked ? 'Blocked' : 'Enabled'}
                   </div>
 
-                  <button
-                    type="button"
-                    className="btn btn-quiet btn-sm"
-                    disabled={Boolean(busy)}
-                    onClick={() => toggle(action, blocked)}
-                  >
-                    {busy === action
-                      ? 'Saving…'
-                      : blocked
-                        ? 'Restore'
-                        : 'Disable'}
-                  </button>
+                  <div className="permission-control-cell">
+                    <button
+                      type="button"
+                      className="admin-switch"
+                      role="switch"
+                      aria-checked={!blocked}
+                      aria-label={`${blocked ? 'Restore' : 'Disable'} ${String(action).replaceAll('_', ' ')}`}
+                      disabled={Boolean(busy)}
+                      onClick={() => toggle(action, blocked)}
+                    >
+                      <span className="admin-switch-thumb" aria-hidden="true">
+                        {busy === action ? (
+                          <span className="admin-switch-spinner" />
+                        ) : blocked ? (
+                          <RiCloseLine size={13} />
+                        ) : (
+                          <RiCheckLine size={13} />
+                        )}
+                      </span>
+                    </button>
+                    <span className="settings-switch-label" aria-live="polite">
+                      {busy === action ? 'Saving…' : blocked ? 'Disabled' : 'Enabled'}
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -1071,8 +1123,7 @@ function RbacPanel() {
               <tr>
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
-                <th scope="col">State</th>
-                <th scope="col">Policy</th>
+                <th scope="col">Access</th>
               </tr>
             </thead>
 
@@ -1088,33 +1139,34 @@ function RbacPanel() {
                       <td>{row.permission}</td>
 
                       <td>
-                        <span
-                          className={`admin-pill ${
-                            row.enabled
-                              ? 'pill-success'
-                              : 'pill-danger'
-                          }`}
-                        >
-                          {row.enabled ? 'Allowed' : 'Denied'}
-                        </span>
-                      </td>
-
-                      <td>
                         {immutable ? (
                           <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
                         ) : (
-                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
-                            <legend className="sr-only">{row.role} — {row.permission}</legend>
-                            <label>
-                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="allow" checked={row.enabled} onChange={() => setPermission(row, true)} disabled={Boolean(busyKey)} />
-                              <span>Allow</span>
-                            </label>
-                            <label>
-                              <input type="radio" name={`permission-${row.role}-${row.permission}`} value="deny" checked={!row.enabled} onChange={() => setPermission(row, false)} disabled={Boolean(busyKey)} />
-                              <span>Deny</span>
-                            </label>
-                            {busyKey === key && <span role="status">Saving…</span>}
-                          </fieldset>
+                          <div className="permission-control-cell">
+                            <button
+                              type="button"
+                              className="admin-switch permission-switch"
+                              role="switch"
+                              aria-checked={row.enabled}
+                              aria-label={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission} for ${row.role}`}
+                              title={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission}`}
+                              onClick={() => setPermission(row, !row.enabled)}
+                              disabled={Boolean(busyKey)}
+                            >
+                              <span className="admin-switch-thumb" aria-hidden="true">
+                                {busyKey === key ? (
+                                  <span className="admin-switch-spinner" />
+                                ) : row.enabled ? (
+                                  <RiCheckLine size={13} />
+                                ) : (
+                                  <RiCloseLine size={13} />
+                                )}
+                              </span>
+                            </button>
+                            <span className="settings-switch-label" aria-live="polite">
+                              {busyKey === key ? 'Saving…' : row.enabled ? 'Allowed' : 'Denied'}
+                            </span>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -1122,7 +1174,7 @@ function RbacPanel() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="4">
+                  <td colSpan="3">
                     <div className="admin-empty">
                       {loading
                         ? 'Loading permissions…'
@@ -1143,20 +1195,112 @@ function RbacPanel() {
 /* Notifications                                                              */
 /* -------------------------------------------------------------------------- */
 
+function NotificationImagePicker({ label, value, onChange, optional = false }) {
+  const { toast } = useToast();
+  const inputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const fieldId = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  const handleImageSelect = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Images must be 5 MB or smaller.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await adminService.uploadNotificationImage(file);
+      const uploadedUrl = result?.url || result?.data?.url;
+      if (!uploadedUrl) throw new Error('The image upload did not return a hosted URL.');
+      onChange(uploadedUrl);
+      toast.success(`${label} uploaded.`);
+    } catch (error) {
+      toast.error(errorMessage(error, `Unable to upload ${label.toLowerCase()}.`));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="notification-field notification-asset-field">
+      <label className="notification-asset-label" htmlFor={`${fieldId}-path`}>
+        {label} {optional && <small>Optional</small>}
+      </label>
+      <div className="notification-path-control">
+        <input
+          id={`${fieldId}-path`}
+          aria-label={`${label} URL path`}
+          value={value}
+          maxLength={500}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={label === 'Large image' ? '/products/offer-banner.webp' : '/icon-512.png'}
+          autoComplete="off"
+        />
+        {value && (
+          <img
+            className="notification-inline-preview"
+            src={value}
+            alt=""
+            aria-hidden="true"
+            onError={(event) => { event.currentTarget.hidden = true; }}
+            onLoad={(event) => { event.currentTarget.hidden = false; }}
+          />
+        )}
+        <button
+          type="button"
+          className="notification-image-pick-button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          aria-label={uploading ? `Uploading ${label.toLowerCase()}` : `Choose ${label.toLowerCase()} image`}
+          title={uploading ? 'Uploading image…' : 'Choose image from phone'}
+        >
+          {uploading
+            ? <span className="admin-switch-spinner" aria-hidden="true" />
+            : <RiImageLine size={17} aria-hidden="true" />}
+        </button>
+      </div>
+      <input
+        ref={inputRef}
+        className="notification-image-file-input"
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        aria-label={`Choose ${label.toLowerCase()} from phone`}
+        onChange={handleImageSelect}
+        disabled={uploading}
+      />
+      <small className="notification-asset-hint">
+        {uploading ? 'Uploading and optimizing image…' : value ? 'Image URL ready for push payload.' : 'Enter a hosted path or tap the image icon to upload.'}
+      </small>
+    </div>
+  );
+}
+
+const OPTIONAL_NOTIFICATION_OPTIONS = [
+  { key: 'destination', label: 'Click destination', hint: 'Open an in-site page when tapped.' },
+  { key: 'tag', label: 'Campaign tag', hint: 'Group repeated sends by the same tag.' },
+  { key: 'icon', label: 'Custom notification icon', hint: 'Replace Luviio’s default notification icon.' },
+  { key: 'badge', label: 'Custom badge', hint: 'Choose the small status-bar badge.' },
+  { key: 'image', label: 'Large image', hint: 'Attach a wider promotional image.' },
+  { key: 'audience', label: 'Specific audience', hint: 'Send only to selected subscriber IDs.' },
+  { key: 'actions', label: 'Action buttons', hint: 'Add up to two in-notification buttons.' },
+  { key: 'delivery', label: 'Delivery behaviour', hint: 'Request supported keep-visible / re-alert behaviour.' },
+];
+
 function NotificationsPanel() {
   const { toast } = useToast();
   const { mountedRef } = useAsyncGuard();
 
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [url, setUrl] = useState('/');
-  const [icon, setIcon] = useState('/icon-192.png');
-  const [badge, setBadge] = useState('/icon-192.png');
+  const [icon, setIcon] = useState('');
+  const [badge, setBadge] = useState('');
   const [image, setImage] = useState('');
-  const [tag, setTag] = useState('luviio-offer');
+  const [tag, setTag] = useState('');
   const [requireInteraction, setRequireInteraction] = useState(false);
   const [renotify, setRenotify] = useState(false);
   const [targetUsers, setTargetUsers] = useState('');
@@ -1164,43 +1308,36 @@ function NotificationsPanel() {
   const [actionOneUrl, setActionOneUrl] = useState('');
   const [actionTwoTitle, setActionTwoTitle] = useState('');
   const [actionTwoUrl, setActionTwoUrl] = useState('');
-
+  const [enabledOptions, setEnabledOptions] = useState({});
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [sendReport, setSendReport] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const toggleOption = (key) => {
+    setEnabledOptions((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  };
 
-    try {
-      const result = await adminService.pushStats();
+  const enabledOptionCount = Object.values(enabledOptions).filter(Boolean).length;
 
-      if (!mountedRef.current) return;
-
-      setStats(result);
-    } catch (error) {
-      if (mountedRef.current) {
-        toast.error(
-          errorMessage(error, 'Unable to load notification stats.'),
-        );
-      }
-    } finally {
-      if (mountedRef.current) {
-        setLoading(false);
-      }
-    }
-  }, [mountedRef, toast]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const send = async (event) => {
+  const prepareSend = (event) => {
     event.preventDefault();
-
     if (sending) return;
 
     const normalizedTitle = text(title);
     const normalizedBody = text(body);
-    const normalizedUrl = text(url) || '/';
+    const normalizedUrl = enabledOptions.destination ? text(url) || '/' : '/';
+    const normalizedIcon = enabledOptions.icon ? text(icon) : '';
+    const normalizedBadge = enabledOptions.badge ? text(badge) : '';
+    const normalizedImage = enabledOptions.image ? text(image) : '';
+    const normalizedTag = enabledOptions.tag ? text(tag) : '';
+    const normalizedTargets = enabledOptions.audience && targetUsers.trim()
+      ? Array.from(new Set(targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)))
+      : null;
     const normalizedIcon = text(icon) || '/icon-192.png';
     const normalizedBadge = text(badge) || '/icon-192.png';
     const normalizedImage = text(image);
@@ -1212,6 +1349,15 @@ function NotificationsPanel() {
       { title: text(actionOneTitle), action: text(actionOneUrl) },
       { title: text(actionTwoTitle), action: text(actionTwoUrl) },
     ];
+    const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
+    const actions = actionFields.filter((item) => item.title && item.action);
+
+    const actionFields = enabledOptions.actions
+      ? [
+          { title: text(actionOneTitle), action: text(actionOneUrl) },
+          { title: text(actionTwoTitle), action: text(actionTwoUrl) },
+        ]
+      : [];
     const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
     const actions = actionFields.filter((item) => item.title && item.action);
 
@@ -1232,153 +1378,336 @@ function NotificationsPanel() {
       return;
     }
 
+    if (enabledOptions.audience && !normalizedTargets?.length) {
+      toast.error('Enter at least one subscriber ID, or turn off Specific audience to send to everyone.');
+      return;
+    }
+
+    if (normalizedTargets?.length > 500) {
+      toast.error('A campaign can target at most 500 subscriber IDs.');
+      return;
+    }
+
+    if (normalizedTargets?.some((id) => id.length < 8)) {
+      toast.error('Check the subscriber IDs; each ID must contain at least 8 characters.');
+      return;
+    }
+
+    if (partialAction) {
+      toast.error('Each action button needs both a label and an in-site destination path.');
+      return;
+    }
+
+    const isSitePath = (value) =>
+      value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
+
+    const isAllowedAsset = (value) => {
+      if (isSitePath(value)) return true;
+
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:'
+          && parsed.hostname.endsWith('.supabase.co')
+          && parsed.pathname.startsWith('/storage/v1/object/public/product-images/notifications/')
+          && parsed.pathname.endsWith('.webp')
+          && !parsed.search
+          && !parsed.hash
+          && !parsed.pathname.split('/').includes('..');
+      } catch {
+        return false;
+      }
+    };
+
+    if (enabledOptions.destination && !isSitePath(normalizedUrl)) {
+      toast.error('Click destination must be an in-site path starting with /.');
+      return;
+    }
+
+    if (actions.some((item) => !isSitePath(item.action))) {
+      toast.error('Action destinations must be in-site paths starting with /.');
+      return;
+    }
+
+    if (
+      (enabledOptions.icon && !normalizedIcon) ||
+      (enabledOptions.badge && !normalizedBadge) ||
+      (enabledOptions.image && !normalizedImage)
+    ) {
+      toast.error('Choose or upload an image for each enabled image option.');
+      return;
+    }
+
+    if (![normalizedIcon, normalizedBadge, normalizedImage].every((value) => !value || isAllowedAsset(value))) {
+      toast.error('Images must use an in-site path or be uploaded with the image picker.');
+      return;
+    }
+
+    if (enabledOptions.delivery && renotify && (!enabledOptions.tag || !normalizedTag)) {
+      toast.error('To re-alert on a replaced notification, enable Campaign tag and enter the same tag you will reuse.');
+      return;
+    }
+
+    const payload = {
+      title: normalizedTitle,
+      body: normalizedBody,
+      ...(enabledOptions.audience ? { user_ids: normalizedTargets } : {}),
+      ...(enabledOptions.destination ? { url: normalizedUrl } : {}),
+      ...(normalizedIcon ? { icon: normalizedIcon } : {}),
+      ...(normalizedBadge ? { badge: normalizedBadge } : {}),
+      ...(normalizedImage ? { image: normalizedImage } : {}),
+      ...(normalizedTag ? { tag: normalizedTag } : {}),
+      ...(enabledOptions.delivery
+        ? {
+            require_interaction: Boolean(requireInteraction),
+            renotify: Boolean(renotify),
+          }
+        : {}),
+      ...(enabledOptions.actions ? { actions } : {}),
+    };
+
+    setPendingPayload(payload);
+    setConfirmationOpen(true);
+  };
+
+  const dispatchPush = async () => {
+    if (!pendingPayload || sending) return;
+
     setSending(true);
 
     try {
-      const result = await adminService.sendPush({
-        user_ids: normalizedTargets,
-        title: normalizedTitle,
-        body: normalizedBody,
-        url: normalizedUrl,
-        icon: normalizedIcon,
-        badge: normalizedBadge,
-        ...(normalizedImage ? { image: normalizedImage } : {}),
-        tag: normalizedTag,
-        require_interaction: requireInteraction,
-        renotify,
-        actions,
-      });
-
+      const result = await adminService.sendPush(pendingPayload);
       if (!mountedRef.current) return;
 
-      toast.success(result?.message || 'Notification dispatched.');
+      const details = Array.isArray(result?.details) ? result.details : [];
+      const report = {
+        title: pendingPayload.title,
+        body: pendingPayload.body,
+        audience: Number(result?.audience) || 0,
+        success: Number(result?.success) || 0,
+        failed: Number(result?.failed) || 0,
+        noSubscription: details.filter((item) => item?.status === 'no_subscription').length,
+        errors: details.filter((item) => item?.status === 'error').length,
+      };
 
+      setConfirmationOpen(false);
+      setPendingPayload(null);
+      setSendReport(report);
       setTitle('');
       setBody('');
       setActionOneTitle('');
       setActionOneUrl('');
       setActionTwoTitle('');
       setActionTwoUrl('');
-
-      await load();
     } catch (error) {
       if (mountedRef.current) {
-        toast.error(
-          errorMessage(error, 'Unable to send notification.'),
-        );
+        toast.error(errorMessage(error, 'Unable to send the notification.'));
       }
     } finally {
-      if (mountedRef.current) {
-        setSending(false);
-      }
+      if (mountedRef.current) setSending(false);
     }
   };
 
+  const confirmationMessage = pendingPayload
+    ? [
+        'Title: ' + pendingPayload.title,
+        'Audience: ' + (pendingPayload.user_ids ? pendingPayload.user_ids.length + ' selected subscriber(s)' : 'all subscribed users'),
+        'This will dispatch a push campaign now.',
+      ].join('\n')
+    : '';
+
   return (
-    <section className="admin-panel">
-      <div className="admin-card">
+    <section className="admin-panel notifications-panel" aria-labelledby="notifications-title">
+      <div className="admin-card notification-card">
         <Toolbar
           title="Notifications"
-          description="Send controlled customer messaging and monitor Web Push subscriptions."
-          onRefresh={load}
-          refreshing={loading}
+          description="Write the message first. Add only the options you actually need."
+          showRefresh={false}
         />
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Subscribed devices</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : pretty(stats?.total_subscriptions ?? stats?.subscriptions ?? stats?.total ?? 0)}
+        <form onSubmit={prepareSend} className="ops-form notification-composer" noValidate>
+          <section className="notification-block" aria-labelledby="notification-message-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiMegaphoneLine size={18} aria-hidden="true" /></span>
+              <div><h3 id="notification-message-heading">Message</h3><p>Only the title and message are required.</p></div>
             </div>
-          </div>
+            <label className="notification-field">
+              <span>Title <em>Required</em></span>
+              <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
+              <small>{title.length}/120 characters</small>
+            </label>
+            <label className="notification-field">
+              <span>Message <em>Required</em></span>
+              <textarea required maxLength={2000} rows={4} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
+              <small>{body.length}/2000 characters</small>
+            </label>
+          </section>
 
-          <div className="admin-stat">
-            <div className="stat-label">Subscribed customers</div>
-            <div className="stat-value">{loading ? '…' : pretty(stats?.unique_users ?? 0)}</div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Push configuration</div>
-            <div className="stat-value ops-stat-value-sm">
-              {loading ? 'Checking…' : stats?.vapid_configured ? 'Configured' : 'Not configured'}
+          <section className="notification-block notification-optional-block" aria-labelledby="notification-options-heading">
+            <div className="notification-block-heading">
+              <span className="notification-heading-icon"><RiAddLine size={18} aria-hidden="true" /></span>
+              <div>
+                <h3 id="notification-options-heading">Optional settings</h3>
+                <p>Add only the fields you want to use. Nothing below is enabled by default.</p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <form onSubmit={send} className="ops-form notification-composer" noValidate>
-          <div className="notification-section-heading">
-            <h3>Message content</h3>
-            <p>Use a clear title, concise message and an in-site destination.</p>
-          </div>
-          <label>
-            Title
-            <input required maxLength={120} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. New Luviio offer" />
-          </label>
-          <label>
-            Message
-            <textarea required maxLength={2000} rows="4" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Tell customers what is new or on offer…" />
-          </label>
-          <div className="field-grid notification-media-grid">
-            <label>
-              Click destination
-              <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/products/floor-drainer-square-ring" />
-            </label>
-            <label>
-              Notification icon path
-              <input value={icon} maxLength={500} onChange={(event) => setIcon(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Badge path
-              <input value={badge} maxLength={500} onChange={(event) => setBadge(event.target.value)} placeholder="/icon-192.png" />
-            </label>
-            <label>
-              Large image path (optional)
-              <input value={image} maxLength={500} onChange={(event) => setImage(event.target.value)} placeholder="/products/offer-banner.webp" />
-            </label>
-            <label>
-              Campaign tag
-              <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="diwali-offer-2026" />
-            </label>
-            <label>
-              Specific user IDs (optional)
-              <input value={targetUsers} maxLength={4000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Leave empty to send to all subscribers" />
-            </label>
-          </div>
-          <fieldset className="notification-actions-config">
-            <legend>Optional notification buttons (up to 2)</legend>
-            <div className="field-grid">
-              <label>
-                Button 1 label
-                <input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" />
-              </label>
-              <label>
-                Button 1 destination path
-                <input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" />
-              </label>
-              <label>
-                Button 2 label
-                <input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" />
-              </label>
-              <label>
-                Button 2 destination path
-                <input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" />
-              </label>
-            </div>
-          </fieldset>
-          <div className="notification-toggles">
-            <label><input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} /> Keep visible until interaction (where supported)</label>
-            <label><input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} /> Re-alert for same campaign tag</label>
-          </div>
+            <button
+              type="button"
+              className="btn btn-quiet notification-add-options-button"
+              onClick={() => setOptionsOpen((open) => !open)}
+              aria-expanded={optionsOpen}
+              aria-controls="notification-option-picker"
+            >
+              <RiAddLine size={17} aria-hidden="true" />
+              {optionsOpen ? 'Close options' : 'Add options'}
+              {enabledOptionCount > 0 && <span className="notification-option-count">{enabledOptionCount} selected</span>}
+            </button>
+            {optionsOpen && (
+              <div id="notification-option-picker" className="notification-option-picker" role="group" aria-label="Choose optional notification settings">
+                {OPTIONAL_NOTIFICATION_OPTIONS.map((option) => (
+                  <label key={option.key} className={'notification-option-choice' + (enabledOptions[option.key] ? ' is-selected' : '')}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(enabledOptions[option.key])}
+                      onChange={() => toggleOption(option.key)}
+                    />
+                    <span>
+                      <strong>{option.label}</strong>
+                      <small>{option.hint}</small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {enabledOptionCount > 0 && (
+              <div className="notification-optional-fields">
+                {enabledOptions.destination && (
+                  <label className="notification-field">
+                    <span>Click destination</span>
+                    <input value={url} maxLength={500} onChange={(event) => setUrl(event.target.value)} placeholder="/" />
+                    <small>Where the customer lands after tapping the notification.</small>
+                  </label>
+                )}
+
+                {enabledOptions.tag && (
+                  <label className="notification-field">
+                    <span>Campaign tag</span>
+                    <input value={tag} maxLength={100} onChange={(event) => setTag(event.target.value)} placeholder="e.g. diwali-offer-2026" />
+                    <small>Reuse exactly the same tag when you want to replace a previous campaign notification.</small>
+                  </label>
+                )}
+
+                {enabledOptions.icon && <NotificationImagePicker label="Notification icon" value={icon} onChange={setIcon} />}
+                {enabledOptions.badge && <NotificationImagePicker label="Badge image" value={badge} onChange={setBadge} />}
+                {enabledOptions.image && <NotificationImagePicker label="Large image" value={image} onChange={setImage} optional />}
+
+                {enabledOptions.audience && (
+                  <label className="notification-field notification-field-full">
+                    <span>Specific subscriber IDs <em>Required for this option</em></span>
+                    <textarea rows={3} value={targetUsers} maxLength={8000} onChange={(event) => setTargetUsers(event.target.value)} placeholder="Paste IDs separated by commas, spaces or new lines" />
+                    <small>Only these subscribers will be targeted. Maximum 500 IDs; this field cannot be left empty.</small>
+                  </label>
+                )}
+
+                {enabledOptions.actions && (
+                  <div className="notification-field-full notification-action-options">
+                    <fieldset className="notification-actions-config">
+                      <legend>Action button 1</legend>
+                      <div className="field-grid">
+                        <label className="notification-field"><span>Button label</span><input value={actionOneTitle} maxLength={30} onChange={(event) => setActionOneTitle(event.target.value)} placeholder="Shop offer" /></label>
+                        <label className="notification-field"><span>Destination path</span><input value={actionOneUrl} maxLength={500} onChange={(event) => setActionOneUrl(event.target.value)} placeholder="/offers" /></label>
+                      </div>
+                    </fieldset>
+                    <fieldset className="notification-actions-config">
+                      <legend>Action button 2</legend>
+                      <div className="field-grid">
+                        <label className="notification-field"><span>Button label</span><input value={actionTwoTitle} maxLength={30} onChange={(event) => setActionTwoTitle(event.target.value)} placeholder="View product" /></label>
+                        <label className="notification-field"><span>Destination path</span><input value={actionTwoUrl} maxLength={500} onChange={(event) => setActionTwoUrl(event.target.value)} placeholder="/products/slug" /></label>
+                      </div>
+                    </fieldset>
+                  </div>
+                )}
+
+                {enabledOptions.delivery && (
+                  <div className="notification-field-full notification-delivery-options">
+                    <label className="notification-toggle">
+                      <input type="checkbox" checked={requireInteraction} onChange={(event) => setRequireInteraction(event.target.checked)} />
+                      <span>
+                        <strong>Keep visible until interaction</strong>
+                        <small>Honoured by supported browsers, mainly desktop. Chrome on Android controls tray behaviour and can ignore this hint.</small>
+                      </span>
+                    </label>
+                    <label className="notification-toggle">
+                      <input type="checkbox" checked={renotify} onChange={(event) => setRenotify(event.target.checked)} />
+                      <span>
+                        <strong>Re-alert when replacing the same campaign</strong>
+                        <small>Enable Campaign tag and reuse the exact tag on a later send. Device sound/vibration settings still apply.</small>
+                      </span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
           <div className="notification-form-actions">
-            <button className="btn" type="submit" disabled={sending || loading}>
+            <span><RiShieldCheckLine size={15} aria-hidden="true" /> Review the audience before sending.</span>
+            <button className="btn notification-send-button" type="submit" disabled={sending}>
               <RiSendPlaneLine size={16} aria-hidden="true" />
-              {sending ? 'Sending…' : 'Send notification'}
+              Send notification
             </button>
           </div>
         </form>
       </div>
+
+      <ConfirmDialog
+        open={confirmationOpen}
+        title="Send this notification?"
+        message={confirmationMessage}
+        confirmLabel="Send now"
+        cancelLabel="Go back"
+        busy={sending}
+        onConfirm={dispatchPush}
+        onCancel={() => {
+          if (sending) return;
+          setConfirmationOpen(false);
+          setPendingPayload(null);
+        }}
+      />
+
+      {sendReport && (
+        <AdminModal
+          className="notification-report-modal"
+          title="Notification dispatch report"
+          sub="Counts below come from the backend push-delivery results."
+          onClose={() => setSendReport(null)}
+        >
+          <div className="notification-report-message">
+            <strong>{sendReport.title}</strong>
+            <p>{sendReport.body}</p>
+          </div>
+          <div className="notification-report-metrics" role="status" aria-live="polite">
+            <div><small>Audience</small><strong>{sendReport.audience}</strong></div>
+            <div><small>Delivered responses</small><strong>{sendReport.success}</strong></div>
+            <div><small>Failed / no delivery</small><strong>{sendReport.failed}</strong></div>
+          </div>
+          {sendReport.audience === 0 ? (
+            <p className="notification-report-note">No active subscriber records were found for this audience.</p>
+          ) : sendReport.success === 0 ? (
+            <p className="notification-report-note">No recipient returned a successful delivery. Check active subscriptions and the push service before retrying.</p>
+          ) : sendReport.failed > 0 ? (
+            <p className="notification-report-note">Some recipients did not receive a successful delivery response. No device-level display confirmation is available from Web Push.</p>
+          ) : (
+            <p className="notification-report-note">The backend reports successful push delivery attempts. Actual heads-up display, sound and persistence remain controlled by the browser and device settings.</p>
+          )}
+          {sendReport.noSubscription > 0 && <p className="notification-report-note">{sendReport.noSubscription} recipient(s) had no active push subscription.</p>}
+          {sendReport.errors > 0 && <p className="notification-report-note">{sendReport.errors} recipient(s) encountered delivery errors.</p>}
+          <div className="notification-report-actions">
+            <button type="button" className="btn" onClick={() => setSendReport(null)}>Done</button>
+          </div>
+        </AdminModal>
+      )}
     </section>
   );
 }
@@ -1396,6 +1725,7 @@ function SettingsPanel() {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [switchBusyKey, setSwitchBusyKey] = useState('');
 
   const load = useCallback(async () => {
     const requestId = startRequest();
@@ -1445,6 +1775,33 @@ function SettingsPanel() {
 
     setEditing(null);
     setDraft('');
+  };
+
+  const toggleBooleanSetting = async (setting) => {
+    if (!setting || setting.is_system_locked || saving || switchBusyKey) return;
+
+    const currentValue =
+      setting.value === true ||
+      String(setting.value ?? '').trim().toLowerCase() === 'true';
+    const nextValue = !currentValue;
+    setSwitchBusyKey(setting.key);
+
+    try {
+      await adminService.updateSetting(
+        setting.key,
+        nextValue,
+        'Toggled from System settings',
+      );
+      if (!mountedRef.current) return;
+      toast.success(`${setting.key} ${nextValue ? 'enabled' : 'disabled'}.`);
+      await load();
+    } catch (error) {
+      if (mountedRef.current) {
+        toast.error(errorMessage(error, `Unable to update ${setting.key}.`));
+      }
+    } finally {
+      if (mountedRef.current) setSwitchBusyKey('');
+    }
   };
 
   const parseDraft = (setting) => {
@@ -1552,33 +1909,62 @@ function SettingsPanel() {
 
             <tbody>
               {settings.length ? (
-                settings.map((setting) => (
-                  <tr key={setting.key}>
-                    <td className="td-strong">{setting.key}</td>
-                    <td>{pretty(setting.category)}</td>
-                    <td>{pretty(setting.data_type)}</td>
-                    <td className="td-dim">
-                      <span title={pretty(setting.value)}>
-                        {pretty(setting.value)}
-                      </span>
-                    </td>
-                    <td>
-                      {setting.is_system_locked ? (
-                        <span className="admin-pill pill-muted">
-                          Locked
+                settings.map((setting) => {
+                  const isBooleanSetting =
+                    setting.data_type === 'boolean' ||
+                    typeof setting.value === 'boolean';
+                  const booleanValue =
+                    setting.value === true ||
+                    String(setting.value ?? '').trim().toLowerCase() === 'true';
+                  const switchBusy = switchBusyKey === setting.key;
+
+                  return (
+                    <tr key={setting.key}>
+                      <td className="td-strong">{setting.key}</td>
+                      <td>{pretty(setting.category)}</td>
+                      <td>{pretty(setting.data_type)}</td>
+                      <td className="td-dim">
+                        <span title={pretty(setting.value)}>
+                          {pretty(setting.value)}
                         </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="btn btn-quiet btn-sm"
-                          onClick={() => openEditor(setting)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        {setting.is_system_locked ? (
+                          <span className="admin-pill pill-muted">Locked</span>
+                        ) : isBooleanSetting ? (
+                          <div className="settings-switch-cell">
+                            <button
+                              type="button"
+                              className="admin-switch"
+                              role="switch"
+                              aria-checked={booleanValue}
+                              aria-label={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              title={`${booleanValue ? 'Disable' : 'Enable'} ${setting.key}`}
+                              disabled={Boolean(switchBusyKey) || saving}
+                              onClick={() => toggleBooleanSetting(setting)}
+                            >
+                              <span className="admin-switch-thumb" aria-hidden="true">
+                                {switchBusy ? <span className="admin-switch-spinner" /> : booleanValue ? <RiCheckLine size={14} /> : <RiCloseLine size={14} />}
+                              </span>
+                            </button>
+                            <span className="settings-switch-label" aria-live="polite">
+                              {switchBusy ? 'Saving…' : booleanValue ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-quiet btn-sm"
+                            onClick={() => openEditor(setting)}
+                            disabled={Boolean(switchBusyKey) || saving}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="5">
@@ -1709,18 +2095,6 @@ function PaymentsPanel() {
     load();
   }, [load]);
 
-  const successfulCount = useMemo(
-    () =>
-      rows.filter((row) =>
-        ['succeeded', 'paid'].includes(
-          text(row.status).toLowerCase(),
-        ),
-      ).length,
-    [rows],
-  );
-
-  const attentionCount = Math.max(0, rows.length - successfulCount);
-
   return (
     <section className="admin-panel">
       <div className="admin-card">
@@ -1731,28 +2105,7 @@ function PaymentsPanel() {
           refreshing={loading}
         />
 
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Attempts</div>
-            <div className="stat-value">
-              {loading ? '…' : rows.length}
-            </div>
-          </div>
 
-          <div className="admin-stat">
-            <div className="stat-label">Successful</div>
-            <div className="stat-value">
-              {loading ? '…' : successfulCount}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Needs attention</div>
-            <div className="stat-value">
-              {loading ? '…' : attentionCount}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="admin-card">
@@ -1900,45 +2253,33 @@ function ReportsPanel() {
   );
 
   return (
-    <section className="admin-panel">
-      <div className="admin-card">
-        <Toolbar
-          title="Reports"
-          description="Business signals for stock, order volume, revenue and product performance."
-          onRefresh={load}
-          refreshing={loading}
-        />
-
-        <div className="admin-stats">
-          <div className="admin-stat">
-            <div className="stat-label">Orders analysed</div>
-            <div className="stat-value">
-              {loading ? '…' : report?.orders ?? 0}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Revenue</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : formatMoney(Number(report?.revenue) || 0)}
-            </div>
-          </div>
-
-          <div className="admin-stat">
-            <div className="stat-label">Low stock</div>
-            <div className="stat-value">
-              {loading
-                ? '…'
-                : report?.low_stock_products ?? 0}
-            </div>
-          </div>
+    <section className="admin-panel reports-panel" aria-label="Reports panel">
+      <div className="admin-card reports-summary-card">
+        <div className="admin-toolbar ops-toolbar reports-toolbar">
+          <p className="reports-description">
+            Business signals for stock, order volume, revenue and product performance.
+          </p>
+          <button
+            type="button"
+            className="btn btn-quiet btn-sm ops-toolbar-refresh"
+            onClick={load}
+            disabled={loading}
+            aria-label="Refresh Reports"
+            title="Refresh Reports"
+            aria-busy={loading}
+          >
+            <RiRefreshLine
+              size={16}
+              className={loading ? 'ops-spin' : undefined}
+              aria-hidden="true"
+            />
+            <span className="ops-refresh-label">{loading ? 'Refreshing…' : 'Refresh'}</span>
+          </button>
         </div>
-      </div>
 
-      <div className="admin-card">
-        <h3>Order status</h3>
+
+
+        <h3 className="reports-analysis-title">Order status</h3>
 
         {statusCounts.length ? (
           <div className="ops-report-grid" role="list" aria-label="Order status breakdown">
@@ -2216,7 +2557,7 @@ function ReviewsModerationPanel() {
   };
 
   return (
-    <section className="admin-panel">
+    <section className="admin-panel reviews-panel">
       <div className="admin-card">
         <Toolbar
           title="Review moderation"

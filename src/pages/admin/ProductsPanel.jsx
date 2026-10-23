@@ -753,21 +753,28 @@ export default function ProductsPanel({ capabilities = {} }) {
         delete payload.images;
         delete payload.image_url;
 
-        await adminService.updateProduct(
-          editingId,
-          payload,
-        );
-
         if (selectedFiles.length) {
           setUploadingImages(true);
           setUploadMessage('Starting image upload queue…');
           await adminService.uploadProductImages(
             editingId,
             selectedFiles,
-            ({ completed, total, file: uploadedFile }) => {
+            ({ completed, total, file: uploadedFile, result: uploadedResult }) => {
               setSelectedFiles((current) =>
                 current.filter((candidate) => candidate !== uploadedFile),
               );
+              const uploadedImages = Array.isArray(uploadedResult?.images)
+                ? uploadedResult.images.filter(Boolean)
+                : Array.isArray(uploadedResult?.product?.images)
+                  ? uploadedResult.product.images.filter(Boolean)
+                  : null;
+              if (uploadedImages) {
+                setForm((current) => ({
+                  ...current,
+                  images: uploadedImages,
+                  image_url: uploadedImages[0] || '',
+                }));
+              }
               setUploadMessage(
                 'Uploaded ' + completed + ' of ' + total + ' images',
               );
@@ -776,6 +783,11 @@ export default function ProductsPanel({ capabilities = {} }) {
           setUploadingImages(false);
           setUploadMessage('');
         }
+
+        await adminService.updateProduct(
+          editingId,
+          payload,
+        );
 
         toast.success('Product updated.');
       } else {
@@ -786,12 +798,57 @@ export default function ProductsPanel({ capabilities = {} }) {
         };
 
         if (selectedFiles.length) {
+          // Keep the product unpublished until every image in the queue is uploaded.
+          // If the connection drops, the inactive draft can be retried without duplication.
+          createPayload.is_active = false;
+          createPayload.images = [];
+          delete createPayload.image_url;
+
           setUploadingImages(true);
-          setUploadMessage('Uploading product images…');
-          await adminService.createProductWithImages(
-            createPayload,
+          setUploadMessage('Creating unpublished product draft…');
+          const created = await adminService.createProduct(createPayload);
+          const createdId = created?.id || created?.product?.id;
+
+          if (!createdId) {
+            throw new Error('Product draft was created without a product ID. Refresh the catalogue before retrying.');
+          }
+
+          setEditing(true);
+          setEditingId(createdId);
+          setForm((current) => ({
+            ...current,
+            images: Array.isArray(created?.images) ? created.images.filter(Boolean) : [],
+            image_url: created?.image_url || '',
+          }));
+
+          setUploadMessage('Uploading 0 of ' + selectedFiles.length + ' images…');
+          await adminService.uploadProductImages(
+            createdId,
             selectedFiles,
+            ({ completed, total, file: uploadedFile, result: uploadedResult }) => {
+              setSelectedFiles((current) =>
+                current.filter((candidate) => candidate !== uploadedFile),
+              );
+              const uploadedImages = Array.isArray(uploadedResult?.images)
+                ? uploadedResult.images.filter(Boolean)
+                : Array.isArray(uploadedResult?.product?.images)
+                  ? uploadedResult.product.images.filter(Boolean)
+                  : null;
+              if (uploadedImages) {
+                setForm((current) => ({
+                  ...current,
+                  images: uploadedImages,
+                  image_url: uploadedImages[0] || '',
+                }));
+              }
+              setUploadMessage('Uploaded ' + completed + ' of ' + total + ' images');
+            },
           );
+
+          setUploadMessage('Finalising product publication…');
+          await adminService.updateProduct(createdId, {
+            is_active: Boolean(form.is_active),
+          });
         } else {
           await adminService.createProduct(createPayload);
         }

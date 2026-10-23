@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import AdminModal from './Modal';
 
 import {
   RiAddLine,
@@ -878,13 +879,25 @@ export default function CouponsPanel({
         className="admin-panel coupons-panel"
         aria-labelledby="coupons-title"
       >
-        <div className="admin-toolbar">
+        <div className="admin-toolbar coupon-page-toolbar">
           <div>
             <h2 id="coupons-title">
               Coupons
             </h2>
 
           </div>
+
+          <label className="admin-search coupons-search" htmlFor="coupons-search">
+            <RiSearchLine size={16} aria-hidden="true" />
+            <input
+              id="coupons-search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search coupon code, description or type…"
+              autoComplete="off"
+            />
+          </label>
 
           <div className="btn-row coupon-toolbar-actions">
             <button
@@ -924,17 +937,7 @@ export default function CouponsPanel({
           </div>
         </div>
 
-        <label className="admin-search coupons-search" htmlFor="coupons-search">
-          <RiSearchLine size={16} aria-hidden="true" />
-          <input
-            id="coupons-search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search coupon code, description or type…"
-            autoComplete="off"
-          />
-        </label>
+
 
         {error && (
           <div
@@ -948,11 +951,17 @@ export default function CouponsPanel({
         {formOpen &&
           (canCreate ||
             canUpdate) && (
-            <form
-              className="admin-card coupon-form"
-              onSubmit={save}
-              noValidate
+            <AdminModal
+              className="coupon-editor-modal"
+              title={editing ? `Edit coupon · ${editing.code || ''}` : 'Create coupon'}
+              sub="Configure discount rules, usage limits and validity dates."
+              onClose={closeForm}
             >
+              <form
+                className="coupon-form"
+                onSubmit={save}
+                noValidate
+              >
               <div className="field-grid">
                 <div className="field">
                   <label htmlFor="coupon-code">
@@ -1395,7 +1404,8 @@ export default function CouponsPanel({
                   Cancel
                 </button>
               </div>
-            </form>
+              </form>
+            </AdminModal>
           )}
 
         {!canCreate &&

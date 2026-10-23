@@ -44,6 +44,7 @@ import { adminService } from '../../services/admin';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import AdminMfaGate from './AdminMfaGate';
+import OrdersPanelSkeleton from './OrdersPanelSkeleton';
 import { classifyAdminAccessError } from './adminAccess';
 import '../../styles/admin-tailwind.css';
 import '../../styles/product-media.css';
@@ -329,7 +330,7 @@ const NAV_GROUPS = [
 
   [
     'Customers',
-    ['users', 'user-actions', 'reviews'],
+    ['users', 'reviews'],
   ],
 
   [
@@ -472,6 +473,8 @@ export default function AdminPage() {
   const verifyRequestRef =
     useRef(0);
 
+  const validatedTokenRef = useRef(null);
+
   const currentRole =
     profile?.role || role;
 
@@ -521,40 +524,113 @@ export default function AdminPage() {
   const verifyAdmin =
     useCallback(async (verifiedToken = token) => {
       if (initializing) {
-        return null;
+        return false;
       }
 
       if (!isAuthenticated || !verifiedToken) {
         setStatus('auth-required');
-        return null;
+        return false;
       }
 
-      const requestId =
-        ++verifyRequestRef.current;
+      // A token is considered console-ready only after BOTH the live admin
+      // profile and the current AAL/MFA level have been checked.
+      const requestId = ++verifyRequestRef.current;
+      const isCurrentRequest = () =>
+        requestId === verifyRequestRef.current;
 
       setAccessToken(verifiedToken);
 
-      const response =
-        await adminService.verify();
+      try {
+        const response = await adminService.verify();
 
-      if (
-        requestId !==
-        verifyRequestRef.current
-      ) {
-        return response;
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        const verifiedProfile = response?.profile || null;
+        setProfile(verifiedProfile);
+
+        const verifiedRole =
+          verifiedProfile?.role || user?.role || '';
+
+        if (
+          !verifiedProfile ||
+          !(ROLE_PANELS[verifiedRole] || []).length
+        ) {
+          setStatus('denied');
+          return false;
+        }
+
+        let mfaStatus;
+
+        try {
+          mfaStatus = await adminService.mfaStatus();
+        } catch (mfaError) {
+          if (!isCurrentRequest()) {
+            return false;
+          }
+
+          // Fail closed when the MFA service is unavailable. The gate owns
+          // its retry/error UI; a failed status check must never reveal panels.
+          const next = classifyAdminAccessError(mfaError);
+          setStatus(
+            next === 'auth-required'
+              ? 'auth-required'
+              : 'mfa-required',
+          );
+          return false;
+        }
+
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        const requiresMfa =
+          mfaStatus?.privileged_mfa_required !== false;
+        const hasAal2 = mfaStatus?.aal === 'aal2';
+
+        if (requiresMfa && !hasAal2) {
+          setStatus('mfa-required');
+          return false;
+        }
+
+        // Mark this exact token as checked before synchronizing AuthContext.
+        // This prevents the token update from triggering a second verification
+        // and briefly unmounting the MFA card after a successful code entry.
+        validatedTokenRef.current = verifiedToken;
+
+        if (verifiedToken !== token) {
+          try {
+            window.__setToken?.(verifiedToken);
+          } catch {
+            // API client already has the validated token; context sync is best-effort.
+          }
+        }
+
+        setStatus('verified');
+        return true;
+      } catch (error) {
+        if (!isCurrentRequest()) {
+          return false;
+        }
+
+        const next = classifyAdminAccessError(error);
+        setStatus(next);
+
+        if (next === 'denied') {
+          console.warn(
+            'Admin access verification failed:',
+            error,
+          );
+        }
+
+        return false;
       }
-
-      setProfile(
-        response?.profile || null,
-      );
-
-      setStatus('verified');
-
-      return response;
     }, [
       initializing,
       isAuthenticated,
       token,
+      user?.role,
     ]);
 
   useEffect(() => {
@@ -563,89 +639,28 @@ export default function AdminPage() {
       return undefined;
     }
 
-    let activeRequest = true;
+    if (!isAuthenticated || !token) {
+      setStatus('auth-required');
+      return undefined;
+    }
 
-    const verify = async () => {
-      const requestId =
-        ++verifyRequestRef.current;
+    // Keep the protected dashboard out of the tree until the same token has
+    // passed live role verification and the explicit MFA/AAL check above.
+    if (validatedTokenRef.current === token) {
+      return undefined;
+    }
 
-      if (!isAuthenticated || !token) {
-        if (activeRequest) {
-          setStatus('auth-required');
-        }
-        return;
-      }
-
-      try {
-        setAccessToken(token);
-
-        const response =
-          await adminService.verify();
-
-        if (
-          !activeRequest ||
-          requestId !==
-            verifyRequestRef.current
-        ) {
-          return;
-        }
-
-        setProfile(
-          response?.profile || null,
-        );
-
-        setStatus('verified');
-      } catch (error) {
-        if (
-          !activeRequest ||
-          requestId !==
-            verifyRequestRef.current
-        ) {
-          return;
-        }
-
-        const next =
-          classifyAdminAccessError(
-            error,
-          );
-
-        if (
-          next === 'mfa-required'
-        ) {
-          setStatus(
-            'mfa-required',
-          );
-          return;
-        }
-
-        if (
-          next === 'auth-required'
-        ) {
-          setStatus(
-            'auth-required',
-          );
-          return;
-        }
-
-        setStatus('denied');
-
-        console.warn(
-          'Admin access verification failed:',
-          error,
-        );
-      }
-    };
-
-    verify();
+    setStatus('verifying');
+    void verifyAdmin(token);
 
     return () => {
-      activeRequest = false;
       verifyRequestRef.current += 1;
     };
   }, [
     initializing,
     isAuthenticated,
     token,
+    verifyAdmin,
   ]);
 
   useEffect(() => {
@@ -781,21 +796,28 @@ export default function AdminPage() {
     status === 'verifying'
   ) {
     return (
-      <main className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] py-12 max-[760px]:px-[18px] max-[760px]:py-8 max-[480px]:px-4">
-        <div
-          className="admin-access-loading flex min-h-48 items-center justify-center gap-3 text-sm text-muted"
+      <main className="admin-auth-stage">
+        <section
+          className="admin-mfa-gate admin-access-loading"
           role="status"
           aria-live="polite"
           aria-busy="true"
+          aria-labelledby="admin-access-loading-title"
         >
+          <span className="admin-mfa-emblem" aria-hidden="true">
+            <RiShieldKeyholeLine size={28} />
+          </span>
+          <p className="eyebrow">Privileged access</p>
+          <h1 id="admin-access-loading-title">Securing admin session</h1>
+          <p>
+            Checking your account permissions and multi-factor authentication
+            before opening the console.
+          </p>
           <span
-            className="spin"
+            className="admin-mfa-spinner"
             aria-hidden="true"
           />
-          <span>
-            Verifying admin access…
-          </span>
-        </div>
+        </section>
       </main>
     );
   }
@@ -804,12 +826,17 @@ export default function AdminPage() {
     status === 'mfa-required'
   ) {
     return (
-      <main className="page container mx-auto w-full max-w-[1440px] px-[clamp(16px,8vw,120px)] py-12 max-[760px]:px-[18px] max-[760px]:py-8 max-[480px]:px-4">
+      <main className="admin-auth-stage">
         <AdminMfaGate
           role={currentRole}
-          onVerified={
-            verifyAdmin
+          displayName={
+            profile?.full_name ||
+            user?.full_name ||
+            user?.name ||
+            user?.email ||
+            ''
           }
+          onVerified={verifyAdmin}
         />
       </main>
     );
@@ -964,7 +991,9 @@ export default function AdminPage() {
         >
           <Suspense
             fallback={
-              <AdminPanelFallback />
+              effectivePanel === 'orders'
+                ? <OrdersPanelSkeleton canUpdate={capabilities.orderUpdate === true} />
+                : <AdminPanelFallback />
             }
           >
             {effectivePanel ===
@@ -997,9 +1026,9 @@ export default function AdminPage() {
             {effectivePanel ===
               'orders' && (
               <OrdersPanel
-                capabilities={
-                  capabilities
-                }
+                key={String(user?.id ?? user?.user_id ?? profile?.id ?? profile?.user_id ?? user?.email ?? profile?.email ?? 'authenticated-admin-session')}
+                cacheScope={String(user?.id ?? user?.user_id ?? profile?.id ?? profile?.user_id ?? user?.email ?? profile?.email ?? 'authenticated-admin-session')}
+                capabilities={capabilities}
               />
             )}
 
