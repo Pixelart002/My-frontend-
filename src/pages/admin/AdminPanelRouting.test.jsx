@@ -186,7 +186,7 @@ describe('admin panel routing and search', () => {
     });
 
     expect(await screen.findByText('checkout')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Disable checkout' })).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Disable checkout' })).toBeInTheDocument();
   });
 
   it('keeps product search usable and filters catalogue rows while typing', async () => {
