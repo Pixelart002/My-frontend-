@@ -48,6 +48,7 @@ import OrdersPanelSkeleton from './OrdersPanelSkeleton';
 import { classifyAdminAccessError } from './adminAccess';
 import '../../styles/admin-tailwind.css';
 import '../../styles/product-media.css';
+import '../../styles/admin-polish.css';
 
 const DashboardPanel = lazy(
   () => import('./DashboardPanel'),

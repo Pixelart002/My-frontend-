@@ -1,0 +1,1144 @@
+/* Luviio admin console refinement.
+   Scoped to the console so storefront components keep their existing styling. */
+
+.admin-console-root {
+  --admin-card: color-mix(in srgb, var(--surface) 94%, white 6%);
+  --admin-border: color-mix(in srgb, var(--line) 78%, white 22%);
+  --admin-border-soft: color-mix(in srgb, var(--line-soft) 82%, white 18%);
+  --admin-focus: color-mix(in srgb, var(--gold) 82%, white 18%);
+  width: min(100%, 1680px);
+  gap: clamp(14px, 1.8vw, 28px);
+  padding: clamp(12px, 2.4vw, 32px);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+.admin-console-root :where(
+  .admin-main,
+  .admin-console-main,
+  .admin-head,
+  .admin-head-brand,
+  .admin-head-meta,
+  .admin-card,
+  .dashboard-panel,
+  .dashboard-section,
+  .admin-toolbar,
+  .ops-toolbar,
+  .field-grid,
+  .admin-table-wrap
+) {
+  min-width: 0;
+}
+
+.admin-console-root :where(h1, h2, h3, h4) {
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  text-wrap: pretty;
+}
+
+.admin-console-root :where(p, li, label, th, td, small, code) {
+  overflow-wrap: anywhere;
+}
+
+.admin-console-root :where(p) {
+  line-height: 1.65;
+}
+
+.admin-console-root :where(button, a, input, select, textarea, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.admin-console-root :where(button, a, input, select, textarea):focus-visible,
+.admin-console-root :where([role="button"]):focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 3px;
+}
+
+.admin-console-root :where(button, .btn, .icon-btn, .admin-sb-btn, .admin-select, input, select, textarea) {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(.2, .7, .25, 1);
+}
+
+.admin-console-root .admin-main {
+  min-width: 0;
+}
+
+.admin-console-root .admin-console-main {
+  min-width: 0;
+  padding-top: 0;
+}
+
+.admin-console-root > .admin-console-main > .admin-head {
+  min-height: 76px;
+  gap: clamp(10px, 1.6vw, 22px);
+  margin: 0 0 clamp(20px, 2.2vw, 30px);
+  padding: 12px 0 16px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border-bottom-color: var(--admin-border-soft);
+  box-shadow: 0 8px 24px -24px rgb(0 0 0 / 80%);
+}
+
+.admin-console-root .admin-head-context {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-console-root .admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.admin-console-root .admin-breadcrumb-root {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+
+.admin-console-root .admin-breadcrumb-separator {
+  color: var(--dim);
+  opacity: .7;
+}
+
+.admin-console-root .admin-breadcrumb-current {
+  color: var(--gold-soft);
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin-console-root .admin-head-caption {
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: .08em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.admin-console-root .admin-head-meta {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.admin-console-root .admin-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--line) 70%);
+  border-radius: 999px;
+  background: var(--success-dim);
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+
+.admin-console-root .admin-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 15%, transparent);
+}
+
+.admin-console-root .admin-role-chip {
+  min-height: 32px;
+  max-width: min(220px, 28vw);
+  padding: 6px 11px;
+  border-color: var(--admin-border);
+  background: var(--admin-card);
+  color: var(--gold-soft);
+  font-size: 11px;
+  letter-spacing: .045em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.admin-console-root .admin-menu-trigger {
+  flex: 0 0 42px;
+  border-color: var(--admin-border);
+  background: var(--admin-card);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
+.admin-console-root .admin-menu-trigger:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+  transform: translateY(-1px);
+}
+
+.admin-console-root .admin-console-sidebar {
+  border-color: var(--admin-border-soft);
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--surface) 94%, var(--gold) 6%), var(--surface) 38%);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 18%);
+}
+
+.admin-console-root .admin-sidebar-brand {
+  padding-bottom: 16px;
+  border-bottom-color: var(--admin-border-soft);
+}
+
+.admin-console-root .admin-rail-mark {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 48%, transparent);
+  background: linear-gradient(145deg, var(--gold-soft), var(--gold));
+  color: var(--gold-ink);
+  font-size: 19px;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.admin-console-root .admin-sidebar-brand-copy strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: .01em;
+}
+
+.admin-console-root .admin-sidebar-brand-copy span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.admin-console-root .admin-navigation {
+  padding-top: 12px;
+}
+
+.admin-console-root .admin-nav-group + .admin-nav-group {
+  border-top-color: var(--admin-border-soft);
+}
+
+.admin-console-root .admin-nav-group-label {
+  color: var(--dim);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .13em;
+  line-height: 1.4;
+}
+
+.admin-console-root .admin-sb-btn {
+  min-height: 42px;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: color-mix(in srgb, var(--text) 74%, var(--muted) 26%);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.admin-console-root .admin-sb-btn:hover {
+  border-color: var(--admin-border-soft);
+  background: var(--surface-2);
+  color: var(--text);
+  transform: translateX(1px);
+}
+
+.admin-console-root .admin-sb-btn.is-active {
+  border-color: color-mix(in srgb, var(--gold) 28%, var(--line) 72%);
+  background: linear-gradient(100deg, var(--gold-dim), color-mix(in srgb, var(--gold-dim) 35%, transparent));
+  color: var(--gold-soft);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.admin-console-root .admin-sb-btn.is-active::after {
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.admin-console-root .admin-sb-btn svg {
+  opacity: .9;
+}
+
+.admin-console-root .admin-sidebar-close,
+.admin-console-root .admin-signout,
+.admin-console-root .icon-btn {
+  border-radius: 10px;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 180ms ease;
+}
+
+.admin-console-root .admin-sidebar-close:hover,
+.admin-console-root .admin-signout:hover,
+.admin-console-root .icon-btn:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+  transform: translateY(-1px);
+}
+
+.admin-console-root :where(.admin-card, .dashboard-section, .order-shipment-card, .admin-gate) {
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--surface) 96%, white 4%), var(--surface));
+  box-shadow: 0 10px 30px rgb(0 0 0 / 9%);
+}
+
+.admin-console-root .admin-card {
+  padding: clamp(16px, 2vw, 24px);
+  margin-block: 14px;
+}
+
+.admin-console-root .admin-card :where(h2, h3) {
+  margin-block-end: 10px;
+}
+
+.admin-console-root .dashboard-panel {
+  display: grid;
+  gap: clamp(16px, 2vw, 24px);
+  animation: admin-panel-enter 220ms ease-out both;
+}
+
+.admin-console-root .admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: clamp(10px, 1.3vw, 16px);
+  margin: 0;
+}
+
+.admin-console-root .admin-stat {
+  position: relative;
+  isolation: isolate;
+  min-height: 146px;
+  overflow: hidden;
+  padding: clamp(16px, 1.7vw, 22px);
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 15px;
+  background:
+    radial-gradient(ellipse at top right, color-mix(in srgb, var(--gold) 10%, transparent), transparent 64%),
+    linear-gradient(145deg, var(--admin-card), var(--surface));
+  box-shadow: 0 8px 26px rgb(0 0 0 / 10%);
+  transition: transform 180ms cubic-bezier(.2, .7, .25, 1), border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.admin-console-root .admin-stat::after {
+  position: absolute;
+  z-index: -1;
+  right: -26px;
+  bottom: -50px;
+  width: 104px;
+  height: 104px;
+  border: 1px solid color-mix(in srgb, var(--gold) 14%, transparent);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.admin-console-root .admin-stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--gold) 38%, var(--line) 62%);
+  box-shadow: 0 14px 32px rgb(0 0 0 / 17%);
+}
+
+.admin-console-root .stat-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-console-root .stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .025em;
+}
+
+.admin-console-root .stat-icon {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--line) 78%);
+  border-radius: 11px;
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+}
+
+.admin-console-root .stat-value {
+  margin-top: 16px;
+  color: var(--text);
+  font-size: clamp(25px, 2.2vw, 34px);
+  font-weight: 760;
+  letter-spacing: -.045em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.admin-console-root .tone-danger .stat-value {
+  color: var(--danger);
+}
+
+.admin-console-root .stat-hint {
+  margin-top: 8px;
+  color: var(--dim);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.admin-console-root .dashboard-section {
+  min-width: 0;
+  padding: clamp(16px, 2vw, 24px);
+  margin: 0;
+  overflow: hidden;
+}
+
+.admin-console-root .admin-section-label {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -.015em;
+  line-height: 1.35;
+}
+
+.admin-console-root .dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.admin-console-root .dashboard-actions .btn {
+  min-height: 40px;
+}
+
+.admin-console-root .dashboard-refresh-icon {
+  transform-origin: center;
+}
+
+.admin-console-root .dashboard-recent-section {
+  padding-bottom: 10px;
+}
+
+.admin-console-root .admin-toolbar,
+.admin-console-root .ops-toolbar,
+.admin-console-root .fulfillment-title-row,
+.admin-console-root .fulfillment-actions,
+.admin-console-root .btn-row,
+.admin-console-root .admin-inline {
+  gap: 10px;
+}
+
+.admin-console-root .admin-toolbar,
+.admin-console-root .ops-toolbar {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block: 0 18px;
+}
+
+.admin-console-root .admin-toolbar > *,
+.admin-console-root .ops-toolbar > * {
+  min-width: 0;
+}
+
+.admin-console-root .admin-toolbar .btn-row,
+.admin-console-root .ops-toolbar .btn-row {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-console-root .btn,
+.admin-console-root button.btn,
+.admin-console-root a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+}
+
+.admin-console-root .btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.admin-console-root .btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.admin-console-root .btn:disabled,
+.admin-console-root button:disabled {
+  opacity: .52;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-console-root .btn-quiet {
+  border: 1px solid var(--admin-border);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  color: var(--text);
+}
+
+.admin-console-root .btn-quiet:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--line) 55%);
+  background: var(--gold-dim);
+  color: var(--gold-soft);
+  box-shadow: 0 5px 16px rgb(0 0 0 / 12%);
+}
+
+.admin-console-root .btn-sm {
+  min-height: 36px;
+  padding: 7px 11px;
+  font-size: 11px;
+}
+
+.admin-console-root .icon-btn {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-card);
+  color: var(--muted);
+}
+
+.admin-console-root :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .admin-select,
+  .admin-input,
+  .field input,
+  .field select,
+  .field textarea,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .ops-form input,
+  .ops-form select,
+  .ops-form textarea,
+  .ops-inline input,
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form textarea
+) {
+  min-height: 42px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--bg) 54%, var(--surface) 46%);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+}
+
+.admin-console-root .admin-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  width: min(100%, 340px);
+  padding: 0 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg) 54%, var(--surface) 46%);
+  color: var(--muted);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+}
+
+.admin-console-root .admin-search:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.admin-console-root .admin-search > svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.admin-console-root .admin-search input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-console-root .admin-search input:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.admin-console-root :where(input, select, textarea)::placeholder {
+  color: color-mix(in srgb, var(--muted) 78%, var(--bg) 22%);
+  opacity: 1;
+}
+
+.admin-console-root :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .admin-select,
+  .admin-input,
+  .field input,
+  .field select,
+  .field textarea,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .ops-form input,
+  .ops-form select,
+  .ops-form textarea,
+  .ops-inline input,
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form textarea
+):focus {
+  border-color: var(--gold);
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+.admin-console-root :where(textarea, .field textarea, .form-field textarea, .ops-form textarea, .coupon-form textarea) {
+  min-height: 112px;
+  padding-block: 11px;
+  resize: vertical;
+}
+
+.admin-console-root :where(label, .field > label, .form-field > label, .checkbox-field) {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.admin-console-root :where(.field-grid, .form-grid, .coupon-advanced-fields) {
+  gap: clamp(12px, 1.6vw, 18px);
+}
+
+.admin-console-root :where(.field-grid, .form-grid) > * {
+  min-width: 0;
+}
+
+.admin-console-root .admin-table-wrap,
+.admin-console-root .admin-table-wrap:has(> .admin-table-scroll),
+.admin-console-root .admin-table-wrap:has(> .dashboard-table-scroll) {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.admin-console-root .admin-table-scroll,
+.admin-console-root .orders-ledger-wrap,
+.admin-console-root .dashboard-table-scroll {
+  max-width: 100%;
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 28%, var(--surface) 72%);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.admin-console-root .admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-console-root .admin-table thead {
+  background: var(--surface-2);
+}
+
+.admin-console-root .admin-table th {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .075em;
+  line-height: 1.35;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-console-root .admin-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--admin-border-soft);
+  color: var(--text);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.admin-console-root .admin-table tbody tr {
+  transition: background-color 140ms ease;
+}
+
+.admin-console-root .admin-table tbody tr:hover {
+  background: color-mix(in srgb, var(--gold-dim) 65%, transparent);
+}
+
+.admin-console-root .admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-console-root .admin-table .td-strong {
+  color: var(--text);
+  font-weight: 750;
+  letter-spacing: -.01em;
+}
+
+.admin-console-root .admin-table .td-gold {
+  color: var(--gold-soft);
+  font-weight: 750;
+}
+
+.admin-console-root .admin-table .td-dim {
+  color: var(--muted);
+}
+
+.admin-console-root :where(.admin-pill, .admin-badge, .status-pill, .pill-muted, .pill-gold, .pill-success, .pill-danger) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 25px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: .015em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-console-root .pill-gold,
+.admin-console-root .admin-pill.gold {
+  border-color: color-mix(in srgb, var(--gold) 24%, transparent);
+}
+
+.admin-console-root .pill-success {
+  border-color: color-mix(in srgb, var(--success) 23%, transparent);
+}
+
+.admin-console-root .pill-danger {
+  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.admin-console-root .admin-empty,
+.admin-console-root .admin-page-note,
+.admin-console-root .admin-panel-fallback,
+.admin-console-root .dashboard-order-state {
+  border: 1px dashed var(--admin-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 54%, transparent);
+  color: var(--muted);
+}
+
+.admin-console-root .admin-empty,
+.admin-console-root .dashboard-order-state {
+  padding: clamp(18px, 2.4vw, 28px);
+  text-align: center;
+}
+
+.admin-console-root .admin-page-note {
+  padding: 12px 14px;
+  line-height: 1.6;
+}
+
+.admin-console-root .admin-panel-fallback {
+  min-height: 180px;
+  padding: 28px;
+}
+
+.admin-console-root .dashboard-loading,
+.admin-console-root .admin-access-loading {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid var(--admin-border-soft);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--surface), var(--bg));
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-console-root .dashboard-error {
+  margin-bottom: 4px;
+}
+
+.admin-console-root .spin {
+  border-radius: 50%;
+  animation: admin-spin 900ms linear infinite;
+}
+
+.admin-console-root .admin-modal-overlay {
+  padding: clamp(12px, 3vw, 28px);
+  background: rgb(5 5 5 / 72%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: admin-overlay-in 160ms ease-out both;
+}
+
+.admin-console-root .admin-modal {
+  width: min(100%, 880px);
+  padding: clamp(18px, 2.5vw, 30px);
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at top right, color-mix(in srgb, var(--gold) 7%, transparent), transparent 45%),
+    var(--surface);
+  box-shadow: 0 28px 90px rgb(0 0 0 / 50%);
+  animation: admin-modal-in 180ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.admin-console-root .modal-close {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.admin-console-root .admin-gate {
+  border-color: var(--admin-border);
+  box-shadow: 0 18px 55px rgb(0 0 0 / 20%);
+}
+
+.admin-console-root .order-shipment-card {
+  padding: clamp(14px, 2vw, 22px);
+}
+
+.admin-console-root .shipment-summary > div {
+  border-color: var(--admin-border-soft);
+  background: var(--admin-card);
+  border-radius: 12px;
+}
+
+.admin-console-root .shipment-step-icon {
+  border-color: var(--admin-border);
+  background: var(--admin-card);
+}
+
+.admin-console-root .shipment-timeline li {
+  border-bottom-color: var(--admin-border-soft);
+}
+
+.admin-console-root .admin-sidebar-backdrop {
+  background: rgb(0 0 0 / 64%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.admin-console-root .admin-panel-fallback .spin {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line);
+  border-top-color: var(--gold);
+}
+
+
+/* Shared toast provider: refine placement only while the admin console is active. */
+body:has(.admin-console-root) .toast-stack {
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+  width: min(400px, calc(100vw - 32px));
+  margin: 0;
+  gap: 9px;
+  z-index: var(--ui-z-toast, 700);
+}
+
+body:has(.admin-console-root) .toast {
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border-color: var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-3) 92%, black 8%);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 34%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: admin-toast-in 180ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+body:has(.admin-console-root) .toast .toast-icon {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 11px;
+}
+
+body:has(.admin-console-root) .toast-success .toast-icon {
+  background: var(--success-dim);
+}
+
+body:has(.admin-console-root) .toast-error .toast-icon {
+  background: var(--danger-dim);
+}
+
+body:has(.admin-console-root) .toast-info .toast-icon {
+  background: var(--info-dim);
+}
+
+body:has(.admin-console-root) .toast .toast-message {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+body:has(.admin-console-root) .toast .toast-dismiss {
+  flex: 0 0 32px;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+body:has(.admin-console-root) .toast .toast-dismiss:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+@keyframes admin-toast-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes admin-panel-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes admin-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes admin-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 1100px) {
+  .admin-console-root {
+    padding: 14px;
+    gap: 16px;
+  }
+
+  .admin-console-root > .admin-console-main > .admin-head {
+    top: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-console-root {
+    padding: 12px 12px calc(20px + env(safe-area-inset-bottom));
+    gap: 0;
+  }
+
+  .admin-console-root > .admin-console-main > .admin-head {
+    min-height: 64px;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 8px 0 12px;
+  }
+
+  .admin-console-root .admin-head-caption {
+    display: none;
+  }
+
+  .admin-console-root .admin-head-meta {
+    max-width: 42%;
+    gap: 6px;
+  }
+
+  .admin-console-root .admin-live-status {
+    min-height: 28px;
+    padding: 4px 8px;
+  }
+
+  .admin-console-root .admin-role-chip {
+    max-width: 110px;
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .admin-console-root .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-console-root .admin-stat {
+    min-height: 130px;
+    padding: 14px;
+  }
+
+  .admin-console-root .stat-value {
+    margin-top: 13px;
+    font-size: clamp(23px, 7vw, 30px);
+  }
+
+  .admin-console-root .dashboard-section {
+    padding: 15px;
+  }
+
+  .admin-console-root .admin-card {
+    padding: 15px;
+  }
+
+  .admin-console-root .admin-toolbar,
+  .admin-console-root .ops-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-console-root .admin-toolbar > *,
+  .admin-console-root .ops-toolbar > * {
+    max-width: 100%;
+  }
+
+  .admin-console-root .admin-toolbar .btn-row,
+  .admin-console-root .ops-toolbar .btn-row {
+    width: 100%;
+  }
+
+  .admin-console-root .btn-row .btn {
+    flex: 0 1 auto;
+  }
+
+  .admin-console-root .admin-table {
+    min-width: 680px;
+  }
+
+  .admin-console-root .admin-table th,
+  .admin-console-root .admin-table td {
+    padding: 11px 12px;
+  }
+
+  .admin-console-root .admin-modal {
+    max-height: calc(100dvh - 24px);
+    padding: 18px 14px;
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-console-root .admin-stats {
+    gap: 9px;
+  }
+
+  .admin-console-root .admin-stat {
+    min-height: 122px;
+    padding: 12px;
+  }
+
+  .admin-console-root .stat-label {
+    font-size: 11px;
+  }
+
+  .admin-console-root .stat-icon {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .admin-console-root .stat-value {
+    font-size: 23px;
+  }
+
+  .admin-console-root .dashboard-actions .btn {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .admin-console-root .admin-head-meta {
+    max-width: 46%;
+  }
+
+  .admin-console-root .admin-role-chip {
+    max-width: 88px;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .admin-console-root .admin-card:hover {
+    border-color: color-mix(in srgb, var(--gold) 22%, var(--line) 78%);
+    box-shadow: 0 14px 36px rgb(0 0 0 / 14%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-console-root *,
+  .admin-console-root *::before,
+  .admin-console-root *::after,
+  body:has(.admin-console-root) .toast,
+  body:has(.admin-console-root) .toast * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
