@@ -1338,20 +1338,6 @@ function NotificationsPanel() {
     const normalizedTargets = enabledOptions.audience && targetUsers.trim()
       ? Array.from(new Set(targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)))
       : null;
-    const normalizedIcon = text(icon) || '/icon-192.png';
-    const normalizedBadge = text(badge) || '/icon-192.png';
-    const normalizedImage = text(image);
-    const normalizedTag = text(tag) || 'luviio-notification';
-    const normalizedTargets = targetUsers.trim()
-      ? targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)
-      : null;
-    const actionFields = [
-      { title: text(actionOneTitle), action: text(actionOneUrl) },
-      { title: text(actionTwoTitle), action: text(actionTwoUrl) },
-    ];
-    const partialAction = actionFields.some((item) => Boolean(item.title) !== Boolean(item.action));
-    const actions = actionFields.filter((item) => item.title && item.action);
-
     const actionFields = enabledOptions.actions
       ? [
           { title: text(actionOneTitle), action: text(actionOneUrl) },
@@ -1369,15 +1355,6 @@ function NotificationsPanel() {
       toast.error('Each notification action needs both a title and an in-site path.');
       return;
     }
-    if ([normalizedUrl, normalizedIcon, normalizedBadge, normalizedImage, ...actions.map((item) => item.action)].some((value) => value && (!value.startsWith('/') || value.startsWith('//')))) {
-      toast.error('Notification links and assets must use in-site paths beginning with /.');
-      return;
-    }
-    if (normalizedTargets?.some((id) => id.length < 8)) {
-      toast.error('Check the targeted user IDs or leave the audience empty to send to all subscribed users.');
-      return;
-    }
-
     if (enabledOptions.audience && !normalizedTargets?.length) {
       toast.error('Enter at least one subscriber ID, or turn off Specific audience to send to everyone.');
       return;
