@@ -950,7 +950,7 @@ export default function ProductsPanel({ capabilities = {} }) {
 
         <section className="overflow-hidden rounded-3xl border border-line bg-surface shadow-luviio-card" aria-label="Product catalogue">
           <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row sm:items-center sm:p-5">
-            <label className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3.5 text-muted transition focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/20">
+            <label className="product-search-control flex min-h-11 w-full min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-line bg-surface-2 px-3.5 text-muted transition focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/20">
               <RiSearchLine
                 size={16}
                 aria-hidden="true"
@@ -961,13 +961,14 @@ export default function ProductsPanel({ capabilities = {} }) {
               </span>
 
               <input
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Search name, SKU or slug…"
+                className="product-search-input"
+                aria-label="Search products by name, SKU or slug"
                 type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search name, SKU or slug…"
                 autoComplete="off"
+                spellCheck={false}
               />
             </label>
 

@@ -344,8 +344,8 @@ export default function OrdersPanel({
           </p>
         </div>
 
-        <div className="admin-toolbar orders-toolbar" role="search" aria-label="Search and filter orders">
-          <label className="admin-search orders-search" htmlFor="orders-search">
+        <div className="admin-toolbar orders-toolbar flex w-full min-w-0 flex-col items-stretch gap-2 min-[901px]:w-auto min-[901px]:flex-row min-[901px]:items-center" role="search" aria-label="Search and filter orders">
+          <label className="admin-search orders-search min-w-0" htmlFor="orders-search">
             <RiSearchLine size={16} aria-hidden="true" />
             <input
               id="orders-search"

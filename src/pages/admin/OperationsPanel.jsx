@@ -1338,7 +1338,6 @@ function NotificationsPanel() {
     const normalizedTargets = enabledOptions.audience && targetUsers.trim()
       ? Array.from(new Set(targetUsers.split(/[\s,;]+/).map((id) => id.trim()).filter(Boolean)))
       : null;
-
     const actionFields = enabledOptions.actions
       ? [
           { title: text(actionOneTitle), action: text(actionOneUrl) },
@@ -1352,7 +1351,10 @@ function NotificationsPanel() {
       toast.error('Title and message are required.');
       return;
     }
-
+    if (partialAction) {
+      toast.error('Each notification action needs both a title and an in-site path.');
+      return;
+    }
     if (enabledOptions.audience && !normalizedTargets?.length) {
       toast.error('Enter at least one subscriber ID, or turn off Specific audience to send to everyone.');
       return;
@@ -1537,7 +1539,6 @@ function NotificationsPanel() {
               {optionsOpen ? 'Close options' : 'Add options'}
               {enabledOptionCount > 0 && <span className="notification-option-count">{enabledOptionCount} selected</span>}
             </button>
-
             {optionsOpen && (
               <div id="notification-option-picker" className="notification-option-picker" role="group" aria-label="Choose optional notification settings">
                 {OPTIONAL_NOTIFICATION_OPTIONS.map((option) => (

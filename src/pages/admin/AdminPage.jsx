@@ -680,6 +680,21 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (
+      status !== 'verified' ||
+      !requestedPanel ||
+      !allowed.includes(requestedPanel) ||
+      requestedPanel === panel
+    ) {
+      return;
+    }
+
+    // Follow query-string changes initiated by row-level deep links,
+    // browser navigation, and shared admin URLs.
+    setPanel(requestedPanel);
+  }, [allowed, panel, requestedPanel, status]);
+
+  useEffect(() => {
+    if (
       status !== 'verified'
     ) {
       return;
