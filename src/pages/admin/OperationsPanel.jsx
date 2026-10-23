@@ -1123,7 +1123,7 @@ function RbacPanel() {
               <tr>
                 <th scope="col">Role</th>
                 <th scope="col">Permission</th>
-                <th scope="col">Access</th>
+                <th scope="col">Policy</th>
               </tr>
             </thead>
 
@@ -1137,36 +1137,38 @@ function RbacPanel() {
                     <tr key={key}>
                       <td className="td-strong">{row.role}</td>
                       <td>{row.permission}</td>
-
                       <td>
                         {immutable ? (
-                          <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">Fixed policy</span>
+                          <span className="admin-pill pill-muted" title="Super-admin permissions are immutable">
+                            Fixed policy
+                          </span>
                         ) : (
-                          <div className="permission-control-cell">
-                            <button
-                              type="button"
-                              className="admin-switch permission-switch"
-                              role="switch"
-                              aria-checked={row.enabled}
-                              aria-label={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission} for ${row.role}`}
-                              title={`${row.enabled ? 'Disable' : 'Enable'} ${row.permission}`}
-                              onClick={() => setPermission(row, !row.enabled)}
-                              disabled={Boolean(busyKey)}
-                            >
-                              <span className="admin-switch-thumb" aria-hidden="true">
-                                {busyKey === key ? (
-                                  <span className="admin-switch-spinner" />
-                                ) : row.enabled ? (
-                                  <RiCheckLine size={13} />
-                                ) : (
-                                  <RiCloseLine size={13} />
-                                )}
-                              </span>
-                            </button>
-                            <span className="settings-switch-label" aria-live="polite">
-                              {busyKey === key ? 'Saving…' : row.enabled ? 'Allowed' : 'Denied'}
-                            </span>
-                          </div>
+                          <fieldset className="permission-radio-group" disabled={Boolean(busyKey)}>
+                            <legend className="sr-only">{row.role} — {row.permission}</legend>
+                            <label>
+                              <input
+                                type="radio"
+                                name={`permission-${row.role}-${row.permission}`}
+                                value="allow"
+                                checked={row.enabled}
+                                onChange={() => setPermission(row, true)}
+                                disabled={Boolean(busyKey)}
+                              />
+                              <span>Allow</span>
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                name={`permission-${row.role}-${row.permission}`}
+                                value="deny"
+                                checked={!row.enabled}
+                                onChange={() => setPermission(row, false)}
+                                disabled={Boolean(busyKey)}
+                              />
+                              <span>Deny</span>
+                            </label>
+                            {busyKey === key && <span role="status">Saving…</span>}
+                          </fieldset>
                         )}
                       </td>
                     </tr>
