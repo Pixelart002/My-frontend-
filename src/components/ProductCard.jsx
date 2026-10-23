@@ -7,7 +7,7 @@ import {
 } from '@remixicon/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { formatMoney } from '../utils/format';
+import ProductPrice from './ProductPrice';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -325,7 +325,7 @@ export default function ProductCard({ product }) {
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <div className="min-w-0">
-          <h3 className="m-0 h-[2.6rem] max-h-[2.6rem] overflow-hidden text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text break-words sm:text-[14px]">
+          <h3 className="m-0 min-h-[2.6rem] text-[13px] font-semibold leading-[1.3] tracking-[-0.005em] text-text [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-words sm:text-[14px]">
             <Link
               to={`/product/${slug}`}
               className="rounded-sm text-inherit no-underline transition-colors hover:text-gold-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -335,34 +335,7 @@ export default function ProductCard({ product }) {
           </h3>
         </div>
 
-        <div className="mt-2 flex h-[3.25rem] min-h-[3.25rem] min-w-0 shrink-0 items-end justify-between gap-3 overflow-hidden">
-          <div className="min-w-0">
-            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="text-[15px] font-bold tabular-nums tracking-[-0.01em] text-gold-soft sm:text-base">
-                {formatMoney(price)}
-              </span>
-
-              {comparePrice > price && price > 0 && (
-                <span className="text-[10px] font-medium tabular-nums text-dim line-through sm:text-[11px]">
-                  {formatMoney(comparePrice)}
-                </span>
-              )}
-            </div>
-
-            <p
-              className={`m-0 mt-0.5 min-h-4 text-[9px] leading-4 text-muted${savings > 0 ? '' : ' opacity-0'}`}
-              aria-hidden={savings <= 0}
-            >
-              You save {formatMoney(savings)}
-            </p>
-          </div>
-
-          {discount > 0 && (
-            <span className="shrink-0 rounded-full border border-success/20 bg-success-dim px-2 py-1 text-[8px] font-bold uppercase tracking-[0.06em] text-success">
-              {discount}% off
-            </span>
-          )}
-        </div>
+        <ProductPrice price={price} comparePrice={comparePrice} />
 
         <button
           type="button"
@@ -382,7 +355,7 @@ export default function ProductCard({ product }) {
                 : `Add ${name} to bag`
           }
         >
-          <span className="min-w-0 truncate">
+          <span className="min-w-0 flex-1 whitespace-normal break-words text-left leading-snug">
             {outOfStock
               ? 'Out of stock'
               : adding
