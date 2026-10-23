@@ -630,6 +630,26 @@ export default function StripePaymentForm({
             paymentIntent.id,
           );
 
+        // A successful HTTP response is not proof that the payment settled.
+        // The backend must explicitly confirm a terminal successful payment state.
+        const confirmationStatus = String(
+          confirmation?.status ||
+            confirmation?.payment_status ||
+            confirmation?.order_status ||
+            '',
+        ).toLowerCase();
+
+        if (
+          !['paid', 'succeeded', 'success'].includes(
+            confirmationStatus,
+          )
+        ) {
+          throw new Error(
+            confirmation?.message ||
+              'Payment is not confirmed yet.',
+          );
+        }
+
         try {
           await refreshProfile();
         } catch {
