@@ -337,10 +337,8 @@ export default function OrdersPanel({
           <h1 className="min-w-0 break-words">Orders</h1>
 
           <p className="admin-sub">
-            {filter || search.trim()
-              ? `${filtered.length} matching · ${items.length} preloaded`
-              : `${items.length} orders ready`
-            } · {totalOrders} total
+            {totalOrders.toLocaleString('en-IN')} total orders
+            {filter ? ` · ${filter}` : ''}
           </p>
         </div>
 
@@ -352,7 +350,7 @@ export default function OrdersPanel({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search all orders…"
+              placeholder="Search current page…"
               autoComplete="off"
               aria-label="Search all preloaded orders by order number, customer, invoice or tracking"
             />
