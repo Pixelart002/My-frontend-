@@ -320,11 +320,12 @@ export function AuthProvider({ children }) {
    * to authService.
    */
   const register = useCallback(
-    (email, password, fullName) =>
+    (email, password, fullName, acceptedTerms) =>
       authService.register(
         email,
         password,
         fullName,
+        acceptedTerms,
       ),
     [],
   );
