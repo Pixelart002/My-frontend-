@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -340,6 +341,25 @@ function LoadingFallback() {
 }
 
 function AppRoutes() {
+  const { pathname } = useLocation();
+  const hostname = window.location.hostname.toLowerCase().replace(/\.$/, '');
+  const isAdminPath = pathname === '/admin' || pathname.startsWith('/admin/');
+
+  // Keep each production hostname scoped to its own application surface.
+  // Login remains available on the admin hostname so authenticated staff can
+  // return to /admin; API permissions remain the actual authorization boundary.
+  if (
+    hostname === 'admin.luviio.in' &&
+    !isAdminPath &&
+    pathname !== '/login'
+  ) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  if (hostname === 'app.luviio.in' && isAdminPath) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouteSeo />
