@@ -1,0 +1,135 @@
+/* Luviio checkout: predictable mobile flow, restrained surfaces, no layout jumps. */
+main[data-route="/checkout"] .page.container {
+  width: 100%;
+  max-width: 100%;
+  padding-top: clamp(1rem, 3vw, 2.5rem);
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+main[data-route="/checkout"] .page.container > .mx-auto {
+  max-width: 1160px;
+}
+main[data-route="/checkout"] .page.container header h1 {
+  max-width: 16ch;
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+main[data-route="/checkout"] nav[aria-label="Checkout progress"] {
+  position: relative;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 10%);
+}
+main[data-route="/checkout"] nav[aria-label="Checkout progress"] ol {
+  align-items: center;
+}
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start {
+  align-items: start;
+}
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main {
+  min-width: 0;
+}
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside {
+  min-width: 0;
+}
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main > div,
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside > div {
+  border-radius: 20px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 8%);
+}
+main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main > div:first-child {
+  scroll-margin-top: 1rem;
+}
+main[data-route="/checkout"] .page.container input:not([type="radio"]):not([type="checkbox"]) {
+  max-width: 100%;
+}
+main[data-route="/checkout"] .page.container button {
+  touch-action: manipulation;
+}
+main[data-route="/checkout"] .page.container :focus-visible {
+  outline-offset: 3px;
+}
+@media (min-width: 1024px) {
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: 24px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside {
+    position: sticky;
+    top: 1rem;
+  }
+}
+@media (max-width: 639px) {
+  main[data-route="/checkout"] .page.container {
+    padding-inline: 12px;
+  }
+  main[data-route="/checkout"] .page.container > .mx-auto > button:first-child {
+    margin-bottom: 12px;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] {
+    margin-top: 18px;
+    padding: 12px 10px;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] ol {
+    gap: 6px;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] li {
+    gap: 6px;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] li > span:first-child {
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] li > span:nth-child(2) {
+    min-width: 0;
+  }
+  main[data-route="/checkout"] nav[aria-label="Checkout progress"] li > span:nth-child(2) > span:first-child {
+    font-size: 11px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  /* On phones, complete the delivery/review/payment actions before the summary. */
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main {
+    order: 1;
+    width: 100%;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside {
+    order: 2;
+    width: 100%;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main > div,
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside > div {
+    padding: 16px;
+    border-radius: 18px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main > div > div:first-child h2 {
+    line-height: 1.35;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main .grid.gap-3.sm\:grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main label.block {
+    min-width: 0;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main .rounded-2xl.border.p-4 {
+    padding: 12px;
+    border-radius: 14px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > main .mt-5 {
+    margin-top: 14px;
+  }
+  main[data-route="/checkout"] .page.container .grid.min-w-0.items-start > aside .space-y-3 > div {
+    padding-block: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  main[data-route="/checkout"] * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
