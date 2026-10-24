@@ -38,6 +38,14 @@ const PREVIEW_CRAWLERS = [
   'opengraph.xyz',
   'opengraph',
   'open graph',
+  // Preview validators and crawlers that do not use a vendor-specific token.
+  'meta-inspector',
+  'facebook',
+  'twitter',
+  'preview',
+  'crawler',
+  'spider',
+  'bot',
 ];
 
 const BACKEND_ORIGIN =
@@ -47,6 +55,9 @@ const BACKEND_TIMEOUT_MS = 8500;
 function isPreviewCrawler(userAgent) {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
+  // Some social-preview tools use generic crawler user agents rather than
+  // their brand name. Serve SSR metadata to those clients too, otherwise
+  // they receive index.html and its generic/default Open Graph image.
   return PREVIEW_CRAWLERS.some((signature) => ua.includes(signature));
 }
 
