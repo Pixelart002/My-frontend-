@@ -22,9 +22,6 @@ const PREVIEW_CRAWLERS = [
   'bingbot',
   'facebookexternalhit',
   'facebookcatalog',
-  'meta-externalagent',
-  'meta-externalfetcher',
-  'meta-webindexer',
   'whatsapp',
   'telegrambot',
   'twitterbot',
@@ -43,7 +40,7 @@ const PREVIEW_CRAWLERS = [
 const BACKEND_ORIGIN =
   'https://apparent-jordanna-pixelart002-42e39ac6.koyeb.app';
 const SAFE_SLUG_RE = /^[A-Za-z0-9_-]+$/;
-const BACKEND_TIMEOUT_MS = 8500;
+const BACKEND_TIMEOUT_MS = 4000;
 function isPreviewCrawler(userAgent) {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
@@ -113,28 +110,7 @@ export default async function middleware(request) {
     );
 
     if (!backendResponse.ok) {
-      // Do not fall through to index.html: its static OG tags describe the
-      // homepage and would create a misleading website-level product preview.
-      if (backendResponse.status === 404) {
-        return new Response('Product not found.', {
-          status: 404,
-          headers: {
-            'Cache-Control': 'public, max-age=60',
-            'Content-Type': 'text/plain; charset=utf-8',
-            'X-Robots-Tag': 'noindex, nofollow',
-          },
-        });
-      }
-
-      return new Response('Product preview temporarily unavailable.', {
-        status: 503,
-        headers: {
-          'Cache-Control': 'no-store',
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Retry-After': '30',
-          'X-Robots-Tag': 'noindex, nofollow',
-        },
-      });
+      return next();
     }
 
     const html = await backendResponse.text();
@@ -153,17 +129,7 @@ export default async function middleware(request) {
       },
     });
   } catch {
-    // Fail closed for crawlers. Serving the SPA here exposes its generic
-    // homepage Open Graph tags, not the requested product's metadata.
-    return new Response('Product preview temporarily unavailable.', {
-      status: 503,
-      headers: {
-        'Cache-Control': 'no-store',
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Retry-After': '30',
-        'X-Robots-Tag': 'noindex, nofollow',
-      },
-    });
+    return next();
   } finally {
     clearTimeout(timeout);
   }
