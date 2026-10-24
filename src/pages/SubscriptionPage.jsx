@@ -93,7 +93,8 @@ export default function SubscriptionPage() {
 
   const currentTier = String(membership?.tier || 'free').toLowerCase();
   const isSuperAdmin = membership?.is_super_admin === true;
-  const active = !isSuperAdmin && Boolean(membership?.active || (membership?.plan_id && membership?.ends_at && new Date(membership.ends_at) > new Date()));
+  // Trust the expiry timestamp, not only `active`: the API's boolean can remain true for an expired record.
+  const active = !isSuperAdmin && Boolean(membership?.plan_id && membership?.ends_at && new Date(membership.ends_at) > new Date());
   const sortedPlans = useMemo(() => [...plans].sort((a, b) => {
     const rank = (tierRank[String(a.tier || 'free').toLowerCase()] ?? 0) - (tierRank[String(b.tier || 'free').toLowerCase()] ?? 0);
     return rank || Number(a.price_inr || 0) - Number(b.price_inr || 0);
@@ -219,7 +220,11 @@ export default function SubscriptionPage() {
                 const tier = String(plan.tier || 'free').toLowerCase();
                 const meta = tierMeta[tier] || tierMeta.free;
                 const Icon = meta.icon;
-                const isCurrent = active && currentTier === tier && (!membership?.plan_id || membership.plan_id === plan.id);
+                // Compare IDs as strings because API plan IDs can be serialized differently.
+                // Fall back to tier only when the API does not provide a plan ID.
+                const isCurrent = active && (membership?.plan_id != null
+                  ? String(membership.plan_id) === String(plan.id)
+                  : currentTier === tier);
                 const paid = Number(plan.price_inr || 0) > 0;
                 return (
                   <article className={`sub-plan-card sub-plan-${tier} ${tier === 'premium' ? 'sub-plan-featured' : ''}`} key={plan.id || `${tier}-${plan.name}`}>
@@ -236,9 +241,10 @@ export default function SubscriptionPage() {
                       disabled={isSuperAdmin || Boolean(actionId) || isCurrent || (active && !isCurrent) || (paid && !active)}
                       onClick={() => choosePlan(plan)}
                     >
-                      {isSuperAdmin ? 'Admin access' : actionId === String(plan.id) ? 'Activating…' : isCurrent ? 'Current plan' : active ? 'Already subscribed' : paid ? 'Paid checkout coming soon' : 'Choose plan'}
+                      {isSuperAdmin ? 'Admin access' : actionId === String(plan.id) ? 'Activating…' : isCurrent ? 'Already subscribed' : active ? 'Cancel to switch' : paid ? 'Paid checkout coming soon' : 'Choose plan'}
                       {!isCurrent && !active && !paid && <RiArrowRightLine size={17} aria-hidden="true" />}
                     </button>
+                    {active && !isCurrent && <p className="sub-checkout-note">Cancel your current membership above before switching plans.</p>}
                     {paid && !active && <p className="sub-checkout-note">Payment is not enabled for this plan yet.</p>}
                   </article>
                 );
