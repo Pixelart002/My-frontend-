@@ -160,9 +160,16 @@ export const productDescription = (
     'this product',
   );
 
-  const description =
-    product?.short_description ??
-    product?.description;
+  // Admin-authored SEO description wins; fall through on empty strings so a
+  // blank short description does not suppress the product's real description.
+  const description = [
+    product?.seo_description,
+    product?.product_seo?.description,
+    product?.short_description,
+    product?.description,
+  ]
+    .map((value) => normalizeText(value))
+    .find(Boolean);
 
   return normalizeText(
     description,
