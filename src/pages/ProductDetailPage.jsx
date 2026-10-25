@@ -336,6 +336,12 @@ export default function ProductDetailPage() {
   
   const description =
    productDescription(product);
+
+  const seoTitle = text(
+   product.seo_title ||
+   product.product_seo?.title,
+   `${name} | Luviio`,
+  );
   
   const path =
    `/product/${encodedSlug}`;
@@ -422,7 +428,7 @@ export default function ProductDetailPage() {
   };
   
   setPageSeo({
-   title: `${name} — Luviio`,
+   title: seoTitle,
    description,
    path,
    image: image || defaultShareImage,
